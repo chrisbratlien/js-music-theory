@@ -1,0 +1,7 @@
+.fretboard {margin-top: 10px;}
+
+.fret { background: #ddd; font-size: 0.35em; width:20px; text-align: center; font-weight: bold;}
+.fretted { background: #999; color: #fff; }
+.unfretted { background: #ddd;}
+
+#include_degrees { font-size: 1.2em; padding: 3px; color: #777; margin: 10px;}

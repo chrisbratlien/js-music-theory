@@ -3,20 +3,19 @@
 <script src="jquery-latest.js"></script>
 <link media="screen" href="testsuite.css" type="text/css" rel="stylesheet">
 <script src="testrunner.js"></script>
-<script src="eprime.js"></script>
+<script src="js-music-theory.js"></script>
 
 <script>
 
 $(document).ready(function(){
     
-  module("HTML Formatting");
+  module("RootNoteWithIntervals");
   
-  test("html char conversion", function(){
-    equals(convertToHTMLIfRequired('>'),"&gt;");
-    equals(convertToHTMLIfRequired('<'),"&lt;");
-    equals(convertToHTMLIfRequired('"'),"&quot;");
-    equals(convertToHTMLIfRequired("'"),"&apos;");
-  });  
+  var x = RootNoteWithIntervals(60,[0,2,4,5,7,9,11]);
+  test("RootNoteWithIntervals setup", function() {
+    equals(x.rootNote,60);
+    equals(x.intervals,[0,2,4,5,7,9,11]);
+  });
 
 });
 

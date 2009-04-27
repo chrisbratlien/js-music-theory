@@ -1,0 +1,201 @@
+<html>
+<head>
+<script src="jquery-latest.js"></script>
+<link media="screen" href="testsuite.css" type="text/css" rel="stylesheet">
+<link href="fretboard.css" type="text/css" rel="stylesheet">
+<link media="print" href="fretboard.css" type="text/css" rel="stylesheet">
+<script src="testrunner.js"></script>
+<script src="js-music-theory.js"></script>
+
+<script>
+
+function build_string(num) {
+  var foo = ['flat7','7','1','flat2','2','flat3','3','4','flat5','5','sharp5','6'];
+   //var foo = ['f7',7,1,'f2',2,'f3',3,4,'f5',5,'s5',6];
+  var starter = [0,7,3,10,5,0];
+  
+  //////return foo[starter[num]];
+  
+  ///console.log('a')
+  var result = [];
+  for(i = 0; i < 30; i++){
+    var idx = (starter[num]+i)%12;
+    ///console.log(idx);
+    result.push(foo[idx]);    
+  }
+  
+  //console.log(result);
+  
+  return result;
+  
+}
+
+function build_guitar_table(fretboardID,strings) {
+  
+  var table = document.createElement('table');
+  $('#' + fretboardID).append(table);
+  for (i = 0; i < strings.length; i++) {
+    var tr = document.createElement('tr');
+    $(tr).addClass('string');
+    $(tr).addClass('string-' + i);
+    for(j = 0; j < 30; j++) {
+      var td = document.createElement('td');
+      $(tr).append(td);
+      $(td).addClass('fret');
+      $(td).addClass('fret-' + j);
+      $(td).addClass('degree-' + strings[i][j]);
+    }
+    $(table).append(tr);
+  }
+  
+}
+
+function build_guitar() {
+
+  var strings = Array(
+    build_string(0),
+    build_string(1),
+    build_string(2),
+    build_string(3),
+    build_string(4),
+    build_string(5)
+    );
+return strings;  
+}
+
+function goShort(orig){ 
+  result = orig;
+  result = result.replace(/flat/g,'b');
+  result = result.replace(/sharp/g,'#');
+  return result;  
+}
+
+function goLong(orig) {
+  result = orig;
+  result = result.replace(/b/g,'flat');
+  result = result.replace(/#/g,'sharp');
+  return result;
+}
+
+
+function parse_degrees(degreeStr) {
+  //console.log(degreeStr);
+  degreeStr = goLong(degreeStr);
+  //console.log(degreeStr);
+  d2 = degreeStr.split(',');
+  /////console.log(d2);
+  //var degrees = eval('[' + degreeStr + ']');
+  return d2;
+}
+
+function update_guitar(fretboardID,degrees) {
+ 
+ $('#' + fretboardID + ' .fret').text('');
+ $('#' + fretboardID + ' .fret').addClass('unfretted');
+ 
+ jQuery.each(degrees,function(i,d) {
+   $('#' + fretboardID + ' .degree-' + d).each(function(i,e) {
+     ///console.log(e);
+     $(e).removeClass('unfretted');
+     $(e).addClass('fretted');
+     $(e).text(goShort(d));
+   });
+   
+ });
+  
+}
+
+
+$(document).ready(function(){
+
+
+  //var degreeStr = $('#include_degrees-' + id).val();
+
+
+  //zz id = fretboardID.replace(/fretboard-/,'');
+  ////var degrees = include_degrees(id);
+
+
+
+  build_guitar_table('fretboard-1',build_guitar());
+  $('#include_degrees-1').blur(function(e) {update_guitar('fretboard-1',parse_degrees(this.value));});
+
+  build_guitar_table('fretboard-2',build_guitar());
+  $('#include_degrees-2').blur(function(e) {update_guitar('fretboard-2',parse_degrees(this.value));});
+  
+  build_guitar_table('fretboard-3',build_guitar());
+  $('#include_degrees-3').blur(function(e) {update_guitar('fretboard-3',parse_degrees(this.value));});
+  
+  build_guitar_table('fretboard-4',build_guitar());
+  $('#include_degrees-4').blur(function(e) {update_guitar('fretboard-4',parse_degrees(this.value));});
+  
+  build_guitar_table('fretboard-5',build_guitar());
+  $('#include_degrees-5').blur(function(e) {update_guitar('fretboard-5',parse_degrees(this.value));});
+  
+  build_guitar_table('fretboard-6',build_guitar());
+  $('#include_degrees-6').blur(function(e) {update_guitar('fretboard-6',parse_degrees(this.value));});
+  
+  build_guitar_table('fretboard-7',build_guitar());
+  $('#include_degrees-7').blur(function(e) {update_guitar('fretboard-7',parse_degrees(this.value));});
+
+  build_guitar_table('fretboard-8',build_guitar());
+  $('#include_degrees-8').blur(function(e) {update_guitar('fretboard-8',parse_degrees(this.value));});
+  
+  update_guitar('fretboard-1',parse_degrees('1,2,3,4,5,6,7'));    
+  update_guitar('fretboard-2',parse_degrees('1,2,3,5,6,b3'));    
+  update_guitar('fretboard-3',parse_degrees('2,3,4,6,7'));    
+  update_guitar('fretboard-4',parse_degrees('1,3,4,5,7,b5'));    
+  update_guitar('fretboard-5',parse_degrees('1,2,4,5,6,#5'));    
+  update_guitar('fretboard-6',parse_degrees('2,3,5,6,7,b7'));    
+  update_guitar('fretboard-7',parse_degrees('1,3,4,6,7'));    
+  update_guitar('fretboard-8',parse_degrees('1,2,4,5,7,b2'));    
+
+ 
+  ////module("RootNoteWithIntervals");
+  
+  //var x = RootNoteWithIntervals(60,[0,2,4,5,7,9,11]);
+  //test("RootNoteWithIntervals setup", function() {
+  //  equals(x.rootNote,60);
+//    equals(x.intervals,[0,2,4,5,7,9,11]);
+//  });
+
+});
+
+ </script>
+</head>
+<body>
+  
+  <div class="fretboard" id="fretboard-1"></div>
+  <input type="text" id="include_degrees-1"/>
+  
+  <div class="fretboard" id="fretboard-2"></div>
+  <input type="text" id="include_degrees-2"/>
+
+  <div class="fretboard" id="fretboard-3"></div>
+  <input type="text" id="include_degrees-3"/>
+
+  <div class="fretboard" id="fretboard-4"></div>
+  <input type="text" id="include_degrees-4"/>
+
+  <div class="fretboard" id="fretboard-5"></div>
+  <input type="text" id="include_degrees-5"/>
+
+  <div class="fretboard" id="fretboard-6"></div>
+  <input type="text" id="include_degrees-6"/>
+
+  <div class="fretboard" id="fretboard-7"></div>
+  <input type="text" id="include_degrees-7"/>
+
+  <div class="fretboard" id="fretboard-8"></div>
+  <input type="text" id="include_degrees-8"/>
+
+
+<!--
+<h1>E-Prime JavaScript Tests</h1>
+<h2 id="banner"></h2>
+<h2 id="userAgent"></h2>
+<ol id="tests"></ol>
+<div id="main"></div>
+-->
+</body>
+</html>
