@@ -32,8 +32,24 @@ function build_string(num) {
 
 function build_guitar_table(fretboardID,strings) {
   
+  
+  var fretboardDiv = document.createElement('div');
+  fretboardDiv.id = fretboardID;
+  $(fretboardDiv).addClass('fretboard');
+  $(document.body).append(fretboardDiv);
+
+
+  var includeDegrees = document.createElement('input');
+  includeDegrees.id = 'include_degrees-' + fretboardID.replace(/fretboard-/,'');
+  console.log(includeDegrees.id);
+  $(includeDegrees).addClass('includeDegrees');
+
+  $(includeDegrees).blur(function(e) {update_guitar(fretboardID,parse_degrees(this.value));});
+
+  $(fretboardDiv).append(includeDegrees);
+  
   var table = document.createElement('table');
-  $('#' + fretboardID).append(table);
+  $(fretboardDiv).append(table);
   for (i = 0; i < strings.length; i++) {
     var tr = document.createElement('tr');
     $(tr).addClass('string');
@@ -67,6 +83,8 @@ function goShort(orig){
   result = orig;
   result = result.replace(/flat/g,'b');
   result = result.replace(/sharp/g,'#');
+  //result = result.replace(/flat/g,'&#x266d;');
+  //result = result.replace(/sharp/g,'&#x266f;');
   return result;  
 }
 
@@ -74,6 +92,9 @@ function goLong(orig) {
   result = orig;
   result = result.replace(/b/g,'flat');
   result = result.replace(/#/g,'sharp');
+  
+  //result = result.replace(/&#x266d;/g,'flat');
+  //result = result.replace(/&#x266f;/g,'sharp');
   return result;
 }
 
@@ -117,30 +138,14 @@ $(document).ready(function(){
 
 
 
-  build_guitar_table('fretboard-1',build_guitar());
-  $('#include_degrees-1').blur(function(e) {update_guitar('fretboard-1',parse_degrees(this.value));});
-
+  build_guitar_table('fretboard-1',build_guitar()); 
   build_guitar_table('fretboard-2',build_guitar());
-  $('#include_degrees-2').blur(function(e) {update_guitar('fretboard-2',parse_degrees(this.value));});
-  
   build_guitar_table('fretboard-3',build_guitar());
-  $('#include_degrees-3').blur(function(e) {update_guitar('fretboard-3',parse_degrees(this.value));});
-  
   build_guitar_table('fretboard-4',build_guitar());
-  $('#include_degrees-4').blur(function(e) {update_guitar('fretboard-4',parse_degrees(this.value));});
-  
   build_guitar_table('fretboard-5',build_guitar());
-  $('#include_degrees-5').blur(function(e) {update_guitar('fretboard-5',parse_degrees(this.value));});
-  
   build_guitar_table('fretboard-6',build_guitar());
-  $('#include_degrees-6').blur(function(e) {update_guitar('fretboard-6',parse_degrees(this.value));});
-  
   build_guitar_table('fretboard-7',build_guitar());
-  $('#include_degrees-7').blur(function(e) {update_guitar('fretboard-7',parse_degrees(this.value));});
-
   build_guitar_table('fretboard-8',build_guitar());
-  $('#include_degrees-8').blur(function(e) {update_guitar('fretboard-8',parse_degrees(this.value));});
-  
   update_guitar('fretboard-1',parse_degrees('1,2,3,4,5,6,7'));    
   update_guitar('fretboard-2',parse_degrees('1,2,3,5,6,b3'));    
   update_guitar('fretboard-3',parse_degrees('2,3,4,6,7'));    
@@ -150,7 +155,6 @@ $(document).ready(function(){
   update_guitar('fretboard-7',parse_degrees('1,3,4,6,7'));    
   update_guitar('fretboard-8',parse_degrees('1,2,4,5,7,b2'));    
 
- 
   ////module("RootNoteWithIntervals");
   
   //var x = RootNoteWithIntervals(60,[0,2,4,5,7,9,11]);
@@ -164,30 +168,6 @@ $(document).ready(function(){
  </script>
 </head>
 <body>
-  
-  <input type="text" id="include_degrees-1" class="includeDegrees" />
-  <div class="fretboard" id="fretboard-1"></div>
-  
-  <input type="text" id="include_degrees-2" class="includeDegrees" />
-  <div class="fretboard" id="fretboard-2"></div>
-
-  <input type="text" id="include_degrees-3" class="includeDegrees" />
-  <div class="fretboard" id="fretboard-3"></div>
-
-  <input type="text" id="include_degrees-4" class="includeDegrees" />
-  <div class="fretboard" id="fretboard-4"></div>
-
-  <input type="text" id="include_degrees-5" class="includeDegrees" />
-  <div class="fretboard" id="fretboard-5"></div>
-
-  <input type="text" id="include_degrees-6" class="includeDegrees" />
-  <div class="fretboard" id="fretboard-6"></div>
-
-  <input type="text" id="include_degrees-7" class="includeDegrees" />
-  <div class="fretboard" id="fretboard-7"></div>
-
-  <input type="text" id="include_degrees-8" class="includeDegrees" />
-  <div class="fretboard" id="fretboard-8"></div>
 
 
 <!--
