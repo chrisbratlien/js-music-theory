@@ -8,7 +8,7 @@ if (typeof Object.beget !== 'function') {
 }
 */
 
-function RootNoteWithIntervals(rn, intervals = Array()) {
+function RootNoteWithIntervals(rn, intervals) {
 
 	var result = {
 		rootNote: rn,

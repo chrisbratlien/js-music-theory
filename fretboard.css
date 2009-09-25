@@ -1,5 +1,6 @@
 .fretboard {margin-top: 10px; }
 .fret { background: #ddd; width:20px; text-align: center; font-weight: bold;}
+.fret:hover, .fret a:hover, td.fret:hover {cursor: pointer;}
 .fretted { background: #777; color: #fff; }
 .unfretted { background: #ddd;}
 .fretted { font-size: 0.75em; font-weight: bold;}

@@ -4,10 +4,24 @@
 <link media="screen" href="testsuite.css" type="text/css" rel="stylesheet">
 <link media="screen,print" href="fretboard.css" type="text/css" rel="stylesheet">
 <link media="print" href="fretboard-print.css" type="text/css" rel="stylesheet">
-<script src="testrunner.js"></script>
+<script type="text/javascript" src="farbtastic.js"></script>
+<link rel="stylesheet" href="farbtastic.css" type="text/css" />
+<!--<script src="testrunner.js"></script>-->
 <script src="js-music-theory.js"></script>
 
-<script>
+<script type="text/javascript">
+
+var scalesByDegree = [
+  '1,2,3,4,5,6,7',
+  '1,2,3,5,6,b3',
+  '2,3,4,6,7',
+  '1,3,4,5,7,b5',
+  '1,2,4,5,6,#5',
+  '2,3,5,6,7,b7',
+  '1,3,4,6,7',
+  '1,2,4,5,7,b2'
+];
+
 
 function build_string(num) {
   var foo = ['flat7','7','1','flat2','2','flat3','3','4','flat5','5','sharp5','6'];
@@ -30,9 +44,17 @@ function build_string(num) {
   
 }
 
-function build_guitar_table(fretboardID,strings) {
-  
-  
+
+
+function rotateBackgroundColor(elem) {
+  jElem = $(elem);
+  ////console.log(jElem.css('background'));
+  jElem.css('background',$('#color').val());
+}
+
+function build_guitar_table(fretboardID,strings,degrees) {
+  //console.log('degrees:',degrees);
+    
   var fretboardDiv = document.createElement('div');
   fretboardDiv.id = fretboardID;
   $(fretboardDiv).addClass('fretboard');
@@ -40,8 +62,9 @@ function build_guitar_table(fretboardID,strings) {
 
 
   var includeDegrees = document.createElement('input');
+  includeDegrees.value = degrees;
   includeDegrees.id = 'include_degrees-' + fretboardID.replace(/fretboard-/,'');
-  console.log(includeDegrees.id);
+  /////console.log(includeDegrees.id);
   $(includeDegrees).addClass('includeDegrees');
 
   $(includeDegrees).blur(function(e) {update_guitar(fretboardID,parse_degrees(this.value));});
@@ -59,11 +82,20 @@ function build_guitar_table(fretboardID,strings) {
       $(tr).append(td);
       $(td).addClass('fret');
       $(td).addClass('fret-' + j);
-      $(td).addClass('degree-' + strings[i][j]);
+      var sf = 's' + i.toString() + 'f' + j.toString();
+      $(td).addClass(sf);
+      var className = 'degree-' + strings[i][j];
+      $(td).addClass(className);
+      ////console.log(className);
+      $(td).click(function() {
+          rotateBackgroundColor(this);
+        //$('#' + fretboardID + ' .' + sf).css('background','#fa0000');
+      });
     }
     $(table).append(tr);
   }
-  
+  update_guitar(fretboardID,parse_degrees(degrees));
+  //console.log('afterwards');
 }
 
 function build_guitar() {
@@ -111,8 +143,8 @@ function parse_degrees(degreeStr) {
 
 function update_guitar(fretboardID,degrees) {
  
- $('#' + fretboardID + ' .fret').text('');
- $('#' + fretboardID + ' .fret').addClass('unfretted');
+ jQuery('#' + fretboardID + ' .fret').text('');
+ jQuery('#' + fretboardID + ' .fret').addClass('unfretted');
  
  jQuery.each(degrees,function(i,d) {
    $('#' + fretboardID + ' .degree-' + d).each(function(i,e) {
@@ -127,47 +159,41 @@ function update_guitar(fretboardID,degrees) {
 }
 
 
+
 $(document).ready(function(){
 
-
   //var degreeStr = $('#include_degrees-' + id).val();
-
-
   //zz id = fretboardID.replace(/fretboard-/,'');
   ////var degrees = include_degrees(id);
+  //console.log(scalesByDegree.length);
+
+  $(document).ready(function() {
+    $('#picker').farbtastic('#color');
+  });
 
 
+  jQuery.each(scalesByDegree,function(i,e) {
+    //console.log('i:',i);
+  ///console.log('sbd',scalesByDegree[i]);
+    var sbd = scalesByDegree[i]; //not sure why i need a var for this.
+    build_guitar_table('fretboard-' + i,build_guitar(),sbd);
+  //console.log(input_i.val());
+  //////update_guitar('fretboard-' + i,parse_degrees(tmp.val()));    
+  });
 
-  build_guitar_table('fretboard-1',build_guitar()); 
-  build_guitar_table('fretboard-2',build_guitar());
-  build_guitar_table('fretboard-3',build_guitar());
-  build_guitar_table('fretboard-4',build_guitar());
-  build_guitar_table('fretboard-5',build_guitar());
-  build_guitar_table('fretboard-6',build_guitar());
-  build_guitar_table('fretboard-7',build_guitar());
-  build_guitar_table('fretboard-8',build_guitar());
-  update_guitar('fretboard-1',parse_degrees('1,2,3,4,5,6,7'));    
-  update_guitar('fretboard-2',parse_degrees('1,2,3,5,6,b3'));    
-  update_guitar('fretboard-3',parse_degrees('2,3,4,6,7'));    
-  update_guitar('fretboard-4',parse_degrees('1,3,4,5,7,b5'));    
-  update_guitar('fretboard-5',parse_degrees('1,2,4,5,6,#5'));    
-  update_guitar('fretboard-6',parse_degrees('2,3,5,6,7,b7'));    
-  update_guitar('fretboard-7',parse_degrees('1,3,4,6,7'));    
-  update_guitar('fretboard-8',parse_degrees('1,2,4,5,7,b2'));    
-
-  ////module("RootNoteWithIntervals");
-  
-  //var x = RootNoteWithIntervals(60,[0,2,4,5,7,9,11]);
-  //test("RootNoteWithIntervals setup", function() {
-  //  equals(x.rootNote,60);
-//    equals(x.intervals,[0,2,4,5,7,9,11]);
-//  });
 
 });
 
  </script>
 </head>
 <body>
+  <form action="" style="width: 400px;">
+    <div class="form-item">
+      <label for="color">Color:</label>
+      <input type="text" id="color" name="color" value="#123456" />
+    </div>
+    <div id="picker"></div>
+  </form>
 
 
 <!--
@@ -177,5 +203,7 @@ $(document).ready(function(){
 <ol id="tests"></ol>
 <div id="main"></div>
 -->
+
+
 </body>
 </html>
