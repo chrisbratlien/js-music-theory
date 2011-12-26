@@ -433,7 +433,7 @@ background: url(seafloor.jpg) no-repeat;
 
 
 .fretboard {margin-top: 10px; }
-.fret { background: #ddd; width:21px; height: 14px; text-align: center; font-weight: bold; float: left; margin: 1px;}
+.fret { background: #ddd; width:21px; height: 14px; text-align: center; font-weight: bold; float: left; margin: 1px; border-radius: 6px; }
 .clear { clear: both; }
 .fret:hover, .fret a:hover, td.fret:hover {cursor: pointer;}
 .fretted { color: #fff; }

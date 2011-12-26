@@ -9,21 +9,30 @@
 <script type="text/javascript" src="farbtastic.js"></script>
 <link rel="stylesheet" href="farbtastic.css" type="text/css" />
 <!--<script src="testrunner.js"></script>-->
+<script src="array.js"></script>
 <script src="js-music-theory.js"></script>
 
 <script type="text/javascript">
 
 
+JSMT = {};
+JSMT.strings = [];
+
 
 
 var Fret = function(spec) {
+
+  //private
+  var div = document.createElement('div');
+
+  //interface
   var that = {};
   that.number = spec.number || 0;
   that.value = spec.value || 0;
   that.fretted = spec.fretted || false;
   that.degree = spec.degree || false;
   that.lit = spec.lit || false;
-
+  that.string = spec.string || false;
 
   that.goShort = function (orig) { 
     result = orig;
@@ -44,8 +53,19 @@ var Fret = function(spec) {
     return result;
   }
 
+
+  that.harmonics = function() {
+    return that.string.frets.select(function(f) {
+      return that.number % 12 == f.number %12; 
+    });
+  };
+
+
+  that.changeColor = function(hashHex){
+    $(div).css('background',hashHex);
+  };
+
   that.renderOn = function(html) {
-    var div = document.createElement('div');
     $(div).addClass('fret');
     $(div).addClass('fret-number-' + that.number);
     if (that.fretted) {
@@ -53,32 +73,23 @@ var Fret = function(spec) {
       $(div).html(that.goShort(that.degree));  
       $(div).css('background','#777');          
     }  
-    
-    
+          
     $(div).click(function() {
-      that.lit = ! that.lit;
-      
-      if (that.lit) {
-        $(div).css('background',$('#color').val());          
-      }
-      else if (that.fretted) {
-        $(div).css('background','#777');          
-      }
-      else {
-        $(div).css('background','#ddd');          
-      }
-    
-    
-    });
-    
-    
+      that.harmonics().each(function(f) {
+        f.lit = ! f.lit;
+        if (f.lit) {
+          f.changeColor($('#color').val());
+        }
+        else if (f.fretted) {
+          f.changeColor('#777');
+        }
+        else {
+          f.changeColor('#ddd');
+        }
+      });
+    });  
     $(html).append(div);
-    
-    
-    
-    
   };
-  
   return that;
 }
 
@@ -118,9 +129,11 @@ var GuitarString = function(spec) {
       number: i,
       value: that.rootNote + i,
       fretted: function() { return that.frettedDegrees.indexOf(deg) > -1; }(),
-      degree: deg
-    }));
+      degree: deg,
+      string: that
+    }));  
   }
+  JSMT.strings.push(that);
   
   return that;
 }
@@ -207,29 +220,6 @@ var Guitar = function(spec) {
   return that; 
 };
 
-  /*
-
-  that.build_string = function(num) {
-    var foo = ['flat7','7','1','flat2','2','flat3','3','4','flat5','5','sharp5','6'];
-     //var foo = ['f7',7,1,'f2',2,'f3',3,4,'f5',5,'s5',6];
-    var starter = [0,7,3,10,5,0];
-    
-    //////return foo[starter[num]];
-    
-    ///console.log('a')
-    var result = [];
-    for(i = 0; i < 30; i++){
-      var idx = (starter[num]+i)%12;
-      ///console.log(idx);
-      result.push(foo[idx]);    
-    }
-    
-    //console.log(result);
-    
-    return result;  
-  };
-
-  */
 
 
 
