@@ -38,7 +38,7 @@ if (typeof String.prototype.supplant == 'undefined') {
 }
 
 
-
+/*
 var MusicTheory = {
  
   include: function(ary,o) {
@@ -78,6 +78,8 @@ var MusicTheory = {
   }
 
 };
+*/
+
 
 var NotePrimitive = function(spec) {
   var that = {};
@@ -246,4 +248,176 @@ var Chord = function(spec) {
 };
 
 
+var Finger = function(spec) {
 
+  var interface = spec;
+  
+  interface.string = spec.string;
+  interface.fret = spec.fret;
+  interface.scale = spec.scale;
+  interface.degree = spec.degree;  
+  return interface;
+};
+
+
+
+
+var Fret = function(spec) {
+
+  //private
+  var div = document.createElement('div');
+
+  //interface
+  var that = {};
+  that.number = spec.number || 0;
+  that.value = spec.value || 0;
+  that.fretted = spec.fretted || false;
+  that.degree = spec.degree || false;
+  that.lit = spec.lit || false;
+  that.string = spec.string || false;
+  
+  
+  that.guitar = function() {
+    return that.string.guitar;
+  };
+
+  that.goShort = function (orig) { 
+    result = orig;
+    result = result.replace(/flat/g,'b');
+    result = result.replace(/sharp/g,'#');
+    //result = result.replace(/flat/g,'&#x266d;');
+    //result = result.replace(/sharp/g,'&#x266f;');
+    return result;  
+  }
+
+  that.goLong = function(orig) {
+    result = orig;
+    result = result.replace(/b/g,'flat');
+    result = result.replace(/#/g,'sharp');
+    
+    //result = result.replace(/&#x266d;/g,'flat');
+    //result = result.replace(/&#x266f;/g,'sharp');
+    return result;
+  };
+
+
+  that.higherFrets = function() {
+    return that.string.frets.select(function(f) {
+      return f.number > that.number;
+    });
+  };
+
+  that.higherFrettedFrets = function() {
+    return that.higherFrets().select(function(f) {
+      return f.fretted;
+    });
+  };
+
+
+
+
+  that.harmonics = function() {
+    return that.string.frets.select(function(f) {
+      return that.number % 12 == f.number %12; 
+    });
+  };
+
+
+  that.changeColor = function(hashHex){
+    $(div).css('background',hashHex);
+  };
+
+
+
+  that.toggleLight = function(hexColor) {
+    if (that.lit) {
+      that.dim();
+    }
+    else {
+      that.lightUp(hexColor);
+    }
+  };
+  that.lightUp = function(hexColor) {
+    that.lit = true;
+    if (that.lit) {
+      that.changeColor(hexColor);
+    }
+  };
+  that.dim = function() {
+    that.lit = false;
+    if (that.fretted) {
+      that.changeColor('#777');
+    }
+    else {
+      that.changeColor('#ddd');
+    }
+  };
+
+  that.renderOn = function(html) {
+    $(div).addClass('fret');
+    $(div).addClass('fret-number-' + that.number);
+    if (that.fretted) {
+      $(div).addClass('fretted');
+      $(div).html(that.goShort(that.degree));  
+      $(div).css('background','#777');          
+    }  
+          
+    $(div).click(function() {
+      console.log('obserrr',that);
+      that.guitar().firstGrip.frets.push(that);
+      that.harmonics().each(function(f) {
+        f.toggleLight($('#color').val());
+      });
+    });  
+    $(html).append(div);
+  };
+  return that;
+}
+
+
+
+
+
+
+
+
+
+var Grip = function(spec) {
+  var interface = spec;
+  
+  interface.frets = spec.frets || [];
+  
+  
+  interface.hasFrets = function() {
+    return interface.frets.length > 0;
+  };
+  
+  interface.lightUp = function(hexColor) {
+    interface.frets.each(function(f){
+      f.lightUp(hexColor);
+    });
+  };
+  interface.letGo = function() {
+  
+  
+  }; 
+  interface.nextFrets = function() {
+    var candidates = [];
+    interface.frets.each(function(f) {
+      var higherSet = f.higherFrettedFrets();
+      if (higherSet.length > 0) {
+       candidates.push(higherSet[0]); 
+      }
+    });
+    return candidates;
+  };
+  
+  interface.nextGrip = function() {
+    var nextSet = interface.nextFrets();
+    ///console.log(nextSet,'next');
+    return Grip({
+      frets: nextSet
+    });
+  };
+  return interface;
+};
