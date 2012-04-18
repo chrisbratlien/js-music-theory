@@ -5,6 +5,7 @@
 <script src="jquery-latest.js"></script>
 <link media="screen" href="testsuite.css" type="text/css" rel="stylesheet">
 <link media="screen,print" href="fretboard.css" type="text/css" rel="stylesheet">
+<link media="screen,print" href="teacher.css" type="text/css" rel="stylesheet">
 <link media="print" href="fretboard-print.css" type="text/css" rel="stylesheet">
 <script type="text/javascript" src="farbtastic.js"></script>
 <link rel="stylesheet" href="farbtastic.css" type="text/css" />
@@ -20,6 +21,7 @@ JSMT.strings = [];
 
 JSMT.guitars = [];
 
+JSMT.MAXFRETS = 36;
 
 
 var GuitarString = function(spec) {
@@ -77,7 +79,7 @@ var GuitarString = function(spec) {
   var starter = [0,7,3,10,5,0];
   var foo = ['flat7','7','1','flat2','2','flat3','3','4','flat5','5','sharp5','6'];
 
-  for(var i = 0; i < 30; i++){   
+  for(var i = 0; i < JSMT.MAXFRETS; i++){   
     var deg = foo[(that.rootNote+i)%12];
      
     that.frets.push(Fret({
@@ -150,15 +152,14 @@ var Guitar = function(spec) {
     var grip = that.firstGrip.nextGrip(); //the user has already done the first one!
 
     while (grip.hasFrets() && bail > 0) {
-      console.log(grip.frets);
-      grip.lightUp(colors[cidx]);
+      ///console.log(grip.frets);
+      if (grip.unlit()) {
+        grip.lightUpWithHarmonics(colors[cidx]);
+        cidx +=1;
+      }
       bail -= 1;
-      cidx +=1;
       grip = grip.nextGrip();
     }
-    
-  
-  
   };
 
   that.goLong = function(orig) {

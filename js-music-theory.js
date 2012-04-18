@@ -313,15 +313,15 @@ var Fret = function(spec) {
     });
   };
 
-
-
-
   that.harmonics = function() {
     return that.string.frets.select(function(f) {
       return that.number % 12 == f.number %12; 
     });
   };
-
+  
+  that.unlitHarmonics = function() {
+    return that.harmonics().select(function(h) { return h.unlit();})
+  };
 
   that.changeColor = function(hashHex){
     $(div).css('background',hashHex);
@@ -363,9 +363,15 @@ var Fret = function(spec) {
     }  
           
     $(div).click(function() {
-      console.log('obserrr',that);
-      that.guitar().firstGrip.frets.push(that);
-      that.harmonics().each(function(f) {
+      ////console.log('obserrr',that);
+
+      var grip = that.guitar().firstGrip;
+      grip.frets.push(that);
+      
+      
+      ////that.toggleLight($('#color').val()); //harmonics() includes itself
+
+      that.harmonics().each(function(f) { //harmonics() includes itself
         f.toggleLight($('#color').val());
       });
     });  
@@ -397,6 +403,34 @@ var Grip = function(spec) {
       f.lightUp(hexColor);
     });
   };
+
+  interface.lightUpWithHarmonics = function(hexColor) {
+    interface.lightUp(hexColor);
+    interface.frets.each(function(f) {
+      f.harmonics().each(function(h) {
+        h.lightUp(hexColor);
+      });
+    });
+  };
+
+
+
+  interface.toggleLight = function(hexColor) {
+    interface.frets.each(function(f){
+      f.toggleLight(hexColor);
+    });
+  };
+
+
+  interface.lit = function() {
+    var result = interface.frets.detect(function(f) { return f.lit; });
+    return (result != false);
+  };
+  
+  interface.unlit = function() {
+    return ! interface.lit();
+  };
+
   interface.letGo = function() {
   
   
