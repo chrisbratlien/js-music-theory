@@ -323,8 +323,8 @@ var Fret = function(spec) {
     return that.harmonics().select(function(h) { return h.unlit();})
   };
 
-  that.changeColor = function(hashHex){
-    $(div).css('background',hashHex);
+  that.changeColor = function(color){
+    $(div).css('background','#' + color.toHex());
   };
 
 
@@ -337,19 +337,19 @@ var Fret = function(spec) {
       that.lightUp(hexColor);
     }
   };
-  that.lightUp = function(hexColor) {
+  that.lightUp = function(color) {
     that.lit = true;
     if (that.lit) {
-      that.changeColor(hexColor);
+      that.changeColor(color);
     }
   };
   that.dim = function() {
     that.lit = false;
     if (that.fretted) {
-      that.changeColor('#777');
+      that.changeColor(BSD.Color({ r: 119, g: 119, b: 119 })); //'#777'
     }
     else {
-      that.changeColor('#ddd');
+      that.changeColor(BSD.Color({ r: 221, g: 221, b: 221 })); //#ddd
     }
   };
 
@@ -372,7 +372,7 @@ var Fret = function(spec) {
       ////that.toggleLight($('#color').val()); //harmonics() includes itself
 
       that.harmonics().each(function(f) { //harmonics() includes itself
-        f.toggleLight($('#color').val());
+        f.toggleLight(BSD.colorFromHex($('#color').val()));
       });
     });  
     $(html).append(div);
@@ -388,7 +388,7 @@ var Fret = function(spec) {
 
 
 
-var Grip = function(spec) {
+var Grip = function(spec) { //FIXME: grip is a lot like a chord, no?
   var interface = spec;
   
   interface.frets = spec.frets || [];
@@ -398,26 +398,26 @@ var Grip = function(spec) {
     return interface.frets.length > 0;
   };
   
-  interface.lightUp = function(hexColor) {
+  interface.lightUp = function(color) {
     interface.frets.each(function(f){
-      f.lightUp(hexColor);
+      f.lightUp(color);
     });
   };
 
-  interface.lightUpWithHarmonics = function(hexColor) {
-    interface.lightUp(hexColor);
+  interface.lightUpWithHarmonics = function(color) {
+    interface.lightUp(color);
     interface.frets.each(function(f) {
       f.harmonics().each(function(h) {
-        h.lightUp(hexColor);
+        h.lightUp(color);
       });
     });
   };
 
 
 
-  interface.toggleLight = function(hexColor) {
+  interface.toggleLight = function(color) {
     interface.frets.each(function(f){
-      f.toggleLight(hexColor);
+      f.toggleLight(color);
     });
   };
 
@@ -431,10 +431,12 @@ var Grip = function(spec) {
     return ! interface.lit();
   };
 
-  interface.letGo = function() {
+
+  interface.shape = function() {
+    console.log(interface);
   
-  
-  }; 
+  };
+
   interface.nextFrets = function() {
     var candidates = [];
     interface.frets.each(function(f) {

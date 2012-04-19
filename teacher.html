@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="farbtastic.css" type="text/css" />
 <!--<script src="testrunner.js"></script>-->
 <script src="array.js"></script>
+<script src="color.js"></script>
 <script src="js-music-theory.js"></script>
 
 <script type="text/javascript">
@@ -115,6 +116,28 @@ var Guitar = function(spec) {
 
   that.harmonizeFirstGrip = function() {
     var bail = 100;
+    
+    
+    var blues = BSD.colorFromHex('#1f0ab2').upTo(BSD.colorFromHex('#eeeeee'),4);
+    var reds = BSD.colorFromHex('#b20a1e').upTo(BSD.colorFromHex('#eeeeee'),4);
+    var purples = BSD.colorFromHex('#600eaf').upTo(BSD.colorFromHex('#eeeeee'),4);
+    var oranges = BSD.colorFromHex('#f06a00').upTo(BSD.colorFromHex('#eeeeee'),4);
+    var greens = BSD.colorFromHex('#089900').upTo(BSD.colorFromHex('#eeeeee'),4);
+    
+    [blues,reds,purples,oranges,greens].each(function(a) {
+      a.pop(); //pop off the lightest few
+      a.pop(); //pop off the lightest few
+    });
+    
+    var colors = [];
+    colors = colors.concat(purples);
+    //colors = colors.concat(blues);
+    colors = colors.concat(greens);
+    colors = colors.concat(oranges);
+    ///colors = colors.concat(reds);
+    console.log(colors,'colors');
+    
+   /** 
     var colors = [
       '#c979dc',
       '#d31d89',
@@ -146,7 +169,7 @@ var Guitar = function(spec) {
       '#d2e675',
       '#0db565'
     ];
-
+**/
 
     var cidx = 0;
     var grip = that.firstGrip.nextGrip(); //the user has already done the first one!
@@ -154,6 +177,9 @@ var Guitar = function(spec) {
     while (grip.hasFrets() && bail > 0) {
       ///console.log(grip.frets);
       if (grip.unlit()) {
+      
+        console.log(grip.shape());
+      
         grip.lightUpWithHarmonics(colors[cidx]);
         cidx +=1;
       }
@@ -380,7 +406,17 @@ $(document).ready(function(){
         <input type="text" id="color" name="color" value="#ff0f18" />
       </div>
       <div id="picker"></div>      
-      <div id="main"></div>
+      <div id="main">
+
+
+        <ol>
+          <li>1. (optional) Pick a color</li>
+          <li>2. Click some numbered frets to define your first chord</li>
+          <li>3. Click Harmonize This! to see your chord harmonized across the major scale</li>
+        </ol>
+
+      
+      </div>
     </div>
   </div>
 <!--
