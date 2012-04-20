@@ -293,8 +293,6 @@ var Fret = function(spec) {
     $(div).css('background','#' + color.toHex());
   };
 
-
-
   that.toggleLight = function(hexColor) {
     if (that.lit) {
       that.dim();
@@ -364,11 +362,18 @@ JSMT.HarmonizeSession = function() {
   var interface = {};
   var colorMap = {};
   
-  var blues = BSD.colorFromHex('#1f0ab2').upTo(BSD.colorFromHex('#eeeeee'),4);
-  var reds = BSD.colorFromHex('#b20a1e').upTo(BSD.colorFromHex('#eeeeee'),4);
-  var purples = BSD.colorFromHex('#600eaf').upTo(BSD.colorFromHex('#eeeeee'),4);
-  var oranges = BSD.colorFromHex('#f06a00').upTo(BSD.colorFromHex('#eeeeee'),4);
-  var greens = BSD.colorFromHex('#089900').upTo(BSD.colorFromHex('#eeeeee'),4);
+  var gradients = 5;
+  
+  
+  var blues = BSD.colorFromHex('#1f0ab2').upTo(BSD.colorFromHex('#eeeeff'),gradients);
+  var reds = BSD.colorFromHex('#b20a1e').upTo(BSD.colorFromHex('#ffffeeee'),gradients);
+  var purples = BSD.colorFromHex('#600eaf').upTo(BSD.colorFromHex('#ffeeff'),gradients);
+  var oranges = BSD.colorFromHex('#f06a00').upTo(BSD.colorFromHex('#ffffee'),gradients);
+  var greens = BSD.colorFromHex('#089900').upTo(BSD.colorFromHex('#eeffee'),gradients);
+  var cyans = BSD.colorFromHex('#009ba8').upTo(BSD.colorFromHex('#eeffff'),gradients);
+
+
+
 
    /** 
     var colors = [
@@ -405,13 +410,14 @@ JSMT.HarmonizeSession = function() {
 **/
 
   
-  var swatches = [blues,reds,purples,greens]
+  var swatches = [blues,oranges,cyans,reds,greens];
+  
   swatches.reverse(); //so they'll pop in the order shown in the definition of swatches
   
   
   swatches.each(function(a) {
-    a.pop(); //pop off the lightest few
-    a.pop(); //pop off the lightest few
+    //a.pop(); //pop off the lightest few
+    //a.pop(); //pop off the lightest few
     a.reverse(); //so that we pop the darker colors first
   });
   
@@ -491,30 +497,15 @@ var Grip = function(spec) { //FIXME: grip is a lot like a chord, no?
 
 
   interface.shape = function() {
-    ///console.log(interface);
-    
-    ////var result = [];
-    var result = '';
+    var pairs = [];    
     interface.frets.each(function(f) {
-      ///result.push([f.string.number,f.number]);
-      
-      ////console.log(f,'f');
-      
-      ////console.log('string number',f.string.number);
-      
       var news = parseInt(f.string.number,10) - parseInt(interface.lowestString().number,10);
-      var newf = parseInt(f.number,10) - parseInt(interface.lowestFret().number,10);
-      
-      var newpair = '[' + news.toString() + ',' + newf.toString() + '] ';
-      result += newpair;
-      
-      ///result += '[' + (f.string.number - interface.lowestString().number) + ',' (f.number - interface.lowestFret().number) + '] ';
+      var newf = parseInt(f.number,10) - parseInt(interface.lowestFret().number,10);      
+      pairs.push('[' + news.toString() + ',' + newf.toString() + ']');      
     });
-    
-    ////console.log('shape',result);
-    
-    return result;
-    
+    var result = pairs.sort().join(',');
+    console.log('shape',result);
+    return result;    
   };
 
   interface.nextFrets = function() {

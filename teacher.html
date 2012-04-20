@@ -108,11 +108,14 @@ var Guitar = function(spec) {
 
   that.harmonizeFirstGrip = function() {
     var bail = 100;
+    ///that.reset();
     
     var session = JSMT.HarmonizeSession();
+
+
     
     var cidx = 0;
-    var grip = that.firstGrip.nextGrip(); //the user has already done the first one!
+    var grip = that.firstGrip;////.nextGrip(); //the user has already done the first one!
 
     while (grip.hasFrets() && bail > 0) {
       ///console.log(grip.frets);
@@ -120,14 +123,21 @@ var Guitar = function(spec) {
       
         ////console.log(grip.shape());
         var shape = grip.shape();
+        
+        console.log('shape',shape);
+        
+        
         session.addShape(shape);
 
-        grip.lightUpWithHarmonics(session.getColorForShape(shape));
+        var color = session.getColorForShape(shape);
+        console.log('color',color);
+        grip.lightUpWithHarmonics(color);
         cidx +=1;
       }
       bail -= 1;
       grip = grip.nextGrip();
     }
+    that.firstGrip = Grip({});    //reset
   };
 
   that.goLong = function(orig) {
@@ -157,6 +167,7 @@ var Guitar = function(spec) {
 
 
     var harmonizeButton = jQuery('<button>Harmonize This!</button>');
+    var clearButton = jQuery('<button>Clear</button>');
 
 
 
@@ -174,6 +185,13 @@ var Guitar = function(spec) {
     harmonizeButton.click(function() {
       that.harmonizeFirstGrip();
     });
+
+
+    $(html).append(clearButton);
+    clearButton.click(function() {
+      that.redraw();
+      that.firstGrip = Grip({});
+    });
     
     var div = document.createElement('div');
     $(div).addClass('guitar');
@@ -190,6 +208,16 @@ var Guitar = function(spec) {
     that.strings = that.buildStrings();
     that.renderOn(that.container);
   };
+  
+  that.reset = function() {
+    that.strings.each(function(s) {
+      s.litFrets().each(function(f) {
+        f.dim();
+      });
+    });
+  
+  };
+  
   
   that.buildStrings = function() {
     var result = [];
