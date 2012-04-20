@@ -17,14 +17,6 @@
 <script type="text/javascript">
 
 
-JSMT = {};
-JSMT.strings = [];
-
-JSMT.guitars = [];
-
-JSMT.MAXFRETS = 36;
-
-
 var GuitarString = function(spec) {
   var foo = ['flat7','7','1','flat2','2','flat3','3','4','flat5','5','sharp5','6'];
 
@@ -117,60 +109,8 @@ var Guitar = function(spec) {
   that.harmonizeFirstGrip = function() {
     var bail = 100;
     
+    var session = JSMT.HarmonizeSession();
     
-    var blues = BSD.colorFromHex('#1f0ab2').upTo(BSD.colorFromHex('#eeeeee'),4);
-    var reds = BSD.colorFromHex('#b20a1e').upTo(BSD.colorFromHex('#eeeeee'),4);
-    var purples = BSD.colorFromHex('#600eaf').upTo(BSD.colorFromHex('#eeeeee'),4);
-    var oranges = BSD.colorFromHex('#f06a00').upTo(BSD.colorFromHex('#eeeeee'),4);
-    var greens = BSD.colorFromHex('#089900').upTo(BSD.colorFromHex('#eeeeee'),4);
-    
-    [blues,reds,purples,oranges,greens].each(function(a) {
-      a.pop(); //pop off the lightest few
-      a.pop(); //pop off the lightest few
-    });
-    
-    var colors = [];
-    colors = colors.concat(purples);
-    //colors = colors.concat(blues);
-    colors = colors.concat(greens);
-    colors = colors.concat(oranges);
-    ///colors = colors.concat(reds);
-    console.log(colors,'colors');
-    
-   /** 
-    var colors = [
-      '#c979dc',
-      '#d31d89',
-      '#e69b4c',
-      '#38ad46',
-      '#959dd0',
-      '#963727',
-      '#7a2e71',
-      '#d2e675',
-      '#0db565',
-
-      '#c979dc',
-      '#d31d89',
-      '#e69b4c',
-      '#38ad46',
-      '#959dd0',
-      '#963727',
-      '#7a2e71',
-      '#d2e675',
-      '#0db565',
-
-      '#c979dc',
-      '#d31d89',
-      '#e69b4c',
-      '#38ad46',
-      '#959dd0',
-      '#963727',
-      '#7a2e71',
-      '#d2e675',
-      '#0db565'
-    ];
-**/
-
     var cidx = 0;
     var grip = that.firstGrip.nextGrip(); //the user has already done the first one!
 
@@ -178,9 +118,11 @@ var Guitar = function(spec) {
       ///console.log(grip.frets);
       if (grip.unlit()) {
       
-        console.log(grip.shape());
-      
-        grip.lightUpWithHarmonics(colors[cidx]);
+        ////console.log(grip.shape());
+        var shape = grip.shape();
+        session.addShape(shape);
+
+        grip.lightUpWithHarmonics(session.getColorForShape(shape));
         cidx +=1;
       }
       bail -= 1;
