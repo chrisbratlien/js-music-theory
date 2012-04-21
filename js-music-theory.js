@@ -373,46 +373,44 @@ JSMT.HarmonizeSession = function() {
   var cyans = BSD.colorFromHex('#009ba8').upTo(BSD.colorFromHex('#eeffff'),gradients);
 
 
+  var swatches = [
+    BSD.colorFromHex('#c979dc').upTo(BSD.colorFromHex('#eeeeee'),gradients),
+    BSD.colorFromHex('#d31d89').upTo(BSD.colorFromHex('#eeeeee'),gradients),
+    BSD.colorFromHex('#e69b4c').upTo(BSD.colorFromHex('#eeeeee'),gradients),
+    BSD.colorFromHex('#38ad46').upTo(BSD.colorFromHex('#eeeeee'),gradients),
+    BSD.colorFromHex('#959dd0').upTo(BSD.colorFromHex('#eeeeee'),gradients),
+    BSD.colorFromHex('#7a2e71').upTo(BSD.colorFromHex('#eeeeee'),gradients),
+    BSD.colorFromHex('#d2e675').upTo(BSD.colorFromHex('#eeeeee'),gradients)
+  ];
 
-
-   /** 
-    var colors = [
-      '#c979dc',
-      '#d31d89',
-      '#e69b4c',
-      '#38ad46',
-      '#959dd0',
-      '#963727',
-      '#7a2e71',
-      '#d2e675',
-      '#0db565',
-
-      '#c979dc',
-      '#d31d89',
-      '#e69b4c',
-      '#38ad46',
-      '#959dd0',
-      '#963727',
-      '#7a2e71',
-      '#d2e675',
-      '#0db565',
-
-      '#c979dc',
-      '#d31d89',
-      '#e69b4c',
-      '#38ad46',
-      '#959dd0',
-      '#963727',
-      '#7a2e71',
-      '#d2e675',
-      '#0db565'
-    ];
-**/
+    
+  var starters = [
+    '#59096c',
+    '#630d19',
+    '#e69b4c',
+    '#086d06',
+    '#050d40',
+    '#761707',
+    '#0d6515',  
+  ];
+  
+  var mixture = [];
+  while (mixture.length < 7) {
+    var candidate = starters.atRandom();
+    if (mixture.indexOf(candidate) == -1) {
+      mixture.push(candidate);
+    }    
+  }
+  var swatches = [];
+  mixture.each(function(hex) {
+    var swatch = BSD.colorFromHex(hex).upTo(BSD.colorFromHex('#eeeeee'),gradients);
+    swatches.push(swatch);
+  });
 
   
-  var swatches = [blues,oranges,cyans,reds,greens];
+  /////var swatches = [blues,oranges,cyans,reds,greens];
   
-  swatches.reverse(); //so they'll pop in the order shown in the definition of swatches
+  ///swatches.reverse(); //so they'll pop in the order shown in the definition of swatches
   
   
   swatches.each(function(a) {
