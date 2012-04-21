@@ -10,290 +10,14 @@
 <link rel="stylesheet" href="farbtastic.css" type="text/css" />
 <!--<script src="testrunner.js"></script>-->
 <script src="array.js"></script>
+<script src="color.js"></script>
 <script src="js-music-theory.js"></script>
+<script src="guitar.js"></script>
 
 <script type="text/javascript">
 
+JSMT.MAXFRETS = 30;
 
-JSMT = {};
-JSMT.strings = [];
-
-
-
-var Fret = function(spec) {
-
-  //private
-  var div = document.createElement('div');
-
-  //interface
-  var that = {};
-  that.number = spec.number || 0;
-  that.value = spec.value || 0;
-  that.fretted = spec.fretted || false;
-  that.degree = spec.degree || false;
-  that.lit = spec.lit || false;
-  that.string = spec.string || false;
-
-  that.goShort = function (orig) { 
-    result = orig;
-    result = result.replace(/flat/g,'b');
-    result = result.replace(/sharp/g,'#');
-    //result = result.replace(/flat/g,'&#x266d;');
-    //result = result.replace(/sharp/g,'&#x266f;');
-    return result;  
-  }
-
-  that.goLong = function(orig) {
-    result = orig;
-    result = result.replace(/b/g,'flat');
-    result = result.replace(/#/g,'sharp');
-    
-    //result = result.replace(/&#x266d;/g,'flat');
-    //result = result.replace(/&#x266f;/g,'sharp');
-    return result;
-  }
-
-
-  that.harmonics = function() {
-    return that.string.frets.select(function(f) {
-      return that.number % 12 == f.number %12; 
-    });
-  };
-
-
-  that.changeColor = function(hashHex){
-    $(div).css('background',hashHex);
-  };
-
-  that.renderOn = function(html) {
-    $(div).addClass('fret');
-    $(div).addClass('fret-number-' + that.number);
-    if (that.fretted) {
-      $(div).addClass('fretted');
-      $(div).html(that.goShort(that.degree));  
-      $(div).css('background','#777');          
-    }  
-          
-    $(div).click(function() {
-      that.harmonics().each(function(f) {
-        f.lit = ! f.lit;
-        if (f.lit) {
-          f.changeColor($('#color').val());
-        }
-        else if (f.fretted) {
-          f.changeColor('#777');
-        }
-        else {
-          f.changeColor('#ddd');
-        }
-      });
-    });  
-    $(html).append(div);
-  };
-  return that;
-}
-
-
-var GuitarString = function(spec) {
-  var foo = ['flat7','7','1','flat2','2','flat3','3','4','flat5','5','sharp5','6'];
-
-  var that = {};
-  that.number = spec.number || false;
-  that.rootNote = spec.rootNote;
-  that.frettedDegrees = spec.frettedDegrees;
-  //console.log(spec.frettedDegrees);
-  that.frets = [];
-
-  that.renderOn = function(html) {
-    var div = document.createElement('div');
-    $(div).addClass('string');
-    $(div).addClass('string-number-' + that.number);
-    $(html).append(div);
-    for (var i = 0, l = that.frets.length; i < l; i += 1) {
-      that.frets[i].renderOn(div);
-    }
-    
-    var clearMe = document.createElement('div');
-    $(clearMe).addClass('clear');
-    $(html).append(clearMe);
-    
-  };
-
-  var starter = [0,7,3,10,5,0];
-  var foo = ['flat7','7','1','flat2','2','flat3','3','4','flat5','5','sharp5','6'];
-
-  for(var i = 0; i < 30; i++){   
-    var deg = foo[(that.rootNote+i)%12];
-     
-    that.frets.push(Fret({
-      number: i,
-      value: that.rootNote + i,
-      fretted: function() { return that.frettedDegrees.indexOf(deg) > -1; }(),
-      degree: deg,
-      string: that
-    }));  
-  }
-  JSMT.strings.push(that);
-  
-  return that;
-}
-
-
-
-var Guitar = function(spec) {
-  var container = false;
-  
-  var foo = ['flat7','7','1','flat2','2','flat3','3','4','flat5','5','sharp5','6'];
-   //var foo = ['f7',7,1,'f2',2,'f3',3,4,'f5',5,'s5',6];
-  var starter = [0,7,3,10,5,0];
-
-  var that = {};
-  that.degreeList = spec.degreeList || '';
-  that.strings = [];
-
-  that.goLong = function(orig) {
-    result = orig;
-    result = result.replace(/b/g,'flat');
-    result = result.replace(/#/g,'sharp');
-    
-    //result = result.replace(/&#x266d;/g,'flat');
-    //result = result.replace(/&#x266f;/g,'sharp');
-    return result;
-  }
-
-
-  that.parseDegrees = function(degreeStr) {
-    //console.log(degreeStr);
-    degreeStr = that.goLong(degreeStr);
-    //console.log(degreeStr);
-    d2 = degreeStr.split(',');
-    /////console.log(d2);
-    //var degrees = eval('[' + degreeStr + ']');
-    return d2;
-  };
-
-  that.renderOn = function(html) {
-    ///console.log('renderOn list',that.degreeList);
-    that.container = html;
-    var includeDegrees = document.createElement('input');
-    includeDegrees.value = that.degreeList;
-    $(includeDegrees).addClass('includeDegrees');
-    $(includeDegrees).blur(function(e) { 
-      //console.log(that.degreeList);
-      ///console.log('blur',this.value);
-      that.degreeList = this.value;
-      that.redraw(); 
-    });
-    $(html).append(includeDegrees);
-
-    var div = document.createElement('div');
-    $(div).addClass('guitar');
-    $(html).append(div);
-
-    for (var i = 0, l = that.strings.length; i < l; i += 1) {
-      that.strings[i].renderOn(div);
-    }
-  };
-
-  that.redraw = function() {
-    ////console.log('redraw list',that.degreeList);  
-    $(that.container).empty();
-    that.strings = that.buildStrings();
-    that.renderOn(that.container);
-  };
-  
-  that.buildStrings = function() {
-    var result = [];
-    for (var i = 0, l = starter.length; i < l; i += 1) {
-      result.push(GuitarString({
-        number: i+1,
-        rootNote: starter[i],
-        frettedDegrees: that.parseDegrees(that.degreeList)
-      }));  
-    }
-    
-    return result;
-  };
-  
-  that.strings = that.buildStrings();
-
-  return that; 
-};
-
-
-
-
-
-
-function rotateBackgroundColor(elem) {
-  jElem = $(elem);
-  ////console.log(jElem.css('background'));
-  jElem.css('background',$('#color').val());
-}
-
-function build_guitar_table(fretboardID,strings,degrees) {
-  //console.log('degrees:',degrees);
-    
-  var fretboardDiv = document.createElement('div');
-  fretboardDiv.id = fretboardID;
-  $(fretboardDiv).addClass('fretboard');
-  $('#main').append(fretboardDiv);
-
-
-  var includeDegrees = document.createElement('input');
-  includeDegrees.value = degrees;
-  includeDegrees.id = 'include_degrees-' + fretboardID.replace(/fretboard-/,'');
-  /////console.log(includeDegrees.id);
-  $(includeDegrees).addClass('includeDegrees');
-
-  $(includeDegrees).blur(function(e) {update_guitar(fretboardID,parse_degrees(this.value));});
-
-  $(fretboardDiv).append(includeDegrees);
-  
-  var table = document.createElement('table');
-  //$(table).attr('cellpadding','0');
-  $(table).attr('cellspacing','1');
-  $(fretboardDiv).append(table);
-  for (i = 0; i < strings.length; i++) {
-    var tr = document.createElement('tr');
-    $(tr).addClass('string');
-    $(tr).addClass('string-' + i);
-    for(j = 0; j < 30; j++) {
-      var td = document.createElement('td');
-      $(tr).append(td);
-      $(td).addClass('fret');
-      $(td).addClass('fret-' + j);
-      var sf = 's' + i.toString() + 'f' + j.toString();
-      $(td).addClass(sf);
-      var className = 'degree-' + strings[i][j];
-      $(td).addClass(className);
-      ////console.log(className);
-      $(td).click(function() {
-          var defaultColor = this.style.backgroundColor;
-          console.log(this);
-          console.log(this.style.backgroundColor)
-          rotateBackgroundColor(this);
-        //$('#' + fretboardID + ' .' + sf).css('background','#fa0000');
-      });
-    }
-    $(table).append(tr);
-  }
-  update_guitar(fretboardID,parse_degrees(degrees));
-  //console.log('afterwards');
-}
-
-function build_guitar() {
-
-  var strings = Array(
-    build_string(0),
-    build_string(1),
-    build_string(2),
-    build_string(3),
-    build_string(4),
-    build_string(5)
-    );
-return strings;  
-}
 
 
 $(document).ready(function(){
@@ -345,12 +69,22 @@ $(document).ready(function(){
       <h1>Playing the Guitar in 20 Questions</h1>      
     </div>
     <div id="supportingText">
+    <p>
+      <strong>UPDATE:</strong> Check out the <a href="teacher.html">wider and less preachy version</a>    
+    </p>
+    
       <div class="form-item">
         <label for="color">Color:</label>
         <input type="text" id="color" name="color" value="#ff0f18" />
       </div>
       <div id="picker"></div>      
-      <div id="main"></div>
+      <div id="main">
+        <ol>
+          <li>1. (optional) Pick a color</li>
+          <li>2. Click some numbered frets to define your first chord</li>
+          <li>3. Click Harmonize This! to see your chord harmonized across the major scale</li>
+        </ol>      
+      </div>
     </div>
     <div id="linkList">
       <p>Q: What have we got here?</p>
