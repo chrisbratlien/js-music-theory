@@ -119,18 +119,18 @@ var Guitar = function(spec) {
 
     while (grip.hasFrets() && bail > 0) {
       ///console.log(grip.frets);
-      if (grip.unlit()) {
+      if (grip.unlit() || grip == that.firstGrip) {
       
         ////console.log(grip.shape());
         var shape = grip.shape();
         
-        console.log('shape',shape);
+        ///console.log('shape',shape);
         
         
         session.addShape(shape);
 
         var color = session.getColorForShape(shape);
-        console.log('color',color);
+        //console.log('color',color);
         grip.lightUpWithHarmonics(color);
         cidx +=1;
       }

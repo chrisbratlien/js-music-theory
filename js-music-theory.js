@@ -242,6 +242,10 @@ var Fret = function(spec) {
   that.lit = spec.lit || false;
   that.string = spec.string || false;
   
+  that.toString = function() {
+    return '(' + 's: ' + that.string.number + ', f: ' + that.number + ')';
+  };
+  
   
   that.guitar = function() {
     return that.string.guitar;
@@ -496,11 +500,19 @@ var Grip = function(spec) { //FIXME: grip is a lot like a chord, no?
 
   interface.shape = function() {
     var pairs = [];    
-    interface.frets.each(function(f) {
-      var news = parseInt(f.string.number,10) - parseInt(interface.lowestString().number,10);
-      var newf = parseInt(f.number,10) - parseInt(interface.lowestFret().number,10);      
-      pairs.push('[' + news.toString() + ',' + newf.toString() + ']');      
+
+    ///console.log(interface,'grip');
+
+    var ls = parseInt(interface.lowestString().number,10);
+    var lf = parseInt(interface.lowestFret().number,10);
+    var z = interface.frets.collect(function(f) { return f.degree; });
+    //console.log('z',z,'ls',ls,'lf',lf);
+    
+    var pairs = interface.frets.collect(function(f) { 
+      return [f.string.number - ls,f.number - lf]; 
     });
+    
+    
     var result = pairs.sort().join(',');
     console.log('shape',result);
     return result;    
