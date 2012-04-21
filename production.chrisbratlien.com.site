@@ -1,9 +1,0 @@
-# Git repository
-REPO=js-music-theory
-FULLREPO="git@github.com:chrisbratlien/$REPO.git"
-
-# deploy destination
-SSH_USER=chris
-SSH_HOST=chrisbratlien.com
-SSH_OPTS="Port=22"
-REMOTE_TOP=/var/www/localhost/htdocs/js-music-theory
