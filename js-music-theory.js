@@ -392,10 +392,10 @@ JSMT.HarmonizeSession = function() {
     '#59096c',
     '#630d19',
     '#e69b4c',
-    '#086d06',
-    '#050d40',
-    '#761707',
-    '#0d6515',  
+    '#187d16',
+    '#151d50',
+    '#76a707',
+    '#0d9595',  
   ];
   
   var mixture = [];
@@ -430,7 +430,9 @@ JSMT.HarmonizeSession = function() {
   };
   
   interface.getColorForShape = function(shape) {
-    return colorMap[shape].pop();
+    var color = colorMap[shape].pop();
+    console.log(shape,color.toHex());
+    return color;
   };
   
   return interface;
