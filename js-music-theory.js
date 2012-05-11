@@ -46,6 +46,26 @@ JSMT.guitars = [];
 JSMT.MAXFRETS = 36;
 
 
+JSMT.goShort = function (orig) { 
+  result = orig;
+  result = result.replace(/flat/g,'b');
+  result = result.replace(/sharp/g,'#');
+  //result = result.replace(/flat/g,'&#x266d;');
+  //result = result.replace(/sharp/g,'&#x266f;');
+  return result;  
+}
+
+JSMT.goLong = function(orig) {
+  result = orig;
+  result = result.replace(/b/g,'flat');
+  result = result.replace(/#/g,'sharp');
+  
+  //result = result.replace(/&#x266d;/g,'flat');
+  //result = result.replace(/&#x266f;/g,'sharp');
+  return result;
+};
+
+
 
 var NotePrimitive = function(spec) {
   var that = {};
@@ -251,24 +271,6 @@ var Fret = function(spec) {
     return that.string.guitar;
   };
 
-  that.goShort = function (orig) { 
-    result = orig;
-    result = result.replace(/flat/g,'b');
-    result = result.replace(/sharp/g,'#');
-    //result = result.replace(/flat/g,'&#x266d;');
-    //result = result.replace(/sharp/g,'&#x266f;');
-    return result;  
-  }
-
-  that.goLong = function(orig) {
-    result = orig;
-    result = result.replace(/b/g,'flat');
-    result = result.replace(/#/g,'sharp');
-    
-    //result = result.replace(/&#x266d;/g,'flat');
-    //result = result.replace(/&#x266f;/g,'sharp');
-    return result;
-  };
 
 
   that.higherFrets = function() {
@@ -326,7 +328,7 @@ var Fret = function(spec) {
     $(div).addClass('fret-number-' + that.number);
     if (that.fretted) {
       $(div).addClass('fretted');
-      $(div).html(that.goShort(that.degree));  
+      $(div).html(JSMT.goShort(that.degree));  
       $(div).css('background','#777');          
     }  
           
@@ -534,6 +536,51 @@ var Grip = function(spec) { //FIXME: grip is a lot like a chord, no?
     return Grip({
       frets: nextSet
     });
+  };
+  return interface;
+};
+
+
+JSMT.DegreePicker = function(spec) {
+  var degrees = ['1','flat2','2','flat3','3','4','flat5','5','sharp5','6','flat7','7'];  
+  var state = {};
+  degrees.each(function(d) {  state[d] = false; });
+  var turnedOn = JSMT.goLong(spec.degreeString).split(',');
+  turnedOn.each(function(d) {
+    state[d] = true;
+  });  
+  
+  var interface = {};
+  interface.renderOn = function(html) {
+    var label = jQuery('<label>Toggle Degrees</label>');
+    var ul = jQuery('<ul class="toggler">');
+    degrees.each(function(d) {
+      var li = jQuery('<li>');
+      
+      if (state[d]) { 
+        li.addClass('on'); 
+        li.removeClass('off'); }
+      else { 
+        li.addClass('off'); 
+        li.removeClass('on'); 
+      }
+      
+      li.html(JSMT.goShort(d));
+      li.click(function() {
+        state[d] = ! state[d];
+        ///console.log(state[d]);
+        
+        var chosen = degrees.select(function(d) {
+          return state[d];
+        });
+        
+        spec.onUpdate(chosen); //callback
+      });
+      ul.append(li);      
+    });
+    html.append(label);
+    html.append(ul);
+    html.append(jQuery('<div style="clear: both; ">&nbsp;</div>'));
   };
   return interface;
 };

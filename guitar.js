@@ -86,6 +86,16 @@ var Guitar = function(spec) {
 
   that.firstGrip = Grip({});
 
+  var picker = JSMT.DegreePicker({
+    degreeString: '1,2,3,4,5,6,7',
+    onUpdate: function(chosen) {
+      ///console.log(state,'state');
+      that.degreeList = chosen;
+      that.redraw();
+    }
+  });
+
+
 
   that.harmonizeFirstGrip = function() {
     var bail = 100;
@@ -137,13 +147,16 @@ var Guitar = function(spec) {
     degreeStr = that.goLong(degreeStr);
     //console.log(degreeStr);
     d2 = degreeStr.split(',');
-    /////console.log(d2);
+    ////console.log('parseDegrees',d2);
     //var degrees = eval('[' + degreeStr + ']');
     return d2;
   };
 
   that.renderOn = function(html) {
     ///console.log('renderOn list',that.degreeList);
+    html = jQuery(html);
+    
+
     that.container = html;
 
 
@@ -151,7 +164,7 @@ var Guitar = function(spec) {
     var clearButton = jQuery('<button>Clear</button>');
 
 
-
+    /***************
     var includeDegrees = document.createElement('input');
     includeDegrees.value = that.degreeList;
     $(includeDegrees).addClass('includeDegrees');
@@ -162,6 +175,10 @@ var Guitar = function(spec) {
       that.redraw(); 
     });
     $(html).append(includeDegrees);
+    *************/
+    
+    picker.renderOn(html);
+
     $(html).append(harmonizeButton);
     harmonizeButton.click(function() {
       that.harmonizeFirstGrip();
@@ -206,7 +223,7 @@ var Guitar = function(spec) {
       var string = GuitarString({
         number: i+1,
         rootNote: starter[i],
-        frettedDegrees: that.parseDegrees(that.degreeList),
+        frettedDegrees: that.degreeList,
         guitar: that
       });
       result.push(string);    
