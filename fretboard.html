@@ -41,7 +41,7 @@ $(document).ready(function(){
   $('#picker').farbtastic('#color');
 
   for (var i = 0, l = scalesByDegree.length; i < l; i += 1) {
-    var d = document.createElement('div');
+    var d = jQuery('<div></div>');/////document.createElement('div');
     $('#main').append(d);
     Guitar({degreeList: scalesByDegree[i]}).renderOn(d);
   }

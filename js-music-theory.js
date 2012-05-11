@@ -366,7 +366,7 @@ JSMT.HarmonizeSession = function() {
   var interface = {};
   var colorMap = {};
   
-  var gradients = 5;
+  var gradients = 4;
   
   
   var blues = BSD.colorFromHex('#1f0ab2').upTo(BSD.colorFromHex('#eeeeff'),gradients);
@@ -377,25 +377,18 @@ JSMT.HarmonizeSession = function() {
   var cyans = BSD.colorFromHex('#009ba8').upTo(BSD.colorFromHex('#eeffff'),gradients);
 
 
-  var swatches = [
-    BSD.colorFromHex('#c979dc').upTo(BSD.colorFromHex('#eeeeee'),gradients),
-    BSD.colorFromHex('#d31d89').upTo(BSD.colorFromHex('#eeeeee'),gradients),
-    BSD.colorFromHex('#e69b4c').upTo(BSD.colorFromHex('#eeeeee'),gradients),
-    BSD.colorFromHex('#38ad46').upTo(BSD.colorFromHex('#eeeeee'),gradients),
-    BSD.colorFromHex('#959dd0').upTo(BSD.colorFromHex('#eeeeee'),gradients),
-    BSD.colorFromHex('#7a2e71').upTo(BSD.colorFromHex('#eeeeee'),gradients),
-    BSD.colorFromHex('#d2e675').upTo(BSD.colorFromHex('#eeeeee'),gradients)
-  ];
-
-    
   var starters = [
-    '#59096c',
+    ////'#59096c',deep purple
     '#630d19',
-    '#e69b4c',
+    '#d68b3c',
     '#187d16',
     '#151d50',
-    '#76a707',
+    ///'#76a707', puke green
     '#0d9595',  
+    '#900000',
+    '#009000',
+    '#000090',
+    '#900090'
   ];
   
   var mixture = [];
@@ -408,6 +401,10 @@ JSMT.HarmonizeSession = function() {
   var swatches = [];
   mixture.each(function(hex) {
     var swatch = BSD.colorFromHex(hex).upTo(BSD.colorFromHex('#eeeeee'),gradients);
+    console.log('swwww',swatch);
+    var lightest = swatch.pop(); //take off lightest
+    console.log(lightest,'lightest');
+    swatch = swatch.concat(swatch); //double itself
     swatches.push(swatch);
   });
 
