@@ -403,7 +403,7 @@ JSMT.HarmonizeSession = function() {
     '#26BD00',
     ///'#B6BD00',
     '#BD6100',
-    '#BD2300'
+    ///'#BD2300'
   ];
   
   
