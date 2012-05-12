@@ -378,7 +378,7 @@ JSMT.HarmonizeSession = function() {
   var greens = BSD.colorFromHex('#089900').upTo(BSD.colorFromHex('#eeffee'),gradients);
   var cyans = BSD.colorFromHex('#009ba8').upTo(BSD.colorFromHex('#eeffff'),gradients);
 
-
+/*
   var starters = [
     ////'#59096c',deep purple
     '#630d19',
@@ -392,6 +392,20 @@ JSMT.HarmonizeSession = function() {
     '#000090',
     '#900090'
   ];
+  */
+  
+  var starters = [
+    '#BD004C',
+    '#BD00AD',
+    '#5200BD',
+    '#005EBD',
+    '#00BD87',
+    '#26BD00',
+    ///'#B6BD00',
+    '#BD6100',
+    '#BD2300'
+  ];
+  
   
   var mixture = [];
   while (mixture.length < 7) {
