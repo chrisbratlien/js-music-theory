@@ -24,7 +24,13 @@
 
 <script type="text/javascript">
 
-
+function tryRandomPalette() {
+  JSMT.myPalette = JSMT.randomPalette();
+  var firstGuitar = JSMT.guitars[0];
+  firstGuitar.redraw();
+  jQuery('.fret-number-6').trigger('click');  
+  firstGuitar.harmonizeFirstGrip();
+}
 
 
 $(document).ready(function(){
@@ -60,6 +66,11 @@ $(document).ready(function(){
     guitar.renderOn(d);
   }
 
+
+
+  jQuery('#try').click(function() {
+    tryRandomPalette();
+  });
 
 /*
 
@@ -103,6 +114,8 @@ $(document).ready(function(){
           <li>3. Click Harmonize This! to see your chord harmonized across the major scale</li>
         </ol>
 
+
+      <button id="try">Try random Palette</button>
       
       </div>
     </div>

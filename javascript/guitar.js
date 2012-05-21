@@ -131,21 +131,8 @@ var Guitar = function(spec) {
     that.firstGrip = Grip({});    //reset
   };
 
-  that.goLong = function(orig) {
-    result = orig;
-    result = result.replace(/b/g,'flat');
-    result = result.replace(/#/g,'sharp');
-    
-    //result = result.replace(/&#x266d;/g,'flat');
-    //result = result.replace(/&#x266f;/g,'sharp');
-    return result;
-  }
-
 
   that.parseDegrees = function(degreeStr) {
-    //console.log(degreeStr);
-    degreeStr = that.goLong(degreeStr);
-    //console.log(degreeStr);
     d2 = degreeStr.split(',');
     ////console.log('parseDegrees',d2);
     //var degrees = eval('[' + degreeStr + ']');

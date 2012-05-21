@@ -37,8 +37,26 @@ if (typeof String.prototype.supplant == 'undefined') {
    };
 }
 
-
 JSMT = {};
+
+
+
+
+
+JSMT.randLowColor = function() {
+
+  var start = JSMT.randColor();
+  var score = 99;
+  while (score > 25) {
+    score = parseInt(start.substr(1,1),10) + parseInt(start.substr(3,1),10) + parseInt(start.substr(5,1),10);
+  
+  } 
+  
+  
+};
+
+
+
 JSMT.strings = [];
 
 JSMT.guitars = [];
@@ -48,14 +66,14 @@ JSMT.MAXFRETS = 36;
 
 JSMT.goShort = function (orig) { 
   result = orig;
-  result = result.replace(/flat/g,'b');
-  result = result.replace(/sharp/g,'#');
-  //result = result.replace(/flat/g,'&#x266d;');
-  //result = result.replace(/sharp/g,'&#x266f;');
+  /////result = result.replace(/flat/g,'b');
+  ///result = result.replace(/sharp/g,'#');
+  result = result.replace(/flat/g,'&#x266d;');
+  result = result.replace(/sharp/g,'&#x266f;');
   return result;  
 }
 
-JSMT.goLong = function(orig) {
+JSMT.OBSOLETEgoLong = function(orig) {
   result = orig;
   result = result.replace(/b/g,'flat');
   result = result.replace(/#/g,'sharp');
@@ -363,71 +381,90 @@ JSMT.Pair = function(x,y) {
   return interface;
 };
 
+
+
+JSMT.keeperPalettes = [
+  ['#3e9876','#2860a6','#7057b9','#d79200','#dc3642','#00a7d2','#fe6673'],
+  ['#1b1d22','#425000','#39166c','#940812','#056921','#0e00b1','#0cac01'],
+  ['#ae6414','#641999','#db4ea2','#4eb7d7','#8486d3','#7f1f17','#285edc'],
+  ['#8e9247','#9a2b0b','#216708','#621531','#a75eca','#174da8','#e83d21'],
+  ['#f16400','#a70f80','#509dc1','#057af5','#8c1322','#be754f','#cf041b'],
+  ['#1cbcbd','#7c6c02','#989791','#b421cb','#f81e9e','#0eaadf','#4f9323'],
+  ['#883232','#9e6abc','#69bfa7','#da135b','#4c4392','#717d8e','#78e834'],
+  ['#455e7a','#ad616b','#cec349','#864d3d','#50bb9b','#fa5026','#1c5eef']
+/*
+  ['#185a6f','#6f9d10','#bb254b','#261e3d','#7f1888','#a8020d','#0015ed'],
+  ['#7d481e','#229a3f','#1b44ac','#340349','#e41a0e','#950a6f','#02f31d'],
+  ['#814caf','#af6b15','#1051af','#6c0d24','#020418','#664a55','#34a455'],
+  ['#350503','#aa1c2d','#307484','#2a6404','#6b3916','#1a25b1','#18156b'],
+  ['#186e4f','#532c0a','#a12937','#141c9e','#838313','#0c2840','#1a02eb']
+*/
+//  ['#0e73a0','#9d4936','#752e47','#bb3b20','#316737','#e70b10','#0c2097'],
+
+//    ['#0D0824','#A29C33','#6B1C17','#6338C2'],
+//    ['#c90314','#4d2f11','#258b22','#143584','#486139'],
+//    ['#142949','#9a1e12','#254351','#8d1d36','#811e4d'],
+//    ['#8e0821','#0c2aba','#1e696a','#6b1068','#6c4c19','#2c6048','#0b494a'],
+//    ['#217368','#200421','#d70f19','#476156','#992d27','#035f03','#460202'],
+//    ['#57600b','#164c55','#7c7a02','#27057e','#082a54','#0cc41d','#1fd822'],
+//    ['#cf2f24','#8b2c68','#3841af','#ea3e02','#504003','#2c0803','#113b74'],
+//    ['#4204a3','#27a415','#1e076d','#f11215','#671a3b','#1d2a9b','#944100'],
+//    ['#635e26','#1b4326','#1f595e','#3b780d','#7e8b08','#23535c','#482f2a']
+];
+
+JSMT.randomPalette = function() {
+  /***
+    var result = [
+      BSD.randomDarkColor(),
+      BSD.randomDarkColor(),
+      BSD.randomDarkColor(),
+      BSD.randomDarkColor(),
+      BSD.randomDarkColor(),
+      BSD.randomDarkColor(),
+      BSD.randomDarkColor()
+    ];
+  ****/
+  var result = BSD.play(23);
+
+
+  var mixtureString = '';
+  result.each(function(color) {
+    mixtureString += '#' + color.toHex() + ',';
+  });
+  console.log(mixtureString);
+  return result;
+};
+
+JSMT.myPalette = JSMT.keeperPalettes.atRandom();
+////JSMT.myPalette = JSMT.randomPalette();
+
+JSMT.makeSwatch = function(starter) {
+  var gradients = 4;
+  if (typeof starter == 'string') {
+    starter = BSD.colorFromHex(starter);
+  }
+  var swatch = starter.upTo(BSD.colorFromHex('#eeeeee'),gradients);
+  var lightest = swatch.pop(); //take off lightest
+  ////console.log(lightest,'lightest');
+  //swatch = swatch.concat(swatch); //double itself
+  return swatch;  
+};
+
 JSMT.HarmonizeSession = function() {
 
   var interface = {};
   var colorMap = {};
-  
-  var gradients = 4;
-  
-  
-  var blues = BSD.colorFromHex('#1f0ab2').upTo(BSD.colorFromHex('#eeeeff'),gradients);
-  var reds = BSD.colorFromHex('#b20a1e').upTo(BSD.colorFromHex('#ffffeeee'),gradients);
-  var purples = BSD.colorFromHex('#600eaf').upTo(BSD.colorFromHex('#ffeeff'),gradients);
-  var oranges = BSD.colorFromHex('#f06a00').upTo(BSD.colorFromHex('#ffffee'),gradients);
-  var greens = BSD.colorFromHex('#089900').upTo(BSD.colorFromHex('#eeffee'),gradients);
-  var cyans = BSD.colorFromHex('#009ba8').upTo(BSD.colorFromHex('#eeffff'),gradients);
 
-/*
-  var starters = [
-    ////'#59096c',deep purple
-    '#630d19',
-    '#d68b3c',
-    '#187d16',
-    '#151d50',
-    ///'#76a707', puke green
-    '#0d9595',  
-    '#900000',
-    '#009000',
-    '#000090',
-    '#900090'
-  ];
-  */
-  
-  var starters = [
-    '#BD004C',
-    '#BD00AD',
-    '#5200BD',
-    '#005EBD',
-    '#00BD87',
-    '#26BD00',
-    ///'#B6BD00',
-    '#BD6100',
-    ///'#BD2300'
-  ];
-  
-  
-  var mixture = [];
-  while (mixture.length < 7) {
-    var candidate = starters.atRandom();
-    if (mixture.indexOf(candidate) == -1) {
-      mixture.push(candidate);
-    }    
-  }
   var swatches = [];
-  mixture.each(function(hex) {
-    var swatch = BSD.colorFromHex(hex).upTo(BSD.colorFromHex('#eeeeee'),gradients);
-    ////console.log('swwww',swatch);
-    var lightest = swatch.pop(); //take off lightest
-    ////console.log(lightest,'lightest');
-    swatch = swatch.concat(swatch); //double itself
+  JSMT.myPalette.each(function(starter) {
+    var swatch = JSMT.makeSwatch(starter);
     swatches.push(swatch);
   });
 
   
   /////var swatches = [blues,oranges,cyans,reds,greens];
   
-  ///swatches.reverse(); //so they'll pop in the order shown in the definition of swatches
+  swatches.reverse(); //so they'll pop in the order shown in the definition of swatches
   
   
   swatches.each(function(a) {
@@ -559,7 +596,7 @@ JSMT.DegreePicker = function(spec) {
   var degrees = ['1','flat2','2','flat3','3','4','flat5','5','sharp5','6','flat7','7'];  
   var state = {};
   degrees.each(function(d) {  state[d] = false; });
-  var turnedOn = JSMT.goLong(spec.degreeString).split(',');
+  var turnedOn = spec.degreeString.split(',');
   turnedOn.each(function(d) {
     state[d] = true;
   });  

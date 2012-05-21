@@ -441,6 +441,6 @@ background: url(seafloor.jpg) no-repeat;
 .includeDegrees { font-size: 1.2em; padding: 3px; color: #777; margin: 10px;}
 
 .toggler { list-style-type: none; }
-.toggler li { float: left; display: inline; margin-left: 1em; cursor: pointer; padding: 0.4em; font-weight: bold; border-radius: 0.2em; min-width: 1.5em; border: 1px solid #777; text-align: center; }
+.toggler li { float: left; display: inline; margin-left: 1em; cursor: pointer; padding: 0.4em; font-weight: bold; border-radius: 0.2em; min-width: 1.5em; min-height: 1.5em; border: 1px solid #777; text-align: center; }
 .toggler .on { background: #777; color: white; }
 .toggler .off { background: #fff; color: #777; }
