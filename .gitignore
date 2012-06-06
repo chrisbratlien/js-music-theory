@@ -2,3 +2,4 @@ deploy*
 tmp
 tmp/*
 prototype.js
+palette.html
