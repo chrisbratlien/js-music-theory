@@ -389,7 +389,6 @@ JSMT.keeperPalettes = [
   ['#ae6414','#641999','#db4ea2','#4eb7d7','#8486d3','#7f1f17','#285edc'],
   ['#8e9247','#9a2b0b','#216708','#621531','#a75eca','#174da8','#e83d21'],
   ['#f16400','#a70f80','#509dc1','#057af5','#8c1322','#be754f','#cf041b'],
-  ['#1cbcbd','#7c6c02','#989791','#b421cb','#f81e9e','#0eaadf','#4f9323'],
   ['#883232','#9e6abc','#69bfa7','#da135b','#4c4392','#717d8e','#78e834'],
   ['#455e7a','#ad616b','#cec349','#864d3d','#50bb9b','#fa5026','#1c5eef']
 /*
@@ -593,7 +592,7 @@ var Grip = function(spec) { //FIXME: grip is a lot like a chord, no?
 
 
 JSMT.DegreePicker = function(spec) {
-  var degrees = ['1','flat2','2','flat3','3','4','flat5','5','sharp5','6','flat7','7'];  
+  var degrees = ['1','flat2','2','flat3','3','4','flat5','5','flat6','6','flat7','7'];  
   var state = {};
   degrees.each(function(d) {  state[d] = false; });
   var turnedOn = spec.degreeString.split(',');

@@ -13,16 +13,92 @@
 <script src="javascript/color.js"></script>
 <script src="javascript/js-music-theory.js"></script>
 <script src="javascript/guitar.js"></script>
-
-
-
-
-
-
+<script src="javascript/timer.js"></script>
+<script src="javascript/string.supplant.js"></script>
 
 
 
 <script type="text/javascript">
+
+
+DOM = {};
+DOM.element = function() {
+  if (arguments.length == 0) { return "ERROR"; }  
+
+  var tag = arguments[0];
+  var interface = jQuery('<' + tag + '></' + tag + '>');
+  if (arguments.length == 1) {
+    return interface;
+  }
+  
+  var children = arguments[1]; 
+  if (typeof children == "string") {
+    interface.html(children);
+  }
+  else if (typeof children == "object") { //probably another jquery object
+    interface.append(children);
+  }
+  else {
+    children.each(function(child) {
+      interface.append(child);  
+    });  
+  }
+  return interface;
+};
+
+DOM.li = function() {
+  if (arguments.length == 0) { return DOM.element('li'); }
+  return DOM.element('li',arguments[0]);
+};
+DOM.a = function() {
+  if (arguments.length == 0) { return DOM.element('a'); }
+  return DOM.element('a',arguments[0]);
+};
+DOM.img = function() {
+  if (arguments.length == 0) { return DOM.element('img'); }
+  return DOM.element('img',arguments[0]);
+};
+DOM.div = function() {
+  if (arguments.length == 0) { return DOM.element('div'); }
+  return DOM.element('div',arguments[0]);
+};
+
+
+
+JSMT.imageResults = false;  
+function jsonp(payload) {
+
+
+  var study = jQuery('#study');
+
+  console.log(payload,'payload');
+
+  payload.select(function(searchResult) {
+    ////console.log(searchResult,'s r');
+    var li = jQuery('<li></li>');
+
+    var img = jQuery('<img />');
+    img.attr('src',searchResult.url);
+    
+    var a = jQuery('<a></a>');
+    a.attr('href',searchResult.url);
+
+    a.append(img);
+    li.append(a);    
+    study.append(li);
+    
+  ////var img = jQuery('<img src="{src}" />'.supplant({ src: searchResult.url }));
+    ///var a = jQuery('<a href="{src}" />'.supplant({ src: searchResult.url }));
+    //a.append(img);
+    //jQuery(document).append(a);  
+  });
+
+
+}
+
+
+
+
 
 function tryRandomPalette() {
   JSMT.myPalette = JSMT.randomPalette();
@@ -101,32 +177,27 @@ $(document).ready(function(){
       <div id="picker"></div>      
       <div id="main">
 
-    <p>
-      <ul>
-        <li><a href="saved-triads.html">Saved Major (and natural minor) Scale Triads</a></li>
-        <li><a href="saved-hm-triads.html">Saved Harmonic-Minor Scale Triads</a></li>
-      </ul>
-    </p>
+        <p>
+          <ul>
+            <li><a href="saved-triads.html">Saved Major (and natural minor) Scale Triads</a></li>
+            <li><a href="saved-hm-triads.html">Saved Harmonic-Minor Scale Triads</a></li>
+          </ul>
+        </p>
 
         <ol>
           <li>1. (optional) Pick a color</li>
           <li>2. Click some numbered frets to define your first chord</li>
           <li>3. Click Harmonize This! to see your chord harmonized across the major scale</li>
         </ol>
-
-
-      <button id="try">Try random Palette</button>
-      
-      </div>
-    </div>
-  </div>
-<!--
-<h1>E-Prime JavaScript Tests</h1>
-<h2 id="banner"></h2>
-<h2 id="userAgent"></h2>
-<ol id="tests"></ol>
-<div id="main"></div>
--->
+        <button id="try">Try random Palette</button>
+      </div><!-- main -->
+    </div><!-- supporting-text -->
+    <h3>Music Study Images</h3>
+    <ul id="study">
+    </ul><!-- study -->
+    
+  </div><!-- container -->
+<script src="http://dropafew.com/todo/?action=bookmarksjsonp&tony=clifton&tags=study+music+image"></script>
 
 <script type="text/javascript">
 var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");

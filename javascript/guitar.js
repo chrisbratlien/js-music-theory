@@ -1,5 +1,5 @@
 var GuitarString = function(spec) {
-  var foo = ['flat7','7','1','flat2','2','flat3','3','4','flat5','5','sharp5','6'];
+  var foo = ['flat7','7','1','flat2','2','flat3','3','4','flat5','5','flat6','6'];
 
   var that = {};
   that.number = spec.number || false;
@@ -51,7 +51,7 @@ var GuitarString = function(spec) {
   };
 
   var starter = [0,7,3,10,5,0];
-  var foo = ['flat7','7','1','flat2','2','flat3','3','4','flat5','5','sharp5','6'];
+  var foo = ['flat7','7','1','flat2','2','flat3','3','4','flat5','5','flat6','6'];
 
   for(var i = 0; i < JSMT.MAXFRETS; i++){   
     var deg = foo[(that.rootNote+i)%12];
@@ -74,7 +74,7 @@ var GuitarString = function(spec) {
 var Guitar = function(spec) {
   var container = false;
   
-  var foo = ['flat7','7','1','flat2','2','flat3','3','4','flat5','5','sharp5','6'];
+  var foo = ['flat7','7','1','flat2','2','flat3','3','4','flat5','5','flat6','6'];
    //var foo = ['f7',7,1,'f2',2,'f3',3,4,'f5',5,'s5',6];
   var starter = [0,7,3,10,5,0];
   
