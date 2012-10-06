@@ -444,3 +444,9 @@ background: url(seafloor.jpg) no-repeat;
 .toggler li { float: left; display: inline; margin-left: 1em; cursor: pointer; padding: 0.4em; font-weight: bold; border-radius: 0.2em; min-width: 1.5em; min-height: 1.5em; border: 1px solid #777; text-align: center; }
 .toggler .on { background: #777; color: white; }
 .toggler .off { background: #fff; color: #777; }
+
+
+.sticky-note {  position: absolute; top: 0; left: 0; cursor:  pointer; box-shadow: 3px 3px 13px #aaa; z-index: 10; }
+.sticky-note textarea { background: #ffa; cursor:  pointer; border: 1px solid #dd8; width: 140px; height: 100px; font-family: Georgia; }
+
+

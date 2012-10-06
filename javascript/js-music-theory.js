@@ -252,121 +252,8 @@ var Chord = function(spec) {
 };
 
 
-var Finger = function(spec) {
-
-  var interface = spec;
-  
-  interface.string = spec.string;
-  interface.fret = spec.fret;
-  interface.scale = spec.scale;
-  interface.degree = spec.degree;  
-  return interface;
-};
 
 
-
-
-var Fret = function(spec) {
-
-  //private
-  var div = document.createElement('div');
-
-  //interface
-  var that = {};
-  that.number = spec.number || 0;
-  that.value = spec.value || 0;
-  that.fretted = spec.fretted || false;
-  that.degree = spec.degree || false;
-  that.lit = spec.lit || false;
-  that.string = spec.string || false;
-  
-  that.toString = function() {
-    return '(' + 's: ' + that.string.number + ', f: ' + that.number + ')';
-  };
-  
-  
-  that.guitar = function() {
-    return that.string.guitar;
-  };
-
-
-
-  that.higherFrets = function() {
-    return that.string.frets.select(function(f) {
-      return f.number > that.number;
-    });
-  };
-
-  that.higherFrettedFrets = function() {
-    return that.higherFrets().select(function(f) {
-      return f.fretted;
-    });
-  };
-
-  that.harmonics = function() {
-    return that.string.frets.select(function(f) {
-      return that.number % 12 == f.number %12; 
-    });
-  };
-  
-  that.unlitHarmonics = function() {
-    return that.harmonics().select(function(h) { return h.unlit();})
-  };
-
-  that.changeColor = function(color){
-    $(div).css('background','#' + color.toHex());
-  };
-
-  that.toggleLight = function(hexColor) {
-    if (that.lit) {
-      that.dim();
-    }
-    else {
-      that.lightUp(hexColor);
-    }
-  };
-  that.lightUp = function(color) {
-    that.lit = true;
-    if (that.lit) {
-      that.changeColor(color);
-    }
-  };
-  that.dim = function() {
-    that.lit = false;
-    if (that.fretted) {
-      that.changeColor(BSD.Color({ r: 119, g: 119, b: 119 })); //'#777'
-    }
-    else {
-      that.changeColor(BSD.Color({ r: 221, g: 221, b: 221 })); //#ddd
-    }
-  };
-
-  that.renderOn = function(html) {
-    $(div).addClass('fret');
-    $(div).addClass('fret-number-' + that.number);
-    if (that.fretted) {
-      $(div).addClass('fretted');
-      $(div).html(JSMT.goShort(that.degree));  
-      $(div).css('background','#777');          
-    }  
-          
-    $(div).click(function() {
-      ////console.log('obserrr',that);
-
-      var grip = that.guitar().firstGrip;
-      grip.frets.push(that);
-      
-      
-      ////that.toggleLight($('#color').val()); //harmonics() includes itself
-
-      that.harmonics().each(function(f) { //harmonics() includes itself
-        f.toggleLight(BSD.colorFromHex($('#color').val()));
-      });
-    });  
-    $(html).append(div);
-  };
-  return that;
-}
 
 
 
@@ -385,30 +272,14 @@ JSMT.Pair = function(x,y) {
 
 JSMT.keeperPalettes = [
   ['#3e9876','#2860a6','#7057b9','#d79200','#dc3642','#00a7d2','#fe6673'],
-  ['#1b1d22','#425000','#39166c','#940812','#056921','#0e00b1','#0cac01'],
   ['#ae6414','#641999','#db4ea2','#4eb7d7','#8486d3','#7f1f17','#285edc'],
   ['#8e9247','#9a2b0b','#216708','#621531','#a75eca','#174da8','#e83d21'],
   ['#f16400','#a70f80','#509dc1','#057af5','#8c1322','#be754f','#cf041b'],
   ['#883232','#9e6abc','#69bfa7','#da135b','#4c4392','#717d8e','#78e834'],
-  ['#455e7a','#ad616b','#cec349','#864d3d','#50bb9b','#fa5026','#1c5eef']
-/*
-  ['#185a6f','#6f9d10','#bb254b','#261e3d','#7f1888','#a8020d','#0015ed'],
-  ['#7d481e','#229a3f','#1b44ac','#340349','#e41a0e','#950a6f','#02f31d'],
-  ['#814caf','#af6b15','#1051af','#6c0d24','#020418','#664a55','#34a455'],
-  ['#350503','#aa1c2d','#307484','#2a6404','#6b3916','#1a25b1','#18156b'],
-  ['#186e4f','#532c0a','#a12937','#141c9e','#838313','#0c2840','#1a02eb']
-*/
-//  ['#0e73a0','#9d4936','#752e47','#bb3b20','#316737','#e70b10','#0c2097'],
-
-//    ['#0D0824','#A29C33','#6B1C17','#6338C2'],
-//    ['#c90314','#4d2f11','#258b22','#143584','#486139'],
-//    ['#142949','#9a1e12','#254351','#8d1d36','#811e4d'],
-//    ['#8e0821','#0c2aba','#1e696a','#6b1068','#6c4c19','#2c6048','#0b494a'],
-//    ['#217368','#200421','#d70f19','#476156','#992d27','#035f03','#460202'],
-//    ['#57600b','#164c55','#7c7a02','#27057e','#082a54','#0cc41d','#1fd822'],
-//    ['#cf2f24','#8b2c68','#3841af','#ea3e02','#504003','#2c0803','#113b74'],
-//    ['#4204a3','#27a415','#1e076d','#f11215','#671a3b','#1d2a9b','#944100'],
-//    ['#635e26','#1b4326','#1f595e','#3b780d','#7e8b08','#23535c','#482f2a']
+  ['#455e7a','#ad616b','#cec349','#864d3d','#50bb9b','#fa5026','#1c5eef'],
+  ['#0e73a0','#9d4936','#752e47','#bb3b20','#316737','#e70b10','#0c2097'],
+  ['#a24d1a','#deb848','#351c5d','#559d2e','#cd5b44','#6d73d2','#72785a'],
+  ['#22837c','#f28b4b','#fd5f66','#e02702','#3ccb7c','#90849f','#2dd09f']
 ];
 
 JSMT.randomPalette = function() {

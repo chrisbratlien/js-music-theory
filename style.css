@@ -1,0 +1,59 @@
+body { font-family: Lucida Grande; }
+
+
+table { overflow: auto; }
+td { 
+  width: 10px; min-width: 10px; max-width: 10px;
+  height: 10px; min-height: 10px; max-height: 10px;
+  cursor: pointer; 
+}
+td { border: 1px solid #eee; }
+
+
+#pickers { width: 30em; height: 10em; overflow: auto; }
+.color-picker { width: 2em; height: 2em; float: left; cursor: pointer; }
+
+.sticky-note {  position: absolute; top: 0; left: 0; cursor:  pointer; box-shadow: 3px 3px 13px #aaa; }
+.sticky-note textarea { background: #ffa; cursor:  pointer; border: 1px solid #dd8; width: 140px; height: 100px; font-family: Georgia; }
+
+
+
+#rulers { overflow: hidden; }
+
+.ruler { position: absolute; top: 0; left: 0; background: white; border: 1px solid #ddd; }
+.ruler div { 
+  border-bottom: 1px solid #ddd; 
+  cursor: pointer; 
+  width: 30px; 
+  max-width: 30px; 
+  height: 10px; 
+  max-height: 10px; 
+  text-align: center; 
+  padding: 3px; 
+  border-radius: 3px;
+  
+}
+.ruler div { font-size: 9px; }
+.ruler div .name-2 { display: none; }
+
+      
+.ruler.major .on, .ruler.minor .on { color: white; border-bottom: 1px solid #494; }
+.ruler .on { color: white; }
+
+
+.ruler .tonic { font-weight: bold; text-shadow: 1px 1px #666; }
+
+
+
+
+.ruler.major .on {  }
+.ruler.major .tonic { color: white; }
+
+
+
+
+.ruler.one-color .on { background: white; color: black; }
+
+#hover { width: 600px; height: 350px; }
+
+.ruler .close { background: url(images/close.gif); width: 30px; height:  30px; max-height: 30px; background-repeat: no-repeat; }

@@ -1,0 +1,20 @@
+CACHE MANIFEST
+# 2012-06-14:v1
+
+# Explicitly cached 'master entries'.
+CACHE:
+javascript/jquery-latest.js
+css/testsuite.css
+css/fretboard.css
+css/teacher.css
+css/fretboard-print.css
+javascript/farbtastic.js
+farbtastic/farbtastic.css
+farbtastic/wheel.png
+farbtastic/marker.png
+farbtastic/mask.png
+javascript/array.js
+javascript/color.js
+javascript/js-music-theory.js
+javascript/guitar.js
+

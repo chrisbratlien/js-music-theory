@@ -24,6 +24,85 @@
 <script type="text/javascript">
 
 
+DOM = {};
+DOM.element = function() {
+  if (arguments.length == 0) { return "ERROR"; }  
+
+  var tag = arguments[0];
+  var interface = jQuery('<' + tag + '></' + tag + '>');
+  if (arguments.length == 1) {
+    return interface;
+  }
+  
+  var children = arguments[1]; 
+  if (typeof children == "string") {
+    interface.html(children);
+  }
+  else if (typeof children == "object") { //probably another jquery object
+    interface.append(children);
+  }
+  else {
+    children.each(function(child) {
+      interface.append(child);  
+    });  
+  }
+  return interface;
+};
+
+DOM.li = function() {
+  if (arguments.length == 0) { return DOM.element('li'); }
+  return DOM.element('li',arguments[0]);
+};
+DOM.a = function() {
+  if (arguments.length == 0) { return DOM.element('a'); }
+  return DOM.element('a',arguments[0]);
+};
+DOM.img = function() {
+  if (arguments.length == 0) { return DOM.element('img'); }
+  return DOM.element('img',arguments[0]);
+};
+DOM.td = function() {
+  if (arguments.length == 0) { return DOM.element('td'); }
+  return DOM.element('td',arguments[0]);
+};
+
+
+
+JSMT.imageResults = false;  
+function jsonp(payload) {
+
+
+  var study = jQuery('#study');
+
+  ////console.log(payload,'payload');
+
+  payload.select(function(searchResult) {
+    ////console.log(searchResult,'s r');
+    var li = jQuery('<li></li>');
+
+    var img = jQuery('<img />');
+    img.attr('src',searchResult.url);
+    
+    var a = jQuery('<a></a>');
+    a.attr('href',searchResult.url);
+
+    a.append(img);
+    li.append(a);    
+    study.append(li);
+    
+  ////var img = jQuery('<img src="{src}" />'.supplant({ src: searchResult.url }));
+    ///var a = jQuery('<a href="{src}" />'.supplant({ src: searchResult.url }));
+    //a.append(img);
+    //jQuery(document).append(a);  
+  });
+
+
+}
+
+
+
+
+
 function tryRandomPalette() {
   JSMT.myPalette = JSMT.randomPalette();
   var firstGuitar = JSMT.guitars[0];
@@ -33,6 +112,15 @@ function tryRandomPalette() {
 }
 
 
+ function getUrlVars() {
+          var vars = {};
+          var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+              vars[key] = value;
+          });
+          return vars;
+      }
+
+
 $(document).ready(function(){
 
   //var degreeStr = $('#include_degrees-' + id).val();
@@ -40,37 +128,35 @@ $(document).ready(function(){
   ////var degrees = include_degrees(id);
   //console.log(scalesByDegree.length);
 
-  var scalesByDegree = [
-    '1,2,3,4,5,6,7',
-    '1,2,3,4,5,6,7',
-    '1,2,3,4,5,6,7',
-    '1,2,3,4,5,6,7',
-    '1,2,3,4,5,6,7',
-    '1,2,3,4,5,6,7',
-    '1,2,3,4,5,6,7',
-    '1,2,3,4,5,6,7',
-    '1,2,3,4,5,6,7',
-    '1,2,3,4,5,6,7',
-    '1,2,3,4,5,6,7',
-    '1,2,3,4,5,6,7',
-    '1,2,3,4,5,6,7'
-  ];
+var getVars = getUrlVars();
+
+
+ var scalesByDegree = [ '1,2,3,4,5,6,7'  ];
+ 
+
+  if (typeof getVars.degrees != "undefined") {
+    var verbose = getVars.degrees.replace(/#/g,'sharp').replace(/b/g,'flat');
+    
+    scalesByDegree = [verbose];
+  }
+
+
+
   
-  $('#picker').farbtastic('#color');
 
   for (var i = 0, l = scalesByDegree.length; i < l; i += 1) {
     var d = document.createElement('div');
     $('#main').append(d);
-    var guitar = Guitar({degreeList: scalesByDegree[i].split(',') });
+    var guitar = Guitar({
+      degreeList: scalesByDegree[i].split(','), 
+      showDegreePicker: false, 
+      rootNote: getVars.rootNote 
+    });
     JSMT.guitars.push(guitar);
     guitar.renderOn(d);
   }
 
 
-
-  jQuery('#try').click(function() {
-    tryRandomPalette();
-  });
 
 });
 
@@ -78,43 +164,14 @@ $(document).ready(function(){
 </head>
 <style type="text/css">
 
-  .ruler { position: absolute; top: 0; left: 0; background: white; border: 1px solid black; }
-  .ruler div { border-right: 1px solid black; border-bottom: 1px solid black; cursor: pointer; width: 40px; max-width: 40px; }
-  .ruler.major .on { background: green; color: white; }
-  .ruler .on { background: #aaf; color: white; }
-  .ruler.one-color .on { background: white; color: black; }
 
 </style>
 <body id="css-zen-garden">
   <div id="container">
-    <div id="intro">
-      <h1>Playing the Guitar in 20 Questions</h1>      
-    </div>
     <div id="supportingText">
-      <div class="form-item">
-        <label for="color">Color:</label>
-        <input type="text" id="color" name="color" value="#ff0f18" />
-      </div>
-      <div id="picker"></div>      
       <div id="main">
-
-        <p>
-          <ul>
-            <li><a href="saved-triads.html">Saved Major (and natural minor) Scale Triads</a></li>
-            <li><a href="saved-hm-triads.html">Saved Harmonic-Minor Scale Triads</a></li>
-          </ul>
-        </p>
-
-        <ol>
-          <li>1. (optional) Pick a color</li>
-          <li>2. Click some numbered frets to define your first chord</li>
-          <li>3. Click Harmonize This! to see your chord harmonized across the major scale</li>
-        </ol>
-        <button id="try">Try random Palette</button>
       </div><!-- main -->
     </div><!-- supporting-text -->
-  </div><!-- container -->
-
 <script type="text/javascript">
 
   var _gaq = _gaq || [];

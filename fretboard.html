@@ -1,0 +1,134 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" manifest="js-music-theory.manifest">
+<head>
+<script src="javascript/jquery-latest.js"></script>
+<link media="screen" href="css/testsuite.css" type="text/css" rel="stylesheet">
+<link media="screen,print" href="css/fretboard.css" type="text/css" rel="stylesheet">
+<link media="print" href="css/fretboard-print.css" type="text/css" rel="stylesheet">
+<script type="text/javascript" src="javascript/farbtastic.js"></script>
+<link rel="stylesheet" href="farbtastic/farbtastic.css" type="text/css" />
+<script src="http://cdn.dev.bratliensoftware.com/javascript/array.js"></script>
+<script src="http://cdn.dev.bratliensoftware.com/javascript/color.js"></script>
+<script src="http://cdn.dev.bratliensoftware.com/javascript/dom.js"></script>
+<script src="http://cdn.dev.bratliensoftware.com/javascript/draggy.js"></script>
+<script src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
+<script src="javascript/js-music-theory.js"></script>
+<script src="javascript/guitar.js"></script>
+
+<script type="text/javascript">
+
+JSMT.MAXFRETS = 30;
+
+
+
+$(document).ready(function(){
+
+  var scalesByDegree = [
+    '1,2,3,4,5,6,7',
+    '1,2,3,4,5,6,7',
+    '1,2,3,4,5,6,7',
+    '1,2,3,4,5,6,7',
+    '1,2,3,4,5,6,7',
+    '1,2,3,4,5,6,7',
+    '1,2,3,4,5,6,7',
+    '1,2,3,4,5,6,7',
+    '1,2,3,4,5,6,7',
+    '1,2,3,4,5,6,7'
+//    '1,2,3,5,6,b3',
+//    '2,3,4,6,7',
+//    '1,3,4,5,7,b5',
+//    '1,2,4,5,6,#5',
+//    '2,3,5,6,7,b7',
+//    '1,3,4,6,7',
+//    '1,2,4,5,7,b2'
+  ];
+  
+  $('#picker').farbtastic('#color');
+
+  for (var i = 0, l = scalesByDegree.length; i < l; i += 1) {
+    var d = jQuery('<div></div>');/////document.createElement('div');
+    $('#main').append(d);
+    Guitar({
+      degreeList: scalesByDegree[i].split(',')
+    }).renderOn(d);
+  }
+
+});
+
+ </script>
+</head>
+<body id="css-zen-garden">
+  <div id="container">
+    <div id="intro">
+      <h1>Playing the Guitar in 20 Questions</h1>      
+    </div>
+    <div id="supportingText">
+    <p>
+      <strong>UPDATE:</strong> Check out the <a href="teacher.html">wider and less preachy version</a>    
+    </p>
+    
+      <div class="form-item">
+        <label for="color">Color:</label>
+        <input type="text" id="color" name="color" value="#ff0f18" />
+      </div>
+      <div id="picker"></div>      
+      <div id="main">
+        <ol>
+          <li>1. (optional) Pick a color</li>
+          <li>2. Click some numbered frets to define your first chord</li>
+          <li>3. Click Harmonize This! to see your chord harmonized across the major scale</li>
+        </ol>      
+      </div>
+    </div>
+    <div id="linkList">
+      <p>Q: What have we got here?</p>
+      <p>A: Some blocky looking guitar fretboards with numbers on certain frets. Pretend the strings are wide and blocky too! And, like a tire on the road,  the numbered blocks are your finger's contact patch on the string. The topmost blocky string on these fretboards is the same as the high-pitched skinny string on a real guitar</p>
+      <p>Q: OK, that may take a second to get used to, but I'm starting to see it. So why 30 frets?</p>
+      <p>A: It's enough so you can see patterns repeat, and so you can doodle. Pretend these fretboards go on forever to the left and right. Patterns you learn will apply anywhere along the fretboard</p>
+      <p>Q: Did you say I can doodle?</p>
+      <p>A: Yes! go ahead and click on a fret right now. I'll explain the numbers in a minute</p>
+      <p>Q: It changed color! So does the color picker determine it?</p>
+      <p>A: That's right. Use the color picker when you need to mark the frets differently. Use different colors to learn different patterns</p>
+      <p>Q: And the numbers?</p>
+      <p>A: The numbers are degrees of the major scale (don't worry about what that is yet, you can Wikipedia it <a href="http://en.wikipedia.org/wiki/Major_scale">later</a>), with 1 being the root note. You can change the sets of numbers in the text boxes. 
+         The fretboard will refresh once you tab out of the box</p>
+      <p>Q: What's a b3?</p>
+      <p>A: It's a flat 3rd, the note between degrees 2 and 3. You could also call it a sharp 2nd, or #2</p>
+      <p>Q: So the #5 is a sharp 5? The note between degrees 5 and 6?</p>
+      <p>A: You got it!</p>
+      <p>Q: So do you have any suggestions for my first doodle?</p>
+      <p>A: I do. A great way to build chords is to pick a starting degree, and then play every other degree. For example 1,3,5. Let's find those somewhere on a 1,2,3,4,5,6,7 fretboard and paint them red like so<br/>
+        <img src="images/fretboard-135.png"></p>
+      <p>Q: Got it. Now what?</p>
+      <p>A: That degree pattern can be walked up the scale to produce the next chord. Find the 2,4,6 to the right of your red 1,3,5 and make 2,4,6 blue like so<br />
+        <img src="images/fretboard-246.png"></p>
+      <p>Q: OK, I get it. I bet you want me to repeat this again with 3,5,7 and with 4,6,1 and again with 5,7,2 etc until I hit 1,3,5 again?</p>
+      <p>A: Exactly. Use medium-dark shades of color for best results. Then grab a real guitar and start practicing these colored chords. These shapes will work on any fret you start on. Now, have you ever played Tetris?</p>
+      <p>Q: Wait a minute, A: is for answer, why are you asking questions? Yes I've played Tetris. Who hasn't?</p>
+      <p>A: And how many different Tetris shapes are there, 7? Here you've just learned how to play harmonized diatonic chords over the major scale, and you only needed to know 3 shapes</p>
+      <p>Q: Yeah I noticed that. 1,3,5 has the same shape as 4,6,1 and 5,7,2. 2,4,6 has the same shape as 3,5,7 and 6,1,3. And then there's that goofy 7,2,4. What is he, the Cooties of chords?</p>
+      <p>A: Easy now. He's actually got a name. He is called a diminished triad. The 1,3,5 pattern (also 4,6,1 and 5,7,2) is called a major triad. And the 2,4,6 pattern (also 3,5,7 and 6,1,3) is called a minor triad</p>
+      <p>Q: So, could I use the same patterns on other strings making other shapes?</p>
+      <p>A: Absolutely, the theory works all over the fretboard, even on other instruments! And don't be afraid to invert 1,3,5 to 3,5,1 or 5,1,3.  The inversions will have new shapes and sounds which can also walk up the scale too. If you get tired of triads, try 1,3,5,7 and 2,4,6,1 using 4 notes at a time. It's best to first find a shape you can actually reach with your fingers, and then walk that shape up the scale. 
+        <br/><br/>
+        Have fun with this page! And who knows, with a little practice you may find an alternative to Guitar Hero or Rock Band</p>
+        <p>My name is Chris Bratlien, and I write code (so you don't have to). My website is at <a href="http://chrisbratlien.com">CHRISBRATLIEN.COM</a></p>
+    </div>
+  </div>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-32948445-1']);
+  _gaq.push(['_setDomainName', 'bratliensoftware.com']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</body>
+</html>
