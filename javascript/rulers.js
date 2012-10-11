@@ -11,7 +11,7 @@ BSD.RulerItem = function(spec) {
 
 BSD.Ruler = function(spec) {
 
-  console.log('spec',spec);
+  ///console.log('spec',spec);
 
 
   var firstTime = true;
@@ -310,7 +310,6 @@ BSD.twoOctavePattern = [
     { name: '6', names: ['6','13'], on: false },
     { name: 'b7', names: ['b7','b14'], on: false },
     { name: '7', names: ['7','14'], on: false },
-
     { name: '8', names: ['8','1'], on: false },
     { name: 'b9', names: ['b9','b2'], on: false },
     { name: '9', names: ['9','2'], on: false },
@@ -322,14 +321,16 @@ BSD.twoOctavePattern = [
     { name: 'b13', names: ['b13','b6'], on: false },
     { name: '13', names: ['13','6'], on: false },
     { name: 'b14', names: ['b14','b7'], on: false },
-    { name: '14', names: ['14','7'], on: false },    
-    
+    { name: '14', names: ['14','7'], on: false }   
     
   ];
 
 
 BSD.modifiedPattern = function(notes) {
   var startPattern = BSD.twoOctavePattern;
+  ///console.log('startPattern',startPattern);
+  
+  
   
   /*
   var modified = startPattern.collect(function(item) {
@@ -340,7 +341,8 @@ BSD.modifiedPattern = function(notes) {
   */
 
   var modified = startPattern.collect(function(item) {
-    var hit = notes.detect(function(n) { 
+    var hit = notes.detect(function(n) {
+		////console.log(item,'item',item.names,item.name);
       var hit2 = item.names.detect(function(name) {
         return name == n;
       });
@@ -388,6 +390,11 @@ BSD.DegreeRuler = function(spec) {
       
       var nnr = self.nearestNoteRuler();
 
+	  ////console.log('nnr',nnr);
+	  if (!nnr) { 
+		return ''; 
+	  }
+	  
       var cand = nnr.divsNear(firstTonicOffset.top);
 
       if (cand.length == 0 ) {

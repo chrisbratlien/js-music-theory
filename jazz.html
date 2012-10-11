@@ -1,14 +1,28 @@
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
     <link rel="stylesheet" href="style.css" media="screen" />
     <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/array.js"></script>
     <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/color.js"></script>
-    <script type="text/javascript" src="javascript/jquery-latest.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/dom.js"></script>
     <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/draggy.js"></script>
     <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
     <script type="text/javascript" src="javascript/rulers.js"></script>
+	<title>Jazz</title>
+ </head>
+  <body>
+    <div id="content">
+      <div id="pickers">
+      </div><!-- pickers -->
+      <button id="sticky-note-button">Sticky Note</button>
+      <div id="ruler-control-panel"></div><!-- ruler-control-panel -->
+      <div id="rulers"></div><!--rulers -->
+    </div><!-- content -->
     <script type="text/javascript">
+	<!--
     
       if (typeof BSD == "undefined") {
         var BSD = {};    
@@ -17,11 +31,13 @@
       BSD.ColorPicker = function(spec) {
         var interface = {};
         interface.renderOn = function(html) {
-          var square = jQuery('<div class="color-picker"></div>');
-          square.css('background',spec.color.toHex());
+		  ///console.log('hello');
+          var square = DOM.div('').addClass('color-picker');
+          square.css('background-color','#' + spec.color.toHex());
           square.click(function() {
             BSD.chosenColor = spec.color;
           });
+		  ////console.log('html',html);
           html.append(square);
         };
         return interface;
@@ -42,7 +58,7 @@
         interface.row = spec.row;
         interface.column = spec.column;
         
-        var cell = jQuery('<td></td>');
+        var cell = DOM.td();
         var state = false;
         
         interface.changeColor = function(color) {
@@ -84,8 +100,8 @@
       BSD.Grid = function(spec) {
         var interface = {};
         interface.renderOn = function(html) {
-        
-          var table = jQuery('<table cellpadding="0" cellspacing="0"></table>');
+		  var table = DOM.table().attr('cellpadding',0).attr('cellspacing',0);
+			
           
           var strings = [];
           var frets = [];
@@ -94,7 +110,7 @@
           var cols = 100;
           
           for (var i = 0; i < rows; i += 1) {
-            var row = jQuery('<tr>');
+            var row = DOM.tr();
             for (var j = 0; j < cols; j += 1) {
               var cell = BSD.Cell({
                 row: i,
@@ -122,7 +138,7 @@
       jQuery(document).ready(function() {
       
         var pickers = jQuery('#pickers');
-        
+		    
         var palettes = [];
         
         palettes.push(BSD.randomPalette(20,50));
@@ -142,7 +158,8 @@
           });
         });
 
-
+	
+		
         var lightGreyPicker = BSD.ColorPicker({ color: BSD.lightGrey });
         lightGreyPicker.renderOn(pickers);
 
@@ -210,16 +227,8 @@
   
   
   });      
-      
+      -->
     </script>
-  </head>
-  <body>
-    <div id="content">
-      <div id="pickers">
-      </div><!-- pickers -->
-      <button id="sticky-note-button">Sticky Note</button>
-      <div id="ruler-control-panel"></div><!-- ruler-control-panel -->
-      <div id="rulers"></div><!--rulers -->
-    </div><!-- content -->
-  </body>
+
+	</body>
 </html>
