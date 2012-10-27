@@ -103,7 +103,7 @@ var Fret = function(spec) {
       ////that.toggleLight($('#color').val()); //harmonics() includes itself
 
       that.harmonics().each(function(f) { //harmonics() includes itself
-        f.toggleLight(BSD.colorFromHex($('#color').val()));
+        f.toggleLight(BSD.chosenColor);
       });
     });  
     $(html).append(div);

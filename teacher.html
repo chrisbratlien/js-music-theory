@@ -20,9 +20,51 @@
 <script type="text/javascript">
 
 
+      if (typeof BSD == "undefined") {
+        var BSD = {};    
+      }
+      BSD.chosenColor = BSD.colorFromHex('#000000');
+      BSD.ColorPicker = function(spec) {
+        var self = {};
+        self.renderOn = function(html) {
+		  ///console.log('hello');
+          var square = DOM.div('').addClass('color-picker');
+          square.css('background-color','#' + spec.color.toHex());
+          square.click(function() {
+            BSD.chosenColor = spec.color;
+          });
+		  ////console.log('html',html);
+          html.append(square);
+        };
+        return self;
+      };
+      
+      
+        var pickers = jQuery('#pickers');
+        var palettes = [];
+        palettes.push(BSD.randomPalette(20,50));
+        palettes.each(function(pal) {
+          pal.each(function(randcolor) { 
+          var picker = BSD.ColorPicker({ color: randcolor});
+          picker.renderOn(pickers);
+          });
+        });
+      
 
 
 jQuery(document).ready(function(){
+
+        var pickers = jQuery('#pickers');
+        var palettes = [];
+        palettes.push(BSD.randomPalette(20,50));
+        palettes.each(function(pal) {
+          pal.each(function(randcolor) { 
+          var picker = BSD.ColorPicker({ color: randcolor});
+          picker.renderOn(pickers);
+          });
+        });
+
+
 
   //var degreeStr = $('#include_degrees-' + id).val();
   //zz id = fretboardID.replace(/fretboard-/,'');
@@ -45,7 +87,6 @@ jQuery(document).ready(function(){
     '1,2,3,4,5,6,7'
   ];
   
-  $('#picker').farbtastic('#color');
 
   for (var i = 0, l = scalesByDegree.length; i < l; i += 1) {
     var d = document.createElement('div');
@@ -80,19 +121,9 @@ jQuery(document).ready(function(){
       <h1>Playing the Guitar in 20 Questions</h1>      
     </div>
     <div id="supportingText">
-      <div class="form-item">
-        <label for="color">Color:</label>
-        <input type="text" id="color" name="color" value="#ff0f18" />
-      </div>
-      <div id="picker"></div>      
+      
+      <div id="pickers">   </div><!-- pickers -->
       <div id="main">
-
-    <p>
-      <ul>
-        <li><a href="saved-triads.html">Saved Major (and natural minor) Scale Triads</a></li>
-        <li><a href="saved-hm-triads.html">Saved Harmonic-Minor Scale Triads</a></li>
-      </ul>
-    </p>
 
         <ol>
           <li>1. (optional) Pick a color</li>

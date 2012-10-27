@@ -1,2 +1,7 @@
 #intro { width: 900px;}
 #supportingText { width: 900px;}
+
+#pickers { width: 45em; overflow: auto; }
+.color-picker { width: 2em; height: 2em; float: left; cursor: pointer;  border: 1px solid white; }
+
+.guitar { margin:  2em; }

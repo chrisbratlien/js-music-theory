@@ -85,148 +85,351 @@ JSMT.OBSOLETEgoLong = function(orig) {
 
 
 
+/*
 var NotePrimitive = function(spec) {
-  var that = {};
-  that.value = function() {
+  var self = {};
+  self.value = function() {
     return spec.value || 0;
   };
-  that.add = function(other) { 
+  self.add = function(other) { 
     if (typeof other == "number") {
-      return NotePrimitive({value: other + that.value()}); 
+      return NotePrimitive({value: other + self.value()}); 
     } else {
-      return NotePrimitive({value: other.value() + that.value()}); 
+      return NotePrimitive({value: other.value() + self.value()}); 
     }
   };
 
-  that.sub = function(other) { 
+  self.sub = function(other) { 
     if (typeof other == "number") {
-      return NotePrimitive({value: that.value() - other}); 
+      return NotePrimitive({value: self.value() - other}); 
     } else {
-      return NotePrimitive({value: that.value() - other.value()}); 
+      return NotePrimitive({value: self.value() - other.value()}); 
     }
   };
 
-  return that; 
+  return self; 
+};
+*/
+
+JSMT.twelveTones = function() {
+    return ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 };
 
-var Note = function(spec) {
-  var that = NotePrimitive(spec);
-  that.name = function() { 
-    return this.nameFromValue(that.value());
+JSMT.twelveNotes = function() {
+  return JSMT.twelveTones().map(function(n) { return Note(n); });
+};
+
+
+JSMT.scaleMap = {
+    'major' : { name: 'major', intervals: [0,2,4,5,7,9,11] },
+    'minor' : { name: 'minor', intervals: [0,2,3,5,7,8,10] },
+    'HM' : { name: 'harmonic minor', intervals: [0,2,3,5,7,8,11] },
+
+    'mP' : { name: 'minor pentatonic', intervals: [0,3,5,7,10] },
+    '-P' : { name: 'minor pentatonic', intervals: [0,3,5,7,10] },
+
+    'blues' : { name: 'blues', intervals: [0,3,5,6,7,10] },
+
+    'MP' : { name: 'major pentatonic', intervals: [0,2,4,7,9] },
+    'nothing':   { name: 'nothing', intervals: [] }
   };
-  that.nameFromValue = function(value) {
-    var tt = that.twelveTones();
-    return tt[value%12];
+
+JSMT.chordMap = {
+    '': { name: 'major', intervals: [0,4,7] },
+    'M': { name: 'major', intervals: [0,4,7] },
+    '-':   { name: 'minor', intervals: [0,3,7] },
+    'm':   { name: 'minor', intervals: [0,3,7] },
+
+    'M7': { name: 'major7', intervals: [0,4,7,11] },
+
+    '7':   { name: 'dominant7', intervals: [0,4,7,10] },
+    'dom7':   { name: 'dominant7', intervals: [0,4,7,10] },
+
+    'm7': { name: 'minor7', intervals: [0,3,7,10] },
+    '-7': { name: 'minor7', intervals: [0,3,7,10] },
+
+    'm7b5':  { name: 'minor7Flat5', intervals: [0,3,6,10] },
+    '-7b5':  { name: 'minor7Flat5', intervals: [0,3,6,10] },
+    '-7-5':  { name: 'minor7Flat5', intervals: [0,3,6,10] },
+
+
+    '7b9':  { name: 'sevenFlat9', intervals: [0,1,4,7,10] },
+
+
+    '7#9':  { name: 'sevenFlat9', intervals: [0,3,4,7,10] },
+    '7+9':  { name: 'sevenFlat9', intervals: [0,3,4,7,10] },
+
+
+
+
+    '6':  { name: 'six', intervals: [0,4,7,9] },
+
+    'o7':  { name: 'diminished 7', intervals: [0,3,6,9] },
+
+
+
+    '9':   { name: 'dominant9', intervals: [0,4,7,10,14] },
+
+    '-9':   { name: 'minor9', intervals: [0,3,7,10,14] },
+    'm9':   { name: 'minor9', intervals: [0,3,7,10,14] },
+
+
+    '13':   { name: 'dominant13', intervals: [0,4,7,10,2,9] },
+
+    'nothing':   { name: 'nothing', intervals: [] }
   };
-  that.valueFromName = function(name) {
-    return 60 + that.twelveTones().indexOf(name);
-    
-  };
-  that.twelveTones = function() {
-    return ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+
+
+
+var Note = function(foo) {
+  ////var self = spec;/////NotePrimitive(spec);
+  
+  var self = {};
+  
+  self.abstractValue = function() {
+    return self.value() % 12;
   };
   
-  that.majorScale = function() {
-    return Scale({rootNote: this, intervals: [0,2,4,5,7,9,11]});
+  self.abstractlyEqualTo = function(otherNote) {
+    return otherNote.abstractValue() == self.abstractValue();
   };
-  that.minorScale = function() {
-    return Scale({rootNote: this, intervals: [0,2,3,5,7,8,10]});
+  
+  
+  self.value = function() {
+  
+    if (typeof foo == "number") {
+      return foo;
+    }
+    if (typeof foo == "string") {
+      return self.valueFromName(foo);
+    }
+
+    //at this point, just assume it's another Note object
+    return foo.value();
   };
+  
+  self.name = function() { 
+    return self.nameFromValue(self.value());
+  };
+  self.nameFromValue = function(value) {
+    var tt = JSMT.twelveTones();
+    return tt[value%12];
+  };
+  self.valueFromName = function(name) {
+    return 60 + JSMT.twelveTones().indexOf(name);
+    
+  };
+  
+  
+  /*
+  self.majorScale = function() {
+    return Scale({rootNote: self, intervals: [0,2,4,5,7,9,11]});
+  };
+  self.naturalMinorScale = function() {
+    return Scale({rootNote: self, intervals: [0,2,3,5,7,8,10]});
+  };
+  self.minorScale = self.naturalMinorScale;
+  
+
+  self.harmonicMinorScale = function() {
+    return Scale({rootNote: self, intervals: [0,2,3,5,6,8,11]});
+  };
+  */
 
 
-  that.majorChord = function() {
-    return Chord({rootNote: this, intervals: [0,4,7]});
+  self.scale = function(abbrev) {
+    var spec = JSMT.scaleMap[abbrev];
+    if (typeof spec == "undefined") {
+      console.log(abbrev,'not defined');
+    }
+    return Scale({ rootNote: self, intervals: spec.intervals, name: spec.name, "abbrev": abbrev });          
   };
-  that.minorChord = function() {
-    return Chord({rootNote: this, intervals: [0,3,7]});
+  
+  self.chord = function(abbrev) {
+    var spec = JSMT.chordMap[abbrev];
+    
+    if (typeof spec == "undefined") {
+      console.log(abbrev,'not defined');
+    }
+    
+    return Chord({ rootNote: self, intervals: spec.intervals, name: spec.name, "abbrev": abbrev });          
   };
 
-  return that; 
+  return self; 
 };
 
+
+
+function makeChord(name) {
+  
+  var rootName = false;
+  var chordName = false;
+
+  if (name.substr(1,1).match(/#|b/)) {
+    rootName = name.substr(0,2);
+    chordName = name.substr(2);
+  }
+  else {
+    rootName = name.substr(0,1);
+    chordName = name.substr(1);
+  }
+  return Note(rootName).chord(chordName);
+}
+
+function makeScale(name) {
+  
+  var rootName = false;
+  var scaleName = false;
+
+  if (name.substr(1,1).match(/#|b/)) {
+    rootName = name.substr(0,2);
+    scaleName = name.substr(2);
+  }
+  else {
+    rootName = name.substr(0,1);
+    scaleName = name.substr(1);
+  }
+  return Note(rootName).scale(scaleName);
+}
+
+
+
+
 var RootNoteWithIntervals = function(spec) {
-  var that = {};
-  that.rootNote = spec.rootNote;
-  that.intervals = function() { 
+
+  ///console.log('rnwi',spec);
+
+  var self = {};
+  self.name = spec.name || 'no name given';
+  self.abbrev = spec.abbrev || 'no abbrev';
+  self.rootNote = spec.rootNote;
+  self.intervals = function() { 
     return spec.intervals; 
   };
-  that.notes = function() {
-    return MusicTheory.map(that.intervals(),function(interval) { return Note({value: that.rootNote.value() + interval}); });    
+  self.notes = function() {
+    return self.intervals().map(function(interval) { return Note(self.rootNote.value() + interval); });    
   };
-  that.noteNames = function() {
-    return MusicTheory.map(that.notes(),function(note) { return note.name(); });    
+  self.noteNames = function() {
+    return self.notes().map(function(note) { return note.name(); });    
   };
-  that.noteValues = function() {
-    return MusicTheory.map(that.notes(),function(note) { return note.value(); });    
-  };  
-  that.containsNoteName = function(other) {
-    return MusicTheory.include(that.noteNames(),other); 
+  self.noteValues = function() {
+    return self.notes().map(function(note) { return note.value(); });    
   };
-  that.containsNoteNameOfValue = function(other) {
-    return MusicTheory.include(that.noteNames(),Note({value: other}).name()); 
+  
+  self.compatibleScales = function() {
+    var result = [];
+    JSMT.twelveNotes().each(function(n) {
+      for (key in JSMT.scaleMap) {
+        var spec = JSMT.scaleMap[key];
+        var scale = Scale({ rootNote: n, intervals: spec.intervals, name: spec.name, abbrev: key });
+        if (self.notesNotFoundIn(scale).length == 0) {
+          result.push(scale);
+        }
+      }  
+    });
+    
+    return result;
   };
-  that.containsNoteNameOfNote = function(other) {
-    return MusicTheory.include(that.noteNames(),other.name()); 
+
+  self.compatibleScaleNames = function() {
+    return self.compatibleScales().map(function(s) { return s.rootNote.name() + ' ' + s.name });
+  };    
+  self.compatibleScaleAbbrevs = function() {
+    return self.compatibleScales().map(function(s) { return s.rootNote.name() + ' ' + s.abbrev });
+  };    
+
+
+  /*
+  self.containsNoteName = function(other) {
+    return self.noteNames().detect(function(nn) { return nn == other; });
   };
-  that.containsNoteNamesOfRootNoteWithIntervals = function(other) {      
-    var strangers = MusicTheory.reject(other.noteNames(),function(each) {
-      return MusicTheory.include(that.noteNames(),each);
+  self.containsNoteNameOfValue = function(other) {
+    return self.containsNoteName(other.name());
+  };
+  self.containsNoteNameOfNote = function(other) {
+    return self.containsNoteName(other.name());
+  };
+  self.containsNoteNamesOfRootNoteWithIntervals = function(other) {      
+    var strangers = other.noteNames().reject(function(each) {
+      return self.noteNames().detect(each);
     }); 
     return (strangers.length == 0);
-  };  
-  that.contains = function(other) {
+  };
+    
+  self.contains = function(other) {
     if (typeof other === "string") {
-      return that.containsNoteName(other);
+      return self.containsNoteName(other);
     }
     else if (typeof other === "number") {
-      return that.containsNoteNameOfValue(other);
+      return self.containsNoteNameOfValue(other);
     }
     else if (typeof other.value === "function") {
-      return that.containsNoteNameOfNote(other);
+      return self.containsNoteNameOfNote(other);
     }
     else if (typeof other.noteNames === "function") {
-      return that.containsNoteNamesOfRootNoteWithIntervals(other);
+      return self.containsNoteNamesOfRootNoteWithIntervals(other);
     }
   };
 
-  that.noteNamesInCommonWith = function(other) {
-    return MusicTheory.select(that.noteNames(),function(each) {
-      return MusicTheory.include(other.noteNames(),each);
+  */
+
+  self.containsNote = function(otherNote) {
+    return self.notes().detect(function(n) { return n.abstractlyEqualTo(otherNote); });
+  };
+
+  self.notesNotFoundIn = function(other) {
+    return self.notes().reject(function(n) { return other.containsNote(n); });
+  };
+
+
+  self.noteNamesInCommonWith = function(other) {
+    return self.noteNames().select(function(each) {
+      return other.noteNames().detect(each);
     });
   };
-  that.exclusiveNoteNames = function(other) {
-    return that.noteNamesLackedBy(other).concat(other.noteNamesLackedBy(that));
+  self.exclusiveNoteNames = function(other) {
+    return self.noteNamesLackedBy(other).concat(other.noteNamesLackedBy(self));
   };
 
-  that.noteNamesLackedBy = function(other) {
-    return MusicTheory.reject(that.noteNames(),function(each) {
-      return MusicTheory.include(other.noteNames(),each);
+  self.noteNamesLackedBy = function(other) {
+    return self.noteNames().reject(function(each) {
+      return other.noteNames().detect(each);
+    });
+  };
+  
+  self.notesLackedBy = function(other) {
+  
+  
+  }
+  
+  
+
+  self.noteNamesUniqueTo = function(other) {
+    return other.noteNames().reject(function(each) {
+      return self.noteNames().detect(each);
     });
   };
 
-  that.noteNamesUniqueTo = function(other) {
-    return MusicTheory.reject(other.noteNames(),function(each) {
-      return MusicTheory.include(that.noteNames(),each);
-    });
+  self.strangenessTo = function(other) {
+    //return self.exclusiveNoteNames(other).length;
+    return other.noteNamesLackedBy(self).length;
   };
 
-  that.strangenessTo = function(other) {
-    //return that.exclusiveNoteNames(other).length;
-    return other.noteNamesLackedBy(that).length;
-  };
-
-  return that;
+  return self;
 };
 
 var Scale = function(spec) {
-  var that = RootNoteWithIntervals(spec);
 
-  that.degree = function(pos) {
-    return that.notes()[pos-1];
+  ///console.log('Scale spec',spec);
+
+  var self = RootNoteWithIntervals(spec);
+
+  self.degree = function(pos) {
+    return self.notes()[pos-1];
   };
   
-  that.intervalForDegree = function(pos) {
-    var count = that.intervals().length;
+  self.intervalForDegree = function(pos) {
+    var count = self.intervals().length;
     var octaves = Math.floor((pos - 1) / count);
     var degrees = pos % count;
     if (degrees === 0) {
@@ -234,21 +437,21 @@ var Scale = function(spec) {
     }
     var totalInterval = octaves * 12;
     //console.log('pos',pos,'count',count,'octaves',octaves,'degrees',degrees,'totalInterval',totalInterval);
-    //console.log(that.intervals());
+    //console.log(self.intervals());
     //console.log(degrees-1);
-    totalInterval = totalInterval + that.intervals()[degrees-1];
+    totalInterval = totalInterval + self.intervals()[degrees-1];
     
     return totalInterval;
     
   };
     
 
-  return that;
+  return self;
 };
 
 var Chord = function(spec) {
-  var that = RootNoteWithIntervals(spec);
-  return that;
+  var self = RootNoteWithIntervals(spec);
+  return self;
 };
 
 

@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" nomanifest="js-music-theory.manifest">
+<head>
+<script src="http://cdn.dev.bratliensoftware.com/javascript/array.js"></script>
+<script src="http://cdn.dev.bratliensoftware.com/javascript/color.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+
+<script src="http://cdn.dev.bratliensoftware.com/javascript/dom.js"></script>
+<script src="http://cdn.dev.bratliensoftware.com/javascript/draggy.js"></script>
+<script src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
+<script src="javascript/js-music-theory.js"></script>
+<style type="text/css">
+
+  .foo img { width: 100%; }
+  input { width: 100%; }
+
+
+  body { font-family: Helvetica, Arial; }
+
+  #table1-wrap table tr{ border-bottom: 1px solid #aaa; }
+  #table1-wrap table tr td{ padding: 3px; border-top: 1px solid #aaa; border-left: 1px solid #aaa; }
+
+
+  #table1-wrap table tr.new-bar td{ border-top: 4px solid #904; border-bottom: none; }
+
+  #table1-wrap table tr td { text-align: center; }
+  #table1-wrap table tr td.chord-name { width: 60px; }
+
+  #table1-wrap table tr td.cell { width: 25px; text-align: center; }
+  #table1-wrap table tr td.on { background-color: #647; color: white; }
+
+
+
+
+  #table1-wrap ul { list-style-type: none; }
+  #table1-wrap ul li { float: left; margin-right: 1.5em; }
+
+
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div id="table1-wrap"></div>
+<div id="table2-wrap"></div>
+<script type="text/javascript">
+
+
+
+  function getChordImages(cb) {
+    jQuery.ajax({ type: 'POST', url: 'ws.php', data: { action: 'chord_images' }, 
+      success: function(r) { cb( eval( '(' + r + ')' )) } });
+  }
+
+
+
+  BSD.Widgets.Riffer = function(spec) {
+  
+    var self = {};
+    var map = {};
+    
+    self.go = function(progression) {    
+
+      var wrap1 = jQuery('#table1-wrap');
+
+      var table1 = DOM.table().attr('cellpadding',0).attr('cellspacing',0);
+      
+      var headerRow = DOM.tr();
+      
+      headerRow.append(DOM.th('&nbsp;'));
+      
+      JSMT.twelveTones().each(function(t) {
+        headerRow.append(DOM.th(t));
+      });
+      table1.append(headerRow);
+      
+      wrap1.append(table1);
+      
+      
+      
+      var newBar = false;
+      
+      var bars = progression.split('|');
+      bars.each(function(bar) {
+        newBar = true;
+        var chordNames = bar.split(/,|\ +/);
+        chordNames.each(function(name) {
+          var chord = makeChord(name);      
+          var row = DOM.tr();
+          row.append(DOM.td(name).addClass('chord-name'));
+          if (newBar) {
+            newBar = false;
+            row.addClass('new-bar');
+          }
+  
+          JSMT.twelveNotes().each(function(n) {
+            var cell = DOM.td(n.name());
+            cell.addClass('cell');
+            if (chord.containsNote(n)) {
+              cell.addClass('on');
+            }
+            row.append(cell);
+          });
+          
+          var ul = DOM.ul();
+          chord.compatibleScaleAbbrevs().each(function(s) {
+            var li = DOM.li(s);
+            ul.append(li);
+          });
+          row.append(DOM.td(ul));
+          table1.append(row);
+        });
+      });
+    };        
+    return self;
+  };
+// all of me, part 1, CM7,CM7,E7,E7,A7,A7,D-7,D-7,E7,E7,A-7,A-7,D7,D7,D-7,G7
+
+
+
+  var stage = jQuery('#stage'); ///DOM.div().addClass('stage');
+
+  var riffer = BSD.Widgets.Riffer({});
+  
+  
+
+  var input = DOM.input().addClass('progression').attr('type','text');
+  input.blur(function() {
+    riffer.go(input.val());
+  });
+  stage.append(input);
+
+
+  /*
+  var buttonMaxWidth = DOM.button('100% width images').click(function(){
+    jQuery('img').css('width','100%');
+  });
+  stage.append(buttonMaxWidth);
+  */
+  
+  var allOfMeButton = DOM.button('All of Me').click(function() {
+    jQuery('#table1-wrap').empty();
+    riffer.go('CM7|CM7|E7|E7|A7|A7|D-7|D-7|E7|E7|A-7|A-7|D7|D7|D-7|G7|CM7|CM7|E7|E7|A7|A7|D-7|D-7|FM7|F-7|CM7 E-7|A7|D-7|G7|C6 D#o7|D-7 G7');
+  });
+  stage.append(allOfMeButton);
+
+
+  var orpheusButton = DOM.button('Black Orpheus').click(function() {
+    jQuery('#table1-wrap').empty();
+    riffer.go('A-7|B-7b5 E7b9|A-7|B-7b5 E7b9|A-7|D-7 G7|CM7|C#o7|D-7|G7|C6|FM7|B-7b5|E7b9|A-7|B-7b5 E7b9|A-7|B-7b5 E7b9|A-7|B-7b5 E7b9|E-7b5|A7b9|D-7|D-7|D-7|B-7b5 E7b9|A-7|FM7|B-7b5|E7b9|A-7|B-7b5 E7b9');
+  });
+  stage.append(orpheusButton);
+
+
+  var stLouisButton = DOM.button('St. Louis Blues').click(function() {
+    jQuery('#table1-wrap').empty();
+    riffer.go('G-7|G-7|D7|D7|D7|D7|G-7|G-7 D7+9|G-7|G-7|D7|D7|D7|D7|G-7 A7|D7|G7|C7|G7|G7|C7|C7|G7|G7|D7|C7|G7|A-7 D7|G7|G7|G7|G7|C7|C7|G7|E7+9|A-7|D7|G7 Bb7|A-7 D7');
+  });
+  stage.append(stLouisButton);
+
+
+
+
+  
+
+</script>
+</body>
+</html>

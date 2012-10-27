@@ -1,16 +1,13 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" manifest="js-music-theory.mfdddanifest">
 <head>
 <script src="javascript/jquery-latest.js"></script>
 <link media="screen" href="css/testsuite.css" type="text/css" rel="stylesheet">
 <link media="screen,print" href="css/fretboard.css" type="text/css" rel="stylesheet">
 <link media="screen,print" href="css/teacher.css" type="text/css" rel="stylesheet">
-<link media="print" href="css/fretboard-print.css" type="text/css" rel="stylesheet">
-<script type="text/javascript" src="javascript/farbtastic.js"></script>
-<link rel="stylesheet" href="farbtastic/farbtastic.css" type="text/css" />
-<script src="javascript/array.js"></script>
-<script src="javascript/color.js"></script>
+<link media="screen,print" href="farbtastic/farbtastic.css" type="text/css" rel="stylesheet">
+<script src="http://cdn.dev.bratliensoftware.com/javascript/array.js"></script>
+<script src="http://cdn.dev.bratliensoftware.com/javascript/color.js"></script>
 <script src="http://cdn.dev.bratliensoftware.com/javascript/dom.js"></script>
 <script src="http://cdn.dev.bratliensoftware.com/javascript/draggy.js"></script>
 <script src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
@@ -24,101 +21,15 @@
 <script type="text/javascript">
 
 
-DOM = {};
-DOM.element = function() {
-  if (arguments.length == 0) { return "ERROR"; }  
+BSD.chosenColor = BSD.randomColor();
 
-  var tag = arguments[0];
-  var interface = jQuery('<' + tag + '></' + tag + '>');
-  if (arguments.length == 1) {
-    return interface;
-  }
-  
-  var children = arguments[1]; 
-  if (typeof children == "string") {
-    interface.html(children);
-  }
-  else if (typeof children == "object") { //probably another jquery object
-    interface.append(children);
-  }
-  else {
-    children.each(function(child) {
-      interface.append(child);  
-    });  
-  }
-  return interface;
-};
-
-DOM.li = function() {
-  if (arguments.length == 0) { return DOM.element('li'); }
-  return DOM.element('li',arguments[0]);
-};
-DOM.a = function() {
-  if (arguments.length == 0) { return DOM.element('a'); }
-  return DOM.element('a',arguments[0]);
-};
-DOM.img = function() {
-  if (arguments.length == 0) { return DOM.element('img'); }
-  return DOM.element('img',arguments[0]);
-};
-DOM.td = function() {
-  if (arguments.length == 0) { return DOM.element('td'); }
-  return DOM.element('td',arguments[0]);
-};
-
-
-
-JSMT.imageResults = false;  
-function jsonp(payload) {
-
-
-  var study = jQuery('#study');
-
-  ////console.log(payload,'payload');
-
-  payload.select(function(searchResult) {
-    ////console.log(searchResult,'s r');
-    var li = jQuery('<li></li>');
-
-    var img = jQuery('<img />');
-    img.attr('src',searchResult.url);
-    
-    var a = jQuery('<a></a>');
-    a.attr('href',searchResult.url);
-
-    a.append(img);
-    li.append(a);    
-    study.append(li);
-    
-  ////var img = jQuery('<img src="{src}" />'.supplant({ src: searchResult.url }));
-    ///var a = jQuery('<a href="{src}" />'.supplant({ src: searchResult.url }));
-    //a.append(img);
-    //jQuery(document).append(a);  
+function getUrlVars() {
+  var vars = {};
+  var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+  vars[key] = value;
   });
-
-
+  return vars;
 }
-
-
-
-
-
-function tryRandomPalette() {
-  JSMT.myPalette = JSMT.randomPalette();
-  var firstGuitar = JSMT.guitars[0];
-  firstGuitar.redraw();
-  jQuery('.fret-number-6').trigger('click');  
-  firstGuitar.harmonizeFirstGrip();
-}
-
-
- function getUrlVars() {
-          var vars = {};
-          var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
-              vars[key] = value;
-          });
-          return vars;
-      }
 
 
 $(document).ready(function(){
@@ -128,7 +39,7 @@ $(document).ready(function(){
   ////var degrees = include_degrees(id);
   //console.log(scalesByDegree.length);
 
-var getVars = getUrlVars();
+  var getVars = getUrlVars();
 
 
  var scalesByDegree = [ '1,2,3,4,5,6,7'  ];
@@ -141,9 +52,6 @@ var getVars = getUrlVars();
   }
 
 
-
-  
-
   for (var i = 0, l = scalesByDegree.length; i < l; i += 1) {
     var d = document.createElement('div');
     $('#main').append(d);
@@ -155,9 +63,6 @@ var getVars = getUrlVars();
     JSMT.guitars.push(guitar);
     guitar.renderOn(d);
   }
-
-
-
 });
 
  </script>
