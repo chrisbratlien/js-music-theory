@@ -216,8 +216,15 @@ var Note = function(foo) {
     return tt[value%12];
   };
   self.valueFromName = function(name) {
-    return 60 + JSMT.twelveTones().indexOf(name);
+    var sharps = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+    var flats = ["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"];    
+    var idx = sharps.indexOf(name);
+    if (idx == -1) {
+      idx = flats.indexOf(name);
+    }             
+    ///console.log('idx',idx);
     
+    return 60 + idx;
   };
   
   
