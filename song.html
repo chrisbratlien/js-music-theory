@@ -37,6 +37,30 @@
   #table1-wrap ul li { float: left; margin-right: 1.5em; }
 
 
+  #faker-wrap { width: 100%; margin: 0 auto; }
+
+
+
+
+  #faker-wrap .bar { width: 24%; height: 308px; float: left; position: relative;}
+
+  #faker-wrap .bar .chord { float: left; border: 1px solid #798; width: 99%; }
+  #faker-wrap .bar .chord.half { width: 49%; }
+  #faker-wrap .bar .chord.third { width: 32%; }
+  #faker-wrap .bar .chord.fourth { width: 24%; }
+  
+
+  /* #faker-wrap .bar .chord .notes { width: 49%; } */
+
+
+  #faker-wrap .bar ul { list-style-type: none; margin: 0; padding: 0; /* height: 85%; position: absolute; bottom: 0; */ }
+  #faker-wrap .bar ul li { height: 0.9em; padding-left: 0.5em; }  
+  #faker-wrap .bar .cell { font-size: 0.4em; border-top: 1px solid #abc; }
+  #faker-wrap .bar .cell.on { background-color: #38f; color: white;  }
+  #faker-wrap .bar .cell.scale.on { background-color: #98f; color: white;  }
+
+
+
 </style>
 
 <style type="text/css" media="print">
@@ -47,9 +71,23 @@
 </head>
 <body>
 <div id="stage"></div>
+<label> Width
+  <input id="bar-width" type="range" min="0" max="100" value="25" />
+</label>
+<div id="faker-wrap"></div>
 <div id="table1-wrap"></div>
 <div id="table2-wrap"></div>
 <script type="text/javascript">
+
+
+  function probablyTrue(prob) {
+    var res = Math.random();
+    return (res < prob); 
+  }
+  
+  function prob(prob,funcTrue,funcFalse) {
+    return probablyTrue(prob) ? funcTrue() : funcFalse();
+  }
 
 
 
@@ -91,6 +129,9 @@
         newBar = true;
         var chordNames = bar.split(/,|\ +/);
         chordNames.each(function(name) {
+        
+        
+        
           var chord = makeChord(name);      
           var row = DOM.tr();
           row.append(DOM.td(name).addClass('chord-name'));
@@ -144,10 +185,200 @@
 // all of me, part 1, CM7,CM7,E7,E7,A7,A7,D-7,D-7,E7,E7,A-7,A-7,D7,D7,D-7,G7
 
 
+  BSD.Widgets.Faker = function(spec) {
+  
+    var self = {};
+    var map = {};
+    
+    self.go = function(progression) {    
+
+      ////console.log("booo");
+      var wrap = jQuery('#faker-wrap');
+      var bars = progression.split('|');
+      var last = false;
+      bars.each(function(bar) {
+        var barDiv = DOM.div().addClass('bar');        
+        wrap.append(barDiv);
+        
+        var chordNames = bar.split(/,|\ +/);
+        chordNames.each(function(name) {
+          var chord = makeChord(name);
+          var chordDiv = DOM.div().addClass('chord');
+          
+          
+          if (chordNames.length == 2) {
+            chordDiv.addClass('half');
+          }
+          if (chordNames.length == 3) {
+            chordDiv.addClass('third');
+          }
+          if (chordNames.length == 4) {
+            chordDiv.addClass('fourth');
+          }
+          
+          
+          
+          barDiv.append(chordDiv);
+
+          if (last == false) {
+            chordDiv.append(DOM.h4(name));         
+          }
+          else if(chord.abstractlyEqualTo(last)) {
+            chordDiv.append(DOM.h4('%'));
+          }
+          else {
+            chordDiv.append(DOM.h4(name));        
+          }
+
+
+          //scale selector
+          var sel = DOM.select();
+          chordDiv.append(sel);
+          ///JSMT.debug = chord;          
+          chord.compatibleScales().each(function(scale) {
+            var opt = DOM.option(scale.fullAbbrev());
+            sel.append(opt);          
+          });           
+
+
+
+          var chordNotesDiv = DOM.div();
+          chordNotesDiv.addClass('notes');
+          chordNotesDiv.addClass('chord-notes');
+          
+
+          var scaleNotesDiv = DOM.div();
+          scaleNotesDiv.addClass('notes');
+          scaleNotesDiv.addClass('scale-notes');
+          
+          
+          chordDiv.append(chordNotesDiv);
+          chordDiv.append(scaleNotesDiv);
+          
+
+
+
+
+          var scaleUL = DOM.ul();
+          scaleNotesDiv.append(scaleUL);
+
+          var chordUL = DOM.ul();
+          chordNotesDiv.append(chordUL);
+
+
+          //show the chord notes
+          JSMT.twelveNotes().reverse().each(function(n) {
+            var cell = DOM.li(n.name());
+            cell.addClass('cell');
+            if (chord.containsNote(n)) {
+              cell.addClass('on');
+            }
+            chordUL.append(cell);
+          });
+
+
+          var scale = chord.compatibleScales().shift();
+
+          scaleUL.empty();
+          JSMT.twelveNotes().reverse().each(function(n) {
+            var cell = DOM.li(n.name());
+            cell.addClass('cell');
+            cell.addClass('scale');
+            if (scale.containsNote(n)) {
+              cell.addClass('on');
+            } 
+            scaleUL.append(cell);
+          });
+
+
+
+          
+          
+          //show the currently selected scale          
+          sel.change(function() {            
+            console.log('chord',chord);
+            console.log(chord.compatibleScales());
+          
+            var scale = chord.compatibleScales().detect(function(s) { 
+              console.log(s.fullAbbrev(),'<->',sel.val());
+            
+            return s.fullAbbrev() == sel.val() });
+            
+            console.log('scale?',scale);
+            
+            scaleUL.empty();
+            JSMT.twelveNotes().reverse().each(function(n) {
+              var cell = DOM.li(n.name());
+              cell.addClass('cell');
+              cell.addClass('scale');
+              if (scale.containsNote(n)) {
+                cell.addClass('on');
+              } 
+              scaleUL.append(cell);
+            });
+          });
+          
+
+          
+          last = chord;
+        });
+      });
+      
+      wrap.append(DOM.div().css('clear','both'));
+      
+      
+
+          
+          /*
+          var ul = DOM.ul();
+          var sorted = chord.compatibleScaleAbbrevs().sort(function(a,b) {
+            var aRoot = a.substr(0,1).match(chord.rootNote.name());
+            var aMajor = a.match(/major/);
+            var bRoot = b.substr(0,1).match(chord.rootNote.name());
+            var bMajor = b.match(/major/);
+            var aRootAndMajor = aRoot && aMajor;
+            var bRootAndMajor = bRoot && bMajor;
+            
+            if (aRootAndMajor && ! bRootAndMajor) { return -3; }
+            if (aMajor && ! bMajor) { return -2; }
+            if (aRoot && ! bRoot) { return -1; }
+
+
+            if (bRootAndMajor && ! aRootAndMajor) { return 3; }
+            if (bMajor && ! aMajor) { return 2; }
+            if (bRoot && ! aRoot) { return 1; }
+
+            return a < b; 
+          
+          });
+          
+          sorted.each(function(s) {
+            var li = DOM.li(s);
+            ul.append(li);
+          });
+          row.append(DOM.td(ul));
+          table1.append(row);
+        });
+      });
+      **/
+      
+      
+    };        
+    return self;
+  };
+
+
+
+
+
+
+
+
 
   var stage = jQuery('#stage'); ///DOM.div().addClass('stage');
 
   var riffer = BSD.Widgets.Riffer({});
+  var faker = BSD.Widgets.Faker({});
   
   
 
@@ -155,8 +386,15 @@
   input.blur(function() {
     jQuery('#table1-wrap').empty();
     riffer.go(input.val());
+    faker.go(input.val());
   });
   stage.append(input);
+
+  var range = jQuery('#bar-width');
+  range.change(function(){
+    jQuery('.bar').css('width',this.value + '%');
+  });
+
 
 
   /*
@@ -169,7 +407,10 @@
   var allOfMeButton = DOM.button('All of Me').click(function() {
     jQuery('#table1-wrap').empty();
     jQuery('#table1-wrap').append(DOM.h2('All of Me'));
-    riffer.go('CM7|CM7|E7|E7|A7|A7|D-7|D-7|E7|E7|A-7|A-7|D7|D7|D-7|G7|CM7|CM7|E7|E7|A7|A7|D-7|D-7|FM7|F-7|CM7 E-7|A7|D-7|G7|C6 D#o7|D-7 G7');
+    var prog = 'CM7|CM7|E7|E7|A7|A7|D-7|D-7|E7|E7|A-7|A-7|D7|D7|D-7|G7|CM7|CM7|E7|E7|A7|A7|D-7|D-7|FM7|F-7|CM7 E-7|A7|D-7|G7|C6 D#o7|D-7 G7';
+    riffer.go(prog);
+    jQuery('#faker-wrap').empty();
+    faker.go(prog);
   });
   stage.append(allOfMeButton);
 
@@ -177,20 +418,26 @@
   var orpheusButton = DOM.button('Black Orpheus').click(function() {
     jQuery('#table1-wrap').empty();
     jQuery('#table1-wrap').append(DOM.h2('Black Orpheus'));
-    riffer.go('A-7|B-7b5 E7b9|A-7|B-7b5 E7b9|A-7|D-7 G7|CM7|C#o7|D-7|G7|C6|FM7|B-7b5|E7b9|A-7|B-7b5 E7b9|A-7|B-7b5 E7b9|A-7|B-7b5 E7b9|E-7b5|A7b9|D-7|D-7|D-7|B-7b5 E7b9|A-7|FM7|B-7b5|E7b9|A-7|B-7b5 E7b9');
+    var prog = 'A-7|B-7b5 E7b9|A-7|B-7b5 E7b9|A-7|D-7 G7|CM7|C#o7|D-7|G7|C6|FM7|B-7b5|E7b9|A-7|B-7b5 E7b9|A-7|B-7b5 E7b9|A-7|B-7b5 E7b9|E-7b5|A7b9|D-7|D-7|D-7|B-7b5 E7b9|A-7|FM7|B-7b5|E7b9|A-7|B-7b5 E7b9';
+    riffer.go(prog);
+    jQuery('#faker-wrap').empty();
+    faker.go(prog);
   });
   stage.append(orpheusButton);
-
 
   var stLouisButton = DOM.button('St. Louis Blues').click(function() {
     jQuery('#table1-wrap').empty();
     jQuery('#table1-wrap').append(DOM.h2('St. Louis Blues'));
-    riffer.go('G-7|G-7|D7|D7|D7|D7|G-7|D7+9|G-7|G-7|D7|D7|D7|D7|G-7 A7|D7|G7|C7|G7|G7|C7|C7|G7|G7|D7|C7|G7|A-7 D7|G7|G7|G7|G7|C7|C7|G7|E7+9|A-7|D7|G7 Bb7|A-7 D7');
+    var prog = 'G-7|G-7|D7|D7|D7|D7|G-7|D7+9|G-7|G-7|D7|D7|D7|D7|G-7 A7|D7|G7|C7|G7|G7|C7|C7|G7|G7|D7|C7|G7|A-7 D7|G7|G7|G7|G7|C7|C7|G7|E7+9|A-7|D7|G7 Bb7|A-7 D7';
+    riffer.go(prog);
+    jQuery('#faker-wrap').empty();
+    faker.go(prog);
+
   });
   stage.append(stLouisButton);
 
 
-
+  
 
   
 

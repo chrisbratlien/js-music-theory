@@ -153,6 +153,10 @@ JSMT.chordMap = {
     '-7-5':  { name: 'minor7Flat5', intervals: [0,3,6,10] },
 
 
+    '-7+5':  { name: 'minor7Flat5', intervals: [0,3,8,10] },
+    '-7+5':  { name: 'minor7Flat5', intervals: [0,3,8,10] },
+
+
     '7b9':  { name: 'sevenFlat9', intervals: [0,1,4,7,10] },
 
 
@@ -323,6 +327,15 @@ var RootNoteWithIntervals = function(spec) {
     return self.notes().map(function(note) { return note.value(); });    
   };
   
+  
+  self.fullName = function() {
+    return self.rootNote.name() + ' ' + self.name;
+  };
+
+  self.fullAbbrev = function() {
+    return self.rootNote.name() + ' ' + self.abbrev;
+  };
+  
   self.compatibleScales = function() {
     var result = [];
     JSMT.twelveNotes().each(function(n) {
@@ -339,11 +352,17 @@ var RootNoteWithIntervals = function(spec) {
   };
 
   self.compatibleScaleNames = function() {
-    return self.compatibleScales().map(function(s) { return s.rootNote.name() + ' ' + s.name });
+    return self.compatibleScales().map(function(s) { return s.fullName(); });
   };    
   self.compatibleScaleAbbrevs = function() {
-    return self.compatibleScales().map(function(s) { return s.rootNote.name() + ' ' + s.abbrev });
-  };    
+    return self.compatibleScales().map(function(s) { return s.fullAbbrev(); });
+  };
+  
+  self.abstractlyEqualTo = function(other) {
+    var lista = other.notesNotFoundIn(self);
+    var listb = self.notesNotFoundIn(other);
+    return (lista.length == 0 && listb.length == 0);
+  }    
 
 
   /*
@@ -459,6 +478,9 @@ var Scale = function(spec) {
 var Chord = function(spec) {
   var self = RootNoteWithIntervals(spec);
   return self;
+  
+
+
 };
 
 
