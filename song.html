@@ -12,6 +12,9 @@
 <script src="javascript/js-music-theory.js"></script>
 <style type="text/css">
 
+
+  .clear { clear: both; }
+
   .foo img { width: 100%; }
   input { width: 100%; }
 
@@ -28,8 +31,10 @@
   #table1-wrap table tr td.chord-name { width: 60px; }
 
   #table1-wrap table tr td.cell { width: 25px; text-align: center; }
-  #table1-wrap table tr td.on { background-color: #647; color: white; }
 
+
+
+  #table1-wrap table tr td.on { background-color: #647; color: white; }
 
 
 
@@ -61,6 +66,22 @@
 
 
 
+  #player-wrap label { margin-right: 1em; }
+
+  #player-wrap .fret { width: 21px; height: 14px; background: #eee; border-radius: 2px; float: left; margin: 1px; text-align: center; line-height: 14px; }
+  #player-wrap .fret { font-size: 0.5em; }
+  #player-wrap .fret-1 { border-radius: none; border-left: 1px solid black; }
+
+  #ignore #player-wrap .fret.prev { background: #bba; }
+  #player-wrap .fret.next { background: #dde; }
+  #player-wrap .fret.on { background: #fa0; }
+  #player-wrap .fret-0 { background: #fff; border-radius: none; border-right: 1px solid black; }
+  #player-wrap .fret-0.on { background: #750; color: white; }
+
+  .sticky-note {  position: absolute; top: 20px; left: 20px; cursor:  pointer; box-shadow: 3px 3px 13px #aaa; z-index: 100; }
+  .sticky-note textarea { background: #ffa; cursor:  pointer; border: 1px solid #dd8; width: 20px; height: 20px; font-family: Georgia; }
+
+
 </style>
 
 <style type="text/css" media="print">
@@ -71,9 +92,19 @@
 </head>
 <body>
 <div id="stage"></div>
+<button id="sticky-note-button">Sticky Note</button>
 <label> Width
   <input id="bar-width" type="range" min="0" max="100" value="25" />
 </label>
+
+
+<label> Delay
+  <input id="player-delay" type="range" min="0" max="5000" value="2000" />
+</label>
+
+
+
+<div id="player-wrap"></div>
 <div id="faker-wrap"></div>
 <div id="table1-wrap"></div>
 <div id="table2-wrap"></div>
@@ -185,6 +216,54 @@
 // all of me, part 1, CM7,CM7,E7,E7,A7,A7,D-7,D-7,E7,E7,A-7,A-7,D7,D7,D-7,G7
 
 
+
+ BSD.Widgets.Spinner = function(spec) {
+    var self = {};
+    var length = spec.items.length;
+    var callback = spec.callback || function(o) {};
+    
+    self.timeout = spec.timeout || 1000;
+
+    var c,p,n = false;
+    switch(length) {
+      case 0:
+        console.log('err-OR! does not compute. ');
+        break;
+      case 1:
+        c = 0; n = 0; p = 0;
+        break;
+      case 2: 
+        c = 0; n = 1; p = 1;
+        break;
+      default:
+        c = 0; n = 1; p = length - 1;
+        break;
+    }
+    
+    self.spin = function() { 
+      c += 1; c %= length;
+      n += 1; n %= length;
+      p += 1; p %= length;
+      ////////console.log('c',c,'n',n,'p',p);
+      
+      callback({ prev: spec.items[p], current: spec.items[c], next: spec.items[n] });
+      setTimeout(self.spin,self.timeout);
+    };
+    return self;
+  };
+
+/**
+BSD.Widgets.Spinner({ 
+  items: ["-","-","*"],
+  timeout: 2000,
+  callback: function(o) {
+    var output = jQuery('#example1');
+    output.append('<br />' + o.prev + ' ' + o.current + ' ' + o.next);      
+  }
+}).spin();
+***/
+
+
   BSD.Widgets.Faker = function(spec) {
   
     var self = {};
@@ -199,13 +278,10 @@
       bars.each(function(bar) {
         var barDiv = DOM.div().addClass('bar');        
         wrap.append(barDiv);
-        
         var chordNames = bar.split(/,|\ +/);
         chordNames.each(function(name) {
           var chord = makeChord(name);
           var chordDiv = DOM.div().addClass('chord');
-          
-          
           if (chordNames.length == 2) {
             chordDiv.addClass('half');
           }
@@ -216,10 +292,7 @@
             chordDiv.addClass('fourth');
           }
           
-          
-          
           barDiv.append(chordDiv);
-
           if (last == false) {
             chordDiv.append(DOM.h4(name));         
           }
@@ -230,16 +303,13 @@
             chordDiv.append(DOM.h4(name));        
           }
 
-
           //scale selector
           var sel = DOM.select();
           chordDiv.append(sel);
-          ///JSMT.debug = chord;          
           chord.compatibleScales().each(function(scale) {
             var opt = DOM.option(scale.fullAbbrev());
             sel.append(opt);          
           });           
-
 
 
           var chordNotesDiv = DOM.div();
@@ -254,10 +324,6 @@
           
           chordDiv.append(chordNotesDiv);
           chordDiv.append(scaleNotesDiv);
-          
-
-
-
 
           var scaleUL = DOM.ul();
           scaleNotesDiv.append(scaleUL);
@@ -276,36 +342,10 @@
             chordUL.append(cell);
           });
 
+          var compatScales = chord.compatibleScales();
+          if (compatScales.length > 0) {
 
-          var scale = chord.compatibleScales().shift();
-
-          scaleUL.empty();
-          JSMT.twelveNotes().reverse().each(function(n) {
-            var cell = DOM.li(n.name());
-            cell.addClass('cell');
-            cell.addClass('scale');
-            if (scale.containsNote(n)) {
-              cell.addClass('on');
-            } 
-            scaleUL.append(cell);
-          });
-
-
-
-          
-          
-          //show the currently selected scale          
-          sel.change(function() {            
-            console.log('chord',chord);
-            console.log(chord.compatibleScales());
-          
-            var scale = chord.compatibleScales().detect(function(s) { 
-              console.log(s.fullAbbrev(),'<->',sel.val());
-            
-            return s.fullAbbrev() == sel.val() });
-            
-            console.log('scale?',scale);
-            
+            var scale = chord.compatibleScales().shift();  
             scaleUL.empty();
             JSMT.twelveNotes().reverse().each(function(n) {
               var cell = DOM.li(n.name());
@@ -316,77 +356,160 @@
               } 
               scaleUL.append(cell);
             });
-          });
-          
 
+            sel.change(function() {            
+              ///console.log('chord',chord);
+            
+              var scale = chord.compatibleScales().detect(function(s) { 
+              //console.log(s.fullAbbrev(),'<->',sel.val());
+              
+              return s.fullAbbrev() == sel.val() });
+              
+              ///console.log('scale?',scale);
+              
+              scaleUL.empty();
+              JSMT.twelveNotes().reverse().each(function(n) {
+                var cell = DOM.li(n.name());
+                cell.addClass('cell');
+                cell.addClass('scale');
+                if (scale.containsNote(n)) {
+                  cell.addClass('on');
+                } 
+                scaleUL.append(cell);
+              });
+            });
+          }
+          
+          //show the currently selected scale          
           
           last = chord;
         });
       });
       
       wrap.append(DOM.div().css('clear','both'));
-      
-      
-
-          
-          /*
-          var ul = DOM.ul();
-          var sorted = chord.compatibleScaleAbbrevs().sort(function(a,b) {
-            var aRoot = a.substr(0,1).match(chord.rootNote.name());
-            var aMajor = a.match(/major/);
-            var bRoot = b.substr(0,1).match(chord.rootNote.name());
-            var bMajor = b.match(/major/);
-            var aRootAndMajor = aRoot && aMajor;
-            var bRootAndMajor = bRoot && bMajor;
-            
-            if (aRootAndMajor && ! bRootAndMajor) { return -3; }
-            if (aMajor && ! bMajor) { return -2; }
-            if (aRoot && ! bRoot) { return -1; }
-
-
-            if (bRootAndMajor && ! aRootAndMajor) { return 3; }
-            if (bMajor && ! aMajor) { return 2; }
-            if (bRoot && ! aRoot) { return 1; }
-
-            return a < b; 
-          
-          });
-          
-          sorted.each(function(s) {
-            var li = DOM.li(s);
-            ul.append(li);
-          });
-          row.append(DOM.td(ul));
-          table1.append(row);
-        });
-      });
-      **/
-      
-      
     };        
     return self;
   };
 
 
 
+  BSD.Widgets.Player = function(spec) {
+    var self = {};
+
+    var wrap = jQuery('#player-wrap');
+
+    var chordLabel = DOM.h2();
+    var noteLabel = DOM.label();
+    var spinner = false;
+
+
+    self.initFretboard = function() {
+      wrap.empty();
+      wrap.append(chordLabel);
+      wrap.append(noteLabel);
+      var opens = [76,71,67,62,57,52];
+      [0,1,2,3,4,5].each(function(stridx) {
+        var stringDiv = DOM.div().addClass('string').addClass('string-' + stridx);
+        [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].each(function(fidx) {
+          var midinote = opens[stridx] + fidx;
+          var noteName = Note(midinote).name();
+          var nn = noteName.toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');          
+          ////console.log(noteName);      
+          
+          var fretDiv = DOM.div().addClass('fret').addClass('fret-' + fidx).addClass('midinote-' + midinote).addClass('note-' + nn);         
+          stringDiv.append(fretDiv);
+        });
+        wrap.append(stringDiv);
+        wrap.append(DOM.div().addClass('clear'));
+      });
+    };    
+
+
+    self.setDelay = function(ms) {
+      spinner.timeout = ms;    
+    };
+
+    self.go = function(progression) {    
+      self.initFretboard();
+      
+      var queue = [];
+      
+      var bars = progression.split('|');
+      var last = false;
+      bars.each(function(bar) {
+        var barDiv = DOM.div().addClass('bar');        
+        wrap.append(barDiv);
+        var chordNames = bar.split(/,|\ +/);
+        chordNames.each(function(name) {
+          var chord = makeChord(name);
+          chord.notes().each(function(note) {
+            queue.push({ note: note, chord: chord });              
+          });
+        });
+      });
+      
+      spinner = BSD.Widgets.Spinner({
+        items: queue,
+        timeout: 2000,
+        callback: function(o) {
+          var midinote = o.current.note.value();
+
+          prevMIDI = o.prev.note.value();
+          currentMIDI = o.current.note.value();
+          nextMIDI = o.next.note.value();
+
+
+          var prevName = Note(prevMIDI).name();
+          var prevnn = prevName.toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');          
+          var currentName = Note(currentMIDI).name();
+          var currentnn = currentName.toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');          
+          var nextName = Note(nextMIDI).name();
+          var nextnn = nextName.toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');          
 
 
 
+          //wrap.find('.midinote-' + prevMIDI).
+          chordLabel.html(o.current.chord.fullAbbrev());
+          noteLabel.html(o.current.note.name());
+          
+          wrap.find('.fret').removeClass('on');
+          wrap.find('.fret').removeClass('current');
+          wrap.find('.fret').removeClass('next');
+          wrap.find('.fret').removeClass('prev');
+/*
+          wrap.find('.midinote-' + currentMIDI).addClass('on');
+          wrap.find('.midinote-' + prevMIDI).addClass('prev');
+          wrap.find('.midinote-' + nextMIDI).addClass('next');
+*/
+          wrap.find('.note-' + currentnn).addClass('on').html(currentName);
+          wrap.find('.note-' + prevnn).addClass('prev').html(null);
+          wrap.find('.note-' + nextnn).addClass('next');
 
+        }
+      });
+      spinner.spin();
+    };
+    return self;
+  };
+
+  function letsDoThis(prog) {
+    riffer.go(prog);
+    faker.go(prog);
+    player.go(prog);
+  }
 
 
   var stage = jQuery('#stage'); ///DOM.div().addClass('stage');
 
   var riffer = BSD.Widgets.Riffer({});
   var faker = BSD.Widgets.Faker({});
+  var player = BSD.Widgets.Player({});
   
   
 
   var input = DOM.input().addClass('progression').attr('type','text');
   input.blur(function() {
-    jQuery('#table1-wrap').empty();
-    riffer.go(input.val());
-    faker.go(input.val());
+    letsDoThis(input.val());
   });
   stage.append(input);
 
@@ -396,21 +519,23 @@
   });
 
 
-
-  /*
-  var buttonMaxWidth = DOM.button('100% width images').click(function(){
-    jQuery('img').css('width','100%');
+  var playerDelay = jQuery('#player-delay');
+  playerDelay.change(function(){
+    player.setDelay(this.value);
   });
-  stage.append(buttonMaxWidth);
-  */
+
+
+
+
   
   var allOfMeButton = DOM.button('All of Me').click(function() {
     jQuery('#table1-wrap').empty();
     jQuery('#table1-wrap').append(DOM.h2('All of Me'));
-    var prog = 'CM7|CM7|E7|E7|A7|A7|D-7|D-7|E7|E7|A-7|A-7|D7|D7|D-7|G7|CM7|CM7|E7|E7|A7|A7|D-7|D-7|FM7|F-7|CM7 E-7|A7|D-7|G7|C6 D#o7|D-7 G7';
-    riffer.go(prog);
+    var prog = 'CM7|CM7|E7|E7|A7|A7|D-7|D-7|E7|E7|A-7|A-7|D7|D7|D-7|G7|CM7|CM7|E7|E7|A7|A7|D-7|D-7|FM7|F-7|E-7|A7|D-7|G7|C6 D#o7|D-7 G7';
     jQuery('#faker-wrap').empty();
-    faker.go(prog);
+    input.val(prog);
+    letsDoThis(prog);
+
   });
   stage.append(allOfMeButton);
 
@@ -419,9 +544,9 @@
     jQuery('#table1-wrap').empty();
     jQuery('#table1-wrap').append(DOM.h2('Black Orpheus'));
     var prog = 'A-7|B-7b5 E7b9|A-7|B-7b5 E7b9|A-7|D-7 G7|CM7|C#o7|D-7|G7|C6|FM7|B-7b5|E7b9|A-7|B-7b5 E7b9|A-7|B-7b5 E7b9|A-7|B-7b5 E7b9|E-7b5|A7b9|D-7|D-7|D-7|B-7b5 E7b9|A-7|FM7|B-7b5|E7b9|A-7|B-7b5 E7b9';
-    riffer.go(prog);
     jQuery('#faker-wrap').empty();
-    faker.go(prog);
+    input.val(prog);
+    letsDoThis(prog);
   });
   stage.append(orpheusButton);
 
@@ -429,14 +554,18 @@
     jQuery('#table1-wrap').empty();
     jQuery('#table1-wrap').append(DOM.h2('St. Louis Blues'));
     var prog = 'G-7|G-7|D7|D7|D7|D7|G-7|D7+9|G-7|G-7|D7|D7|D7|D7|G-7 A7|D7|G7|C7|G7|G7|C7|C7|G7|G7|D7|C7|G7|A-7 D7|G7|G7|G7|G7|C7|C7|G7|E7+9|A-7|D7|G7 Bb7|A-7 D7';
-    riffer.go(prog);
     jQuery('#faker-wrap').empty();
-    faker.go(prog);
-
+    input.val(prog);
+    letsDoThis(prog);
   });
   stage.append(stLouisButton);
 
 
+  var stickyNoteButton = jQuery('#sticky-note-button');
+  stickyNoteButton.click(function() {
+    var sticky = BSD.Widgets.StickyNote();
+    sticky.renderOn(jQuery(document.body));
+  });
   
 
   
