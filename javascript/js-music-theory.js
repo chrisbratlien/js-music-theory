@@ -359,10 +359,26 @@ var RootNoteWithIntervals = function(spec) {
   };
   
   self.abstractlyEqualTo = function(other) {
+    ////console.log('otherzz',other);
     var lista = other.notesNotFoundIn(self);
     var listb = self.notesNotFoundIn(other);
     return (lista.length == 0 && listb.length == 0);
-  }    
+  }
+  
+  
+  self.noteAbove = function(other) {
+    //console.log('other',other);
+  
+    var midival = other.value();
+    midival += 1;
+    var candidate = Note(midival); 
+    while (! self.containsNote(candidate)) {
+      midival += 1;
+      candidate = Note(midival);     
+    }
+    return candidate;
+  };
+      
 
 
   /*

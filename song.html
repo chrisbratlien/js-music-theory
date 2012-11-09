@@ -68,6 +68,8 @@
 
   #player-wrap label { margin-right: 1em; }
 
+  
+
 
 
   /* lowest priority in the cascade */
@@ -76,14 +78,21 @@
 
 
   #player-wrap .fret { width: 21px; height: 14px; background: #eee; border-radius: 2px; float: left; margin: 1px; text-align: center; line-height: 14px; }
+
+  #player-wrap .legend .fret { width: 92px; }
+
+
   #player-wrap .fret { font-size: 0.5em; }
   #player-wrap .fret-1 { border-radius: none; border-left: 1px solid black; }
 
   #ignore #player-wrap .fret.prev { background: #bba; }
   #player-wrap .fret.next { background: #aab; }
-  #player-wrap .fret.on { background: #fa0; }
+  #player-wrap .fret.on { background: #fa0; color: #940; }
   #player-wrap .fret-0 { background: #fff; border-radius: none; border-right: 1px solid black; }
   #player-wrap .fret-0.on { background: #750; color: white; }
+
+
+  #player-wrap .fret.above { background: #abd; }
 
 
   .sticky-note {  position: absolute; top: 20px; left: 20px; cursor:  pointer; box-shadow: 3px 3px 13px #aaa; z-index: 100; }
@@ -99,14 +108,15 @@
 
 </head>
 <body>
-<div id="stage"></div>
 <button id="sticky-note-button">Sticky Note</button>
-<label> Width
+<div id="stage"></div>
+<br />
+<label> Width of bars
   <input id="bar-width" type="range" min="0" max="100" value="25" />
 </label>
 
 
-<label> Delay
+<label> Delay of player
   <input id="player-delay" type="range" min="0" max="5000" value="1000" />
 </label>
 
@@ -405,14 +415,33 @@ BSD.Widgets.Spinner({
     var self = {};
 
     var wrap = jQuery('#player-wrap');
+    var board = DOM.div().addClass('fretboard');
+
+
+
 
     var chordLabel = DOM.h2();
     var noteLabel = DOM.label();
     var spinner = false;
 
 
+
     self.initFretboard = function() {
       wrap.empty();
+
+
+      var legend = DOM.div().addClass('legend');
+      legend.append(DOM.div('current').addClass('fret on current'));
+      legend.append(DOM.div('next').addClass('fret next'));
+      legend.append(DOM.div('above').addClass('fret above'));
+      legend.append(DOM.div('scale').addClass('fret compat-scale'));
+      legend.append(DOM.h5().addClass('clear'));
+      legend.append(DOM.div().addClass('clear'));
+      wrap.append(legend);
+
+
+      wrap.append(board);
+
       wrap.append(chordLabel);
       wrap.append(noteLabel);
       var opens = [76,71,67,62,57,52];
@@ -427,8 +456,8 @@ BSD.Widgets.Spinner({
           var fretDiv = DOM.div().addClass('fret').addClass('fret-' + fidx).addClass('midinote-' + midinote).addClass('note-' + nn);         
           stringDiv.append(fretDiv);
         });
-        wrap.append(stringDiv);
-        wrap.append(DOM.div().addClass('clear'));
+        board.append(stringDiv);
+        board.append(DOM.div().addClass('clear'));
       });
     };    
 
@@ -470,11 +499,16 @@ BSD.Widgets.Spinner({
           nextMIDI = o.next.note.value();
           
           
-          var scale = o.current.scales[0];
-          console.log('scale',scale);
+
           
-
-
+          
+          var scale = o.current.scales[0];
+          ///console.log('scale',scale);
+          
+          var noteAboveNext = scale.noteAbove(o.next.note);
+          var noteAboveNextName = noteAboveNext.name();
+          var nann = noteAboveNextName.toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');          
+          
           var prevName = Note(prevMIDI).name();
           var prevnn = prevName.toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');          
           var currentName = Note(currentMIDI).name();
@@ -488,26 +522,31 @@ BSD.Widgets.Spinner({
           chordLabel.html(o.current.chord.fullAbbrev());
           noteLabel.html(o.current.note.name());
           
-          wrap.find('.fret').removeClass('on');
-          wrap.find('.fret').removeClass('current');
-          wrap.find('.fret').removeClass('next');
-          wrap.find('.fret').removeClass('prev');
+          board.find('.fret').removeClass('on');
+          board.find('.fret').removeClass('current');
+          board.find('.fret').removeClass('next');
+          board.find('.fret').removeClass('prev');
 /*
-          wrap.find('.midinote-' + currentMIDI).addClass('on');
-          wrap.find('.midinote-' + prevMIDI).addClass('prev');
-          wrap.find('.midinote-' + nextMIDI).addClass('next');
+          board.find('.midinote-' + currentMIDI).addClass('on');
+          board.find('.midinote-' + prevMIDI).addClass('prev');
+          board.find('.midinote-' + nextMIDI).addClass('next');
 */
-          wrap.find('.note-' + currentnn).addClass('on').html(currentName);
-          wrap.find('.note-' + prevnn).addClass('prev').html(null);
-          wrap.find('.note-' + nextnn).addClass('next');
+          board.find('.note-' + currentnn).addClass('on').addClass('current').html(currentName);
+          board.find('.note-' + prevnn).addClass('prev').html(null);
+          board.find('.note-' + nextnn).addClass('next');
+          
+          board.find('.above').removeClass('above');
+          board.find('.note-' + nann).addClass('above');
           
           
-          wrap.find('.compat-scale').removeClass('compat-scale');
+          
+          
+          board.find('.compat-scale').removeClass('compat-scale');
           scale.notes().each(function(n) {
             var scalenn = n.name().toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');  
             
             //console.log('scalenn',scalenn);
-            wrap.find('.note-' + scalenn).addClass('compat-scale');
+            board.find('.note-' + scalenn).addClass('compat-scale');
           });
           
 
