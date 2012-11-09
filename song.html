@@ -68,15 +68,23 @@
 
   #player-wrap label { margin-right: 1em; }
 
+
+
+  /* lowest priority in the cascade */
+  #player-wrap .fret.compat-scale { background: #dcd; }
+
+
+
   #player-wrap .fret { width: 21px; height: 14px; background: #eee; border-radius: 2px; float: left; margin: 1px; text-align: center; line-height: 14px; }
   #player-wrap .fret { font-size: 0.5em; }
   #player-wrap .fret-1 { border-radius: none; border-left: 1px solid black; }
 
   #ignore #player-wrap .fret.prev { background: #bba; }
-  #player-wrap .fret.next { background: #dde; }
+  #player-wrap .fret.next { background: #aab; }
   #player-wrap .fret.on { background: #fa0; }
   #player-wrap .fret-0 { background: #fff; border-radius: none; border-right: 1px solid black; }
   #player-wrap .fret-0.on { background: #750; color: white; }
+
 
   .sticky-note {  position: absolute; top: 20px; left: 20px; cursor:  pointer; box-shadow: 3px 3px 13px #aaa; z-index: 100; }
   .sticky-note textarea { background: #ffa; cursor:  pointer; border: 1px solid #dd8; width: 20px; height: 20px; font-family: Georgia; }
@@ -99,7 +107,7 @@
 
 
 <label> Delay
-  <input id="player-delay" type="range" min="0" max="5000" value="2000" />
+  <input id="player-delay" type="range" min="0" max="5000" value="1000" />
 </label>
 
 
@@ -442,21 +450,29 @@ BSD.Widgets.Spinner({
         var chordNames = bar.split(/,|\ +/);
         chordNames.each(function(name) {
           var chord = makeChord(name);
+          
+          var scales = chord.compatibleScales();
+          
           chord.notes().each(function(note) {
-            queue.push({ note: note, chord: chord });              
+            queue.push({ note: note, chord: chord, scales: scales });              
           });
         });
       });
       
       spinner = BSD.Widgets.Spinner({
         items: queue,
-        timeout: 2000,
+        timeout: 1000,
         callback: function(o) {
           var midinote = o.current.note.value();
 
           prevMIDI = o.prev.note.value();
           currentMIDI = o.current.note.value();
           nextMIDI = o.next.note.value();
+          
+          
+          var scale = o.current.scales[0];
+          console.log('scale',scale);
+          
 
 
           var prevName = Note(prevMIDI).name();
@@ -484,6 +500,16 @@ BSD.Widgets.Spinner({
           wrap.find('.note-' + currentnn).addClass('on').html(currentName);
           wrap.find('.note-' + prevnn).addClass('prev').html(null);
           wrap.find('.note-' + nextnn).addClass('next');
+          
+          
+          wrap.find('.compat-scale').removeClass('compat-scale');
+          scale.notes().each(function(n) {
+            var scalenn = n.name().toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');  
+            
+            //console.log('scalenn',scalenn);
+            wrap.find('.note-' + scalenn).addClass('compat-scale');
+          });
+          
 
         }
       });
@@ -523,6 +549,7 @@ BSD.Widgets.Spinner({
   playerDelay.change(function(){
     player.setDelay(this.value);
   });
+  playerDelay.val(1000);
 
 
 

@@ -13,8 +13,8 @@ td { border: 1px solid #eee; }
 #pickers { width: 30em; height: 10em; overflow: auto; }
 .color-picker { width: 2em; height: 2em; float: left; cursor: pointer;  border: 1px solid white; }
 
-.sticky-note {  position: absolute; top: 0; left: 0; cursor:  pointer; box-shadow: 3px 3px 13px #aaa; }
-.sticky-note textarea { background: #ffa; cursor:  pointer; border: 1px solid #dd8; width: 140px; height: 100px; font-family: Georgia; }
+.sticky-note {  position: absolute; top: 20px; left: 20px; cursor:  pointer; box-shadow: 3px 3px 13px #aaa; }
+.sticky-note textarea { background: #ffa; cursor:  pointer; border: 1px solid #dd8; width: 20px; height: 20px; font-family: Georgia; }
 
 
 
