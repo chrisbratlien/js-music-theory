@@ -1,3 +1,16 @@
+function fisherYates ( myArray ) {
+  var i = myArray.length;
+  if ( i == 0 ) return false;
+  while ( --i ) {
+     var j = Math.floor( Math.random() * ( i + 1 ) );
+     var tempi = myArray[i];
+     var tempj = myArray[j];
+     myArray[i] = tempj;
+     myArray[j] = tempi;
+   }
+}
+
+
 BSD.Widgets.ChordPlayer = function(spec) {
 
 
@@ -52,7 +65,12 @@ BSD.Widgets.ChordPlayer = function(spec) {
     var legend = DOM.div().addClass('legend');
     legend.append(DOM.div('current').addClass('fret on current'));
     legend.append(DOM.div('next').addClass('fret next'));
-    legend.append(DOM.div('major scale').addClass('fret compat-scale'));
+
+
+    var legendScale = DOM.div('legend scale').addClass('fret compat-scale');
+
+
+    legend.append(legendScale);
     legend.append(DOM.div('major scale root').addClass('fret compat-scale-root'));
     legend.append(DOM.div().addClass('clear'));
     legend.append(DOM.div().addClass('clear'));
@@ -250,6 +268,47 @@ BSD.Widgets.ChordPlayer = function(spec) {
         board.find('.note-' + nn).addClass('color');
       });
 
+
+      /*
+      var scale = o.current.scales.select(function(s){ return s.fullName().match(/major/); }).atRandom();
+      if (!scale) {
+        scale = o.current.scales.select(function(s){ return s.fullName().match(/harmonic minor/); }).atRandom();
+      }
+      if (!scale) {
+        scale = o.current.scales.select(function(s){ return s.fullName().match(/blues/); }).atRandom();
+      }
+      */
+
+      var guesses = ['major','harmonic minor','blues'];      
+      
+      var scale = o.current.scales.detect(function(s){ 
+
+        var guess;
+
+        guess = guesses.atRandom();
+        if (s.fullName().match(guess)) { return true; } 
+
+        guess = guesses.atRandom();
+        if (s.fullName().match(guess)) { return true; } 
+
+        guess = guesses.atRandom();
+        if (s.fullName().match(guess)) { return true; } 
+
+        return false;
+
+      });
+      
+      
+      
+      
+      if (scale) {
+        legendScale.html(scale.fullName() + ' scale');
+      }
+      else {
+        legendScale.html(null);
+      }
+      
+
       o.current.chord.notes().each(function(note) {
         var noteName = note.name();
         var nn = noteName.toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');          
@@ -266,13 +325,9 @@ BSD.Widgets.ChordPlayer = function(spec) {
           board.find('.note-' + nn).addClass('on').addClass('current').html(noteName);        
         }
         
-        var scale = o.current.scales.select(function(s){ return s.fullName().match(/major/); }).atRandom();
-
-        if (!scale) {
-          scale = o.current.scales.select(function(s){ return s.fullName().match(/harmonic minor/); }).atRandom();
-        } 
         
         if (scale) { 
+          console.log(scale.fullName());
           scale.notes().each(function(n) {
             var scalenn = n.name().toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');              
             board.find('.note-' + scalenn).addClass('compat-scale');

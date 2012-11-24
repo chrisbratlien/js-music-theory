@@ -1,8 +1,8 @@
 function WaveTableLoader() {
 
-    this.waveNamesV2 = ['Celeste','Twelve String Guitar 1'];
+    this.waveNames = ['Celeste','Twelve String Guitar 1','Chorus_Strings'];
 
-    this.waveNames = [
+    this.waveNamesVA = [
         "01_Saw",
         "02_Triangle",
         "03_Square",
