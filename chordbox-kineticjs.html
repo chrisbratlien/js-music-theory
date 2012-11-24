@@ -1,0 +1,75 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+      canvas {
+        border: 1px solid #9C9898;
+      }
+    </style>
+    <script src="http://www.html5canvastutorials.com/libraries/kinetic-v4.0.5.js"></script>
+    <script src="http://cdn.dev.bratliensoftware.com/javascript/array.js"></script>
+  </head>
+  <body>
+    <div id="container"></div>
+    <script type="text/javascript">
+      var stage = new Kinetic.Stage({
+        container: 'container',
+        width: 578,
+        height: 200
+      });
+      var layer = new Kinetic.Layer();
+
+
+      for(var i = 0; i < 100; i+= 1) {
+        var circle = new Kinetic.Circle({
+          x: 14,//stage.getWidth() / 2,
+          y: 14,//stage.getHeight() / 2,
+          radius: 5,
+          fill: 'black',
+          stroke: 'black',
+          strokeWidth: 4,
+          draggable: true
+        });
+        layer.add(circle);
+        circle.moveToTop();
+      }
+
+
+      var myx = 0;
+      var myy = 0;
+      var dx = 14;
+      var dy = 120;
+      'r,r,r,r'.split(',').each(function(row) {
+        'c,c,c,c'.split(',').each(function(col) {
+          var imageObj = new Image();
+          imageObj.onload = function() {
+            console.log(myx);
+            var chordBox = new Kinetic.Image({
+              x: myx,
+              y: 20,
+              image: imageObj,
+              width: 106,
+              height: 118,
+              draggable: true
+            });
+            // add the shape to the layer
+            layer.add(chordBox);
+            layer.draw();
+            // add the layer to the stage
+            chordBox.moveToBottom();
+          };
+          imageObj.src = 'images/chordbox.jpg';    
+          myx += dx;
+        });
+        myy += dy;
+      });    
+      stage.add(layer);
+
+      
+    </script>      
+  </body>
+</html>

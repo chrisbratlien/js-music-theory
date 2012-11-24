@@ -153,8 +153,7 @@ JSMT.chordMap = {
     '-7-5':  { name: 'minor7Flat5', intervals: [0,3,6,10] },
 
 
-    '-7+5':  { name: 'minor7Flat5', intervals: [0,3,8,10] },
-    '-7+5':  { name: 'minor7Flat5', intervals: [0,3,8,10] },
+    '-7+5':  { name: 'minor7Sharp5', intervals: [0,3,8,10] },
 
 
     '7b9':  { name: 'sevenFlat9', intervals: [0,1,4,7,10] },
@@ -311,14 +310,46 @@ var RootNoteWithIntervals = function(spec) {
   ///console.log('rnwi',spec);
 
   var self = {};
+  
+  self.constructor = RootNoteWithIntervals;
+  
   self.name = spec.name || 'no name given';
   self.abbrev = spec.abbrev || 'no abbrev';
   self.rootNote = spec.rootNote;
   self.intervals = function() { 
     return spec.intervals; 
   };
+  
+  self.invertDown = function() {  
+    var newSet = self.noteValues();
+    var jumper = newSet.pop();
+    jumper -= 12; 
+    newSet.push(jumper);
+    newSet = newSet.sort();    
+    newRoot = Note(newSet[0]);
+    var newIntervals = newSet.map(function(v) { return v - newRoot.value(); });
+    return self.constructor({ rootNote: newRoot, intervals: newIntervals });
+  };
+  
+  self.invertUp = function() {  
+    var newSet = self.noteValues();
+    var jumper = newSet.shift();
+    jumper += 12; 
+    newSet.push(jumper);
+    newSet = newSet.sort();    
+    newRoot = Note(newSet[0]);
+    var newIntervals = newSet.map(function(v) { return v - newRoot.value(); });
+    return self.constructor({ rootNote: newRoot, intervals: newIntervals });
+  };
+  
+  
+  
+  self.noteFromInterval = function(interval) {
+    return Note(self.rootNote.value() + interval)
+  };
+  
   self.notes = function() {
-    return self.intervals().map(function(interval) { return Note(self.rootNote.value() + interval); });    
+    return self.intervals().map(function(interval) { return self.noteFromInterval(interval); });    
   };
   self.noteNames = function() {
     return self.notes().map(function(note) { return note.name(); });    
@@ -351,6 +382,20 @@ var RootNoteWithIntervals = function(spec) {
     return result;
   };
 
+
+  self.myThird = function() {
+    var hit = self.intervals().detect(function(i) { return (i == 3 || i == 4); });
+    if (!hit) { return false; }
+    return self.noteFromInterval(hit);  
+  }
+
+  self.mySeventh = function() {
+    var hit = self.intervals().detect(function(i) { return (i == 11 || i == 10 || i == 9); });
+    if (!hit) { return false; }
+    return self.noteFromInterval(hit);  
+  }
+
+
   self.compatibleScaleNames = function() {
     return self.compatibleScales().map(function(s) { return s.fullName(); });
   };    
@@ -378,6 +423,21 @@ var RootNoteWithIntervals = function(spec) {
     }
     return candidate;
   };
+
+  self.noteBelow = function(other) {
+    //console.log('other',other);
+  
+    var midival = other.value();
+    midival -= 1;
+    var candidate = Note(midival); 
+    while (! self.containsNote(candidate)) {
+      midival -= 1;
+      candidate = Note(midival);     
+    }
+    return candidate;
+  };
+
+
       
 
 
@@ -466,6 +526,10 @@ var Scale = function(spec) {
 
   var self = RootNoteWithIntervals(spec);
 
+
+  self.constructor = Scale;
+
+
   self.degree = function(pos) {
     return self.notes()[pos-1];
   };
@@ -493,10 +557,13 @@ var Scale = function(spec) {
 
 var Chord = function(spec) {
   var self = RootNoteWithIntervals(spec);
+  self.constructor = Chord;
+
+  self.fullAbbrev = function() { //override superclass, don't want space separator
+    return self.rootNote.name() + self.abbrev;
+  };
+
   return self;
-  
-
-
 };
 
 

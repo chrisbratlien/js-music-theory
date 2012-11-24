@@ -10,6 +10,20 @@
 <script src="http://cdn.dev.bratliensoftware.com/javascript/draggy.js"></script>
 <script src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
 <script src="javascript/js-music-theory.js"></script>
+<script src="javascript/bsd.widgets.spinner.js"></script>
+<script src="javascript/bsd.widgets.faker.js"></script>
+<script src="javascript/bsd.widgets.player.js"></script>
+<script src="javascript/sinewave.js"></script>
+
+<!-- wavetable dependencies -->
+<script src="javascript/bpm-delay.js"></script>
+<script src="javascript/waveshaper.js"></script>
+<script src="javascript/wavetable.js"></script>
+<script src="javascript/fft.js"></script>
+<script src="javascript/sequence.js"></script>
+<script src="javascript/wtnote.js"></script>
+<script src="javascript/wavetableloader.js"></script>
+<script src="javascript/staticaudiorouting.js"></script>
 <style type="text/css">
 
 
@@ -42,57 +56,78 @@
   #table1-wrap ul li { float: left; margin-right: 1.5em; }
 
 
-  #faker-wrap { width: 100%; margin: 0 auto; }
-
-
-
-
-  #faker-wrap .bar { width: 24%; height: 308px; float: left; position: relative;}
-
-  #faker-wrap .bar .chord { float: left; border: 1px solid #798; width: 99%; }
+  #faker-wrap { width: 90%; margin: 0 auto; margin-top: 1em; }
+  #faker-wrap .bar { width: 24%;  float: left; position: relative;}
+  #faker-wrap .bar .chord { float: left; border: 1px solid white; width: 99%; }
   #faker-wrap .bar .chord.half { width: 49%; }
   #faker-wrap .bar .chord.third { width: 32%; }
   #faker-wrap .bar .chord.fourth { width: 24%; }
-  
-
-  /* #faker-wrap .bar .chord .notes { width: 49%; } */
-
 
   #faker-wrap .bar ul { list-style-type: none; margin: 0; padding: 0; /* height: 85%; position: absolute; bottom: 0; */ }
   #faker-wrap .bar ul li { height: 0.9em; padding-left: 0.5em; }  
-  #faker-wrap .bar .cell { font-size: 0.4em; border-top: 1px solid #abc; }
-  #faker-wrap .bar .cell.on { background-color: #38f; color: white;  }
-  #faker-wrap .bar .cell.scale.on { background-color: #98f; color: white;  }
+  #faker-wrap .cell { font-size: 0.4em; border-top: 1px solid #abc; padding: 1px; }
+  #faker-wrap .on { background-color: #38f; color: white;  }
+  #faker-wrap .scale.on { background-color: #edf; color: #98f;  }
+
+  #faker-wrap .on.young { background-color: #9f9; color: #393;  }
+  #faker-wrap .on.old { background-color: #f99; color: #933;  }
+  #faker-wrap .on.young.old { background-color: #fc9; color: #963;  }
+
+  #faker-wrap .legend div { float: left; padding: 5px; }
 
 
+  .bsd-widgets-player { width: 50%;  }
 
-  #player-wrap label { margin-right: 1em; }
 
+  .bsd-widgets-player label { margin-right: 1em; }
+
+
+  .bsd-widgets-player .fret, .bsd-widgets-player .fret-label { 
+    /*
+    width: 21px; 
+    height: 14px; line-height: 14px; 
+    */
+    width: 4%;
+    height: 2em; line-height: 2em;
+
+    background: #eee; border-radius: 2px; 
+    float: left; margin: 1px; text-align: center; 
+    
+  }
   
+  .bsd-widgets-player .fret-label { font-size: 0.5em; }
+  
+
+  .bsd-widgets-player .legend .fret { width: 92px; }
 
 
 
   /* lowest priority in the cascade */
-  #player-wrap .fret.compat-scale { background: #dcd; }
+  .bsd-widgets-player .fret.compat-scale { background: #dcd; }
+  .bsd-widgets-player .fret.compat-scale-root { background: #ace; }
 
 
 
-  #player-wrap .fret { width: 21px; height: 14px; background: #eee; border-radius: 2px; float: left; margin: 1px; text-align: center; line-height: 14px; }
+  .bsd-widgets-player .fret { font-size: 0.5em; }
+  .bsd-widgets-player .fret-1 { border-radius: none; border-left: 1px solid black; }
 
-  #player-wrap .legend .fret { width: 92px; }
-
-
-  #player-wrap .fret { font-size: 0.5em; }
-  #player-wrap .fret-1 { border-radius: none; border-left: 1px solid black; }
-
-  #ignore #player-wrap .fret.prev { background: #bba; }
-  #player-wrap .fret.next { background: #aab; }
-  #player-wrap .fret.on { background: #fa0; color: #940; }
-  #player-wrap .fret-0 { background: #fff; border-radius: none; border-right: 1px solid black; }
-  #player-wrap .fret-0.on { background: #750; color: white; }
+  #ignore .bsd-widgets-player .fret.prev { background: #bba; }
+ /* .bsd-widgets-player .fret.next { background: #ccc; } */
+  .bsd-widgets-player .fret.on { background: #fa0; color: #940; }
+  .bsd-widgets-player .fret-0 { background: #fff; border-radius: none; border-right: 1px solid black; }
+  .bsd-widgets-player .fret-0.on { background: #750; color: white; }
 
 
-  #player-wrap .fret.above { background: #abd; }
+  .bsd-widgets-player .fret.color { color: white; }
+  .bsd-widgets-player .fret.root { background: red; color: white; }
+
+  .bsd-widgets-player .position-indicator { width: 200px; height: 200px; list-style-type: none;  }
+  .bsd-widgets-player .position-indicator li { margin: 0; float: left; width: 25%; background: #aaf; color: #778; text-align: center;  }
+  .bsd-widgets-player .position-indicator li.selected { background: yellow; }
+
+
+
+  /* .bsd-widgets-player .fret.above { background: #ccd; } */
 
 
   .sticky-note {  position: absolute; top: 20px; left: 20px; cursor:  pointer; box-shadow: 3px 3px 13px #aaa; z-index: 100; }
@@ -111,21 +146,18 @@
 <button id="sticky-note-button">Sticky Note</button>
 <div id="stage"></div>
 <br />
-<label> Width of bars
-  <input id="bar-width" type="range" min="0" max="100" value="25" />
-</label>
-
-
-<label> Delay of player
-  <input id="player-delay" type="range" min="0" max="5000" value="1000" />
-</label>
 
 
 
-<div id="player-wrap"></div>
-<div id="faker-wrap"></div>
+
+
+<div id="chord-player-wrap"></div>
+<div id="faker-wrap">
+</div>
 <div id="table1-wrap"></div>
 <div id="table2-wrap"></div>
+
+<button id="sinewave">Play Sinewave</button>
 <script type="text/javascript">
 
 
@@ -231,344 +263,523 @@
     };        
     return self;
   };
-// all of me, part 1, CM7,CM7,E7,E7,A7,A7,D-7,D-7,E7,E7,A-7,A-7,D7,D7,D-7,G7
 
-
-
- BSD.Widgets.Spinner = function(spec) {
-    var self = {};
-    var length = spec.items.length;
-    var callback = spec.callback || function(o) {};
-    
-    self.timeout = spec.timeout || 1000;
-
-    var c,p,n = false;
-    switch(length) {
-      case 0:
-        console.log('err-OR! does not compute. ');
-        break;
-      case 1:
-        c = 0; n = 0; p = 0;
-        break;
-      case 2: 
-        c = 0; n = 1; p = 1;
-        break;
-      default:
-        c = 0; n = 1; p = length - 1;
-        break;
-    }
-    
-    self.spin = function() { 
-      c += 1; c %= length;
-      n += 1; n %= length;
-      p += 1; p %= length;
-      ////////console.log('c',c,'n',n,'p',p);
-      
-      callback({ prev: spec.items[p], current: spec.items[c], next: spec.items[n] });
-      setTimeout(self.spin,self.timeout);
-    };
-    return self;
-  };
-
-/**
-BSD.Widgets.Spinner({ 
-  items: ["-","-","*"],
-  timeout: 2000,
-  callback: function(o) {
-    var output = jQuery('#example1');
-    output.append('<br />' + o.prev + ' ' + o.current + ' ' + o.next);      
-  }
-}).spin();
-***/
-
-
-  BSD.Widgets.Faker = function(spec) {
+  var chordPlayerWrap = jQuery('#chord-player-wrap');
   
+
+
+  /* audio stuff */
+  if (typeof webkitAudioContext != "undefined") {
+    BSD.audioContext = new webkitAudioContext();
+  }
+  
+  
+  function midi2hertz(x) {
+    return Math.pow(2,(x-69)/12)*440;
+  }
+  
+  BSD.hzTable = [];
+  var a = 440; // a is 440 hz...
+  for (var x = 0; x <= 127; ++x)
+  {
+    BSD.hzTable[x] = midi2hertz(x);
+  }
+  
+  
+  function soundIt(freq,duration) {
+    var sinewave = new SineWave(BSD.audioContext);
+    sinewave.setFrequency(freq);
+    sinewave.play();
+    setTimeout(function() { sinewave.pause(); },duration);
+  }
+  
+  
+  BSD.MIDIPlayer = function(spec) {
     var self = {};
-    var map = {};
+
+    self.playChord = function(chord,duration) {
+      chord.notes().each(function(n) { self.playNote(n,duration); });
+    };
+
+    self.playNote = function(note,duration) {
+      soundIt(BSD.hzTable[note.value()],duration);  
+    };
+    return self;
+  };
+
+
+function wtInit() {
+        context = new webkitAudioContext();
+        staticAudioRouting = new StaticAudioRouting();
+        monophonicNote = new WTNote(staticAudioRouting, true);
     
-    self.go = function(progression) {    
-
-      ////console.log("booo");
-      var wrap = jQuery('#faker-wrap');
-      var bars = progression.split('|');
-      var last = false;
-      bars.each(function(bar) {
-        var barDiv = DOM.div().addClass('bar');        
-        wrap.append(barDiv);
-        var chordNames = bar.split(/,|\ +/);
-        chordNames.each(function(name) {
-          var chord = makeChord(name);
-          var chordDiv = DOM.div().addClass('chord');
-          if (chordNames.length == 2) {
-            chordDiv.addClass('half');
-          }
-          if (chordNames.length == 3) {
-            chordDiv.addClass('third');
-          }
-          if (chordNames.length == 4) {
-            chordDiv.addClass('fourth');
-          }
-          
-          barDiv.append(chordDiv);
-          if (last == false) {
-            chordDiv.append(DOM.h4(name));         
-          }
-          else if(chord.abstractlyEqualTo(last)) {
-            chordDiv.append(DOM.h4('%'));
-          }
-          else {
-            chordDiv.append(DOM.h4(name));        
-          }
-
-          //scale selector
-          var sel = DOM.select();
-          chordDiv.append(sel);
-          chord.compatibleScales().each(function(scale) {
-            var opt = DOM.option(scale.fullAbbrev());
-            sel.append(opt);          
-          });           
+        loadWaveTables();
+        sequence = new Sequence();
+}
 
 
-          var chordNotesDiv = DOM.div();
-          chordNotesDiv.addClass('notes');
-          chordNotesDiv.addClass('chord-notes');
-          
 
-          var scaleNotesDiv = DOM.div();
-          scaleNotesDiv.addClass('notes');
-          scaleNotesDiv.addClass('scale-notes');
-          
-          
-          chordDiv.append(chordNotesDiv);
-          chordDiv.append(scaleNotesDiv);
-
-          var scaleUL = DOM.ul();
-          scaleNotesDiv.append(scaleUL);
-
-          var chordUL = DOM.ul();
-          chordNotesDiv.append(chordUL);
+/** wavetable experimentation **/
+var loader;
+var sequence;
+var defaultWaveTableName = "Celeste"; ///"Twelve String Guitar 1"; //"Celeste";
+var arp = true;
+var playMonophonic = true;
 
 
-          //show the chord notes
-          JSMT.twelveNotes().reverse().each(function(n) {
-            var cell = DOM.li(n.name());
-            cell.addClass('cell');
-            if (chord.containsNote(n)) {
-              cell.addClass('on');
-            }
-            chordUL.append(cell);
-          });
 
-          var compatScales = chord.compatibleScales();
-          if (compatScales.length > 0) {
+var context;
+context = new webkitAudioContext();
 
-            var scale = chord.compatibleScales().shift();  
-            scaleUL.empty();
-            JSMT.twelveNotes().reverse().each(function(n) {
-              var cell = DOM.li(n.name());
-              cell.addClass('cell');
-              cell.addClass('scale');
-              if (scale.containsNote(n)) {
-                cell.addClass('on');
-              } 
-              scaleUL.append(cell);
-            });
+var staticAudioRouting;
+staticAudioRouting = new StaticAudioRouting();
 
-            sel.change(function() {            
-              ///console.log('chord',chord);
-            
-              var scale = chord.compatibleScales().detect(function(s) { 
-              //console.log(s.fullAbbrev(),'<->',sel.val());
-              
-              return s.fullAbbrev() == sel.val() });
-              
-              ///console.log('scale?',scale);
-              
-              scaleUL.empty();
-              JSMT.twelveNotes().reverse().each(function(n) {
-                var cell = DOM.li(n.name());
-                cell.addClass('cell');
-                cell.addClass('scale');
-                if (scale.containsNote(n)) {
-                  cell.addClass('on');
-                } 
-                scaleUL.append(cell);
-              });
-            });
-          }
-          
-          //show the currently selected scale          
-          
-          last = chord;
-        });
-      });
-      
-      wrap.append(DOM.div().css('clear','both'));
-    };        
+
+var waveTable;
+var waveTable2;
+var monophonicNote;
+
+////
+var cutoff = 0.2;
+var resonance = 12;
+var envAmount = 0.4;
+var width = 0.6;
+var detune1 = 4.5;
+var detune2 = -2.5;
+var octave = 0;
+
+
+var volume = 1;
+var filterAttack = 0.056;
+var filterDecay = 0.991;
+var ampAttack = 0.056;
+var ampDecay = 0.100;
+var playDoubleOctave = false;
+var grungeDrive = 1;
+
+var views;
+var sequenceView;
+
+var isShiftDown = false;
+var isAltDown = false;
+
+var tempo = 85.0;
+
+
+
+
+
+wtInit(); //// <========== XXX
+
+
+
+
+
+function start() {
+    // first, get rid of loading animation
+    //var loading = document.getElementById("loading");
+    //loading.innerHTML = "";
+
+    startTime = context.currentTime + 0.160;
+    
+    waveTable = loader.getTable(defaultWaveTableName);
+    waveTable2 = loader.getTable(defaultWaveTableName);
+    ///sequence.schedule();    
+}
+
+
+function loadWaveTables() {
+    loader = new WaveTableLoader();
+    loader.load(start);        
+}
+
+
+function loadImpulseResponse(url, convolver) {
+    // Load impulse response asynchronously
+
+    var request = new XMLHttpRequest();
+    request.open("GET", url, true);
+    request.responseType = "arraybuffer";
+
+    request.onload = function() { 
+        convolver.buffer = context.createBuffer(request.response, false);
+        isImpulseResponseLoaded = true;
+    }
+    request.onerror = function() { 
+        alert("error loading reverb");
+    }
+
+    request.send();
+}
+
+
+
+
+
+
+
+BSD.wtTest = function() {
+
+ 
+  var self = {};  
+ 
+  function init() {
+        context = new webkitAudioContext();
+        staticAudioRouting = new StaticAudioRouting();
+        monophonicNote = new WTNote(staticAudioRouting, true);
+    
+        loadWaveTables();
+        
+    
+        sequence = new Sequence();
+    
+        ///addUI();
+  }  
+  
+  
+  self.go = function() {
+    init();
+  
+  };
+  
+  
     return self;
+  
   };
 
 
 
-  BSD.Widgets.Player = function(spec) {
+  BSD.OSCPlayer = function(spec) {
+
+    var context = BSD.audioContext;
+    var ctx = context;
+
     var self = {};
 
-    var wrap = jQuery('#player-wrap');
-    var board = DOM.div().addClass('fretboard');
+    var SINE = 0, SQUARE = 1, SAWTOOTH = 2, TRIANGLE = 3, CUSTOM = 4;
 
 
+    var playing = {};
+    
+    var oscillators = [];
+    self.oscillators = oscillators;
+    
+    [0,1,2,3,4,5,6,7,8].each(function(i) {
+      var oscillator = ctx.createOscillator();
+      oscillator.id = i; //FIXME: is this sane?
+      playing[oscillator.id] = false;  
+      oscillator.type = SINE;////[0,1,2,3].atRandom();
+      oscillator.connect(context.destination);
+      oscillators.push(oscillator);
+    });
 
 
-    var chordLabel = DOM.h2();
-    var noteLabel = DOM.label();
-    var spinner = false;
-
-
-
-    self.initFretboard = function() {
-      wrap.empty();
-
-
-      var legend = DOM.div().addClass('legend');
-      legend.append(DOM.div('current').addClass('fret on current'));
-      legend.append(DOM.div('next').addClass('fret next'));
-      legend.append(DOM.div('above').addClass('fret above'));
-      legend.append(DOM.div('scale').addClass('fret compat-scale'));
-      legend.append(DOM.h5().addClass('clear'));
-      legend.append(DOM.div().addClass('clear'));
-      wrap.append(legend);
-
-
-      wrap.append(board);
-
-      wrap.append(chordLabel);
-      wrap.append(noteLabel);
-      var opens = [76,71,67,62,57,52];
-      [0,1,2,3,4,5].each(function(stridx) {
-        var stringDiv = DOM.div().addClass('string').addClass('string-' + stridx);
-        [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].each(function(fidx) {
-          var midinote = opens[stridx] + fidx;
-          var noteName = Note(midinote).name();
-          var nn = noteName.toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');          
-          ////console.log(noteName);      
-          
-          var fretDiv = DOM.div().addClass('fret').addClass('fret-' + fidx).addClass('midinote-' + midinote).addClass('note-' + nn);         
-          stringDiv.append(fretDiv);
-        });
-        board.append(stringDiv);
-        board.append(DOM.div().addClass('clear'));
-      });
-    };    
-
-
-    self.setDelay = function(ms) {
-      spinner.timeout = ms;    
+    var updateFreq = function(freq) {
+        oscillator.type = parseInt($('#comboWaveType').val(),10) ;
+        oscillator.frequency.value = freq;
+        oscillator.connect(context.destination);
+        oscillator.noteOn && oscillator.noteOn(0); // this method doesn't seem to exist, though it's in the docs?
+        $("#freqDisplay").val(freq + "Hz");
+    };
+      
+    self.idleOscillators = function() {
+      //return oscillators.select(function(o) { return o.playbackState == 0; });
+      return oscillators.select(function(o) { return playing[o.id] == false; });
+    };
+      
+    self.hush = function() {
+      oscillators.each(function(o) { o.disconnect(); });
     };
 
-    self.go = function(progression) {    
-      self.initFretboard();
+
+    self.playChord = function(chord,duration) {
       
-      var queue = [];
+      var tooDamnHigh = 50;
+      var tooDamnLow = 30;
       
-      var bars = progression.split('|');
-      var last = false;
-      bars.each(function(bar) {
-        var barDiv = DOM.div().addClass('bar');        
-        wrap.append(barDiv);
-        var chordNames = bar.split(/,|\ +/);
-        chordNames.each(function(name) {
-          var chord = makeChord(name);
-          
-          var scales = chord.compatibleScales();
-          
-          chord.notes().each(function(note) {
-            queue.push({ note: note, chord: chord, scales: scales });              
-          });
-        });
-      });
-      
-      spinner = BSD.Widgets.Spinner({
-        items: queue,
-        timeout: 1000,
-        callback: function(o) {
-          var midinote = o.current.note.value();
+      var tooHigh = chord.notes().detect(function(n) { return n.value() > tooDamnHigh; });
+      while (tooHigh) {
+        ////console.log('tooDamnHigh',chord.fullName());
+        chord = chord.invertDown();
+        var tooHigh = chord.notes().detect(function(n) { return n.value() > tooDamnHigh; });
+      }
 
-          prevMIDI = o.prev.note.value();
-          currentMIDI = o.current.note.value();
-          nextMIDI = o.next.note.value();
-          
-          
-
-          
-          
-          var scale = o.current.scales[0];
-          ///console.log('scale',scale);
-          
-          var noteAboveNext = scale.noteAbove(o.next.note);
-          var noteAboveNextName = noteAboveNext.name();
-          var nann = noteAboveNextName.toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');          
-          
-          var prevName = Note(prevMIDI).name();
-          var prevnn = prevName.toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');          
-          var currentName = Note(currentMIDI).name();
-          var currentnn = currentName.toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');          
-          var nextName = Note(nextMIDI).name();
-          var nextnn = nextName.toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');          
-
-
-
-          //wrap.find('.midinote-' + prevMIDI).
-          chordLabel.html(o.current.chord.fullAbbrev());
-          noteLabel.html(o.current.note.name());
-          
-          board.find('.fret').removeClass('on');
-          board.find('.fret').removeClass('current');
-          board.find('.fret').removeClass('next');
-          board.find('.fret').removeClass('prev');
-/*
-          board.find('.midinote-' + currentMIDI).addClass('on');
-          board.find('.midinote-' + prevMIDI).addClass('prev');
-          board.find('.midinote-' + nextMIDI).addClass('next');
-*/
-          board.find('.note-' + currentnn).addClass('on').addClass('current').html(currentName);
-          board.find('.note-' + prevnn).addClass('prev').html(null);
-          board.find('.note-' + nextnn).addClass('next');
-          
-          board.find('.above').removeClass('above');
-          board.find('.note-' + nann).addClass('above');
-          
-          
-          
-          
-          board.find('.compat-scale').removeClass('compat-scale');
-          scale.notes().each(function(n) {
-            var scalenn = n.name().toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');  
+      var tooLow = chord.notes().detect(function(n) { return n.value() < tooDamnLow; });      
+      while (tooLow) {
+        ////console.log('tooDamnLow',chord.fullName());
+        chord = chord.invertUp();
+        var tooLow = chord.notes().detect(function(n) { return n.value() < tooDamnLow; }); 
+      }
             
-            //console.log('scalenn',scalenn);
-            board.find('.note-' + scalenn).addClass('compat-scale');
-          });
-          
+      var midivalues = chord.notes().collect(function(n) { return n.value(); });
+      console.log(midivalues);
+      chord.notes().each(function(n) { self.playNote(n,duration); });
+    };
 
-        }
-      });
-      spinner.spin();
+    self.playNote = function(note,duration) {
+      var o = self.idleOscillators().detect(function(o) { return true; });
+      BSD.o = o;
+      
+      if (o == false) {
+        console.log('no free oscs',note,duration);
+        return false;
+      }
+
+      o.frequency.value = BSD.hzTable[note.value()];
+      o.connect(ctx.destination);
+      o.noteOn(0);
+      
+      playing[o.id] = true;
+      
+      setTimeout(function() { 
+        o.disconnect(); 
+        playing[o.id] = false;        
+      },duration);
+    
+      /////self.soundIt(BSD.hzTable[note.value()],duration);  
     };
     return self;
   };
+  
+  
+BSD.Oscar = function(spec) {
 
+  var panner1 = context.createPanner();
+  panner1.panningModel = webkitAudioPannerNode.EQUALPOWER;
+  
+  var panner2 = context.createPanner();
+  panner2.panningModel = webkitAudioPannerNode.EQUALPOWER;
+  
+
+  // Amplitude envelope
+  var ampEnvelope = context.createGainNode();
+  ampEnvelope.gain.value = 0.0; // default value
+
+  // Create note volume.
+  var noteVolume = context.createGainNode();
+  noteVolume.gain.value = 0; // start out silent until told otherwise
+
+
+
+    // Filter
+    var filter = context.createBiquadFilter();
+    filter.type = 0;
+    filter.gain.value = 0.0; // default value
+
+
+
+  var isMonophonic = true;
+
+    var osc1 = context.createBufferSource();
+    osc1.looping = true;
+
+    var osc1Octave = context.createBufferSource();
+    osc1Octave.looping = true;
+
+    var osc2 = context.createBufferSource();
+    osc2.looping = true;
+
+    var osc2Octave = context.createBufferSource();
+    osc2Octave.looping = true;
+        
+    // oscillators --> panners.
+    osc1.connect(panner1);
+    osc1Octave.connect(panner1);
+    osc2.connect(panner2);
+    osc2Octave.connect(panner2);
+
+    // panners --> amplitude envelope
+    panner1.connect(ampEnvelope);
+    panner2.connect(ampEnvelope);
+
+    // amplitude envelope --> filter envelope
+    ampEnvelope.connect(filter);
+
+    // filter envelope --> note volume
+    filter.connect(noteVolume);
+
+    // note volume -> subsonic filter
+    noteVolume.connect(staticAudioRouting.subsonicFilter /*subsonicFilter*/);
+    
+    
+    
+
+    osc1.noteOn(0);
+    osc2.noteOn(0);
+    osc1Octave.noteOn(0);
+    osc2Octave.noteOn(0);
+
+    var self = spec;
+    self.osc1 = osc1;
+    self.osc2 = osc2;
+    self.osc1Octave = osc1Octave;
+    self.osc2Octave = osc2Octave;
+    self.playing = false;
+    var o = self;
+
+
+  self.setFilterValues = function() {
+    var time = context.currentTime;
+
+    var pitchFrequency = self.pitchFrequency;
+    
+    filter.frequency.cancelScheduledValues(0);
+
+    filter.type = 0; // Lowpass
+    filter.Q.value = resonance; // !!FIXME: should be Q
+
+    var nyquist = 0.5 * context.sampleRate;
+
+    var cutoffCents = 9600 * cutoff;
+    var cutoffRate = Math.pow(2, cutoffCents / 1200.0);
+    var startFrequency = cutoffRate * pitchFrequency;
+    if (startFrequency > nyquist)
+        startFrequency = nyquist;
+
+    var envAmountCents = 7200 * envAmount;
+    var envAmountRate = Math.pow(2, envAmountCents / 1200.0);
+    var envAmountFrequency = startFrequency * envAmountRate;
+    if (envAmountFrequency > nyquist)
+        envAmountFrequency = nyquist;
+
+    filter.frequency.setTargetValueAtTime(envAmountFrequency, time, filterAttack);
+    filter.frequency.setTargetValueAtTime(startFrequency, time + filterAttack, filterDecay);
+  };
+
+
+  self.play = function(wave, wave2, semitone, octave, duration) {   
+  
+    console.log('playyy');
+    self.playing = true;
+
+    setTimeout(function() { self.playing = false; },duration);
+
+    var time = context.currentTime;
+        
+    // Set oscillator pitches.
+    
+    var pitchFrequency = 20.0 /*440.0*/ * Math.pow(2.0, semitone / 12.0);
+    self.pitchFrequency = pitchFrequency;
+    
+    
+    var pitchRate = pitchFrequency * wave.getRateScale();
+
+    var rate1 = pitchRate * Math.pow(2.0, -detune1/1200);
+    var buffer1 = wave.getWaveDataForPitch(rate1);
+    if (WTNote.firstTime) osc1.buffer = buffer1;
+
+    osc1.playbackRate.value = rate1;
+
+
+    var rate2 = pitchRate * Math.pow(2.0, octave - detune2/1200);
+    var buffer2 = wave2.getWaveDataForPitch(rate2);
+    if (WTNote.firstTime) osc1Octave.buffer = buffer2;
+    osc1Octave.playbackRate.value = rate2;
+
+    if (WTNote.firstTime) osc2.buffer = buffer1;
+    osc2.playbackRate.value = pitchRate * Math.pow(2.0, +detune1/1200); // max one semi-tone
+
+    if (WTNote.firstTime) osc2Octave.buffer = buffer2;
+    osc2Octave.playbackRate.value = pitchRate * Math.pow(2.0, octave + detune2/1200); // max one semi-tone
+    
+    // Set panning amount for width spreading.
+    
+    // pan maximum from -90 -> +90 degrees
+    var x = Math.sin(0.5*Math.PI * width);
+    var z = -Math.cos(0.5*Math.PI * width);
+    panner1.panningModel = webkitAudioPannerNode.EQUALPOWER;
+    panner1.setPosition(-x, 0, z);
+
+    panner2.panningModel = webkitAudioPannerNode.EQUALPOWER;
+    panner2.setPosition(x, 0, z);
+
+    // Amplitude envelope
+    ampEnvelope.gain.cancelScheduledValues(0);
+
+    
+    // Amplitude attack
+    var ampAttackTime = time + ampAttack;
+    
+    // Amplitude decay
+    ampEnvelope.gain.setTargetValueAtTime(1, time, ampAttack);
+    ampEnvelope.gain.setTargetValueAtTime(0, ampAttackTime, ampDecay);
+
+    // Filter
+    self.setFilterValues();
+
+    // Set note volume.
+    noteVolume.gain.value = 0.1 * volume*volume; // use x^2 volume curve for now
+
+}
+
+
+
+    return self;    
+};
+
+
+BSD.WTPlayer = function(spec) {
+
+
+  var time = context.currentTime;
+  var isMonophonic = true;
+
+  var self = BSD.OSCPlayer(spec);
+
+  self.idleOscillators = function() {
+    return oscillators.select(function(o) { return o.playing == false; });
+  };
+
+  var oscillators = [];
+  self.oscillators = oscillators;
+  [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16].each(function(i) {
+    var oscillator = BSD.Oscar({ id: i  });  
+    oscillators.push(oscillator);
+  });
+
+  self.play = function(wave, wave2, semitone, octave, duration) {   
+    var o = self.idleOscillators().detect(function(o) { return true; });
+    if (!o) { 
+      console.log('could not find idle oscillator'); 
+      return false; 
+    }
+    o.play(wave, wave2, semitone, octave, duration);
+  };
+
+  self.playNote = function(note,duration) {
+    self.play(waveTable, waveTable2, note.value(), octave, duration);  
+  };
+  return self;
+};
+
+  
   function letsDoThis(prog) {
     riffer.go(prog);
     faker.go(prog);
-    player.go(prog);
+
+
+    var chordPlayer = BSD.Widgets.ChordPlayer({ 
+      progression: prog, 
+      guid: 'CHORXDY',
+      audioPlayer: audioPlayer 
+    });
+    chordPlayer.renderOn(chordPlayerWrap);
+    chordPlayer.play();
+    BSD.chordy = chordPlayer;
   }
 
 
+  
+
   var stage = jQuery('#stage'); ///DOM.div().addClass('stage');
 
+
+  var audioPlayer = BSD.WTPlayer(); ////////BSD.OSCPlayer({});
   var riffer = BSD.Widgets.Riffer({});
-  var faker = BSD.Widgets.Faker({});
-  var player = BSD.Widgets.Player({});
+  var faker = BSD.Widgets.Faker({
+    audioPlayer: audioPlayer 
+  });
+  BSD.audioPlayer = audioPlayer;
   
   
 
@@ -577,20 +788,6 @@ BSD.Widgets.Spinner({
     letsDoThis(input.val());
   });
   stage.append(input);
-
-  var range = jQuery('#bar-width');
-  range.change(function(){
-    jQuery('.bar').css('width',this.value + '%');
-  });
-
-
-  var playerDelay = jQuery('#player-delay');
-  playerDelay.change(function(){
-    player.setDelay(this.value);
-  });
-  playerDelay.val(1000);
-
-
 
 
   
@@ -609,7 +806,7 @@ BSD.Widgets.Spinner({
   var orpheusButton = DOM.button('Black Orpheus').click(function() {
     jQuery('#table1-wrap').empty();
     jQuery('#table1-wrap').append(DOM.h2('Black Orpheus'));
-    var prog = 'A-7|B-7b5 E7b9|A-7|B-7b5 E7b9|A-7|D-7 G7|CM7|C#o7|D-7|G7|C6|FM7|B-7b5|E7b9|A-7|B-7b5 E7b9|A-7|B-7b5 E7b9|A-7|B-7b5 E7b9|E-7b5|A7b9|D-7|D-7|D-7|B-7b5 E7b9|A-7|FM7|B-7b5|E7b9|A-7|B-7b5 E7b9';
+    var prog = 'A-7|B-7b5 E7b9|A-7|B-7b5 E7b9|A-7|D-7 G7|CM7|C#o7 A7b9|D-7|G7|C6|FM7|B-7b5|E7b9|A-7|B-7b5 E7b9|A-7|B-7b5 E7b9|A-7|B-7b5 E7b9|E-7b5|A7b9|D-7|D-7|D-7|B-7b5 E7b9|A-7|FM7|B-7b5|E7b9|A-7|B-7b5 E7b9';
     jQuery('#faker-wrap').empty();
     input.val(prog);
     letsDoThis(prog);
@@ -632,7 +829,82 @@ BSD.Widgets.Spinner({
     var sticky = BSD.Widgets.StickyNote();
     sticky.renderOn(jQuery(document.body));
   });
-  
+
+
+/*****
+
+$(document).ready(function() {
+
+    var context = new webkitAudioContext(),
+        oscillator = context.createOscillator();
+
+    var updateFreq = function(freq) {
+        oscillator.type = parseInt($('#comboWaveType').val(),10) ;
+        oscillator.frequency.value = freq;
+        oscillator.connect(context.destination);
+        oscillator.noteOn && oscillator.noteOn(0); // this method doesn't seem to exist, though it's in the docs?
+        $("#freqDisplay").val(freq + "Hz");
+    };
+        
+    $("#freqSlider").bind("change",function() {
+        $("#freqDisplay").val( $("#freqSlider").val() + "Hz");
+        updateFreq($("#freqSlider").val());
+    });
+        
+    $("#btnPlay").click(function() {
+        updateFreq($("#freqSlider").val());
+    });
+
+    $("#btnPause").click(function() {
+        // stop frequency increase (if on)
+        $("#btnSlowClimb").text("Slowly Increase Frequency");
+        slowClimbIncr = -1;
+        
+        // kill sound
+        oscillator.disconnect();
+    });
+
+    $("#comboWaveType").change(function() {
+        updateFreq($("#freqSlider").val());
+    });
+    
+    var slowClimbIncr = 0;
+    $("#btnSlowClimb").toggle(function() {
+        $("#btnSlowClimb").text("Stop Increase Frequency");
+        slowClimbIncr = $("#freqSlider").val();
+        
+        var increase = function() {
+            if (slowClimbIncr === -1 || slowClimbIncr > 22000) {return;}
+            
+            if ( slowClimbIncr !== 0 && slowClimbIncr !== ( parseInt($("#freqSlider").val(),10)+1) ) {
+                slowClimbIncr = $("#freqSlider").val();
+            }
+            
+            $("#freqSlider").val(slowClimbIncr);
+            updateFreq(slowClimbIncr);
+            slowClimbIncr++;
+            setTimeout(increase, 50);
+        };
+        
+        $("#freqSlider").val(slowClimbIncr);
+        increase();
+        
+    }, function() {
+        $("#btnSlowClimb").text("Slowly Increase Frequency");
+        slowClimbIncr = -1;
+    });
+});
+
+***/
+
+
+
+
+
+
+
+
+
 
   
 

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+
+    <title>Per-pixel drag & drop | Fabric.js Demos</title>
+
+    <script src="javascript/fabric/0.9.15.min.js"></script>
+    <!--[if lt IE 9]>
+      <script src="../lib/excanvas.js"></script>
+    <![endif]-->
+
+    <script>
+      // polyfill by @paulirish
+      if (!window.requestAnimationFrame ) {
+        window.requestAnimationFrame = (function() {
+          return window.webkitRequestAnimationFrame ||
+          window.mozRequestAnimationFrame ||
+          window.oRequestAnimationFrame ||
+          window.msRequestAnimationFrame ||
+          function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element ) {
+            window.setTimeout( callback, 1000 / 60 );
+          };
+        })();
+      }
+    </script>
+  </head>
+  <body>
+    <div id="wrapper">
+      <canvas id="c" width="800" height="800"></canvas>
+    </div>
+    <script type="text/javascript">
+    var canvas = new fabric.Canvas('c', {
+      hoverCursor: 'pointer',
+      selection: false
+    });
+    
+    canvas.on({
+      'object:moving': function(e) {
+        e.target.opacity = 0.5;
+      },
+      'object:modified': function(e) {
+        e.target.opacity = 1;
+      }
+    });
+    
+    var y = 80;
+    var dx = 150;
+    var dy = 150;
+    var points = [];
+    for (var r = 0; r < 4; r++) {
+      x = 80; 
+      for (var c = 0; c < 4; c++) {
+        points.push([x,y]);
+        x += dx;  
+      }
+      y += dy;
+    }
+    console.log(points);
+      
+    for (var i = 0; i < 16; i++) {
+        fabric.Image.fromURL('images/chordbox.jpg', function(img) {
+          var point = points.shift();
+          img.set({
+          
+            left: point[0],
+            top: point[1],
+            //angle: fabric.util.getRandomInt(0, 90)
+          });
+      
+          ///img.perPixelTargetFind = true;
+          //img.targetFindTolerance = 4;
+          img.hasControls = img.hasBorders = false;
+      
+          ////img.scale(fabric.util.getRandomInt(50, 100) / 100);
+      
+          canvas.add(img);
+        });
+    }
+    
+  for (var i = 0; i < 100; i += 1) {
+    var myCircle = new fabric.Circle({ top: 80, left: 80, radius: 6, hasControls: false, hasBorders: false });
+    myCircle.hasControls = myCircle.hasBorders = false;
+    setTimeout(function() { canvas.add(myCircle); },1000);
+  }   
+    
+    
+    
+      (function(){
+        var mainScriptEl = document.getElementById('main');
+        if (!mainScriptEl) return;
+        var el = document.createElement('pre');
+        el.innerHTML = mainScriptEl.innerHTML;
+        el.lang = 'javascript';
+        el.className = 'prettyprint';
+        document.getElementById('bd-wrapper').appendChild(el);
+        prettyPrint();
+      })();
+    </script>
+
+  </body>
+</html>
