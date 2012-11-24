@@ -1,8 +1,8 @@
 function WaveTableLoader() {
 
-    this.waveNames = ['Celeste','Twelve String Guitar 1'];
+    this.waveNamesV2 = ['Celeste','Twelve String Guitar 1'];
 
-    this.waveNamesV1 = [
+    this.waveNames = [
         "01_Saw",
         "02_Triangle",
         "03_Square",
@@ -55,6 +55,17 @@ function WaveTableLoader() {
         "Wurlitzer",
         "Wurlitzer_2",
     ];
+
+    /*    
+    var s = '';
+    this.waveNames.each(function(n) {
+      s += 'wget http://chromium.googlecode.com/svn/trunk/samples/audio/wave-tables/' + n + "\n";    
+    
+    });
+    console.log(s);
+    */
+    
+    
 }
 
 WaveTableLoader.prototype.load = function(finishedCallback) {
@@ -64,7 +75,7 @@ WaveTableLoader.prototype.load = function(finishedCallback) {
     loader.loadedCount = 0;
     loader.waveList = new Array();
 
-    console.log('checkit',loader);
+    ///console.log('checkit',loader);
 
 
     for (var i = 0; i < loader.waveNames.length; ++i) {
