@@ -230,6 +230,8 @@ BSD.Widgets.Oscar = function(spec) {
     // Set oscillator pitches.
     
     var pitchFrequency = 20.0 /*440.0*/ * Math.pow(2.0, semitone / 12.0);
+    
+    console.log('semitone',semitone,'pf',pitchFrequency);
     /////var pitchFrequency = BSD.hzTable[semitone];
     ////var pitchFrequency = midi2Hertz(semitone);
 

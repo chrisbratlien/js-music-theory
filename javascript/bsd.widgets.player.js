@@ -13,6 +13,7 @@ BSD.Widgets.ChordPlayer = function(spec) {
     noteLabel = DOM.label();
     board = DOM.div().addClass('fretboard');
     
+    
     var progression = spec.progression;
   
     self.progression = progression;
@@ -72,13 +73,19 @@ BSD.Widgets.ChordPlayer = function(spec) {
       var stringDiv = DOM.div().addClass('string').addClass('string-' + stridx);
       [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].each(function(fidx) {
         var midinote = opens[stridx] + fidx;
-        var noteName = Note(midinote).name();
+        var thisNote = Note(midinote);
+        var noteName = thisNote.name();
         var nn = noteName.toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');          
         ////console.log(noteName);      
         
         var fretDiv = DOM.div().addClass('fret').addClass('fret-' + fidx).addClass('midinote-' + midinote).addClass('note-' + nn); 
         
         fretDiv.addClass('guid-' + spec.guid);
+        
+        fretDiv.click(function() {
+          audioPlayer.playNote(thisNote,timeout);
+        });
+        
                 
         stringDiv.append(fretDiv);
       });
