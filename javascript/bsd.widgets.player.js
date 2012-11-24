@@ -20,7 +20,7 @@ BSD.Widgets.ChordPlayer = function(spec) {
 
 
     var delayLabel = DOM.label('Spinner delay');
-    var delayInput = DOM.input().attr('type','range').attr('min',0).attr('max',5000).val(1000);
+    var delayInput = DOM.input().attr('type','range').attr('min',0).attr('max',15000).val(timeout);
     delayInput.change(function(){ self.setDelay(this.value); });
     delayLabel.append(delayInput);
   
@@ -42,6 +42,9 @@ BSD.Widgets.ChordPlayer = function(spec) {
     var queue = [];
     
     var spinner = false;  
+  
+    var leftPanel = DOM.div().addClass('panel panel-left');
+    var rightPanel = DOM.div().addClass('panel panel-right');
     
     var positionIndicator = DOM.ul().addClass('position-indicator');
 
@@ -85,6 +88,10 @@ BSD.Widgets.ChordPlayer = function(spec) {
         fretDiv.click(function() {
           audioPlayer.playNote(thisNote,timeout);
         });
+        fretDiv.bind('touchstart',function() {
+          audioPlayer.playNote(thisNote,timeout);
+        });
+        
         
                 
         stringDiv.append(fretDiv);
@@ -140,13 +147,20 @@ BSD.Widgets.ChordPlayer = function(spec) {
       wrap.append(cnToggleLabel);      
       wrap.append(queueToggleLabel);      
       wrap.append(delayLabel); //which contains the delayInput
-      wrap.append(chordLabel);
-      wrap.append(noteLabel);
-      wrap.append(positionIndicator);
-      wrap.append(legend);
-      wrap.append(board);
       
       
+      leftPanel.append(positionIndicator);
+      wrap.append(leftPanel);
+      wrap.append(rightPanel);
+      
+      
+      
+      rightPanel.append(chordLabel);
+      rightPanel.append(noteLabel);
+      rightPanel.append(legend);
+      rightPanel.append(board);      
+      rightPanel.append(DOM.div().addClass('clear'));
+
 
       
 

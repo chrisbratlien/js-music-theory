@@ -75,7 +75,11 @@
   #faker-wrap .legend div { float: left; padding: 5px; }
 
 
-  .bsd-widgets-player { width: 50%;  }
+  .bsd-widgets-player { width: 100%;  }
+
+  .panel { float: left; }
+  .panel-left { width: 20%; }
+  .panel-right { width: 55%; }
 
 
   .bsd-widgets-player label { margin-right: 1em; }
@@ -86,12 +90,12 @@
     width: 21px; 
     height: 14px; line-height: 14px; 
     */
-    width: 4%;
+    width: 5%;
     height: 2em; line-height: 2em;
 
     background: #eee; border-radius: 2px; 
     float: left; margin: 1px; text-align: center; 
-    
+    cursor: pointer;
   }
   
   .bsd-widgets-player .fret-label { font-size: 0.5em; }
@@ -120,9 +124,11 @@
   .bsd-widgets-player .fret.color { color: white; }
   .bsd-widgets-player .fret.root { background: red; color: white; }
 
-  .bsd-widgets-player .position-indicator { width: 200px; height: 200px; list-style-type: none;  }
+  .bsd-widgets-player .position-indicator { list-style-type: none;  }
   .bsd-widgets-player .position-indicator li { margin: 0; float: left; width: 25%; background: #aaf; color: #778; text-align: center;  }
   .bsd-widgets-player .position-indicator li.selected { background: yellow; }
+
+
 
 
 

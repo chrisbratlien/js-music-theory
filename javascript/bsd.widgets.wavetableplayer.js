@@ -43,8 +43,8 @@
 
     self.playChord = function(chord,duration) {
       
-      var tooDamnHigh = 50;
-      var tooDamnLow = 30;
+      var tooDamnHigh = 70;
+      var tooDamnLow = -300;
       
       var tooHigh = chord.notes().detect(function(n) { return n.value() > tooDamnHigh; });
       while (tooHigh) {
@@ -230,10 +230,13 @@ BSD.Widgets.Oscar = function(spec) {
     // Set oscillator pitches.
     
     var pitchFrequency = 20.0 /*440.0*/ * Math.pow(2.0, semitone / 12.0);
-    
     console.log('semitone',semitone,'pf',pitchFrequency);
+    ///pitchFrequency = 261;
+    
+    
     /////var pitchFrequency = BSD.hzTable[semitone];
-    ////var pitchFrequency = midi2Hertz(semitone);
+    var pitchFrequency = midi2Hertz(semitone);
+    console.log('semitone',semitone,'pf',pitchFrequency);
 
     
     self.pitchFrequency = pitchFrequency;
