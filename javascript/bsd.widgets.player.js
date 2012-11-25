@@ -180,20 +180,6 @@ BSD.Widgets.ChordPlayer = function(spec) {
       rightPanel.append(DOM.div().addClass('clear'));
 
 
-      
-
-
-
-
-  
-
-
-
-
-
-
-
-
       var last = false;
       var barIndex = 0;
       
@@ -212,6 +198,8 @@ BSD.Widgets.ChordPlayer = function(spec) {
           if (halfBar) {
             timeoutScale = 0.5;
           }
+          
+          ////console.log('enqueueing',chord.fullName(),timeoutScale);
           self.enqueue({ chord: chord, scales: scales, barIndex: barIndex, halfBar: halfBar, timeoutScale: timeoutScale });  
         });
         barIndex += 1;        
@@ -332,7 +320,7 @@ BSD.Widgets.ChordPlayer = function(spec) {
         
         
         if (scale) { 
-          console.log(scale.fullName());
+          ///console.log('scale chosen',scale.fullName());
           scale.notes().each(function(n) {
             var scalenn = n.name().toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');              
             board.find('.note-' + scalenn).addClass('compat-scale');
