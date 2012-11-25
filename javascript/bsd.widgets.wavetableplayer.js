@@ -61,7 +61,7 @@
       }
             
       var midivalues = chord.notes().collect(function(n) { return n.value(); });
-      console.log(midivalues);
+      ////console.log(midivalues);
       chord.notes().each(function(n) { self.playNote(n,duration); });
     };
 
@@ -236,7 +236,7 @@ BSD.Widgets.Oscar = function(spec) {
     
     /////var pitchFrequency = BSD.hzTable[semitone];
     var pitchFrequency = midi2Hertz(semitone);
-    console.log('semitone',semitone,'pf',pitchFrequency);
+    ///console.log('semitone',semitone,'pf',pitchFrequency);
 
     
     self.pitchFrequency = pitchFrequency;

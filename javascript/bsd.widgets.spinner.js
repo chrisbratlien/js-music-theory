@@ -30,17 +30,30 @@
     self.spin = function() { 
       callback({ prev: spec.items[p], current: spec.items[c], next: spec.items[n] });
 
-      c += 1; c %= length;
-      n += 1; n %= length;
-      p += 1; p %= length;
-      spins += 1;
       ////////console.log('c',c,'n',n,'p',p);
 
       ///console.log(spec.oneShot,spins,length);
       if (spec.oneShot && spins == length) {
         return false;
       }
-      setTimeout(self.spin,self.timeout);      
+      
+      var current = spec.items[c];
+      
+      /////console.log(current,current.timeoutScale);
+      
+      if (typeof current.timeoutScale != "undefined") {
+        //allow per-item timeout adjustment
+        setTimeout(self.spin,self.timeout * current.timeoutScale);          
+      }
+      else {
+        setTimeout(self.spin,self.timeout);          
+      }
+    
+      //do this stuff last
+      c += 1; c %= length;
+      n += 1; n %= length;
+      p += 1; p %= length;
+      spins += 1;
     };
     return self;
   };

@@ -207,7 +207,12 @@ BSD.Widgets.ChordPlayer = function(spec) {
           var chord = makeChord(name);
           var scales = chord.compatibleScales();
           var candidateNotes = chord.notes();        
-          self.enqueue({ chord: chord, scales: scales, barIndex: barIndex, halfBar: halfBar });  
+          
+          var timeoutScale = 1.0;
+          if (halfBar) {
+            timeoutScale = 0.5;
+          }
+          self.enqueue({ chord: chord, scales: scales, barIndex: barIndex, halfBar: halfBar, timeoutScale: timeoutScale });  
         });
         barIndex += 1;        
       });
