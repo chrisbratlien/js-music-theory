@@ -222,6 +222,17 @@ BSD.Widgets.ChordPlayer = function(spec) {
     self.play = self.start;
     
 
+  self.currentChordIsProbably2of251 = function(o) { 
+    return (o.next.chord.rootNote.isAFourthOf(o.current.chord.rootNote) // 5 is "a fourth of" 2
+      && o.current.chord.hasMinorThirdInterval() 
+      && o.next.chord.hasMajorThirdInterval());
+  };
+
+  self.currentChordIsProbably5of251 = function(o) {
+    return (o.current.chord.rootNote.isAFourthOf(o.prev.chord.rootNote) // 5 is "a fourth of" 2
+      && o.prev.chord.hasMinorThirdInterval() 
+      && o.current.chord.hasMajorThirdInterval());
+  };
   
   self.spinCallback = function(o) {
 
@@ -272,32 +283,58 @@ BSD.Widgets.ChordPlayer = function(spec) {
       }
       */
 
-      var guesses = ['major','harmonic minor','blues'];      
-      
-      var scale = o.current.scales.detect(function(s){ 
 
-        var guess;
-
-        guess = guesses.atRandom();
-        if (s.fullName().match(guess)) { return true; } 
-
-        guess = guesses.atRandom();
-        if (s.fullName().match(guess)) { return true; } 
-
-        guess = guesses.atRandom();
-        if (s.fullName().match(guess)) { return true; } 
-
-        return false;
-
-      });
+      var scale = false;
       
       
+      var preferredGuesses = [];
+      if (self.currentChordIsProbably2of251(o)) {
+        //console.log('probably 2');      
+        preferredGuesses = ['blues','major','minor']; //the major here would be the 1 major.. but just in case that isn't found, still try for minor            
+      }
+      if (self.currentChordIsProbably5of251(o)) {
+        //console.log('probably 5');      
+        preferredGuesses = ['harmonic minor','major','blues','minor']; //the major here would be the 1 major.. but just in case that isn't found, still try for minor            
+      }
+
+      if (o.current.chord.hasDominantQuality()) {
+        preferredGuesses.push('major');
+      }
       
+      preferredGuesses.push(o.current.chord.rootNote.scale('major').fullName()); //hail mary before we start guessing and hit an off-major.…      
+
+      //first go through the preferred, if any      
+      while (!scale && preferredGuesses.length > 0) {
+        var guess = preferredGuesses.shift();
+        scale = o.current.scales.detect(function(s) {
+          if (s.fullName().match(guess)) { return true; } 
+        });
+      }
+      if (scale) {
+        //console.log('found preferred',scale.fullName());
+      }
+
+      
+      if (!scale) {
+        var randomGuesses = ['major','harmonic minor','blues','pentatonic'];      
+        scale = o.current.scales.detect(function(s){ 
+          var guess;
+          guess = randomGuesses.atRandom();
+          if (s.fullName().match(guess)) { return true; } 
+          guess = randomGuesses.atRandom();
+          if (s.fullName().match(guess)) { return true; } 
+          guess = randomGuesses.atRandom();
+          if (s.fullName().match(guess)) { return true; } 
+          return false;
+        });
+      }
       
       if (scale) {
+        //console.log('scale chosen',scale.fullName());
         legendScale.html(scale.fullName() + ' scale');
       }
       else {
+        console.log('**NO SCALE CHOSEN FOR CHORD ',o.current.chord.fullName());
         legendScale.html(null);
       }
       
@@ -320,7 +357,6 @@ BSD.Widgets.ChordPlayer = function(spec) {
         
         
         if (scale) { 
-          ///console.log('scale chosen',scale.fullName());
           scale.notes().each(function(n) {
             var scalenn = n.name().toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');              
             board.find('.note-' + scalenn).addClass('compat-scale');

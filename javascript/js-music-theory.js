@@ -265,6 +265,18 @@ var Note = function(foo) {
     return Chord({ rootNote: self, intervals: spec.intervals, name: spec.name, "abbrev": abbrev });          
   };
 
+
+  self.isAFourthOf = function(otherNote) {
+    var test = Note(otherNote.value() + 5);
+    return self.abstractlyEqualTo(test);
+  };
+
+  self.isAFifthOf = function(otherNote) {
+    var test = Note(otherNote.value() + 7);
+    return self.abstractlyEqualTo(test);
+  };
+
+
   return self; 
 };
 
@@ -380,6 +392,26 @@ var RootNoteWithIntervals = function(spec) {
     });
     
     return result;
+  };
+
+
+  self.hasDominantQuality = function() {
+    return (self.hasMajorThirdInterval() && self.hasDominantSeventhInterval());
+  };
+  
+  self.hasDominantSeventhInterval = function() {
+    var hit = self.intervals().detect(function(i) { return i == 10; });  
+    return (hit != false);
+  };
+
+  self.hasMinorThirdInterval = function() {
+    var hit = self.intervals().detect(function(i) { return i == 3; });  
+    return (hit != false);
+  };
+
+  self.hasMajorThirdInterval = function() {
+    var hit = self.intervals().detect(function(i) { return i == 4; });  
+    return (hit != false);
   };
 
 
