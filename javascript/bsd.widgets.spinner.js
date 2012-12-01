@@ -26,8 +26,21 @@
         c = 0; n = 1; p = length - 1;
         break;
     }
+    var paused = false;
     
-    self.spin = function() { 
+    self.pause = function() {
+      paused = true;
+    };
+    
+    self.play = function() {
+      //console.log('going to play again');
+      paused = false;
+      self.goAgain();
+    };
+    self.spin = self.play;
+
+    self.goAgain = function() { 
+    
       callback({ prev: spec.items[p], current: spec.items[c], next: spec.items[n] });
 
       ////////console.log('c',c,'n',n,'p',p);
@@ -41,12 +54,16 @@
       
       /////console.log(current,current.timeoutScale);
       
+      if (paused) {
+        return false;
+      }
+      
       if (typeof current.timeoutScale != "undefined") {
         //allow per-item timeout adjustment
-        setTimeout(self.spin,self.timeout * current.timeoutScale);          
+        setTimeout(self.goAgain,self.timeout * current.timeoutScale);          
       }
       else {
-        setTimeout(self.spin,self.timeout);          
+        setTimeout(self.goAgain,self.timeout);          
       }
     
       //do this stuff last

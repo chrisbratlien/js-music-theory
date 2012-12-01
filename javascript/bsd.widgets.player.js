@@ -37,6 +37,23 @@ BSD.Widgets.ChordPlayer = function(spec) {
     delayInput.change(function(){ self.setDelay(this.value); });
     delayLabel.append(delayInput);
   
+  
+    var paused = true;
+  
+  
+    var togglePlay = DOM.button('play/pause');
+    togglePlay.click(function() {
+      paused = ! paused;
+      if (paused) {
+        self.pause();
+        togglePlay.html('play');
+      }
+      else {
+        self.play();
+        togglePlay.html('pause');
+      }
+    });
+  
 
     chordNoteState = false;
     queueState = false;
@@ -165,6 +182,7 @@ BSD.Widgets.ChordPlayer = function(spec) {
       wrap.append(cnToggleLabel);      
       wrap.append(queueToggleLabel);      
       wrap.append(delayLabel); //which contains the delayInput
+      wrap.append(togglePlay);
       
       
       leftPanel.append(positionIndicator);
@@ -217,9 +235,17 @@ BSD.Widgets.ChordPlayer = function(spec) {
     };
     
     self.start = function() {
+      paused = false;
       spinner.spin();
     };
     self.play = self.start;
+    
+    self.pause = function() {
+      paused = true;
+      
+      //console.log('asking spinner to pause');
+      spinner.pause();
+    };
     
 
   self.currentChordIsProbably2of251 = function(o) { 

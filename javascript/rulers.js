@@ -457,6 +457,23 @@ BSD.MinorScaleRuler = function() {
 };
 
 
+BSD.MajorPentatonicScaleRuler = function() {
+  return BSD.DegreeRuler({ title: 'MP', degrees: '1,2,3,5,6,8,9,10,12,13', classes: ['scale','major-pentatonic'], isScale: true,     onColor: BSD.colorFromHex('#88bb88') });
+};
+BSD.MinorPentatonicScaleRuler = function() {
+  return BSD.DegreeRuler({ title: 'mP', degrees: '1,b3,4,5,b7,8,b10,11,12,b14', classes: ['scale','minor-pentatonic'], isScale: true,     onColor: BSD.colorFromHex('#88bb88') });
+};
+BSD.BluesScaleRuler = function() {
+  return BSD.DegreeRuler({ title: 'blues', degrees: '1,b3,4,b5,5,b7,8,b10,11,b12,12,b14', classes: ['scale','blues'], isScale: true,     onColor: BSD.colorFromHex('#88bb88') });
+};
+BSD.MajorPentatonicPatternRuler = function() {
+  return BSD.DegreeRuler({ title: 'MPP', degrees: '1,b3,3,5,6,8,b10,10,12,13', classes: ['scale','major-pentatonic-pattern'], isScale: true,     onColor: BSD.colorFromHex('#88bb88') });
+};
+
+
+
+
+
 
 BSD.MajorSixChordRuler = function() {
   return BSD.DegreeRuler({ title: '6', degrees: '1,3,5,6,8,10,12,13' });
