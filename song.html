@@ -13,6 +13,7 @@
 <script src="javascript/bsd.widgets.spinner.js"></script>
 <script src="javascript/bsd.widgets.faker.js"></script>
 <script src="javascript/bsd.widgets.player.js"></script>
+<script src="javascript/bsd.widgets.roll.js"></script>
 <script src="javascript/sinewave.js"></script>
 
 <!-- wavetable dependencies -->
@@ -25,6 +26,7 @@
 <script src="javascript/bsd.widgets.oscplayer.js"></script>
 <script src="javascript/bsd.widgets.wavetableplayer.js"></script>
 <script src="javascript/prob.js"></script>
+<script src="http://cdn.dev.bratliensoftware.com/javascript/bsd.pubsub.js"></script>
 <style type="text/css">
 
 
@@ -57,24 +59,31 @@
   #table1-wrap ul li { float: left; margin-right: 1.5em; }
 
 
-  #faker-wrap { width: 90%; margin: 0 auto; margin-top: 1em; }
-  #faker-wrap .bar { width: 24%;  float: left; position: relative;}
-  #faker-wrap .bar .chord { float: left; border: 1px solid white; width: 99%; }
-  #faker-wrap .bar .chord.half { width: 49%; }
-  #faker-wrap .bar .chord.third { width: 32%; }
-  #faker-wrap .bar .chord.fourth { width: 24%; }
+  .roll-ui { width: 90%; margin: 0 auto; margin-top: 1em; }
+  .roll-ui .bar { width: 24%;  float: left; position: relative;}
+  .roll-ui .bar .chord { float: left; border: 1px solid white; width: 99%; }
+  .roll-ui .bar .chord.half { width: 49%; }
+  .roll-ui .bar .chord.third { width: 32%; }
+  .roll-ui .bar .chord.fourth { width: 24%; }
 
-  #faker-wrap .bar ul { list-style-type: none; margin: 0; padding: 0; /* height: 85%; position: absolute; bottom: 0; */ }
-  #faker-wrap .bar ul li { height: 0.9em; padding-left: 0.5em; }  
-  #faker-wrap .cell { font-size: 0.4em; border-top: 1px solid #abc; padding: 1px; }
-  #faker-wrap .on { background-color: #38f; color: white;  }
-  #faker-wrap .scale.on { background-color: #edf; color: #98f;  }
+  .roll-ui .bar ul { list-style-type: none; margin: 0; padding: 0; /* height: 85%; position: absolute; bottom: 0; */ }
+  .roll-ui .bar ul li { height: 0.9em; padding-left: 0.5em; }  
+  .roll-ui .cell { font-size: 0.4em; border-top: 1px solid #abc; padding: 1px; }
+  .roll-ui .on { background-color: #38f; color: white;  }
+  .roll-ui .scale.on { background-color: #edf; color: #98f;  }
 
-  #faker-wrap .on.young { background-color: #9f9; color: #393;  }
-  #faker-wrap .on.old { background-color: #f99; color: #933;  }
-  #faker-wrap .on.young.old { background-color: #fc9; color: #963;  }
+  .roll-ui .on.young { background-color: #9f9; color: #393;  }
+  .roll-ui .on.old { background-color: #f99; color: #933;  }
+  .roll-ui .on.young.old { background-color: #fc9; color: #963;  }
 
-  #faker-wrap .legend div { float: left; padding: 5px; }
+  .roll-ui .legend div { float: left; padding: 5px; }
+
+  #roll-wrap { width: 55%; float: right; }
+  #roll-wrap ul { list-style-type: none; }
+
+
+
+
 
 
   .bsd-widgets-player { width: 100%;  }
@@ -159,10 +168,13 @@
 
 
 <div id="chord-player-wrap"></div>
-<div id="faker-wrap">
+<div id="roll-wrap" class="roll-ui"></div>
+<div id="faker-wrap" class="roll-ui">
 </div>
 <div id="table1-wrap"></div>
 <div id="table2-wrap"></div>
+
+
 
 <script type="text/javascript">
 
@@ -321,16 +333,31 @@ function loadImpulseResponse(url, convolver) {
     request.send();
 }
 
+
+
+  
+
+  BSD.audioPlayer = false;
+  BSD.riffer = false;
+  BSD.faker = false;
+  
+  var campfire = BSD.PubSub({});
+
+  var roll = BSD.Widgets.Roll({
+    wrap: jQuery('#roll-wrap'),
+    gossip: campfire
+  });
   
   function letsDoThis(prog) {
-    riffer.go(prog);
-    faker.go(prog);
+    BSD.riffer.go(prog);
+    BSD.faker.go(prog);
 
 
     var chordPlayer = BSD.Widgets.ChordPlayer({ 
+      gossip: campfire,
       progression: prog, 
       guid: 'CHORXDY',
-      audioPlayer: audioPlayer 
+      audioPlayer: BSD.audioPlayer 
     });
     chordPlayer.renderOn(chordPlayerWrap);
     chordPlayer.play();
@@ -343,18 +370,41 @@ function loadImpulseResponse(url, convolver) {
   var stage = jQuery('#stage'); ///DOM.div().addClass('stage');
 
 
-  var audioPlayer = BSD.Widgets.WaveTablePlayer({
-    context: context,
-   name: 'Chorus_Strings'
-   // name: 'Guitar_Fuzz'
-//    name: "Celeste"
-  }); 
-  
-  var riffer = BSD.Widgets.Riffer({});
-  var faker = BSD.Widgets.Faker({
-    audioPlayer: audioPlayer 
+
+  BSD.getWaveTableNames(function(resp) {
+
+    var list = eval( '(' + resp + ')');
+
+
+    //console.log(typeof list);
+    var chosen = list.atRandom();
+    console.log(chosen);
+    
+    BSD.audioPlayer = BSD.Widgets.WaveTablePlayer({
+      context: context,
+      name: chosen,
+     //name: 'Chorus_Strings'
+     // name: 'Guitar_Fuzz'
+  //    name: "Celeste"
+    }); 
+    
+    BSD.riffer = BSD.Widgets.Riffer({});
+    BSD.faker = BSD.Widgets.Faker({
+      audioPlayer: BSD.audioPlayer 
+    });
+    
+    campfire.subscribe('playNote',function(payload) {
+      BSD.audioPlayer.playNote(payload.note,payload.duration);    
+    });
+
+    campfire.subscribe('chordChange',function(o) {
+      BSD.audioPlayer.playChord(o.current.chord,1000);    
+    });
+
   });
-  BSD.audioPlayer = audioPlayer;
+
+
+
   
   
 
@@ -392,6 +442,11 @@ function loadImpulseResponse(url, convolver) {
   stickyNoteButton.click(function() {
     var sticky = BSD.Widgets.StickyNote();
     sticky.renderOn(jQuery(document.body));
+  });
+
+  bootSong({
+    progression: 'F-7|F-7|Eb7|Eb7|Db7|C7sus4|F-7|F-7|F-7|F-7|Eb7|Eb7|Db7|C7sus4|F-7|F-7|Eb7|Eb7|F-7|F-7|Eb7 Db7|C7|F-7|F-7',
+    title: 'Song For My Father'
   });
 
   bootSong({

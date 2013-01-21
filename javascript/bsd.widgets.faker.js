@@ -3,6 +3,11 @@
     var self = {};
     var map = {};
     var queue = [];
+    
+    var gossip = spec.gossip; //BSD.PubSub
+    
+    var backplane = BSD.PubSub({});
+    
     self.enqueue = function(o) {
       queue.push(o);
     };
@@ -127,7 +132,7 @@
               }
             }
             cell.click(function() {
-              audioPlayer.playNote(n,1000);
+              spec.audioPlayer.playNote(n,1000);
             });
             
             
@@ -157,7 +162,7 @@
               } 
               scaleUL.append(cell);
               cell.click(function() {
-                audioPlayer.playNote(n,500);
+                spec.audioPlayer.playNote(n,500);
               });              
             });
 

@@ -13,7 +13,6 @@ function fisherYates ( myArray ) {
 
 BSD.Widgets.ChordPlayer = function(spec) {
 
-
     var timeout = 4000;
 
 
@@ -121,10 +120,14 @@ BSD.Widgets.ChordPlayer = function(spec) {
         fretDiv.addClass('guid-' + spec.guid);
         
         fretDiv.click(function() {
-          audioPlayer.playNote(thisNote,timeout);
+          //spec.audioPlayer.playNote(thisNote,timeout);
+          spec.gossip.publish('playNote',{ note: thisNote, duration: 1000 });
+          
+          
         });
         fretDiv.bind('touchstart',function() {
-          audioPlayer.playNote(thisNote,timeout);
+          spec.gossip.publish('playNote',{ note: thisNote, duration: 1000 });
+          ////spec.audioPlayer.playNote(thisNote,timeout);
         });
         
         
@@ -261,6 +264,7 @@ BSD.Widgets.ChordPlayer = function(spec) {
   };
   
   self.spinCallback = function(o) {
+    spec.gossip.publish('chordChange',o); //NOTE: the future way to implement all this?
 
     //////console.log(self.guid,'got called back');
 
@@ -394,15 +398,14 @@ BSD.Widgets.ChordPlayer = function(spec) {
       });
       
       o.next.chord.notes().each(function(note) {
-  
         var noteName = note.name();
         var nn = noteName.toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');          
         board.find('.note-' + nn).addClass('next');//.html(noteName);              
         /////////console.log('next',noteName);
       });
       
-      audioPlayer.playChord(o.current.chord,timeout);
-              
+      ///spec.audioPlayer.playChord(o.current.chord,timeout);
+      /////spec.gossip.publish('playChord',{ chord: o.current.chord, timeout: timeout });    
 
     });
 

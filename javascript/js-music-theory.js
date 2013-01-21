@@ -145,6 +145,10 @@ JSMT.chordMap = {
     '7':   { name: 'dominant7', intervals: [0,4,7,10] },
     'dom7':   { name: 'dominant7', intervals: [0,4,7,10] },
 
+
+
+
+
     'm7': { name: 'minor7', intervals: [0,3,7,10] },
     '-7': { name: 'minor7', intervals: [0,3,7,10] },
 
@@ -162,7 +166,7 @@ JSMT.chordMap = {
     '7#9':  { name: 'sevenFlat9', intervals: [0,3,4,7,10] },
     '7+9':  { name: 'sevenFlat9', intervals: [0,3,4,7,10] },
 
-
+    '7sus4':  { name: 'sevenSuspended4', intervals: [0,5,7,10] },
 
 
     '6':  { name: 'six', intervals: [0,4,7,9] },

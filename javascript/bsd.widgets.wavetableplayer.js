@@ -237,6 +237,16 @@ BSD.Widgets.Oscar = function(spec) {
 };
 
 
+BSD.getWaveTableNames = function(cb) {
+  jQuery.ajax({ 
+    type: 'POST', 
+    url: 'ws.php', 
+    data: { action: 'wave_tables' },
+     success: cb
+  });
+};
+
+
 BSD.Widgets.WaveTablePlayer = function(spec) {
   var staticAudioRouting = new StaticAudioRouting();
   var waveTable;

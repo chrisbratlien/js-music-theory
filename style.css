@@ -24,8 +24,8 @@ td { border: 1px solid #eee; }
 .ruler div { 
   border-bottom: 1px solid #ddd; 
   cursor: pointer; 
-  width: 30px; 
-  max-width: 30px; 
+  width: 31px; 
+  max-width: 31px; 
   height: 10px; 
   max-height: 10px; 
   text-align: center; 

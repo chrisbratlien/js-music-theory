@@ -37,7 +37,7 @@ BSD.Ruler = function(spec) {
       var diffB = nearestB - current;
       var tolerance = 5;
       
-      console.log('nearestA',nearestA,'nearestB',nearestB,'diffA',diffA,'diffB',diffB);
+      //console.log('nearestA',nearestA,'nearestB',nearestB,'diffA',diffA,'diffB',diffB);
       
       if (diffA > spec.snap / 2) {
         console.log('SNAP B');
@@ -454,6 +454,9 @@ BSD.MajorScaleRuler = function() {
 };
 BSD.MinorScaleRuler = function() {
   return BSD.DegreeRuler({ title: '-', degrees: '1,2,b3,4,5,b6,b7,8,9,b10,11,12,b13,b14', classes: ['scale','minor'], isScale: true,     onColor: BSD.colorFromHex('#88bb88') });
+};
+BSD.HarmonicMinorScaleRuler = function() {
+  return BSD.DegreeRuler({ title: 'HM', degrees: '1,2,b3,4,5,b6,7,8,9,b10,11,12,b13,14', classes: ['scale','harmonic-minor'], isScale: true,     onColor: BSD.colorFromHex('#88bb88') });
 };
 
 
