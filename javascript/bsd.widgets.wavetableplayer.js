@@ -259,7 +259,8 @@ BSD.Widgets.WaveTablePlayer = function(spec) {
     loader = new WaveTableLoader();
     loader.load(function start() {
       waveTable = loader.getTable(spec.name);
-      waveTable2 = loader.getTable(spec.name);  
+      waveTable2 = loader.getTable(spec.name); 
+ 			alert('finished loading ' + spec.name + ', you may begin rocking out'); 
     });
   }
 

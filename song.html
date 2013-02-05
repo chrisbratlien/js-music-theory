@@ -79,7 +79,9 @@
   .roll-ui .legend div { float: left; padding: 5px; }
 
   #roll-wrap { width: 55%; float: right; }
-  #roll-wrap ul { list-style-type: none; }
+  #roll-wrap ul { list-style-type: none; margin: 0; padding: 0; }
+  #roll-wrap ul li { height: 2em; }
+  #roll-wrap .cell { font-size: 0.8em; }
 
 
 
@@ -378,6 +380,7 @@ function loadImpulseResponse(url, convolver) {
 
     //console.log(typeof list);
     var chosen = list.atRandom();
+    ////alert(chosen)
     console.log(chosen);
     
     BSD.audioPlayer = BSD.Widgets.WaveTablePlayer({

@@ -1,0 +1,264 @@
+<!doctype html>
+<html>
+<head>
+<title>mySynth</title>
+<script src="http://cdn.dev.bratliensoftware.com/javascript/array.js"></script>
+<script src="http://cdn.dev.bratliensoftware.com/javascript/color.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+
+<script src="http://cdn.dev.bratliensoftware.com/javascript/dom.js"></script>
+<script src="http://cdn.dev.bratliensoftware.com/javascript/draggy.js"></script>
+<script src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
+<script src="javascript/js-music-theory.js"></script>
+<script src="javascript/bsd.widgets.spinner.js"></script>
+<script src="javascript/bsd.widgets.faker.js"></script>
+<script src="javascript/bsd.widgets.player.js"></script>
+<script src="javascript/bsd.widgets.roll.js"></script>
+<script src="javascript/sinewave.js"></script>
+
+<!-- wavetable dependencies -->
+<script src="javascript/bpm-delay.js"></script>
+<script src="javascript/waveshaper.js"></script>
+<script src="javascript/wavetable.js"></script>
+<script src="javascript/fft.js"></script>
+<script src="javascript/wavetableloader.js"></script>
+<script src="javascript/staticaudiorouting.js"></script>
+<script src="javascript/bsd.widgets.oscplayer.js"></script>
+<script src="javascript/bsd.widgets.wavetableplayer.js"></script>
+<script src="javascript/prob.js"></script>
+<script src="http://cdn.dev.bratliensoftware.com/javascript/bsd.pubsub.js"></script>
+<script type="text/javascript">
+    
+    
+var context;
+
+/* audio stuff */
+  function midi2Hertz(x) {
+    return Math.pow(2,(x-69)/12)*440;
+  }
+
+
+
+if (typeof webkitAudioContext != "undefined") {
+  context = new webkitAudioContext();
+  BSD.audioContext = context;
+}
+
+
+
+    
+var myAudioContext  = BSD.audioContext;    
+
+
+BSD.IOSPlayer = function(spec) {
+
+  var waveTable;
+
+
+  function loadWaveTables() {
+    loader = new WaveTableLoader();
+    loader.load(function start() {
+      waveTable = loader.getTable(spec.name);
+      
+      console.log('waveTable is',waveTable);
+      
+      
+      //waveTable2 = loader.getTable(spec.name);  
+    });
+  }
+
+
+
+  var self = {};
+
+
+
+  self.playNote = function(note,duration) {
+    var wave = waveTable;
+    
+    console.log('wave is',wave);
+    
+
+    var semitone = note.value();
+
+
+    var detune1 = 4.5;
+    var detune2 = -2.5;
+
+    // create a new AudioBufferSourceNode
+    var source = myAudioContext.createBufferSource();
+    source.buffer = selectRandomBuffer();
+    source.loop = true;
+    source = routeSound(source);
+    
+    var pitchFrequency = midi2Hertz(semitone);
+    ///console.log('semitone',semitone,'pf',pitchFrequency);
+    self.pitchFrequency = pitchFrequency;
+    
+    
+    var pitchRate = pitchFrequency * wave.getRateScale();
+    var rate1 = pitchRate * Math.pow(2.0, -detune1/1200);
+    source.playbackRate.value = rate1;
+
+    console.log('rate1',rate1);
+
+    
+    // play right now (0 seconds from now)
+    // can also pass myAudioContext.currentTime
+    source.noteOn(0);
+    setTimeout(function() { source.noteOff(0); },duration);
+    //////source.noteOff(context.currentTime + duration);
+    //////mySource = source;
+
+  };
+
+
+
+
+  loadWaveTables();
+
+  return self;
+
+
+};
+
+
+jQuery(document).ready(function() {
+
+  var player = BSD.IOSPlayer({
+    name: 'Celeste'
+  });
+  
+  
+  
+  jQuery('#play').click(function() {
+  
+    player.playNote(Note("C"),3000);  
+  
+  });
+
+
+
+});
+
+    
+    
+        const PATH = 'sounds/',
+              SOUNDS = ['Basso', 'Blow', 'Bottle', 'Frog', 'Funk', 'Glass', 'Hero',
+                        'Morse', 'Ping', 'Pop', 'Purr', 'Sosumi', 'Submarine', 'Tink'];
+        var myAudioContext, myAudioAnalyser,
+            myBuffers = {}, mySource,
+            myNodes = {},  
+            isPlaying = false;
+ 
+        function init() {
+            if('webkitAudioContext' in window) {
+                myAudioContext = BSD.audioContext;
+                // an analyser is used for the spectrum
+                myAudioAnalyser = myAudioContext.createAnalyser();
+                myAudioAnalyser.smoothingTimeConstant = 0.85;
+                myAudioAnalyser.connect(myAudioContext.destination);
+ 
+                fetchSounds();
+            }
+        }
+ 
+        function fetchSounds() {
+            var request = new XMLHttpRequest();
+            for (var i = 0, len = SOUNDS.length; i < len; i++) {
+                request = new XMLHttpRequest();
+                // the underscore prefix is a common naming convention
+                // to remind us that the variable is developer-supplied
+                request._soundName = SOUNDS[i];
+                request.open('GET', PATH + request._soundName + '.aiff', true);
+                request.responseType = 'arraybuffer';
+                request.addEventListener('load', bufferSound, false);
+                request.send();
+            }
+        }
+ 
+        function bufferSound(event) {
+            var request = event.target;
+            var buffer = myAudioContext.createBuffer(request.response, false);
+            myBuffers[request._soundName] = buffer;
+        }
+ 
+        function selectRandomBuffer() {
+            var rand = Math.floor(Math.random() * SOUNDS.length);
+            var soundName = SOUNDS[rand];
+            return myBuffers[soundName];
+        }
+ 
+        function routeSound(source) {
+            myNodes.filter = myAudioContext.createBiquadFilter();
+            myNodes.panner = myAudioContext.createPanner();
+            myNodes.volume = myAudioContext.createGainNode();
+            // var compressor = myAudioContext.createDynamicsCompressor();
+ 
+            // set node values to current slider values
+            var highpass = 512;
+            var panX = 0;
+            var volume = 1;
+ 
+            myNodes.filter.type = 1; // highpass
+            myNodes.filter.frequency.value = highpass;
+            myNodes.panner.setPosition(panX, 0, 0);
+            myNodes.volume.gain.value = volume;
+ 
+            // pass source through series of nodes
+            source.connect(myNodes.filter);
+            myNodes.filter.connect(myNodes.panner);
+            myNodes.panner.connect(myNodes.volume);
+            myNodes.volume.connect(myAudioAnalyser);
+ 
+            return source;
+        }
+ 
+        function playSound() {
+            // create a new AudioBufferSourceNode
+            var source = myAudioContext.createBufferSource();
+            source.buffer = selectRandomBuffer();
+            source.loop = true;
+            source = routeSound(source);
+            // play right now (0 seconds from now)
+            // can also pass myAudioContext.currentTime
+            source.noteOn(0);
+            mySource = source;
+        }
+        
+        
+ 
+        function pauseSound() {
+            var source = mySource;
+            source.noteOff(0);
+        }
+  
+ 
+        function sliderChange(slider) {
+            if(myAudioContext.activeSourceCount > 0) {
+                if(slider.id == 'highpass') {
+                    var highpass = slider.value;
+                    myNodes.filter.frequency.value = highpass;
+                }
+                else if(slider.id == 'pan') {
+                    var panX = slider.value;
+                    myNodes.panner.setPosition(panX, 0, 0);
+                }
+                else if(slider.id == 'volume') {
+                    var volume = slider.value;
+                    myNodes.volume.gain.value = volume;
+                }
+            }
+        }
+
+    </script>
+    <style>
+        input { display: block; }
+    </style>
+</head>
+<body onload="init()">
+    <input id="play" type="button" value="Play random sound" />
+
+    <span>Pan:</span>
+</body>
+</html>
