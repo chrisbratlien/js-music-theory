@@ -255,12 +255,17 @@ BSD.Widgets.WaveTablePlayer = function(spec) {
   
   var octave = 0;
 
+  var self = BSD.Widgets.OSCPlayer(spec);
+
+  self.name = spec.name;
+
   function loadWaveTables() {
     loader = new WaveTableLoader();
     loader.load(function start() {
       waveTable = loader.getTable(spec.name);
       waveTable2 = loader.getTable(spec.name); 
- 			alert('finished loading ' + spec.name + ', you may begin rocking out'); 
+      spec.gossip.publish('BSD.Widgets.WaveTablePlayer loaded',self);
+ 			///alert('finished loading ' + spec.name + ', you may begin rocking out'); 
     });
   }
 
@@ -269,7 +274,6 @@ BSD.Widgets.WaveTablePlayer = function(spec) {
   var time = context.currentTime;
   var isMonophonic = true;
 
-  var self = BSD.Widgets.OSCPlayer(spec);
 
   self.idleOscillators = function() {
     return oscillators.select(function(o) { return o.playing == false; });

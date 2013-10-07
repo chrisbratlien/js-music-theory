@@ -34,8 +34,16 @@ BSD.Widgets.OSCPlayer = function(spec) {
 
   self.playChord = function(chord,duration) {
     
+    var tooDamnHigh = (typeof spec.range == "undefined") ? 70 : spec.range[1];
+    var tooDamnLow = (typeof spec.range == "undefined") ? -300 : spec.range[0];
+
+    console.log('tooDamnHigh',tooDamnHigh);
+    console.log('tooDamnLow',tooDamnLow);
+
+    /*    
     var tooDamnHigh = 70;
     var tooDamnLow = -300;
+    **/
     
     var tooHigh = chord.notes().detect(function(n) { return n.value() > tooDamnHigh; });
     while (tooHigh) {

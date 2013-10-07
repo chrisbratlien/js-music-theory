@@ -1,3 +1,5 @@
+//shows the bars and chords of a progression, with a little piano roll player inside.
+
   BSD.Widgets.Faker = function(spec) {
   
     var self = {};
@@ -131,8 +133,8 @@
                 cell.addClass('young');
               }
             }
-            cell.click(function() {
-              spec.audioPlayer.playNote(n,1000);
+            cell.click(function() {            
+              gossip.publish('noteClicked',n);
             });
             
             
@@ -162,7 +164,7 @@
               } 
               scaleUL.append(cell);
               cell.click(function() {
-                spec.audioPlayer.playNote(n,500);
+                gossip.publish('noteClicked',n);
               });              
             });
 

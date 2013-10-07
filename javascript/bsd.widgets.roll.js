@@ -32,7 +32,9 @@ BSD.Widgets.Roll = function(spec) {
     
     cell.addClass('cell');
     cell.click(function() {
-      spec.gossip.publish('playNote',{ note: n, duration: 1000 });
+      //////spec.gossip.publish('playNote',{ note: n, duration: 1000 });
+      spec.gossip.publish('noteClicked',n);
+      
     });
     chordUL.append(cell);
   });

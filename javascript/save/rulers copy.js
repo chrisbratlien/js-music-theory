@@ -9,228 +9,243 @@ BSD.RulerItem = function(spec) {
 };
 
 
-Array.prototype.rotate = (function() {
-    var unshift = Array.prototype.unshift,
-        splice = Array.prototype.splice;
 
-    return function(count) {
-        var len = this.length >>> 0,
-            count = count >> 0;
-
-        unshift.apply(this, splice.call(this, count % len, len));
-        return this;
-    };
-})();
 
 
 BSD.Ruler = function(spec) {
   ///console.log('spec',spec);
-  
-  spec.items.reverse(); //get things in the right order now.
-
-
-
   var self = {};
   var backplane = BSD.PubSub({});
   
   self.publish = backplane.publish;
   self.subscribe = backplane.subscribe;
 
+  var firstTime = true;
 
-
-  var twelve = JSMT.twelveNotes();
-
-  var allMIDIValues = [];
-  var divs = []; // to match state;
-  for(var i = 0; i < 128; i += 1) {
-    allMIDIValues[i] = i;
-    var div = DOM.div().addClass('note');
-    divs[i] = div;
-  }  
+  var wrap = DOM.div().addClass('ruler');
   
-  //MIDI note value on/off table
-  var state = spec.state || [];
-  self.defaultState = function() {
-    state = [];
-    for(var i = 0; i < 128; i += 1) {
-      state.push(false);
+  var drug = Draggy(wrap[0],{ 
+    direction: 'y',
+    onUpdate: function(p) {
+      ////console.log('p',p);
+      
+      spec.onUpdate(p); //bubble up
+      return false;/////confused…think it needs to know direction or else it'll always snap to what it's near to.
+      
+      
+      var current = parseInt(wrap.css('top'));
+      var diff = current % spec.snap;
+      var nearestA = current - diff;
+      var nearestB = nearestA + spec.snap;
+      var diffA = diff;
+      var diffB = nearestB - current;
+      var tolerance = 5;
+      
+      //console.log('nearestA',nearestA,'nearestB',nearestB,'diffA',diffA,'diffB',diffB);
+      
+      if (diffA > spec.snap / 2) {
+        console.log('SNAP B');
+        wrap.css('top',nearestB + 'px');            
+        wrap[0].onmousemove = null;
+        wrap[0].onmouseup = null;
+        return false;
+      }
+      if (diffB > spec.snap / 2) {
+        console.log('SNAP B');
+        wrap.css('top',nearestB + 'px');            
+        wrap[0].onmousemove = null;
+        wrap[0].onmouseup = null;
+        return false;
+      }    
     }
+  }); //do this late…
+  self.nowBeHere = function(aPoint) {
+    console.log('nbh');
   };
-  self.defaultState(); //go ahead and default it.
-
-  var palette = BSD.randomPalette2(128,70);
-
-  
-  self.allMIDINotes = function() {
-    return allMIDIValues.map(function(v){ return Note(v); });
-  };
-  
-  self.allMIDIValuesCurrentlyOn = function() {
-    var hits = allMIDIValues.select(function(v) { return state[v]; });
-    return hits;
-  };  
-  
-  self.allMIDINotesCurrentlyOn = function() {
-    return self.allMIDIValuesCurrentlyOn().map(function(v) { return Note(v); });  
-  }; 
-
-  self.allDivsCurrentlyOn = function() {
-    var result = self.allMIDIValuesCurrentlyOn().map(function(v) { return divs[v]; });  
-    /////console.log('**RESULT**',result);
-    return result;
-  }; 
-
-
-  self.rootNote = spec.rootNote || Note('C');
-
-
-  var rulerDiv = DOM.div().addClass('ruler');
-  rulerDiv.css('display','inline');
-  rulerDiv.css('position','relative');
-  rulerDiv.css('float','left');
 
   /*
-  rulerDiv.click(function() { //make draggy!!
-    if (firstTime) { return false; 
-      rulerDiv.css('left',(parseInt(rulerDiv.css('left'),10) || 0) +'px');
-      rulerDiv.css('position','absolute');
-      rulerDiv.css('float','none');  
+  self.rootNote = false;
+  self.getRootNote = function() {
+    if (!self.rootNote) { 
+      self.rootNote = prompt('Root Note');
     }
-    firstTime = false;
-  });
+    return self.rootNote;
+  };
   */
-
-  self.shiftUp = function(){  
-    state.rotate(-1);
-    palette.rotate(-1);
-    self.reload();
-  };
-  self.shiftDown = function(){  
-    state.rotate(1);
-    palette.rotate(1);
-    self.reload();
-  };
-
-  self.renderOn = function(wrap) {
-    self.reload();
-    wrap.append(rulerDiv);
-  };
+  self.allDivs = [];
+  self.tonicDivs = [];
   
   
-  self.chord = function() {
-    /////var them = twelve.select(function(tone){ return state[tone.value()];  });
-    var them = self.allMIDINotesCurrentlyOn();
-    ///console.log('them, not quite a chord',them);
-    ///console.log('themlength',them.length);    
-    var rootNote = them[0];
-    var intervals = them.map(function(tone){ return tone.value() - rootNote.value(); });
-    ///////console.log('intervals',intervals);
-    var result =  RootNoteWithIntervals({
-      rootNote: rootNote,
-      intervals: intervals
-    });
+  
+  
+  self.tonicOffsets = function() {
+    return self.tonicDivs.collect(function(d) { return d.offset(); });
+  };
+  self.allOffsets = function() {
+    return self.allDivs.collect(function(d) { return d.offset(); });
+  };
+  
+  self.offsetLeft = function() {
+    return self.allOffsets().shift().left;
+  }
+  
+  self.nearNoteRulers = function() {
+    var nrs = BSD.noteRulers.select(function(nr) {
+        return nr.offsetLeft() < self.offsetLeft();
+    });  
+    return nrs;  
+  };
+
+  self.nearScaleRulers = function() {
+    var nrs = BSD.rulers.select(function(r) {
+        return r.spec.isScale && nr.offsetLeft() < self.offsetLeft();
+    });  
+    return nrs;  
+  };
+  
+  self.nearestNoteRuler = function() {
+  
+    var them = self.nearNoteRulers();
     
-    console.log('result (chord) note names',result.noteNames());
-    return result;
-  };
-  
-  
-  self.colorize = function() {    
-    console.log('colorize');
-    divs.forEach(function(div,offset) {
-      ///console.log('offset',offset,'palette',palette);
-      if (state[offset]) {
-        var color = palette[offset];
-        console.log('offset',offset,'color',color);
-        div.css('background-color','#' + color.toHex());
-        div.css('color','white');
-      }
-      else {
-        div.css('background-color','#fff');
-        div.css('color','black');
-      }    
-      //OR//
-      /***
-      ////console.log('what?',console.log(spec.onColor));
-      div.css('background-color','#fff');
-      div.css('color','black');
-      ***/
+    if (them.length == 0) {
+      return false;
+    }
+    
+    var sorted = them.sort(function(a,b) {
+      return b.offsetLeft() -  a.offsetLeft();
     });
+    //var collected = sorted.collect(function(nr) { return nr.offsetLeft(); });
+    //console.log('sorted',sorted,'collected',collected);
+
+    return sorted.shift();    
+      
+  };
+
+
+  self.nearestScaleRuler = function() {  
+    var them = self.nearScaleRulers();
+    
+    if (them.length == 0) {
+      return false;
+    }    
+    var sorted = them.sort(function(a,b) {
+      return b.offsetLeft() -  a.offsetLeft();
+    });
+    return sorted.shift();    
+  };
+    
+  self.divsNear = function(y) {
+    var tolerance = 10;
+    return self.allDivs.select(function(d) { return Math.abs(y - d.offset().top) < tolerance; });
   };
   
-  self.reload = function() {
-    rulerDiv.empty();
-
+  self.renderOn = function(html) {
     var classes = spec.classes || []; 
     classes.each(function(c) {
-      rulerDiv.addClass(c);
+      wrap.addClass(c);
+    });
+    wrap.css('display','inline');
+    wrap.css('position','relative');
+    wrap.css('float','left');
+    wrap.click(function() { //make draggy!!
+      if (firstTime) { return false; 
+        wrap.css('left',(parseInt(wrap.css('left'),10) || 0) +'px');
+        wrap.css('position','absolute');
+        wrap.css('float','none');  
+      }
+      firstTime = false;
     });
 
     var close = DOM.div().addClass('close');
-    rulerDiv.append(close);
+    wrap.append(close);
     close.click(function(){
-      rulerDiv.remove();    
+      wrap.remove();    
     });
-
-
-    var btnPlayAll = DOM.button('>>').addClass('play-all block');
-    rulerDiv.append(btnPlayAll);
-    btnPlayAll.click(function(){
-      self.publish('play-chord',self.chord());
-    });
-
-    var btnShiftUp = DOM.button('+').addClass('shift-up block');
-    rulerDiv.append(btnShiftUp);
-    btnShiftUp.click(function(){
-      self.shiftUp();
-    });
-
-    var btnShiftDown = DOM.button('-').addClass('shift-down block');
-    rulerDiv.append(btnShiftDown);
-    btnShiftDown.click(function(){
-      self.shiftDown();
-    });
-
-
-    
-
-
     close.bind('touchend',function() { close.trigger('click'); }); //touchstart could cause too many things to accidentally get touched if the DOM shifts neighbors over
     
-    ///console.log('state',state);
-  
-    var filtered = self.allMIDINotes().select(function(n) { 
-      var v = n.value();
-      //return v >= 30 && v <= 90; 
-      return v >= 60 && v <= 84; 
-    });
-    
-    
-    filtered.reverse().forEach(function(note,i) {
-      //console.log('note',note,'name',note.name(),'ih?',i);
-      //var div = DOM.div(note.name() + ' ' + note.value()).addClass('note');
-      var midiValue = note.value();
-      div = divs[midiValue];
-      div.html(note.name());
+    var hoverdiv = jQuery('<div id="hover"></div>');
+    var iframe = jQuery('<iframe></iframe>');
+
+    spec.items.reverse().each(function(item) {      
+      var div = DOM.div().addClass('note');
+      var clickState = false;
       var priorColors = [];
-
-
-      div.click(function() {
-        state[midiValue] = !state[midiValue];
-        self.publish('click',note); 
-        self.colorize();
-      });
-
-      self.colorize();
-
-
-
-      rulerDiv.append(div);
+      priorColors.push(BSD.colorFromHex('#ffffff'));
       
+      div.click(function() {
+        clickState = ! clickState;
+        if (clickState) {
+          var color = BSD.chosenColor;
+          priorColors.push(color);
+          div.css('background-color','#' + color.toHex());
+        
+        }
+        else {
+          ////console.log('what?',console.log(spec.onColor));
+          if (item.on) {
+            div.css('background-color','#' + spec.onColor.toHex());
+          }        
+          else {
+            div.css('background-color','#fff');
+          }   
+        }
+        
+        self.publish('click',item); 
+      });
+      
+      hoverdiv.append(iframe);
+      hoverdiv.css('position','absolute');
+      hoverdiv.css('z-index','3000');
+      
+      var content = '';      
+      var tonic = item.names.detect(function(n) { return n == '1'; });
 
+      self.allDivs.push(div);
+      
+      if (tonic) {
+        self.tonicDivs.push(div);
+        
+        div.addClass('tonic');
+        content = spec.title;
+        div.html(content);
+      };
+      
+      if (spec.showDegrees) {
+        var span1 = jQuery('<span class="name-1"></span>');
+        span1.html(item.names[0]);
+        div.append(span1);
+        
+        if (item.names.length > 1) { 
+          var span2 = jQuery('<span class="name-2"></span>');
 
+          span2.html(item.names[1]);
+
+          div.append(span2);
+          
+        }
+      }
+      
+      var toggle = false;
+      //div.hover(function(e){ div.css('text-indent','0px'); },function(e) { div.css('text-indent','-3000px'); });
+      div.dblclick(function() {
+        toggle = ! toggle; 
+        if (toggle) { 
+          iframe.attr('src','http://lucid.bratliensoftware.com/js-music-theory/lookup.html?degrees=' + spec.degrees + '&rootNote=' + self.getRootNote());
+          div.append(hoverdiv); 
+        }
+        else { hoverdiv.remove(); }
+      });          
+      
+      if (item.on) { 
+        div.addClass('on'); 
+        div.css('background-color','#' + spec.onColor.toHex());
+
+      }  
+      wrap.append(div);
     });
+    html.append(wrap);
 
+    drug.hookupEvents();
   };
   return self;
 };
@@ -317,8 +332,6 @@ BSD.rulerSnapSize = 20;
 
 BSD.DegreeRuler = function(spec) {
   var pattern = BSD.modifiedPattern((spec.degrees).split(','));
-  
-  console.log('pattern',pattern);
   var myItems = pattern.concat(pattern);
   var myRulerItems = myItems.map(function(i) { return BSD.RulerItem(i); });
   var self = BSD.Ruler({
@@ -534,10 +547,6 @@ BSD.ChordRulerPanel = function(spec) {
         ruler.subscribe('click',function(o){
           self.publish('click',o);
         });
-        ruler.subscribe('play-chord',function(o){
-          self.publish('play-chord',o);
-        });
-
         ruler.renderOn(rulersWrap);
       });
       html.append(button);

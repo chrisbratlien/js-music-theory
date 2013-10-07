@@ -146,6 +146,10 @@ JSMT.chordMap = {
     'dom7':   { name: 'dominant7', intervals: [0,4,7,10] },
 
 
+    '7b5':   { name: 'dominant7Flat5', intervals: [0,4,6,10] },
+    '7-5':   { name: 'dominant7Flat5', intervals: [0,4,6,10] },
+    '7+5':   { name: 'dominant7Sharp5', intervals: [0,4,8,10] },
+    '7#5':   { name: 'dominant7Sharp5', intervals: [0,4,8,10] },
 
 
 
@@ -232,6 +236,16 @@ var Note = function(foo) {
     ///console.log('idx',idx);
     
     return 60 + idx;
+  };
+  
+  
+  self.plus = function(other) {
+    if (typeof other == "number") {
+      return Note(self.value() + other);
+    }
+    else {
+      return Note(self.value() + other.value());
+    }
   };
   
   
