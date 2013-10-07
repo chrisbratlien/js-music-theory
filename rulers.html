@@ -24,7 +24,7 @@
     <script src="javascript/bsd.widgets.wavetableplayer.js"></script>
 
 
-	<title>Jazz</title>
+	<title>Rulers</title>
  </head>
   <body>
     <div id="content">
@@ -205,11 +205,9 @@
         var palettes = [];
         
         palettes.push(BSD.randomPalette2(20,200));
+        palettes.push(BSD.randomPalette2(20,100));
         palettes.push(BSD.randomPalette2(20,50));
-        palettes.push(BSD.randomPalette2(20,200));
-        palettes.push(BSD.randomPalette2(20,50));
-        palettes.push(BSD.randomPalette2(20,200));
-        palettes.push(BSD.randomPalette2(20,50));
+        palettes.push(BSD.randomPalette2(20,25));
         
         
         
@@ -319,8 +317,12 @@
     
     panel.renderOn(panelDiv);
     panel.subscribe('click',function(o){
-      console.log('oh',o);
-      campfire.publish('play-note',{ note: Note('C'), duration: 1000 });
+      //console.log('oh',o);
+      campfire.publish('play-note',{ note: o, duration: 1000 });
+    });
+
+    panel.subscribe('play-chord',function(o){
+      campfire.publish('play-chord',{ chord: o, duration: 1000 });
     });
 
 
@@ -339,6 +341,9 @@
       gossip: campfire,
       context: context,
       name: chosen,
+      range: [-300,128]
+
+
      //name: 'Chorus_Strings'
      // name: 'Guitar_Fuzz'
   //    name: "Celeste"
@@ -346,6 +351,9 @@
     
     campfire.subscribe('play-note',function(payload) {
       BSD.audioPlayer.playNote(payload.note,payload.duration);    
+    });    
+    campfire.subscribe('play-chord',function(o) {
+      BSD.audioPlayer.playChord(o.chord,o.duration);    
     });    
   });
 

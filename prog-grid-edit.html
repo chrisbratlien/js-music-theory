@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" nomanifest="js-music-theory.manifest">
+<head>
+<script src="http://cdn.dev.bratliensoftware.com/javascript/array.js"></script>
+<script src="http://cdn.dev.bratliensoftware.com/javascript/color.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+
+<script src="http://cdn.dev.bratliensoftware.com/javascript/dom.js"></script>
+<script src="http://cdn.dev.bratliensoftware.com/javascript/draggy.js"></script>
+<script src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
+<script src="http://cdn.dev.bratliensoftware.com/javascript/bsd.pubsub.js"></script>
+<script src="javascript/js-music-theory.js"></script>
+
+<style type="text/css">
+
+  .foo img { width: 100%; }
+  input { width: 100%; }
+  .sticky-note {  position: absolute; top: 50px; left: 50px; cursor:  pointer; box-shadow: 3px 3px 13px #aaa; }
+  .sticky-note textarea { background: #ffa; cursor:  pointer; border: 1px solid #dd8; width: 20px; height: 20px; font-family: Georgia; }
+
+
+
+</style>
+</head>
+<body>
+<button id="sticky-note-button">Sticky Note</button>
+<button id="grid-button">New Grid</button>
+<script type="text/javascript">
+
+
+  BSD.Widgets.ProgGrid = function(spec) {
+    var self = {};
+
+    self.renderOn = function(wrap) {
+    
+      var table = DOM.table();
+      
+        for(var i = 0; i < spec.rows; i+= 1) {
+          var tr = DOM.tr();
+          
+          for(var j = 0; j < spec.columns; j += 1) {
+            var td = DOM.td();
+            var box = DOM.input();
+            td.append(box);
+            tr.append(td);
+          }
+          table.append(tr);
+        }
+    wrap.append(table);    
+    };
+    return self;
+  };
+
+
+  jQuery(document).ready(function(){
+    var campfire = BSD.PubSub({});
+    var body = jQuery('body');
+    var stickyNoteButton = jQuery('#sticky-note-button');
+    stickyNoteButton.click(function() {
+      var sticky = BSD.Widgets.StickyNote();
+      sticky.renderOn(body);
+    });
+    var gridButton = jQuery('#grid-button');
+    gridButton.click(function(){  
+      campfire.publish('new-grid',null); });    
+      campfire.subscribe('new-grid',function(o){
+      var grid = BSD.Widgets.ProgGrid({
+        rows: 4,
+        columns: 4
+      });
+      grid.renderOn(body);
+    });
+  });
+</script>
+</body>
+</html>

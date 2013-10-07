@@ -11,10 +11,8 @@
 <script src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
 <script src="javascript/js-music-theory.js"></script>
 <script src="javascript/bsd.widgets.spinner.js"></script>
-<script src="javascript/bsd.widgets.riffer.js"></script>
 <script src="javascript/bsd.widgets.faker.js"></script>
-<script src="javascript/bsd.widgets.progressionclock.js"></script>
-<script src="javascript/bsd.widgets.fretboardviz.js"></script>
+<script src="javascript/bsd.widgets.player.js"></script>
 <script src="javascript/bsd.widgets.roll.js"></script>
 <script src="javascript/sinewave.js"></script>
 
@@ -86,11 +84,21 @@
   #roll-wrap ul li { height: 2em; }
   #roll-wrap .cell { font-size: 0.8em; }
 
+
+
+
+
+
   .bsd-widgets-player { width: 100%;  }
+
   .panel { float: left; }
   .panel-left { width: 20%; }
   .panel-right { width: 55%; }
+
+
   .bsd-widgets-player label { margin-right: 1em; }
+
+
   .bsd-widgets-player .fret, .bsd-widgets-player .fret-label { 
     /*
     width: 21px; 
@@ -105,6 +113,8 @@
   }
   
   .bsd-widgets-player .fret-label { font-size: 0.5em; }
+  
+
   .bsd-widgets-player .legend .fret { width: 92px; }
 
 
@@ -112,6 +122,9 @@
   /* lowest priority in the cascade */
   .bsd-widgets-player .fret.compat-scale { background: #dcd; }
   .bsd-widgets-player .fret.compat-scale-root { background: #ace; }
+
+
+
   .bsd-widgets-player .fret { font-size: 0.5em; }
   .bsd-widgets-player .fret-1 { border-radius: none; border-left: 1px solid black; }
 
@@ -129,11 +142,20 @@
   .bsd-widgets-player .position-indicator li { margin: 0; float: left; width: 25%; background: #aaf; color: #ddf; text-align: center;  }
   .bsd-widgets-player .position-indicator li.selected { background: yellow; color: #778; }
 
+
+
+
+
   /* .bsd-widgets-player .fret.above { background: #ccd; } */
+
+
   .sticky-note {  position: absolute; top: 20px; left: 20px; cursor:  pointer; box-shadow: 3px 3px 13px #aaa; z-index: 100; }
   .sticky-note textarea { background: #ffa; cursor:  pointer; border: 1px solid #dd8; width: 20px; height: 20px; font-family: Georgia; }
+
+
   .surface { background: #39a; border: 4px solid red; width: 180px; height: 80px; }
-  .loading-label { background: #005; color: white; font-weight: bold; padding: 4px; }
+
+
 </style>
 
 <style type="text/css" media="print">
@@ -149,17 +171,12 @@
 
 
 
-<!--
-<h1>VOLUME</h1>
-<input id="volume" type="range" min="0" max="1" step="0.1" value="0.5"/>
--->
 
-<button id="pause">Pause</button>
 
-<div id="progression-clock-wrap"></div>
-<div id="fretboard-viz-wrap"></div>
+<div id="chord-player-wrap"></div>
 <div id="roll-wrap" class="roll-ui"></div>
-<div id="faker-wrap" class="roll-ui"></div>
+<div id="faker-wrap" class="roll-ui">
+</div>
 <div id="table1-wrap"></div>
 <div id="table2-wrap"></div>
 
@@ -167,13 +184,142 @@
 
 <script type="text/javascript">
 
+
+
   function getChordImages(cb) {
     jQuery.ajax({ type: 'POST', url: 'ws.php', data: { action: 'chord_images' }, 
       success: function(r) { cb( eval( '(' + r + ')' )) } });
   }
+
+
+
+  BSD.Widgets.Riffer = function(spec) {
+  
+    var self = {};
+    var map = {};
+    
+    self.go = function(progression) {    
+
+      var wrap1 = jQuery('#table1-wrap');
+
+      var table1 = DOM.table().attr('cellpadding',0).attr('cellspacing',0);
+      
+      var headerRow = DOM.tr();
+      
+      headerRow.append(DOM.th('&nbsp;'));
+      
+      JSMT.twelveTones().each(function(t) {
+        headerRow.append(DOM.th(t));
+      });
+      table1.append(headerRow);
+      
+      wrap1.append(table1);
+      
+      
+      
+      var newBar = false;
+      
+      var bars = progression.split('|');
+      bars.each(function(bar) {
+        newBar = true;
+        var chordNames = bar.split(/,|\ +/);
+        chordNames.each(function(name) {
+        
+        
+        
+          var chord = makeChord(name);      
+          var row = DOM.tr();
+          row.append(DOM.td(name).addClass('chord-name'));
+          if (newBar) {
+            newBar = false;
+            row.addClass('new-bar');
+          }
+  
+          JSMT.twelveNotes().each(function(n) {
+            var cell = DOM.td(n.name());
+            cell.addClass('cell');
+            if (chord.containsNote(n)) {
+              cell.addClass('on');
+            }
+            row.append(cell);
+          });
+          
+          var ul = DOM.ul();
+          var sorted = chord.compatibleScaleAbbrevs().sort(function(a,b) {
+            var aRoot = a.substr(0,1).match(chord.rootNote.name());
+            var aMajor = a.match(/major/);
+            var bRoot = b.substr(0,1).match(chord.rootNote.name());
+            var bMajor = b.match(/major/);
+            var aRootAndMajor = aRoot && aMajor;
+            var bRootAndMajor = bRoot && bMajor;
+            
+            if (aRootAndMajor && ! bRootAndMajor) { return -3; }
+            if (aMajor && ! bMajor) { return -2; }
+            if (aRoot && ! bRoot) { return -1; }
+
+
+            if (bRootAndMajor && ! aRootAndMajor) { return 3; }
+            if (bMajor && ! aMajor) { return 2; }
+            if (bRoot && ! aRoot) { return 1; }
+
+            return a < b; 
+          
+          });
+          
+          sorted.each(function(s) {
+            var li = DOM.li(s);
+            ul.append(li);
+          });
+          row.append(DOM.td(ul));
+          table1.append(row);
+        });
+      });
+    };        
+    return self;
+  };
+
+  var chordPlayerWrap = jQuery('#chord-player-wrap');
+  
+
+  
+  
   function midi2Hertz(x) {
     return Math.pow(2,(x-69)/12)*440;
   }
+  
+  BSD.hzTable = [];
+  var a = 440; // a is 440 hz...
+  for (var x = 0; x <= 127; ++x)
+  {
+    BSD.hzTable[x] = midi2Hertz(x);
+  }
+  
+  
+  
+  BSD.MIDIPlayer = function(spec) {
+    var self = {};
+
+    self.playChord = function(chord,duration) {
+      chord.notes().each(function(n) { self.playNote(n,duration); });
+    };
+
+    self.playNote = function(note,duration) {
+      ////soundIt(BSD.hzTable[note.value()],duration);  
+    };
+    return self;
+  };
+
+
+
+/** wavetable experimentation **/
+
+var context;
+
+/* audio stuff */
+if (typeof webkitAudioContext != "undefined") {
+  context = new webkitAudioContext();
+  BSD.audioContext = context;
+}
 
 function loadImpulseResponse(url, convolver) {
     // Load impulse response asynchronously
@@ -193,47 +339,37 @@ function loadImpulseResponse(url, convolver) {
     request.send();
 }
 
-  var isUnlocked = false;
-  function unlock() {
-  			
-  			/*
-  	if(isIOS || this.unlocked)
-  		return;
-  */
-  
-  	// create empty buffer and play it
-  	var buffer = context.createBuffer(1, 1, 22050);
-  	var source = context.createBufferSource();
-  	source.buffer = buffer;
-  	source.connect(context.destination);
-  	source.noteOn(0);
-  
-  	// by checking the play state after some time, we know if we're really unlocked
-  	setTimeout(function() {
-  		if((source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE)) {
-  			isUnlocked = true;
-  		}
-  	}, 0);
-  
-  }
 
-  BSD.hzTable = [];
-  var a = 440; // a is 440 hz...
-  for (var x = 0; x <= 127; ++x)
-  {
-    BSD.hzTable[x] = midi2Hertz(x);
-  }
 
-  var fretboardVizWrap = jQuery('#fretboard-viz-wrap');
-  
-  /** wavetable experimentation **/
-  var context;
-  
-  /* audio stuff */
-  if (typeof webkitAudioContext != "undefined") {
-    context = new webkitAudioContext();
-    BSD.audioContext = context;
-  }
+
+
+var isUnlocked = false;
+function unlock() {
+			
+			/*
+	if(isIOS || this.unlocked)
+		return;
+*/
+
+	// create empty buffer and play it
+	var buffer = context.createBuffer(1, 1, 22050);
+	var source = context.createBufferSource();
+	source.buffer = buffer;
+	source.connect(context.destination);
+	source.noteOn(0);
+
+	// by checking the play state after some time, we know if we're really unlocked
+	setTimeout(function() {
+		if((source.playbackState === source.PLAYING_STATE || source.playbackState === source.FINISHED_STATE)) {
+			isUnlocked = true;
+		}
+	}, 0);
+
+}
+
+
+
+
   
 
   BSD.audioPlayer = false;
@@ -242,73 +378,26 @@ function loadImpulseResponse(url, convolver) {
   
   var campfire = BSD.PubSub({});
 
-
-
-    /*
-    document.getElementById('volume').addEventListener('change', function () {
-        ////gainNode.gain.value = this.value;
-        campfire.publish('set-volume',this.value);
-    });
-    */
-    
   var roll = BSD.Widgets.Roll({
     wrap: jQuery('#roll-wrap'),
     gossip: campfire
   });
   
-  
-  
-  campfire.subscribe('lets-do-this',function(prog) {
-    console.log('lets-do-this');
-
-    var riffer = BSD.Widgets.Riffer({
-      progression: prog
-    });    
-    riffer.subscribe('play-note',function(note){    
-      campfire.publish('playNote',{ note: note, duration: 1000 });
-    });
-    riffer.subscribe('play-chord',function(chord){    
-      campfire.publish('play-chord',{ chord: chord, duration: 1000 });
-    });
-    var rifferWrap = jQuery('#table1-wrap');
-    riffer.renderOn(rifferWrap);    
-
-
+  function letsDoThis(prog) {
+    BSD.riffer.go(prog);
     BSD.faker.go(prog);
 
 
-    var progressionClock = BSD.Widgets.ProgressionClock({ 
+    var chordPlayer = BSD.Widgets.ChordPlayer({ 
       gossip: campfire,
       progression: prog, 
       guid: 'CHORXDY',
       audioPlayer: BSD.audioPlayer 
     });
-
-
-    var fretboardViz = BSD.Widgets.FretboardViz({ 
-      gossip: campfire,
-      progression: prog, 
-      guid: 'CHORXDY',
-      audioPlayer: BSD.audioPlayer 
-    });
-        
-        
-        
-    progressionClock.renderOn(jQuery('#progression-clock-wrap'));
-    fretboardViz.renderOn(fretboardVizWrap);
-
-    progressionClock.play();
-    
-    campfire.subscribe('pause',function(o){
-      progressionClock.pause();
-    });
-    
-    campfire.subscribe('play',function(o){
-      progressionClock.play();
-    });
-    ///BSD.chordy = progressionClock;
-    BSD.clock = progressionClock;
-  });
+    chordPlayer.renderOn(chordPlayerWrap);
+    chordPlayer.play();
+    BSD.chordy = chordPlayer;
+  }
 
 
   BSD.keycodes = {
@@ -333,22 +422,20 @@ function loadImpulseResponse(url, convolver) {
     
 
 
+    /*
     BSD.audioPlayer = BSD.Widgets.WaveTablePlayer({
-      gossip: campfire,
       context: context,
       name: chosen,
      //name: 'Chorus_Strings'
      // name: 'Guitar_Fuzz'
   //    name: "Celeste"
     });
+    */ 
 
 
-    /***************
     BSD.audioPlayer = BSD.Widgets.OSCPlayer({
       context: context
     }); 
-    
-    ******************/
 
 
 
@@ -359,17 +446,6 @@ function loadImpulseResponse(url, convolver) {
     BSD.faker = BSD.Widgets.Faker({
       gossip: campfire
     });
-  
-  
-  
-  
-  var playing = false;
-  var pauseButton = jQuery('#pause');
-  pauseButton.click(function(){
-    campfire.publish('pause',null);
-  });
-
-  
     
     campfire.subscribe('playNote',function(payload) {
       BSD.audioPlayer.playNote(payload.note,payload.duration);    
@@ -383,12 +459,8 @@ function loadImpulseResponse(url, convolver) {
 
 
 
-
     campfire.subscribe('chordChange',function(o) {
       BSD.audioPlayer.playChord(o.current.chord,1000);    
-    });
-    campfire.subscribe('play-chord',function(o) {
-      BSD.audioPlayer.playChord(o.chord,o.duration);    
     });
 
 
@@ -398,16 +470,9 @@ function loadImpulseResponse(url, convolver) {
 
     
     jQuery(document).on('keydown',function(e) {
-      
-      var c = e.keyCode || e.which;
-      //console.log©;
-      
-      //f (c != BSD.keycodes.f) { return false; }
-      //if (BSD.currentFretDiv == false) { return false; }
-      
-      if (BSD.currentFretDiv && c == BSD.keycodes.f) {
-        BSD.currentFretDiv.trigger('click');    
-      }      
+      if (e.keyCode != BSD.keycodes.f) { return false; }
+      if (BSD.currentFretDiv == false) { return false; }
+      BSD.currentFretDiv.trigger('click');
       ///console.log(e.keyCode);
       ////if (e.keyCode =)
     });
@@ -420,23 +485,20 @@ function loadImpulseResponse(url, convolver) {
   });
 
 
-  var loadingLabel = DOM.div('loading. . .').addClass('loading-label');
-  stage.append(loadingLabel);
-  campfire.subscribe('BSD.Widgets.WaveTablePlayer loaded',function(o){
-    loadingLabel.html(o.name + ' loaded. You may begin rocking out');
-  });
 
+  
+  
 
-  var progInput = DOM.input().addClass('progression').attr('type','text');
-  progInput.blur(function() { 
-    console.log('okay');
-    if (progInput.val().length == 0) { return false; }
-    campfire.publish('lets-do-this',progInput.val());
+  var input = DOM.input().addClass('progression').attr('type','text');
+  input.blur(function() {
+    if (input.val().length == 0) { return false; }
+    letsDoThis(input.val());
   });
   
   var inputLabel = DOM.label('Progression');
-  inputLabel.append(progInput);
+  inputLabel.append(input);
   stage.append(inputLabel);
+
 
   var exampleProg = 'C-7|F-7|D-7b5 G7';
   var exampleLabel = DOM.label('Example: '  + exampleProg + '<br />');
@@ -451,8 +513,8 @@ function loadImpulseResponse(url, convolver) {
       jQuery('#table1-wrap').empty();
       jQuery('#table1-wrap').append(DOM.h2(spec.title));
       jQuery('#faker-wrap').empty();
-      progInput.val(spec.progression);
-      campfire.publish('lets-do-this',spec.progression);
+      input.val(spec.progression);
+      letsDoThis(spec.progression);
     });
     stage.append(button);
   }
@@ -487,25 +549,9 @@ function loadImpulseResponse(url, convolver) {
     title: 'All of Me',
     progression:  'CM7|CM7|E7|E7|A7|A7|D-7|D-7|E7|E7|A-7|A-7|D7|D7|D-7|G7|CM7|CM7|E7|E7|A7|A7|D-7|D-7|FM7|F-7|E-7|A7|D-7|G7|C6 D#o7|D-7 G7'
   });
-
-
-var atprog =     
-  'CM7|CM7|D7b5|D7b5|D-7|G7|CM7|CM7|' +
-  'CM7|CM7|D7b5|D7b5|D-7|G7|CM7|C7|' +
-  'FM7|FM7|FM7|FM7|' +
-  'D7|D7|D-7|G7 G7b9|' +
-  'CM7|CM7|D7b5|D7b5|D-7|G7|CM7|CM7';
-  bootSong({
-    title: 'Take the "A" Train',
-    progression: atprog  
-  });
-
   
   
   unlock(); //iOS, you stinker, you!
-  
-  
-  
   
 </script>
 <div class="surface">SURFACE</div>

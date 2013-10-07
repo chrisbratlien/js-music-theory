@@ -10,7 +10,7 @@ td {
 td { border: 1px solid #eee; }
 
 
-#pickers { width: 30em; height: 10em; overflow: auto; }
+#pickers { width: 100%; height: 10em; overflow: auto; }
 .color-picker { width: 2em; height: 2em; float: left; cursor: pointer;  border: 1px solid white; }
 
 .sticky-note {  position: absolute; top: 20px; left: 20px; cursor:  pointer; box-shadow: 3px 3px 13px #aaa; }
@@ -58,3 +58,4 @@ td { border: 1px solid #eee; }
 
 .ruler .close { background: url(images/close.gif); width: 30px; height:  30px; max-height: 30px; background-repeat: no-repeat; }
 
+.block { display: block; }
