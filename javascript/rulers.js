@@ -23,6 +23,11 @@ Array.prototype.rotate = (function() {
 })();
 
 
+BSD.defaultMIDIState = [];
+for (var i = 0; i < 128; i += 1) {
+  BSD.defaultMIDIState[i] = false;
+}
+
 BSD.Ruler = function(spec) {
   ///console.log('spec',spec);
   
@@ -31,6 +36,7 @@ BSD.Ruler = function(spec) {
 
 
   var self = {};
+  self.deleted = false;
   var backplane = BSD.PubSub({});
   
   self.publish = backplane.publish;
@@ -56,7 +62,9 @@ BSD.Ruler = function(spec) {
       state.push(false);
     }
   };
-  self.defaultState(); //go ahead and default it.
+  if (state.length == 0) {
+    self.defaultState(); //go ahead and default it.
+  }
 
   var palette = BSD.randomPalette2(128,70);
 
@@ -130,18 +138,18 @@ BSD.Ruler = function(spec) {
       intervals: intervals
     });
     
-    console.log('result (chord) note names',result.noteNames());
+    ////console.log('result (chord) note names',result.noteNames());
     return result;
   };
   
   
   self.colorize = function() {    
-    console.log('colorize');
+    ////console.log('colorize');
     divs.forEach(function(div,offset) {
       ///console.log('offset',offset,'palette',palette);
       if (state[offset]) {
         var color = palette[offset];
-        console.log('offset',offset,'color',color);
+        ///console.log('offset',offset,'color',color);
         div.css('background-color','#' + color.toHex());
         div.css('color','white');
       }
@@ -166,26 +174,30 @@ BSD.Ruler = function(spec) {
       rulerDiv.addClass(c);
     });
 
-    var close = DOM.div().addClass('close');
+    var close = DOM.div().addClass('control block close');
     rulerDiv.append(close);
     close.click(function(){
+      if (!confirm('confirm removal of this ruler?')) {
+        return false;
+      }
       rulerDiv.remove();    
+      self.deleted = true;
     });
 
 
-    var btnPlayAll = DOM.button('>>').addClass('play-all block');
+    var btnPlayAll = DOM.div().addClass('control block play-all');
     rulerDiv.append(btnPlayAll);
     btnPlayAll.click(function(){
       self.publish('play-chord',self.chord());
     });
 
-    var btnShiftUp = DOM.button('+').addClass('shift-up block');
+    var btnShiftUp = DOM.div('+').addClass(' control block shift-up');
     rulerDiv.append(btnShiftUp);
     btnShiftUp.click(function(){
       self.shiftUp();
     });
 
-    var btnShiftDown = DOM.button('-').addClass('shift-down block');
+    var btnShiftDown = DOM.div('-').addClass('control block shift-down');
     rulerDiv.append(btnShiftDown);
     btnShiftDown.click(function(){
       self.shiftDown();
@@ -202,7 +214,7 @@ BSD.Ruler = function(spec) {
     var filtered = self.allMIDINotes().select(function(n) { 
       var v = n.value();
       //return v >= 30 && v <= 90; 
-      return v >= 60 && v <= 84; 
+      return v >= 40 && v <= 84; 
     });
     
     
@@ -217,18 +229,15 @@ BSD.Ruler = function(spec) {
 
       div.click(function() {
         state[midiValue] = !state[midiValue];
-        self.publish('click',note); 
+        if (state[midiValue]) {
+          self.publish('click',note);       
+        }
         self.colorize();
       });
 
       self.colorize();
 
-
-
       rulerDiv.append(div);
-      
-
-
     });
 
   };

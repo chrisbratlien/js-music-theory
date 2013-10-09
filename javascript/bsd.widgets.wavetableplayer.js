@@ -255,9 +255,14 @@ BSD.Widgets.WaveTablePlayer = function(spec) {
   
   var octave = 0;
 
-  var self = BSD.Widgets.OSCPlayer(spec);
+  var self = BSD.Widgets.BasePlayer(spec);
 
   self.name = spec.name;
+  
+  
+  console.log('self',self);
+  //return false;
+  
 
   function loadWaveTables() {
     loader = new WaveTableLoader();
@@ -275,9 +280,27 @@ BSD.Widgets.WaveTablePlayer = function(spec) {
   var isMonophonic = true;
 
 
-  self.idleOscillators = function() {
-    return oscillators.select(function(o) { return o.playing == false; });
+  self.play = function(wave, wave2, semitone, octave, duration) {   
+  
+    /////console.log('idle',self.idleOscillators());
+  
+    var o = self.idleOscillators().detect(function(o) { return true; });
+    if (!o) { 
+      console.log('could not find idle oscillator'); 
+      return false; 
+    }
+    o.play(wave, wave2, semitone, octave, duration);
   };
+
+
+
+  /*****
+  OVERRIDES ov OSCPlayer functions below
+  ***/
+  self.idleOscillators = function() {
+    return self.oscillators.select(function(o) { return o.playing == false; });
+  };
+
 
   var oscillators = [];
   self.oscillators = oscillators;
@@ -289,15 +312,6 @@ BSD.Widgets.WaveTablePlayer = function(spec) {
     });  
     oscillators.push(oscillator);
   });
-
-  self.play = function(wave, wave2, semitone, octave, duration) {   
-    var o = self.idleOscillators().detect(function(o) { return true; });
-    if (!o) { 
-      console.log('could not find idle oscillator'); 
-      return false; 
-    }
-    o.play(wave, wave2, semitone, octave, duration);
-  };
 
   self.playNote = function(note,duration) {
     self.play(waveTable, waveTable2, note.value(), octave, duration);  

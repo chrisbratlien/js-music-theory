@@ -32,14 +32,35 @@
       </div><!-- pickers -->
       <button id="sticky-note-button">Sticky Note</button>
       <div id="ruler-control-panel"></div><!-- ruler-control-panel -->
+      <div id="msg" class="loading-label">loading...</div>
+      <button id="bookmark">Bookmark these rulers</button>
       <div id="rulers"></div><!--rulers -->
     </div><!-- content -->
     <script type="text/javascript">
 
 
+      function getUrlVars() {
+          var vars = {};
+          var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+              vars[key] = value;
+          });
+          return vars;
+      }
+
+
       function midi2Hertz(x) {
         return Math.pow(2,(x-69)/12)*440;
       }
+      
+      BSD.hzTable = [];
+      var a = 440; // a is 440 hz...
+      for (var x = 0; x <= 127; ++x)
+      {
+      BSD.hzTable[x] = midi2Hertz(x);
+      }
+
+      
+      
       function loadImpulseResponse(url, convolver) {
           // Load impulse response asynchronously
       
@@ -193,69 +214,28 @@
       });
       
       jQuery(document).ready(function() {
-      
-      
         var campfire = BSD.PubSub({});
-        
-        
-
-      
-        var pickers = jQuery('#pickers');
-		    
+        var pickers = jQuery('#pickers');		    
         var palettes = [];
-        
         palettes.push(BSD.randomPalette2(20,200));
         palettes.push(BSD.randomPalette2(20,100));
         palettes.push(BSD.randomPalette2(20,50));
         palettes.push(BSD.randomPalette2(20,25));
-        
-        
-        
-        
-        
-        ////palettes.push(BSD.play());
-        //palettes.push(BSD.play());
-        //palettes.push(BSD.play());
-
         palettes.each(function(pal) {
           pal.each(function(randcolor) { 
           var picker = BSD.ColorPicker({ color: randcolor});
           picker.renderOn(pickers);
           });
         });
-
-	
-		
         var lightGreyPicker = BSD.ColorPicker({ color: BSD.lightGrey });
         lightGreyPicker.renderOn(pickers);
-
-      
-      
         var penDownToggle = jQuery('#pen-down-toggle');
         penDownToggle.click(function() {
-          BSD.penDown = ! BSD.penDown;
-        
+          BSD.penDown = ! BSD.penDown;        
         });
-      
-      
         var grid = BSD.Grid({});
         var gridDiv = jQuery('#grid');
         grid.renderOn(gridDiv);
-        
-    
-        
-        var stringerButton = jQuery('#stringer-button');
-          var string1 = BSD.cells.select(function(c) { return c.row % 7 == 1; });
-          var string6 = BSD.cells.select(function(c) { return c.row % 7 == 6; });
-          var fret0 = BSD.cells.select(function(c) { return c.row % 7 > 1 && c.row % 7 < 6 && c.column == 0 ;});
-        
-        
-        stringerButton.click(function() { 
-          string1.each(function(cell) { cell.changeColor(BSD.lightGrey); });
-          string6.each(function(cell) { cell.changeColor(BSD.lightGrey);  });
-          fret0.each(function(cell) { cell.changeColor(BSD.lightGrey);  });
-        });
-
 
         var stickyNoteButton = jQuery('#sticky-note-button');
         stickyNoteButton.click(function() {
@@ -273,17 +253,10 @@
         { name: 'minor scale', constructor: BSD.MinorScaleRuler },
         { name: 'HM scale', constructor: BSD.HarmonicMinorScaleRuler },
 
-
-
-
-
         { name: 'MP scale', constructor: BSD.MajorPentatonicScaleRuler },
         { name: 'mP scale', constructor: BSD.MinorPentatonicScaleRuler },
         { name: 'blues scale', constructor: BSD.BluesScaleRuler },
         { name: 'MP Pattern', constructor: BSD.MajorPentatonicPatternRuler },
-
-
-
 
         
         { name: '-', constructor: BSD.MinorChordRuler },
@@ -326,39 +299,64 @@
     });
 
 
-
-
+  campfire.subscribe('BSD.Widgets.WaveTablePlayer loaded',function(o){
+    jQuery('#msg').html(o.name + ' loaded. You may begin rocking out');
+  });
 
   BSD.getWaveTableNames(function(resp) {
     var list = eval( '(' + resp + ')');
-
-    //console.log(typeof list);
     var chosen = list.atRandom();
-    ////alert(chosen)
-    console.log(chosen);
-    
     BSD.audioPlayer = BSD.Widgets.WaveTablePlayer({
       gossip: campfire,
       context: context,
       name: chosen,
       range: [-300,128]
-
-
-     //name: 'Chorus_Strings'
-     // name: 'Guitar_Fuzz'
-  //    name: "Celeste"
     });
-    
     campfire.subscribe('play-note',function(payload) {
       BSD.audioPlayer.playNote(payload.note,payload.duration);    
     });    
     campfire.subscribe('play-chord',function(o) {
       BSD.audioPlayer.playChord(o.chord,o.duration);    
-    });    
+    });
+    var rulersWrap = jQuery('#rulers');
+    var vars = getUrlVars();
+    ////console.log('vars',vars);
+    if (typeof vars.rulers != "undefined") {
+      var them = eval(vars.rulers);
+      console.log('them',them);
+      
+      them.each(function(set){
+        var state = BSD.defaultMIDIState.map(function(tf){ return tf; });
+        set.each(function(mv){  state[mv] = true; });
+        ///console.log('state',state);
+        var ruler = BSD.Ruler({
+          items: [],
+          state: state
+        });
+        ruler.subscribe('click',function(o){
+          campfire.publish('play-note',{ note: o, duration: 1000 });
+        });
+        ruler.subscribe('play-chord',function(o){
+          campfire.publish('play-chord',{ chord: o, duration: 1000});
+        });    
+        ruler.renderOn(rulersWrap);
+        BSD.rulers.push(ruler);
+      });
+    }
+    var btnBookmark = jQuery('#bookmark');
+    btnBookmark.click(function(){
+      var sets = BSD.rulers.select(function(ruler) { return ! ruler.deleted; }).map(function(ruler) { return ruler.allMIDIValuesCurrentlyOn(); });
+      ////console.log('sets',JSON.stringify(sets));
+      var url = 'rulers.html?rulers=' + JSON.stringify(sets);
+      ////console.log(url);
+      window.location.href = url;
+    });
   });
-
-  });      
-
+});
+    
+    
+    
+    
     </script>
 
 	</body>

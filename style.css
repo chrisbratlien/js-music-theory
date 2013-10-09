@@ -56,6 +56,89 @@ td { border: 1px solid #eee; }
 
 #hover { width: 600px; height: 350px; }
 
-.ruler .close { background: url(images/close.gif); width: 30px; height:  30px; max-height: 30px; background-repeat: no-repeat; }
+/* .ruler .close { background: url(images/close.gif); width: 30px; height:  30px; max-height: 30px; background-repeat: no-repeat; } */
 
 .block { display: block; }
+
+
+.ruler .control { height: 30px; max-height: 30px; line-height: 30px; padding: 0; margin: 2px 0px; }
+.ruler .control { background: black; color: white; }
+.ruler .control:active { background: white; color: black; }
+.ruler .control.play-all { background: green; height: 50px; max-height: 50px; line-height: 50px; } 
+.ruler .control.play-all:active { background: #0f0; }
+.ruler .control.close { background: #f44; } 
+.ruler .control.close:active { background: #f00; } 
+
+
+
+/* Smartphones (portrait and landscape) ----------- */
+@media only screen
+and (min-device-width : 320px)
+and (max-device-width : 480px) {
+
+}
+
+/* Smartphones (landscape) ----------- */
+@media only screen
+and (min-width : 321px) {
+
+}
+
+/* Smartphones (portrait) ----------- */
+@media only screen
+and (max-width : 320px) {
+
+}
+
+/* iPads (portrait and landscape) ----------- */
+@media only screen
+and (min-device-width : 768px)
+and (max-device-width : 1024px) {
+
+.ruler .note { max-width: 40px; width: 40px; max-height: 30px; height: 30px; }
+
+
+}
+
+/* iPads (landscape) ----------- */
+@media only screen
+and (min-device-width : 768px)
+and (max-device-width : 1024px)
+and (orientation : landscape) {
+
+
+}
+
+/* iPads (portrait) ----------- */
+@media only screen
+and (min-device-width : 768px)
+and (max-device-width : 1024px)
+and (orientation : portrait) {
+
+}
+
+/* Desktops and laptops ----------- */
+@media only screen
+and (min-width : 1224px) {
+
+}
+
+/* Large screens ----------- */
+@media only screen
+and (min-width : 1824px) {
+
+}
+
+/* iPhone 4 ----------- */
+@media
+only screen and (-webkit-min-device-pixel-ratio : 1.5),
+only screen and (min-device-pixel-ratio : 1.5) {
+
+}
+
+/* iPhone only CSS */
+@media screen and (max-width: 480px) {
+
+
+
+}
