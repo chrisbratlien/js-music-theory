@@ -49,8 +49,7 @@ BSD.Widgets.Oscar = function(spec) {
   var envAmount = 0.4;
   var filterAttack = 0.056;
   var filterDecay = 0.991;
-  var volume = 1;
-
+  var masterVolume = 1;
 
 
 
@@ -119,13 +118,20 @@ BSD.Widgets.Oscar = function(spec) {
     osc1Octave.noteOn(0);
     osc2Octave.noteOn(0);
 
-    var self = spec;
+    var self = BSD.PubSub({});
     self.osc1 = osc1;
     self.osc2 = osc2;
     self.osc1Octave = osc1Octave;
     self.osc2Octave = osc2Octave;
     self.playing = false;
     var o = self;
+
+
+
+  self.subscribe('set-master-volume',function(magnitude) {
+    ////console.log('MAG',magnitude);
+    masterVolume = magnitude;
+  });
 
 
   self.setFilterValues = function() {
@@ -169,14 +175,7 @@ BSD.Widgets.Oscar = function(spec) {
     // Set oscillator pitches.
     
     var pitchFrequency = 20.0 /*440.0*/ * Math.pow(2.0, semitone / 12.0);
-    ////console.log('semitone',semitone,'pf',pitchFrequency);
-    ///pitchFrequency = 261;
-    
-    
-    /////var pitchFrequency = BSD.hzTable[semitone];
     var pitchFrequency = midi2Hertz(semitone);
-    ///console.log('semitone',semitone,'pf',pitchFrequency);
-
     
     self.pitchFrequency = pitchFrequency;
     
@@ -227,7 +226,10 @@ BSD.Widgets.Oscar = function(spec) {
     self.setFilterValues();
 
     // Set note volume.
-    noteVolume.gain.value = 0.1 * volume*volume; // use x^2 volume curve for now
+    noteVolume.gain.value = 0.1;/// * volume*volume; // use x^2 volume curve for now
+
+
+    noteVolume.gain.value = noteVolume.gain.value * masterVolume;
 
 }
 
@@ -256,11 +258,25 @@ BSD.Widgets.WaveTablePlayer = function(spec) {
   var octave = 0;
 
   var self = BSD.Widgets.BasePlayer(spec);
+  var context = spec.context;
+  var oscillators = [];
+  self.oscillators = oscillators;
 
   self.name = spec.name;
+
+  self.newOscillator = function() {
+    var id = self.oscillators.length + 1;  
+    var result = BSD.Widgets.Oscar({ 
+      id: id, 
+      context: context, 
+      staticAudioRouting: staticAudioRouting  
+    });  
+    self.oscillators.push(result);
+    return result;
+  };
   
   
-  console.log('self',self);
+  ////console.log('self',self);
   //return false;
   
 
@@ -274,24 +290,26 @@ BSD.Widgets.WaveTablePlayer = function(spec) {
     });
   }
 
-  var context = spec.context;
+  ///});
 
   var time = context.currentTime;
   var isMonophonic = true;
 
+  var polyphonyCount = spec.polyphonyCount || 4;
+  for (var i = 0; i < polyphonyCount; i += 1) {
+        self.newOscillator();
+  }
 
   self.play = function(wave, wave2, semitone, octave, duration) {   
-  
     /////console.log('idle',self.idleOscillators());
-  
     var o = self.idleOscillators().detect(function(o) { return true; });
     if (!o) { 
-      console.log('could not find idle oscillator'); 
+      console.log('could not find idle oscillator');       
       return false; 
     }
     o.play(wave, wave2, semitone, octave, duration);
   };
-
+  
 
 
   /*****
@@ -302,16 +320,6 @@ BSD.Widgets.WaveTablePlayer = function(spec) {
   };
 
 
-  var oscillators = [];
-  self.oscillators = oscillators;
-  [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16].each(function(i) {
-    var oscillator = BSD.Widgets.Oscar({ 
-      id: i, 
-      context: context, 
-      staticAudioRouting: staticAudioRouting  
-    });  
-    oscillators.push(oscillator);
-  });
 
   self.playNote = function(note,duration) {
     self.play(waveTable, waveTable2, note.value(), octave, duration);  

@@ -1,7 +1,7 @@
 BSD.Widgets.BasePlayer = function(spec) {
   var context = spec.context;
   var ctx = context;
-  var self = {};
+  var self = BSD.PubSub({});
   var oscillators = [];
   self.oscillators = oscillators;
   
@@ -10,6 +10,14 @@ BSD.Widgets.BasePlayer = function(spec) {
     //return oscillators.select(function(o) { return o.playbackState == 0; });
     //return oscillators.select(function(o) { return playing[o.id] == false; });
   };
+
+
+  self.subscribe('set-master-volume',function(magnitude){
+    ///console.log('MAG222',magnitude);
+    ///console.log('oscillators',oscillators);
+    ////console.log('self.oscillators',self.oscillators);
+    self.oscillators.each(function(o){ o.publish('set-master-volume',magnitude); });
+  });
 
 
   self.hush = function() {
@@ -75,7 +83,7 @@ BSD.Widgets.OSCPlayer = function(spec) {
 
   var playing = {};
   
-  [0,1,2,3,4,5,6,7,8].each(function(i) {
+  [0,1,2].each(function(i){//////,3,4,5,6,7,8].each(function(i) {
     var oscillator = ctx.createOscillator();
     oscillator.id = i; //FIXME: is this sane?
     playing[oscillator.id] = false;  

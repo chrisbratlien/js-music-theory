@@ -190,14 +190,15 @@ BSD.Widgets.FretboardViz = function(spec) {
   
   ///self.spinCallback = function(o) {
   
-  self.subscribe('play-chord',function(o) {
+  ///spec.gossip.subscribe('play-chord',function(o) {
+  self.subscribe('chordChange',function(o) {
     var chord = o.current.chord;
     var chordName = chord.fullAbbrev();    
     self.updateChordLabel(chordName);    
     self.withBoard(function(board) {
 
       var findee = board.find('.fret');
-      ////console.log('cp findee',findee);
+      ///console.log('cp findee',findee);
 
 
       findee.removeClass('on');
@@ -264,7 +265,7 @@ BSD.Widgets.FretboardViz = function(spec) {
         });
       }
       if (scale) {
-        //console.log('scale chosen',scale.fullName());
+        console.log('scale chosen',scale.fullName());
         legendScale.html(scale.fullName() + ' scale');
       }
       else {

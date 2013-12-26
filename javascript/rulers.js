@@ -1,5 +1,5 @@
 if (typeof BSD == "undefined") { var BSD = {};    }
-
+if (typeof BSD.Widgets == "undefined") { BSD.Widgets = {};    }
 
 BSD.RulerItem = function(spec) {
   var self = spec;
@@ -23,20 +23,19 @@ Array.prototype.rotate = (function() {
 })();
 
 
-BSD.defaultMIDIState = [];
-for (var i = 0; i < 128; i += 1) {
-  BSD.defaultMIDIState[i] = false;
-}
+BSD.allMIDIValues = [];
+for(var i = 0; i < 128; i += 1) {
+    BSD.allMIDIValues[i] = i;
+} 
 
 BSD.Ruler = function(spec) {
   ///console.log('spec',spec);
   
-  spec.items.reverse(); //get things in the right order now.
+  ////spec.items.reverse(); //get things in the right order now.
 
 
 
   var self = {};
-  self.deleted = false;
   var backplane = BSD.PubSub({});
   
   self.publish = backplane.publish;
@@ -65,6 +64,7 @@ BSD.Ruler = function(spec) {
   if (state.length == 0) {
     self.defaultState(); //go ahead and default it.
   }
+  
 
   var palette = BSD.randomPalette2(128,70);
 
@@ -74,6 +74,7 @@ BSD.Ruler = function(spec) {
   };
   
   self.allMIDIValuesCurrentlyOn = function() {
+    //console.log('state',state);
     var hits = allMIDIValues.select(function(v) { return state[v]; });
     return hits;
   };  
@@ -128,11 +129,8 @@ BSD.Ruler = function(spec) {
   self.chord = function() {
     /////var them = twelve.select(function(tone){ return state[tone.value()];  });
     var them = self.allMIDINotesCurrentlyOn();
-    ///console.log('them, not quite a chord',them);
-    ///console.log('themlength',them.length);    
     var rootNote = them[0];
     var intervals = them.map(function(tone){ return tone.value() - rootNote.value(); });
-    ///////console.log('intervals',intervals);
     var result =  RootNoteWithIntervals({
       rootNote: rootNote,
       intervals: intervals
@@ -181,7 +179,6 @@ BSD.Ruler = function(spec) {
         return false;
       }
       rulerDiv.remove();    
-      self.deleted = true;
     });
 
 
@@ -214,7 +211,7 @@ BSD.Ruler = function(spec) {
     var filtered = self.allMIDINotes().select(function(n) { 
       var v = n.value();
       //return v >= 30 && v <= 90; 
-      return v >= 40 && v <= 84; 
+      return v >= 40 && v <= 72; 
     });
     
     
@@ -237,7 +234,12 @@ BSD.Ruler = function(spec) {
 
       self.colorize();
 
+
+
       rulerDiv.append(div);
+      
+
+
     });
 
   };
@@ -261,37 +263,37 @@ BSD.notePattern = [
 ];
 
 BSD.twoOctavePattern = [
-    { name: '1', names: ['1','8'], on: false },
-    { name: 'b2', names: ['b2','b9'], on: false },
-    { name: '2', names: ['2','9'], on: false },
-    { name: 'b3', names: ['b3','b10','#9','#2'], on: false },
-    { name: '3', names: ['3','10'], on: false },
-    { name: '4', names: ['4','11'], on: false },
-    { name: 'b5', names: ['b5','b12'], on: false },
-    { name: '5', names: ['5','12'], on: false },
-    { name: 'b6', names: ['b6','b13'], on: false },
-    { name: '6', names: ['6','13'], on: false },
-    { name: 'b7', names: ['b7','b14'], on: false },
-    { name: '7', names: ['7','14'], on: false },
-    { name: '8', names: ['8','1'], on: false },
-    { name: 'b9', names: ['b9','b2'], on: false },
-    { name: '9', names: ['9','2'], on: false },
-    { name: 'b10', names: ['b10','b3','#9','#2'], on: false },
-    { name: '10', names: ['10','3'], on: false },
-    { name: '11', names: ['11','4'], on: false },
-    { name: 'b12', names: ['b12','b5'], on: false },
-    { name: '12', names: ['12','5'], on: false },
-    { name: 'b13', names: ['b13','b6'], on: false },
-    { name: '13', names: ['13','6'], on: false },
-    { name: 'b14', names: ['b14','b7'], on: false },
-    { name: '14', names: ['14','7'], on: false }   
+    { name: '1', names: ['1'], on: false },
+    { name: 'b2', names: ['b2'], on: false },
+    { name: '2', names: ['2',], on: false },
+    { name: 'b3', names: ['b3','#2'], on: false },
+    { name: '3', names: ['3'], on: false },
+    { name: '4', names: ['4'], on: false },
+    { name: 'b5', names: ['b5'], on: false },
+    { name: '5', names: ['5'], on: false },
+    { name: 'b6', names: ['b6'], on: false },
+    { name: '6', names: ['6'], on: false },
+    { name: 'b7', names: ['b7'], on: false },
+    { name: '7', names: ['7'], on: false },
+    { name: '8', names: ['8'], on: false },
+    { name: 'b9', names: ['b9'], on: false },
+    { name: '9', names: ['9'], on: false },
+    { name: 'b10', names: ['b10','#9'], on: false },
+    { name: '10', names: ['10'], on: false },
+    { name: '11', names: ['11'], on: false },
+    { name: 'b12', names: ['b12'], on: false },
+    { name: '12', names: ['12'], on: false },
+    { name: 'b13', names: ['b13'], on: false },
+    { name: '13', names: ['13'], on: false },
+    { name: 'b14', names: ['b14'], on: false },
+    { name: '14', names: ['14'], on: false }   
     
   ];
 
 
 BSD.modifiedPattern = function(notes) {
   var startPattern = BSD.twoOctavePattern;
-  ///console.log('startPattern',startPattern);
+  ////console.log('startPattern',startPattern);
   
   
   
@@ -305,7 +307,7 @@ BSD.modifiedPattern = function(notes) {
 
   var modified = startPattern.collect(function(item) {
     var hit = notes.detect(function(n) {
-		////console.log(item,'item',item.names,item.name);
+		////console.log('item',item,item.names,item.name);
       var hit2 = item.names.detect(function(name) {
         return name == n;
       });
@@ -315,7 +317,7 @@ BSD.modifiedPattern = function(notes) {
     return { name: item.name, names: item.names, on: (hit != false) }
   });
   
-  ////console.log('modified',modified);
+  ///console.log('modified',modified);
   return modified;
 };
 
@@ -326,63 +328,20 @@ BSD.rulerSnapSize = 20;
 
 BSD.DegreeRuler = function(spec) {
   var pattern = BSD.modifiedPattern((spec.degrees).split(','));
-  
-  console.log('pattern',pattern);
-  var myItems = pattern.concat(pattern);
-  var myRulerItems = myItems.map(function(i) { return BSD.RulerItem(i); });
-  var self = BSD.Ruler({
-    onUpdate: function(point) {
-      
-      ////console.log(self.fooNote());
-      self.renameTonics(self.fooNote());
-    
-      //self.renameFromPoint(point);
-    },
-    showDegrees: false,
-    title: spec.title,
-    items: myRulerItems,
-    classes: spec.classes || [],
-    degrees: spec.degrees,
-    snap: BSD.rulerSnapSize,
-    onColor: spec.onColor || BSD.colorFromHex('#aaaaff')
+  var state = BSD.allMIDIValues.map(function(v){
+    if (typeof pattern[v-60] == "undefined") { return false; }
+    return pattern[v-60].on;
   });
-
-
-  self.fooNote = function() {
-  
-      var firstTonicOffset = self.tonicOffsets().shift();
-      /////////console.log('fto',firstTonicOffset);      
-      
-      var nnr = self.nearestNoteRuler();
-
-	  ////console.log('nnr',nnr);
-	  if (!nnr) { 
-		return ''; 
-	  }
-	  
-      var cand = nnr.divsNear(firstTonicOffset.top);
-
-      if (cand.length == 0 ) {
-        return false;
-      }
-
-      return cand.shift().find('.name-1').html();
-  
-  };
-
-
-
-  self.renameTonics = function(str) {
-    self.tonicDivs.each(function(d) { d.html(str + spec.title); });
-  };
-
-
+  var self = BSD.Ruler({
+    state: state,
+    foo: 'bar'
+  });
   BSD.rulers.push(self);
-
   return self;
 };
 
 BSD.NoteRuler = function(spec) {
+  console.log('note ruler');
   var pattern = BSD.notePattern;
   var myItems = pattern.concat(pattern).concat(pattern);
   var myRulerItems = myItems.map(function(i) { return BSD.RulerItem(i); });
@@ -409,8 +368,6 @@ BSD.NoteRuler = function(spec) {
   BSD.noteRulers.push(self);
   return self;
 };
-
-
 
 BSD.NullRuler = function() {
   return BSD.DegreeRuler({ title: '(empty)', degrees: '' });
@@ -448,14 +405,14 @@ BSD.MajorPentatonicPatternRuler = function() {
 
 
 BSD.MajorSixChordRuler = function() {
-  return BSD.DegreeRuler({ title: '6', degrees: '1,3,5,6,8,10,12,13' });
+  return BSD.DegreeRuler({ title: '6', degrees: '1,3,5,6' });
 };
 BSD.MajorSixNineChordRuler = function() {
-  return BSD.DegreeRuler({ title: '6/9', degrees: '1,2,3,5,6,8,9,10,12,13' });
+  return BSD.DegreeRuler({ title: '6/9', degrees: '1,2,3,5,6,9' });
 };
 
 BSD.MinorSixChordRuler = function() {
-  return BSD.DegreeRuler({ title: '-6', degrees: '1,b3,5,6,8,b10,12,13' });
+  return BSD.DegreeRuler({ title: '-6', degrees: '1,b3,5,6' });
 };
 
 
@@ -463,10 +420,10 @@ BSD.MinorSixChordRuler = function() {
 
 //major/minor
 BSD.MajorChordRuler = function() {
-  return BSD.DegreeRuler({ title: '', degrees: '1,3,5,8,10,12' });
+  return BSD.DegreeRuler({ title: '', degrees: '1,3,5' });
 };
 BSD.MinorChordRuler = function() {
-  return BSD.DegreeRuler({ title: '-', degrees: '1,b3,5,8,b10,12' });
+  return BSD.DegreeRuler({ title: '-', degrees: '1,b3,5' });
 };
 
 
@@ -474,44 +431,44 @@ BSD.MinorChordRuler = function() {
 //sevenths
 
 BSD.Minor7ChordRuler = function() {
-  return BSD.DegreeRuler({ title: '-7', degrees: '1,b3,5,b7,8,b10,12,b14' });
+  return BSD.DegreeRuler({ title: '-7', degrees: '1,b3,5,b7' });
 };
 BSD.Minor7Flat5ChordRuler = function() {
-  return BSD.DegreeRuler({ title: '-7b5', degrees: '1,b3,b5,b7,8,b10,b12,b14' });
+  return BSD.DegreeRuler({ title: '-7b5', degrees: '1,b3,b5,b7' });
 };
 
 
 BSD.Dominant7ChordRuler = function() {
-  return BSD.DegreeRuler({ title: '7', degrees: '1,3,5,b7,8,10,12,b14' });
+  return BSD.DegreeRuler({ title: '7', degrees: '1,3,5,b7' });
 };
 BSD.Dominant7Flat5ChordRuler = function() {
-  return BSD.DegreeRuler({ title: '7b5', degrees: '1,3,b5,b7,8,10,b12,b14' });
+  return BSD.DegreeRuler({ title: '7b5', degrees: '1,3,b5,b7' });
 };
 BSD.Dominant7Flat9ChordRuler = function() {
-  return BSD.DegreeRuler({ title: '7b9', degrees: '1,b2,3,5,b7,8,b9,10,12,b14' });
+  return BSD.DegreeRuler({ title: '7b9', degrees: '1,b2,3,5,b7,b9' });
 };
 BSD.Dominant7Sharp9ChordRuler = function() {
-  return BSD.DegreeRuler({ title: '7#9', degrees: '1,#2,3,5,b7,8,#9,10,12,b14' });
+  return BSD.DegreeRuler({ title: '7#9', degrees: '1,#2,3,5,b7,#9' });
 };
 BSD.Major7ChordRuler = function() {
-  return BSD.DegreeRuler({ title: 'M7', degrees: '1,3,5,7,8,10,12,14' });
+  return BSD.DegreeRuler({ title: 'M7', degrees: '1,3,5,7' });
 };
 BSD.Diminished7ChordRuler = function() {
-  return BSD.DegreeRuler({ title: 'o7', degrees: '1,b3,b5,6,8,b10,b12,13' });
+  return BSD.DegreeRuler({ title: 'o7', degrees: '1,b3,b5,6' });
 };
 
 
 
 BSD.Minor9ChordRuler = function() {
-  return BSD.DegreeRuler({ title: '-9', degrees: '1,2,b3,5,b7,8,9,b10,12,b14' });
+  return BSD.DegreeRuler({ title: '-9', degrees: '1,b3,5,b7,9' });
 };
 
 BSD.Dominant9ChordRuler = function() {
-  return BSD.DegreeRuler({ title: '9', degrees: '1,2,3,5,b7,8,9,10,12,b14' });
+  return BSD.DegreeRuler({ title: '9', degrees: '1,3,5,b7,9' });
 };
 
 BSD.Major9ChordRuler = function() {
-  return BSD.DegreeRuler({ title: 'M9', degrees: '1,2,3,5,7,8,9,10,12,14' });
+  return BSD.DegreeRuler({ title: 'M9', degrees: '1,3,5,7,9' });
 };
 
 
@@ -521,38 +478,22 @@ BSD.Major9ChordRuler = function() {
 
 
 
-
-
-
-BSD.ChordRulerPanel = function(spec) {
-  var self = {};
-  
-  var backplane = BSD.PubSub({});
-  
-  self.subscribe = backplane.subscribe;
-  self.publish = backplane.publish;
-  
-  var rulersWrap = jQuery('#rulers');
-  self.renderOn = function(html) {
-    spec.builders.each(function(b) {
-      /////console.log('b',b);
-      var button = jQuery('<button></button>');
-      button.html(b.name);
-      button.click(function() {
-        var ruler = b.constructor();
-        ruler.subscribe('click',function(o){
-          self.publish('click',o);
-        });
-        ruler.subscribe('play-chord',function(o){
-          self.publish('play-chord',o);
-        });
-
-        ruler.renderOn(rulersWrap);
-      });
-      html.append(button);
-    });
-  };
-  return self;
+BSD.Minor13ChordRuler = function() {
+  return BSD.DegreeRuler({ title: '-13', degrees: '1,b3,5,b7,9,11,13' });
 };
+
+BSD.Dominant13ChordRuler = function() {
+  return BSD.DegreeRuler({ title: '13', degrees: '1,3,5,b7,9,11,13' });
+};
+
+BSD.Major13ChordRuler = function() {
+  return BSD.DegreeRuler({ title: 'M13', degrees: '1,3,5,7,9,11,13' });
+};
+
+
+
+
+
+
 
 

@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <link rel="stylesheet" href="style.css" media="screen" />
+    <script type="text/javascript">
+      if (typeof BSD == "undefined") { var BSD = {}; }
+      if (typeof BSD.Widgets == "undefined") { BSD.Widgets = {}; }
+    </script>
+    <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/array.js"></script>
+    <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/eachify.js"></script>
+    <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/color.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/bsd.pubsub.js"></script>
+    <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/dom.js"></script>
+    <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/draggy.js"></script>
+    <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
+    <script type="text/javascript" src="javascript/js-music-theory.js"></script>
+    <script type="text/javascript" src="javascript/bsd.widgets.procrastinator.js"></script>
+    <script type="text/javascript" src="javascript/bsd.widgets.lightbox.js"></script>
+    <!-- wavetable dependencies -->
+    <script src="javascript/bpm-delay.js"></script>
+    <script src="javascript/waveshaper.js"></script>
+    <script src="javascript/wavetable.js"></script>
+    <script src="javascript/fft.js"></script>
+    <script src="javascript/wavetableloader.js"></script>
+    <script src="javascript/staticaudiorouting.js"></script>
+    <script src="javascript/bsd.widgets.oscplayer.js"></script>
+    <script src="javascript/bsd.widgets.wavetableplayer.js"></script>
+
+
+    <style type="text/css">
+      #pickers { height: 40px; }
+      #progression { width: 100%; font-size: 1em; padding: 0.1em;}
+    </style>
+  <style type="text/css">
+body { font-size: 16px; font-family: Helvetica; }
+table { border-bottom: 1px solid black }
+table { border-right: 1px solid black }
+table td { padding: 0.2em; text-align: center; min-width: 23px; cursor: pointer; }
+table td { border-top: 1px solid #666; }
+table td { border-left: 1px solid #666; }
+
+table td sub { font-size: 0.5em; }
+
+.midpoint { background: #eee; }  
+.root { background: purple; color: white;  }
+.start { background: yellow; color: black; }  
+.active { background: #f07; color: white;  }
+
+.slider-control label input { width: 50%; margin: 10px; }
+
+</style>
+  </head>
+  <body>
+    <div id="content">
+      <div id="msg" class="loading-label">loading...</div>
+      <div class="pull-right">
+        <button id="sticky-note-button">Sticky Note</button>
+      </div><!-- pull-right -->
+      <div class="pull-right">
+        <label><strong>Progression</strong><br />
+          <input id="progression" type="text" />    
+        </label>      
+        <button id="progression-clear">Clear</button>
+        <button id="progression-help">Help</button>
+        <div id="progression-help-content" style="display: none;">
+          <h5>Help</h5>
+          <p><strong>1</strong><br/> Type in a Chord progression into the box. Separate the chords with spaces or the "|" pipe character. <br /><br /><strong>2</strong><br/> Tab out of the text box to cause those rulers to appear. 
+          <br/><br/><strong>3</strong><br/> Hit the green button to sound that chord
+          <br/><br/><strong>4</strong><br/> Hit other buttons too
+          <br/><br/><strong>5</strong><br/> Click a note to toggle it on/off
+          </p>
+          <h3>Example progressions</h3>
+          <p>A- B-7b5 C D- E- F G A-</p>
+          <p>CM7 D-7 E-7 FM7 G7 A-7 B-7b5 CM7</p>
+          <h3>Tips</h3>
+          <p>Root notes by themselves are assumed major, ex: A</p>
+          <p>Use - or m for minor, ex: A- Em</p>
+          <p>Use M7 for major 7, ex: CM7</p>
+          <p>Use 7 for dominant 7, ex: G7</p>
+        </div>
+      </div><!-- pull-right -->
+      <div class="pull-right slider-control volume-control">
+        <label for="volume-input">Volume
+          <input id="volume-input" type="range" min="0" max="1" step="0.01" value="0.5" />
+        </label>
+      </div><!-- pull-right -->
+      <div class="pull-right slider-control speed-control">
+        <label for="speed-input">Speed
+          <input id="speed-input" type="range" min="0" max="2000" step="1" value="500" />
+        </label>
+      </div><!-- pull-right -->
+      
+  <table class="fretboard-table" cellspacing="0" cellpadding="0">
+  </table>
+	</div><!-- content -->
+  <script type="text/javascript">
+
+BSD.spatialNotes = [];
+BSD.SpatialNoteCollection = function(a) {
+  var self = a;
+  
+  self.closestTo = function(other) {
+		var sorted = self.sortedByDistanceTo(other);
+    //console.log(sorted,'sorted');
+    var result = sorted.shift();  
+    //console.log('result',result);
+    return result.object;
+  };  
+
+  self.furthestFrom = function(other) {
+		var sorted = self.sortedByDistanceTo(other);
+    //console.log(sorted,'sorted');
+    var result = sorted.pop();  
+    //console.log('result',result);
+    return result.object;
+  };  
+
+	self.sortedByDistanceTo = function(other) {
+    var candidates = self.select(function(can){
+      return true; //can't decide whether to include/exclude a self-hit
+      return can.hash() !== other.hash();
+    }).collect(function(o) {
+      return {object: o, distance: o.distanceTo(other) }; 
+    });
+    ///console.log(candidates,'candidates');
+    var sorted = candidates.sort(function(a,b) {
+      return a.distance - b.distance;
+    });
+		return sorted;
+	};
+
+
+
+	self.midpoint = function() {
+		var avgX = self.map(function(sn) { return sn.x; }).average();
+		var avgY = self.map(function(sn) { return sn.y; }).average();
+		return [avgX,avgY];
+	};
+
+
+  self.abstractlyEqualTo = function(other) {
+    var result = self.select(function(can){ return can.abstractlyEqualTo(other); });
+    return BSD.SpatialNoteCollection(result);
+  };
+
+  self.equalTo = function(other) {
+    var result = self.select(function(can){ return can.equalTo(other); });
+    return BSD.SpatialNoteCollection(result);
+  };
+
+  self.noteValueGE = function(other) { 
+    var result = self.select(function(can){ return can.value() >= other.value(); });
+    return BSD.SpatialNoteCollection(result);
+  };  
+
+  self.noteValueGT = function(other) { 
+    var result = self.select(function(can){ return can.value() > other.value(); });
+    return BSD.SpatialNoteCollection(result);
+  };  
+
+  self.noteValueLE = function(other) { 
+    var result = self.select(function(can){ return can.value() <= other.value(); });
+    return BSD.SpatialNoteCollection(result);
+  };  
+
+  self.noteValueLT = function(other) { 
+    var result = self.spatialNotes.select(function(can){ return can.value() < other.value(); });
+    return BSD.SpatialNoteCollection(result);
+  };  
+
+  return self;
+};
+
+BSD.spatialNotes = BSD.SpatialNoteCollection([]);
+
+BSD.SpatialNote = function(spec) {
+  var self = BSD.PubSub({});
+  
+  self.x = parseInt(spec.position[0],10);
+  self.y = parseInt(spec.position[1],10);
+
+  self.note = spec.note;
+  self.cell = spec.cell;
+    
+  self.hash = function() {
+    return 'SpatialNote#(' + self.x +',' + self.y + ')';
+  };
+ 
+  self.value = function() { 
+    return spec.note.value();
+  };
+  
+  self.abstractValue = function() {
+    return spec.note.abstractValue();
+  };
+  
+  self.abstractlyEqualTo = function(other) {
+    return other.abstractValue() == self.abstractValue();
+  };
+
+  self.equalTo = function(other) {
+    /////console.log('ok, got called',other.value(),self.value());
+    return other.value() == self.value();
+  };
+ 
+  neighborsFromChord = function(chord) {
+  };
+
+  self.nearest = function(other) {
+    ///return BSD.spatialNotes.
+  };
+
+
+
+   
+  self.distanceTo = function(otherPoint) {
+    var a = self.x - otherPoint.x;
+    var b = self.y - otherPoint.y;
+    
+    var c = Math.sqrt(a*a + b*b); //Pythagorean, solve for c
+    return c;     
+  };  
+  return self;
+  
+  
+};
+
+
+
+function makeTable(wrap,options) {
+
+var scale = options.scale;
+var noteNames = scale.noteNames();
+     
+var table = DOM.table().addClass('fretboard-table');
+table.attr('cellspacing',0);
+table.attr('cellpadding',0);
+  
+
+	table.empty();
+
+  var openValues = [64,59,55,50,45,40];
+	var fretRange = [];
+	var maxFrets = 22;
+	
+	for (var i = 0; i < maxFrets; i += 1) { fretRange.push(i); };
+
+//console.log('cscale',cscale);
+    [0,1,2,3,4,5].each(function(stringIndex) {
+    
+      var open = openValues[stringIndex];
+     
+      var row = DOM.tr();     
+			fretRange.each(function(fret){ 
+        
+        var valley = open+fret;
+        var note = Note(valley);
+
+        var cell = DOM.td();
+        cell.click(function(){
+          campfire.publish('play-note',{ note: note, duration: 1000 });
+        });
+
+        ////console.log('double check',note.value());
+       
+        
+        var spatialNote = BSD.SpatialNote({
+          note: note,
+          cell: cell,
+          position: [fret,stringIndex]
+        });
+        
+        BSD.spatialNotes.push(spatialNote);
+        
+        var noteName = note.name();
+        if (noteNames.indexOf(noteName) > -1) {
+  				cell.append(noteName);
+					cell.append(DOM.sub(valley));
+        }
+        
+        if (options.rootNote && note.abstractlyEqualTo(options.rootNote)) {
+         cell.addClass('root');
+        }
+          
+        row.append(cell);
+        //console.log(note.name());
+      });
+      table.append(row);
+    });
+
+  //wrap.append(DOM.label(scale.fullName));
+  wrap.append(DOM.label(scale.fullName()));
+	wrap.append(DOM.br());
+	wrap.append(DOM.label().addClass('chord-name'));
+  wrap.append(table);
+
+  wrap.append(DOM.div().css('clear','both'));
+
+}
+
+if (true) { 
+  makeTable(jQuery(document.body),{
+    scale: makeScale('C major'),
+    //pick a root note below //
+    rootNote: Note('C'),
+    //rootNote: Note('D'),
+    //rootNote: Note('E'),
+    //rootNote: Note('F'),
+    //rootNote: Note('G'),
+    //rootNote: Note('A'),
+    //rootNote: Note('B'),
+    //rootNote: false
+    foo: false //ignore this
+  });
+}
+
+
+/***** stuff starts happening here **/
+      function loadImpulseResponse(url, convolver) {
+          // Load impulse response asynchronously
+      
+          var request = new XMLHttpRequest();
+          request.open("GET", url, true);
+          request.responseType = "arraybuffer";
+      
+          request.onload = function() { 
+              convolver.buffer = context.createBuffer(request.response, false);
+              isImpulseResponseLoaded = true;
+          }
+          request.onerror = function() { 
+              alert("error loading reverb");
+          }
+      
+          request.send();
+      }
+
+      function midi2Hertz(x) {
+        return Math.pow(2,(x-69)/12)*440;
+      }
+
+      var context;
+      
+      /* audio stuff */
+      if (typeof webkitAudioContext != "undefined") {
+        context = new webkitAudioContext();
+        BSD.audioContext = context;
+      }
+      BSD.audioPlayer = false;
+      BSD.chosenColor = BSD.colorFromHex('#000000');
+      BSD.ColorPicker = function(spec) {
+        var interface = {};
+        interface.renderOn = function(html) {
+          var square = DOM.div('').addClass('color-picker');
+          square.css('background-color','#' + spec.color.toHex());
+          square.click(function() {
+            BSD.chosenColor = spec.color;
+          });
+          html.append(square);
+        };
+        return interface;
+      };
+      BSD.grey = BSD.Color({ r: 300, g: 300, b: 300 });
+      BSD.lightGrey = BSD.Color({ r: 200, g: 200, b: 200 });
+      BSD.penDown = false;
+      jQuery(document).keypress(function(e) {
+        if (e.charCode == 96) { //backtick
+          BSD.penDown = !BSD.penDown;
+        }
+      });
+
+
+ var campfire = BSD.PubSub({});
+  campfire.subscribe('BSD.Widgets.WaveTablePlayer loaded',function(o){
+    jQuery('#msg').html(o.name + ' loaded. You may begin rocking out');
+  });
+
+
+  var polyphonyCount = 8;
+
+    
+  var wavetableNames = [];
+  var chosen = false;
+    
+    BSD.getWaveTableNames(function(resp) {
+      wavetableNames = eval( '(' + resp + ')');
+      
+      chosen = wavetableNames.atRandom();
+      while (chosen.match(/square/i)) {
+        chosen = wavetableNames.atRandom();      
+      }      
+      while (chosen.match(/harsh/i)) {
+        chosen = wavetableNames.atRandom();      
+      }      
+      /**
+      while (chosen.match(/saw/i)) {
+        chosen = wavetableNames.atRandom();      
+      }
+      **/
+      
+      
+      
+      
+      BSD.audioPlayer = BSD.Widgets.WaveTablePlayer({
+        gossip: campfire,
+        context: context,
+        name: chosen, //'Piano',
+        polyphonyCount: polyphonyCount,
+        range: [-300,128]
+      });
+    });
+    
+    /***
+    
+    BSD.audioPlayer = BSD.Widgets.OSCPlayer({
+      gossip: campfire,
+      context: context,
+      name: 'Piano',
+      range: [-300,128]
+    });
+    
+    */
+    campfire.subscribe('play-note',function(payload) {
+      BSD.audioPlayer.playNote(payload.note,payload.duration);    
+    });    
+    campfire.subscribe('play-chord',function(o) {
+      BSD.audioPlayer.playChord(o.chord,o.duration);    
+    });
+
+    var speedms = 500;
+
+    var speedFunction = function() { return speedms; }
+
+    campfire.subscribe('set-speed-ms',function(ms){
+      speedms = ms;
+    });
+    
+    var volumeInput = jQuery('#volume-input');
+    var volumeWait = BSD.Widgets.Procrastinator({
+      callback: function() {
+        var newVolume = volumeInput.val();
+        BSD.audioPlayer.publish('set-master-volume',newVolume);
+      }
+    });
+
+    volumeInput.change(function(){
+      volumeWait.beg();
+    });
+
+
+
+    var speedInput = jQuery('#speed-input');
+    var speedWait = BSD.Widgets.Procrastinator({
+      callback: function() {
+        var newSpeed = speedInput.val();
+        campfire.publish('set-speed-ms',newSpeed);
+      }
+    });
+
+    speedInput.change(function(){
+      speedWait.beg();
+    });
+
+
+
+
+
+
+
+
+  var queue = [];
+
+	var lastSN = false;   
+	var snHistory = BSD.SpatialNoteCollection([]);
+	var averageSN = false; //idealized midpoint SN
+	var midpointSN = false; //real-world midpoint SN
+	var maxHistory = 3; //default;
+
+
+  var progInput = jQuery('#progression');
+  progInput.blur(function() { 
+    if (progInput.val().length == 0) { return false; }
+		var result = [];
+    var bars = progInput.val().split('|');
+    bars.each(function(bar) {
+      var chordNames = bar.split(/,|\ +/);
+      chordNames.each(function(name) {
+        var chord = makeChord(name);
+				result.push(chord);
+			});
+		});
+		campfire.publish('new-progression',result);
+  });
+
+
+	campfire.subscribe('empty-queue',function(o) {
+
+		while(queue.length > 0) { queue.pop(); }
+	});
+
+
+
+  campfire.subscribe('new-progression',function(progression) {
+
+		campfire.publish('empty-queue',null);
+
+
+
+  var obsoletePPprogressionChords = [
+    makeChord('D-7'),
+    makeChord('G7'),
+    makeChord('CM7'),
+    makeChord('FM7'),
+    makeChord('B-7b5'),
+    makeChord('E-7'),
+    makeChord('A-7'),
+
+    makeChord('D-7'),
+    makeChord('G7'),
+    makeChord('CM7'),
+    makeChord('FM7'),
+    makeChord('B-7b5'),
+    makeChord('E-7'),
+    makeChord('A-7'),
+    
+		makeChord('D-7'),
+    makeChord('G7'),
+    makeChord('CM7'),
+    makeChord('FM7'),
+    makeChord('B-7b5'),
+    makeChord('E-7'),
+    makeChord('A-7'),
+    
+		makeChord('D-7'),
+    makeChord('G7'),
+    makeChord('CM7'),
+    makeChord('FM7'),
+    makeChord('B-7b5'),
+    makeChord('E-7'),
+    makeChord('A-7'),
+  ];
+  
+  
+  var up = false;
+
+  var highest = 85;////74 + 12;////74.plus(12).value();
+  var lowest = -1;
+  //console.log('highest',highest);
+  progression.each(function(chord){
+    up = !up;
+
+		var direction = up ? 'up':'down';
+  
+    var test = chord;
+		var chordName = test.fullName();
+
+ 		///console.log('**inner ** highest',highest);
+    
+		var chordHighest = test.highestNoteValue();
+    var chordLowest = test.lowestNoteValue();    
+    //console.log('**1 test note values',test.noteValues());		
+
+		//on UPs, start off with at least one above highest, then we'll start bringing it down
+		var aboveTopCount = test.noteValues().select(function(tnv) { return tnv > highest; }).length;
+		while (up && aboveTopCount == 0) {
+			test = test.invertUp();
+			aboveTopCount = test.noteValues().select(function(tnv) { return tnv > highest; }).length;
+		}
+
+
+		while (up && aboveTopCount > 0) {
+			test = test.invertDown();
+			aboveTopCount = test.noteValues().select(function(tnv) { return tnv > highest; }).length;
+		}
+
+ //**testing
+      if ( up && chordLowest <= lowest) { //if climbing back up, the number in this chord beneath the last should be 1
+        //now make sure the lowest isnt too low
+        while (chordLowest <= lowest) { 
+          test = test.invertUp(); 
+          chordHighest = test.highestNoteValue();
+          chordLowest = test.lowestNoteValue();
+        }
+        //thats too far, so bring it down once
+          test = test.invertDown(); 
+          chordHighest = test.highestNoteValue();
+          chordLowest = test.lowestNoteValue();     
+      }
+      
+      
+
+      if ( !up && chordHighest <= highest) { //even if falling
+        //now make sure the lowest isn't too low
+        while (chordHighest <= highest) { 
+          test = test.invertUp(); 
+          chordHighest = test.highestNoteValue();
+          chordLowest = test.lowestNoteValue();
+        }
+        //thats too far, so bring it down once
+          test = test.invertDown(); 
+          chordHighest = test.highestNoteValue();
+          chordLowest = test.lowestNoteValue();     
+      }
+      
+
+
+      
+      
+      if (!up && chordHighest >= highest) {// if coming down, make sure I'm not too high over the last loop
+        while (chordHighest >= highest) { 
+          test = test.invertDown(); 
+          chordHighest = test.highestNoteValue();
+          chordLowest = test.lowestNoteValue();
+        }    
+      }
+
+    if (up) {
+
+      //queue.push(test.noteValues());
+       test.noteValues().each(function(nv){  queue.push({ noteValue: nv, chordName: chordName, direction: direction }); });  
+    }
+    else {
+      //queue.push(test.noteValues().reverse());
+      test.noteValues().reverse().each(function(nv){  queue.push({ noteValue: nv, chordName: chordName, direction: direction }); });      
+    }
+    
+    ///console.log('FINAL notevalues',test.noteValues(),test.noteNames(),up?'up':'down');
+
+    //set the new highest
+      highest = test.highestNoteValue(); 
+      lowest = test.lowestNoteValue();
+  
+  });
+  
+  //console.log('queue',queue);
+	///campfire.publish('process-queue',null);
+
+
+});
+
+
+campfire.subscribe('process-queue',function(o) {
+  var startCandy = BSD.spatialNotes.select(function(sn) { 
+    return sn.note.name() == 'D';
+  });
+  
+	///////console.log('startCandy',startCandy);
+  var start = startCandy.select(function(candy){ 
+		//if (candy.y < 4) { return false; }
+		return candy.value() == 74; //really preferring the D high up on the A string these days
+}).atRandom();
+
+	lastSN = start;
+
+
+
+	start.cell.addClass('start');
+
+  console.log('start',start.note.value());
+
+
+  eachify(queue).eachPCN(function(o){
+
+		if (o.c == 0) {
+			maxHistory  = [3,5,7].atRandom();
+			console.log('maxHistory',maxHistory);
+		}
+
+
+    ////console.log('current',o.current);
+    var note = Note(o.current.noteValue);
+    
+    
+    campfire.publish('play-note',{ note: note, duration: 1000 });
+    
+    
+   // console.log('note',note.value(),note.name());
+    var candidates = BSD.spatialNotes.equalTo(note);    
+    
+    ////console.log('candidates',candidates);
+    /////var hashes = candidates.map(function(cand) { return cand.hash(); });
+    
+    //cant call select on a SpatialNoteCollection unless you then put that result back into a SNC.
+    candidates = BSD.SpatialNoteCollection(
+      candidates.select(function(candy){
+				return true; 
+        return candy.x > 1 && candy.y > 1 && candy.y < 5;
+      }));
+    
+
+		if (snHistory.length < 2) { 
+			averageSN = lastSN;
+			midpointSN = lastSN;
+		}
+		else {
+			var midpoint = snHistory.midpoint();
+			//console.log('midpoint',midpoint);
+
+			averageSN = BSD.SpatialNote({
+				note: lastSN.note, //dummy
+				cell: lastSN.cell, //dummy
+				position: midpoint
+			});
+			midpointSN = BSD.spatialNotes.closestTo(averageSN); //from ideal to real-world
+		}
+
+
+		jQuery('.midpoint').removeClass('midpoint');//clear them all first
+		midpointSN.cell.addClass('midpoint');
+
+
+    var hit = candidates.closestTo(averageSN);
+    ////var hit = candidates.furthestFrom(lastSN); //MOAR PAIN!! HURGHGH!!
+    ///console.log('hit',hit,hit.hash());
+    
+    lastSN.cell.removeClass('active');
+    hit.cell.addClass('active');
+    
+		jQuery('.chord-name').html(o.current.chordName + ' ' + o.current.direction);
+
+		snHistory.push(hit); //new ones onto the end
+		while (snHistory.length > maxHistory) {
+			snHistory.shift(); //old ones come off the front
+		}
+
+		////console.log('snHistory',snHistory.map(function(o) { return o.note.value(); }));
+    lastSN = hit;
+    ///console.log('note',note);  
+  },speedFunction);
+  
+}); //process-queue// (was new-progression
+
+///no need to artificially spin-up the queue///campfire.publish('new-progression',[makeChord('C')]);
+campfire.publish('process-queue',null);
+
+ 
+  </script>
+</body>
+</html>

@@ -122,8 +122,17 @@ JSMT.twelveNotes = function() {
 
 JSMT.scaleMap = {
     'major' : { name: 'major', intervals: [0,2,4,5,7,9,11] },
+
     'minor' : { name: 'minor', intervals: [0,2,3,5,7,8,10] },
+    'natural minor' : { name: 'natural minor', intervals: [0,2,3,5,7,8,10] },
+
+
     'HM' : { name: 'harmonic minor', intervals: [0,2,3,5,7,8,11] },
+    'harmonic minor' : { name: 'harmonic minor', intervals: [0,2,3,5,7,8,11] },
+
+    'mm' : { name: 'melodic minor', intervals: [0,2,3,5,7,9,11] },
+    'melodic minor' : { name: 'melodic minor', intervals: [0,2,3,5,7,9,11] },
+
 
     'mP' : { name: 'minor pentatonic', intervals: [0,3,5,7,10] },
     '-P' : { name: 'minor pentatonic', intervals: [0,3,5,7,10] },
@@ -205,6 +214,10 @@ var Note = function(foo) {
     return otherNote.abstractValue() == self.abstractValue();
   };
   
+  self.equalTo = function(other) {
+    return other.value() == self.value();
+  };
+  
   
   self.value = function() {
   
@@ -223,15 +236,25 @@ var Note = function(foo) {
     return self.nameFromValue(self.value());
   };
   self.nameFromValue = function(value) {
-    var tt = JSMT.twelveTones();
-    return tt[value%12];
+    var sharps = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+    var flats = ["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"];    
+
+    var idx = value%12;
+
+    return flats[idx];
+
+
   };
   self.valueFromName = function(name) {
     var sharps = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
     var flats = ["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"];    
-    var idx = sharps.indexOf(name);
+
+    var idx = -1; ///sharps.indexOf(name);
     if (idx == -1) {
       idx = flats.indexOf(name);
+    }             
+    if (idx == -1) {
+      idx = sharps.indexOf(name);
     }             
     ///console.log('idx',idx);
     
@@ -329,6 +352,11 @@ function makeScale(name) {
     rootName = name.substr(0,1);
     scaleName = name.substr(1);
   }
+
+  //////    console.log('scaleName',scaleName);
+  scaleName = scaleName.replace(/^\ +/,'');
+  
+
   return Note(rootName).scale(scaleName);
 }
 
@@ -346,8 +374,10 @@ var RootNoteWithIntervals = function(spec) {
   self.name = spec.name || 'no name given';
   self.abbrev = spec.abbrev || 'no abbrev';
   self.rootNote = spec.rootNote;
+
+
   self.intervals = function() { 
-    return spec.intervals; 
+    return spec.intervals.sort(function(a,b){return a-b}); 
   };
   
   self.invertDown = function() {  
@@ -355,21 +385,29 @@ var RootNoteWithIntervals = function(spec) {
     var jumper = newSet.pop();
     jumper -= 12; 
     newSet.push(jumper);
-    newSet = newSet.sort();    
+    newSet = newSet.sort(function(a,b){return a-b}); 
     newRoot = Note(newSet[0]);
     var newIntervals = newSet.map(function(v) { return v - newRoot.value(); });
     return self.constructor({ rootNote: newRoot, intervals: newIntervals });
   };
   
   self.invertUp = function() {  
-    var newSet = self.noteValues();
-    var jumper = newSet.shift();
-    jumper += 12; 
-    newSet.push(jumper);
-    newSet = newSet.sort();    
-    newRoot = Note(newSet[0]);
-    var newIntervals = newSet.map(function(v) { return v - newRoot.value(); });
+    var values = self.noteValues();  
+    var lowest = values[0];
+    var rest = values.slice(1);
+    rest.push(lowest+12);
+    rest = rest.sort(function(a,b){return a-b});
+    var newRoot = Note(rest[0]);    
+    var newIntervals = rest.map(function(v) { return v - newRoot.value(); });
     return self.constructor({ rootNote: newRoot, intervals: newIntervals });
+  };
+  
+  
+  self.octaveUp = function() {
+    return self.constructor({
+      rootNote: self.rootNote.plus(12),
+      intervals: self.intervals().map(function(i){ return i + 12; })
+    });
   };
   
   
@@ -385,8 +423,19 @@ var RootNoteWithIntervals = function(spec) {
     return self.notes().map(function(note) { return note.name(); });    
   };
   self.noteValues = function() {
-    return self.notes().map(function(note) { return note.value(); });    
+    return self.notes().map(function(note) { return note.value(); }).sort(function(a,b){return a-b});    
   };
+
+  self.highestNoteValue = function() {
+    var them = self.noteValues();
+    return them[them.length-1];
+  }
+
+  self.lowestNoteValue = function() {
+    var them = self.noteValues();
+    return them[0];
+  }
+
   
   
   self.fullName = function() {

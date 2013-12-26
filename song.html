@@ -242,7 +242,7 @@ function loadImpulseResponse(url, convolver) {
   
   var campfire = BSD.PubSub({});
 
-
+  var fretboardViz = false; /// global
 
     /*
     document.getElementById('volume').addEventListener('change', function () {
@@ -285,7 +285,7 @@ function loadImpulseResponse(url, convolver) {
     });
 
 
-    var fretboardViz = BSD.Widgets.FretboardViz({ 
+    fretboardViz = BSD.Widgets.FretboardViz({ 
       gossip: campfire,
       progression: prog, 
       guid: 'CHORXDY',
@@ -384,13 +384,17 @@ function loadImpulseResponse(url, convolver) {
 
 
 
-    campfire.subscribe('chordChange',function(o) {
+    campfire.subscribe('chordChange',function(o) { //chord change object wraps prev, current, next chords
       BSD.audioPlayer.playChord(o.current.chord,1000);    
+      //////console.log('campfire heard chordChange',o);
+      fretboardViz.publish('chordChange',o);
     });
+    
     campfire.subscribe('play-chord',function(o) {
+      console.log('campfire heard play-chord',o);
       BSD.audioPlayer.playChord(o.chord,o.duration);    
+      /////fretboardViz.publish('play-chord',o);
     });
-
 
     campfire.subscribe('fretDivHover',function(payload) {
       BSD.currentFretDiv = payload;
