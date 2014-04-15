@@ -184,6 +184,9 @@ JSMT.chordMap = {
 
     '6':  { name: 'six', intervals: [0,4,7,9] },
 
+    '-6':  { name: 'minor6', intervals: [0,3,7,9] },
+    'm6':  { name: 'minor6', intervals: [0,3,7,9] },
+
     'o7':  { name: 'diminished 7', intervals: [0,3,6,9] },
 
 
@@ -630,7 +633,9 @@ var Scale = function(spec) {
 
 
   self.degree = function(pos) {
-    return self.notes()[pos-1];
+//    return self.notes()[pos-1];
+    var notes = self.notes();    
+    return notes[(pos - 1) % notes.length];
   };
   
   self.intervalForDegree = function(pos) {

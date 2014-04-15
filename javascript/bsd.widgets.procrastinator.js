@@ -6,7 +6,7 @@ BSD.Widgets.Procrastinator = function(spec) {
 
   var updateRequests = [];
   var lastStamp = new Date().getTime();
-  var updateThresh = 1200;///500;
+  var timeout = spec.timeout || 1200; //update Threshold
   
   function checkRequests() {
     ////console.log('cr updateRequests.length',updateRequests.length);
@@ -20,9 +20,9 @@ BSD.Widgets.Procrastinator = function(spec) {
 
   var self = {};
   self.beg = function() {
-    if (updateRequests.length > 5) { return; }
+    if (updateRequests.length > 5) { return false; }
     updateRequests.push('blah');
-    setTimeout(function() { checkRequests(); } ,updateThresh);
+    setTimeout(function() { checkRequests(); } ,timeout);
   };
   
   return self;

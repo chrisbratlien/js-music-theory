@@ -340,6 +340,9 @@ function loadImpulseResponse(url, convolver) {
      //name: 'Chorus_Strings'
      // name: 'Guitar_Fuzz'
   //    name: "Celeste"
+
+        polyphonyCount: 8,
+        range: [-300,128]
     });
 
 
@@ -445,8 +448,8 @@ function loadImpulseResponse(url, convolver) {
   var exampleProg = 'C-7|F-7|D-7b5 G7';
   var exampleLabel = DOM.label('Example: '  + exampleProg + '<br />');
   exampleLabel.click(function() {
-    input.val(exampleProg);
-    input.blur();
+    progInput.val(exampleProg);
+    progInput.blur();
   });
   stage.append(exampleLabel);
 

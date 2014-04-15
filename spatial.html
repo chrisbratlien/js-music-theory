@@ -32,7 +32,7 @@
 
     <style type="text/css">
       #pickers { height: 40px; }
-      #progression { width: 100%; font-size: 1em; padding: 0.1em;}
+      #progression { width: 100%; font-size: 1.5em; padding: 0.2em;}
     </style>
   <style type="text/css">
 body { font-size: 16px; font-family: Helvetica; }
@@ -84,17 +84,30 @@ table td sub { font-size: 0.5em; }
       </div><!-- pull-right -->
       <div class="pull-right slider-control volume-control">
         <label for="volume-input">Volume
-          <input id="volume-input" type="range" min="0" max="1" step="0.01" value="0.5" />
+          <input id="volume-input" type="range" min="0" max="1" step="0.01" value="0.15" />
         </label>
       </div><!-- pull-right -->
       <div class="pull-right slider-control speed-control">
         <label for="speed-input">Speed
-          <input id="speed-input" type="range" min="0" max="2000" step="1" value="500" />
+          <input id="speed-input" type="range" min="0" max="2000" step="1" value="1000" />
+        </label>
+      </div><!-- pull-right -->
+      <div class="pull-right slider-control start-control">
+        <label for="start-input">Start
+          <input id="start-input" type="range" min="40" max="85" step="1" value="60" />
+          <span id="start-indicator">60</span>
+        </label>
+      </div><!-- pull-right -->
+      <div class="pull-right slider-control highest-control">
+        <label for="highest-input">Highest
+          <input id="highest-input" type="range" min="40" max="85" step="1" value="60" />
+          <span id="highest-indicator">60</span>
         </label>
       </div><!-- pull-right -->
       
   <table class="fretboard-table" cellspacing="0" cellpadding="0">
   </table>
+  <textarea class="tablature"></textarea>
 	</div><!-- content -->
   <script type="text/javascript">
 
@@ -439,6 +452,7 @@ if (true) {
     
     var volumeInput = jQuery('#volume-input');
     var volumeWait = BSD.Widgets.Procrastinator({
+      timeout: 250,
       callback: function() {
         var newVolume = volumeInput.val();
         BSD.audioPlayer.publish('set-master-volume',newVolume);
@@ -453,6 +467,7 @@ if (true) {
 
     var speedInput = jQuery('#speed-input');
     var speedWait = BSD.Widgets.Procrastinator({
+      timeout: 250,
       callback: function() {
         var newSpeed = speedInput.val();
         campfire.publish('set-speed-ms',newSpeed);
@@ -462,20 +477,56 @@ if (true) {
     speedInput.change(function(){
       speedWait.beg();
     });
+    
+    
+///////////////////////
+    var startInput = jQuery('#start-input');
+    var startVal = parseInt(startInput.val(),10);
+    start = BSD.spatialNotes.select(function(o){ return o.value() == startVal; }).atRandom();
+    var startWait = BSD.Widgets.Procrastinator({
+      timeout: 250,
+      callback: function() {
+        //campfire.publish('set-start-note-value',startInput.val());
+        console.log('ok?');
+        var startVal = parseInt(startInput.val(),10);
+        console.log('startVal',startVal);
+        start = BSD.spatialNotes.select(function(o){ return o.value() == startVal; }).atRandom();
+        jQuery('#start-indicator').html(startVal);
+      }
+    });
+    startInput.change(function(){
+      startWait.beg();
+    });
 
+///////////////////////
+    var highestInput = jQuery('#highest-input');
+    var highestVal = parseInt(highestInput.val(),10);
+    highest = BSD.spatialNotes.select(function(o){ return o.value() == highestVal; }).atRandom();
+    var highestWait = BSD.Widgets.Procrastinator({
+      timeout: 250,
+      callback: function() {
+        //campfire.publish('set-highest-note-value',highestInput.val());
+        console.log('ok?');
+        var highestVal = parseInt(highestInput.val(),10);
+        console.log('highestVal',highestVal);
+        highest = BSD.spatialNotes.select(function(o){ return o.value() == highestVal; }).atRandom();
+        jQuery('#highest-indicator').html(highestVal);
+      }
+    });
+    highestInput.change(function(){
+      highestWait.beg();
+    });
 
-
-
+///////////////////////
 
 
 
 
   var queue = [];
-
 	var lastSN = false;   
 	var snHistory = BSD.SpatialNoteCollection([]);
-	var averageSN = false; //idealized midpoint SN
-	var midpointSN = false; //real-world midpoint SN
+	var idealMPSN = false; //idealized midpoint SN
+	var discreteMPSN = false; //real-world midpoint SN
 	var maxHistory = 3; //default;
 
 
@@ -545,7 +596,7 @@ if (true) {
   
   var up = false;
 
-  var highest = 85;////74 + 12;////74.plus(12).value();
+  var highest = highestInput.val();/////85;////74 + 12;////74.plus(12).value();
   var lowest = -1;
   //console.log('highest',highest);
   progression.each(function(chord){
@@ -646,12 +697,6 @@ campfire.subscribe('process-queue',function(o) {
     return sn.note.name() == 'D';
   });
   
-	///////console.log('startCandy',startCandy);
-  var start = startCandy.select(function(candy){ 
-		//if (candy.y < 4) { return false; }
-		return candy.value() == 74; //really preferring the D high up on the A string these days
-}).atRandom();
-
 	lastSN = start;
 
 
@@ -680,40 +725,31 @@ campfire.subscribe('process-queue',function(o) {
     var candidates = BSD.spatialNotes.equalTo(note);    
     
     ////console.log('candidates',candidates);
-    /////var hashes = candidates.map(function(cand) { return cand.hash(); });
-    
-    //cant call select on a SpatialNoteCollection unless you then put that result back into a SNC.
-    candidates = BSD.SpatialNoteCollection(
-      candidates.select(function(candy){
-				return true; 
-        return candy.x > 1 && candy.y > 1 && candy.y < 5;
-      }));
-    
 
 		if (snHistory.length < 2) { 
-			averageSN = lastSN;
-			midpointSN = lastSN;
+			idealMPSN = lastSN;
+			discreteMPSN = lastSN;
 		}
 		else {
 			var midpoint = snHistory.midpoint();
 			//console.log('midpoint',midpoint);
-
-			averageSN = BSD.SpatialNote({
+			idealMPSN = BSD.SpatialNote({
 				note: lastSN.note, //dummy
 				cell: lastSN.cell, //dummy
 				position: midpoint
 			});
-			midpointSN = BSD.spatialNotes.closestTo(averageSN); //from ideal to real-world
+			discreteMPSN = BSD.spatialNotes.closestTo(idealMPSN); //from ideal to real-world
 		}
 
-
 		jQuery('.midpoint').removeClass('midpoint');//clear them all first
-		midpointSN.cell.addClass('midpoint');
+		discreteMPSN.cell.addClass('midpoint');
 
 
-    var hit = candidates.closestTo(averageSN);
+    var hit = candidates.closestTo(idealMPSN);
     ////var hit = candidates.furthestFrom(lastSN); //MOAR PAIN!! HURGHGH!!
     ///console.log('hit',hit,hit.hash());
+    campfire.publish('tablature',{ string: hit.y, fret: hit.x });
+    
     
     lastSN.cell.removeClass('active');
     hit.cell.addClass('active');
@@ -735,6 +771,12 @@ campfire.subscribe('process-queue',function(o) {
 ///no need to artificially spin-up the queue///campfire.publish('new-progression',[makeChord('C')]);
 campfire.publish('process-queue',null);
 
+var textarea = jQuery('.tablature');
+campfire.subscribe('tablature',function(o){
+  textarea.append('------' + o.string + '----' + o.fret);
+
+
+});
  
   </script>
 </body>
