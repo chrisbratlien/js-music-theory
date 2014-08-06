@@ -49,10 +49,10 @@ function WTNote(staticAudioRouting, isMonophonic) {
     osc2Octave.looping = true;
     
     var panner1 = context.createPanner();
-    panner1.panningModel = webkitAudioPannerNode.EQUALPOWER;
+    panner1.panningModel = "equalpower";
 
     var panner2 = context.createPanner();
-    panner2.panningModel = webkitAudioPannerNode.EQUALPOWER;
+    panner2.panningModel = "equalpower";
 
     // Amplitude envelope
     var ampEnvelope = context.createGainNode();
@@ -142,8 +142,8 @@ WTNote.prototype.setFilterValues = function() {
         // filter.frequency.setValueAtTime(filter.frequency.value, time); // !! not correct
     }
 
-    filter.frequency.setTargetValueAtTime(envAmountFrequency, time, filterAttack);
-    filter.frequency.setTargetValueAtTime(startFrequency, time + filterAttack, filterDecay);
+    filter.frequency.setTargetAtTime(envAmountFrequency, time, filterAttack);
+    filter.frequency.setTargetAtTime(startFrequency, time + filterAttack, filterDecay);
 }
 
 
@@ -199,10 +199,10 @@ WTNote.prototype.play = function(wave, wave2, semitone, octave, time) {
     // pan maximum from -90 -> +90 degrees
     var x = Math.sin(0.5*Math.PI * width);
     var z = -Math.cos(0.5*Math.PI * width);
-    panner1.panningModel = webkitAudioPannerNode.EQUALPOWER;
+    panner1.panningModel = "equalpower";
     panner1.setPosition(-x, 0, z);
 
-    panner2.panningModel = webkitAudioPannerNode.EQUALPOWER;
+    panner2.panningModel = "equalpower";
     panner2.setPosition(x, 0, z);
 
     // Amplitude envelope

@@ -38,8 +38,8 @@ function StaticAudioRouting() {
     loadImpulseResponse('impulse-responses/matrix-reverb6.wav', convolver);
     // loadImpulseResponse('impulse-responses/spatialized4.wav', convolver);
 
-    var convolverDry = context.createGainNode();
-    var convolverWet = context.createGainNode();
+    var convolverDry = context.createGain();//context.createGainNode();
+    var convolverWet = context.createGain();//context.createGainNode();
 
     convolverDry.connect(compressor);
     convolverWet.connect(convolver);

@@ -54,18 +54,18 @@ BSD.Widgets.Oscar = function(spec) {
 
 
   var panner1 = context.createPanner();
-  panner1.panningModel = webkitAudioPannerNode.EQUALPOWER;
+  panner1.panningModel = "equalpower";///panner1.EQUALPOWER;
   
   var panner2 = context.createPanner();
-  panner2.panningModel = webkitAudioPannerNode.EQUALPOWER;
+  panner2.panningModel = "equalpower";////panner2.EQUALPOWER;
   
 
   // Amplitude envelope
-  var ampEnvelope = context.createGainNode();
+  var ampEnvelope = context.createGain();
   ampEnvelope.gain.value = 0.0; // default value
 
   // Create note volume.
-  var noteVolume = context.createGainNode();
+  var noteVolume = context.createGain();
   noteVolume.gain.value = 0; // start out silent until told otherwise
 
 
@@ -113,10 +113,10 @@ BSD.Widgets.Oscar = function(spec) {
     
     
 
-    osc1.noteOn(0);
-    osc2.noteOn(0);
-    osc1Octave.noteOn(0);
-    osc2Octave.noteOn(0);
+    osc1.start(0);/////noteOn(0);
+    osc2.start(0);////noteOn(0);
+    osc1Octave.start(0);///noteOn(0);
+    osc2Octave.start(0);///noteOn(0);
 
     var self = BSD.PubSub({});
     self.osc1 = osc1;
@@ -158,8 +158,8 @@ BSD.Widgets.Oscar = function(spec) {
     if (envAmountFrequency > nyquist)
         envAmountFrequency = nyquist;
 
-    filter.frequency.setTargetValueAtTime(envAmountFrequency, time, filterAttack);
-    filter.frequency.setTargetValueAtTime(startFrequency, time + filterAttack, filterDecay);
+    filter.frequency.setTargetAtTime(envAmountFrequency, time, filterAttack);
+    filter.frequency.setTargetAtTime(startFrequency, time + filterAttack, filterDecay);
   };
 
 
@@ -205,10 +205,10 @@ BSD.Widgets.Oscar = function(spec) {
     // pan maximum from -90 -> +90 degrees
     var x = Math.sin(0.5*Math.PI * width);
     var z = -Math.cos(0.5*Math.PI * width);
-    panner1.panningModel = webkitAudioPannerNode.EQUALPOWER;
+    panner1.panningModel = "equalpower";
     panner1.setPosition(-x, 0, z);
 
-    panner2.panningModel = webkitAudioPannerNode.EQUALPOWER;
+    panner2.panningModel = "equalpower";
     panner2.setPosition(x, 0, z);
 
     // Amplitude envelope
@@ -219,8 +219,8 @@ BSD.Widgets.Oscar = function(spec) {
     var ampAttackTime = time + ampAttack;
     
     // Amplitude decay
-    ampEnvelope.gain.setTargetValueAtTime(1, time, ampAttack);
-    ampEnvelope.gain.setTargetValueAtTime(0, ampAttackTime, ampDecay);
+    ampEnvelope.gain.setTargetAtTime(1, time, ampAttack);
+    ampEnvelope.gain.setTargetAtTime(0, ampAttackTime, ampDecay);
 
     // Filter
     self.setFilterValues();
@@ -249,6 +249,31 @@ BSD.getWaveTableNames = function(cb) {
 };
 
 
+
+BSD.Gonzo = function(spec) {
+  var self = BSD.PubSub({});
+  var destination = spec.destination;
+  self.playing = false;
+  self.id = spec.id; ///just in case this is still needed...
+
+  self.play = function(a,b,semitone,octave,duration)  {
+
+    var osc1 = context.createBufferSource();
+    osc1.connect(destination);
+
+    var pitchFrequency = midi2Hertz(semitone);
+    
+    ///////self.pitchFrequency = pitchFrequency;
+    ///////var pitchRate = pitchFrequency * wave.getRateScale();
+
+    osc1.start(0);/////noteOn(0);
+    osc1.looping = true;
+    setTimeout(function(){ osc1.stop(); },duration);
+  };
+  return self;
+}
+
+
 BSD.Widgets.WaveTablePlayer = function(spec) {
   var staticAudioRouting = new StaticAudioRouting();
   var waveTable;
@@ -266,11 +291,20 @@ BSD.Widgets.WaveTablePlayer = function(spec) {
 
   self.newOscillator = function() {
     var id = self.oscillators.length + 1;  
+
+    /**
     var result = BSD.Widgets.Oscar({ 
       id: id, 
       context: context, 
       staticAudioRouting: staticAudioRouting  
-    });  
+    });
+    ****/  
+
+    var result = BSD.Gonzo({ 
+      id: id, 
+      context: context, 
+    });
+
     self.oscillators.push(result);
     return result;
   };

@@ -51,6 +51,8 @@ table td sub { font-size: 0.5em; }
 
 .slider-control label input { width: 50%; margin: 10px; }
 
+pre { width: 50%; height: 100px; }
+
 </style>
   </head>
   <body>
@@ -84,7 +86,7 @@ table td sub { font-size: 0.5em; }
       </div><!-- pull-right -->
       <div class="pull-right slider-control volume-control">
         <label for="volume-input">Volume
-          <input id="volume-input" type="range" min="0" max="1" step="0.01" value="0.15" />
+          <input id="volume-input" type="range" min="0" max="1" step="0.01" value="0.05" />
         </label>
       </div><!-- pull-right -->
       <div class="pull-right slider-control speed-control">
@@ -105,9 +107,11 @@ table td sub { font-size: 0.5em; }
         </label>
       </div><!-- pull-right -->
       
-  <table class="fretboard-table" cellspacing="0" cellpadding="0">
-  </table>
-  <textarea class="tablature"></textarea>
+    <div class="fretboard-wrap">
+    </div>
+    <pre class="tablature">
+    tab goes here...
+    </pre>
 	</div><!-- content -->
   <script type="text/javascript">
 
@@ -315,7 +319,11 @@ table.attr('cellpadding',0);
 }
 
 if (true) { 
-  makeTable(jQuery(document.body),{
+
+
+  var fretboardWrap = jQuery('.fretboard-wrap');
+
+  makeTable(jQuery(fretboardWrap),{
     scale: makeScale('C major'),
     //pick a root note below //
     rootNote: Note('C'),
@@ -335,19 +343,27 @@ if (true) {
       function loadImpulseResponse(url, convolver) {
           // Load impulse response asynchronously
       
-          var request = new XMLHttpRequest();
-          request.open("GET", url, true);
-          request.responseType = "arraybuffer";
+          var xhr = new XMLHttpRequest();
+          xhr.open("GET", url, true);
+          xhr.responseType = "arraybuffer";
       
-          request.onload = function() { 
-              convolver.buffer = context.createBuffer(request.response, false);
-              isImpulseResponseLoaded = true;
+          xhr.onload = function() { 
+            context.decodeAudioData(xhr.response, 
+              function onSuccess(decodedBuffer) {
+                // Decoding was successful, do something useful with the audio buffer
+                convolver.buffer = decodedBuffer;
+                isImpulseResponseLoaded = true;
+              }, 
+              function onFailure() {
+                alert("Decoding the audio buffer failed");
+              });
           }
-          request.onerror = function() { 
+          
+          xhr.onerror = function() { 
               alert("error loading reverb");
           }
       
-          request.send();
+          xhr.send();
       }
 
       function midi2Hertz(x) {
@@ -555,6 +571,8 @@ if (true) {
 
   campfire.subscribe('new-progression',function(progression) {
 
+    console.log('newp',progression);
+
 		campfire.publish('empty-queue',null);
 
 
@@ -685,54 +703,41 @@ if (true) {
   
   });
   
-  //console.log('queue',queue);
-	///campfire.publish('process-queue',null);
+  console.log('queue',queue);
+	campfire.publish('process-queue',null);
 
 
 });
 
 
 campfire.subscribe('process-queue',function(o) {
+
+  ////console.log('123');
   var startCandy = BSD.spatialNotes.select(function(sn) { 
     return sn.note.name() == 'D';
   });
   
 	lastSN = start;
 
-
-
 	start.cell.addClass('start');
 
   console.log('start',start.note.value());
 
+  var sequence = [];
 
   eachify(queue).eachPCN(function(o){
-
 		if (o.c == 0) {
 			maxHistory  = [3,5,7].atRandom();
 			console.log('maxHistory',maxHistory);
 		}
-
-
-    ////console.log('current',o.current);
     var note = Note(o.current.noteValue);
-    
-    
-    campfire.publish('play-note',{ note: note, duration: 1000 });
-    
-    
-   // console.log('note',note.value(),note.name());
-    var candidates = BSD.spatialNotes.equalTo(note);    
-    
-    ////console.log('candidates',candidates);
-
+    var candidates = BSD.spatialNotes.equalTo(note);
 		if (snHistory.length < 2) { 
 			idealMPSN = lastSN;
 			discreteMPSN = lastSN;
 		}
 		else {
 			var midpoint = snHistory.midpoint();
-			//console.log('midpoint',midpoint);
 			idealMPSN = BSD.SpatialNote({
 				note: lastSN.note, //dummy
 				cell: lastSN.cell, //dummy
@@ -741,29 +746,42 @@ campfire.subscribe('process-queue',function(o) {
 			discreteMPSN = BSD.spatialNotes.closestTo(idealMPSN); //from ideal to real-world
 		}
 
-		jQuery('.midpoint').removeClass('midpoint');//clear them all first
-		discreteMPSN.cell.addClass('midpoint');
-
-
     var hit = candidates.closestTo(idealMPSN);
-    ////var hit = candidates.furthestFrom(lastSN); //MOAR PAIN!! HURGHGH!!
-    ///console.log('hit',hit,hit.hash());
-    campfire.publish('tablature',{ string: hit.y, fret: hit.x });
-    
-    
-    lastSN.cell.removeClass('active');
-    hit.cell.addClass('active');
-    
-		jQuery('.chord-name').html(o.current.chordName + ' ' + o.current.direction);
-
 		snHistory.push(hit); //new ones onto the end
 		while (snHistory.length > maxHistory) {
 			snHistory.shift(); //old ones come off the front
 		}
+    sequence.push({ spatialNote: hit, chordName: o.current.chordName, direction: o.current.direction });
 
 		////console.log('snHistory',snHistory.map(function(o) { return o.note.value(); }));
     lastSN = hit;
     ///console.log('note',note);  
+  });
+
+  campfire.publish('tablature',sequence);
+
+
+  
+  eachify(sequence).eachPCN(function(o){
+    //console.log('oh',o);
+    ///var note = Note(o.current.noteValue);
+    var spatialNote = o.current.spatialNote;
+    var chordName = o.current.chordName;
+    var direction = o.current.direction;
+    
+    ///console.log('spatialNote',spatialNote);
+    campfire.publish('play-note',{ note: spatialNote, duration: 1000 });
+  		
+  		
+  		jQuery('.chord-name').html(chordName + ' ' + direction);
+  		jQuery('.midpoint').removeClass('midpoint');//clear them all first
+
+      /**
+	   	discreteMPSN.cell.addClass('midpoint');
+      lastSN.cell.removeClass('active');
+      hit.cell.addClass('active');
+      **/
+      
   },speedFunction);
   
 }); //process-queue// (was new-progression
@@ -771,12 +789,58 @@ campfire.subscribe('process-queue',function(o) {
 ///no need to artificially spin-up the queue///campfire.publish('new-progression',[makeChord('C')]);
 campfire.publish('process-queue',null);
 
-var textarea = jQuery('.tablature');
-campfire.subscribe('tablature',function(o){
-  textarea.append('------' + o.string + '----' + o.fret);
+
+BSD.chunkify = function(ary,chunkSize) {
+  var chunks = [];
+  while (ary.length > chunkSize) {
+    chunks.push(ary.splice(0,chunkSize));
+  }
+  chunks.push(ary);
+  return chunks;
+};
+
+
+var pre = jQuery('.tablature');
+campfire.subscribe('tablature',function(sequence){
+  var output = '';
+  var eventsPerRow = 30;  
+  var staves = BSD.chunkify(sequence,eventsPerRow);
+
+  output += "\n";
+  staves.each(function(staff){
+ 
+    [0,1,2,3,4,5].each(function(string){
+      staff.each(function(o){
+        var spatialNote = o.spatialNote;
+        var ch = '---';
+        if (spatialNote.y == string) {
+          ch = '---' + spatialNote.x;
+        }
+        
+        ch = ch.substr(-3,3);
+        
+        output += ch;
+        console.log('spatialNote',spatialNote,spatialNote.y);
+      });
+      output += "\n";
+    });
+    output += "\n";
+  });
+  
+  ////console.log('output',output);
+  
+
+  pre.html(output);
+
 
 
 });
+
+  setTimeout(function(){
+  BSD.audioPlayer.publish('set-master-volume',0.1);
+  console.log('volume',volumeInput.val());  
+  },2000);
+
  
   </script>
 </body>

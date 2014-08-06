@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Fretboard Color Toggle</title>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<meta charset=utf-8 />
+<script>
+  if (typeof BSD == "undefined") {  var BSD = {};  }
+  if (typeof BSD.Widgets == "undefined") {  BSD.Widgets = {};  }
+</script>
+
+  <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/array.js"></script>
+  <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/dom.js"></script>
+  <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/bsd.pubsub.js"></script>
+  <script src="http://cdn.dev.bratliensoftware.com/javascript/color.js"></script>
+  <script src="http://lucid.bratliensoftware.com/js-music-theory/javascript/js-music-theory.js"></script>
+
+
+
+  <script src="http://lucid.bratliensoftware.com/js-music-theory/javascript/fft.js"></script>
+  <script src="http://lucid.bratliensoftware.com/js-music-theory/javascript/wavetable.js"></script>
+  <script src="http://lucid.bratliensoftware.com/js-music-theory/javascript/wavetableloader.js"></script>
+  <script src="http://lucid.bratliensoftware.com/js-music-theory/javascript/staticaudiorouting.js"></script>
+
+
+
+
+  <script src="http://lucid.bratliensoftware.com/js-music-theory/javascript/bsd.widgets.wavetableplayer.js"></script>
+
+
+
+
+  <script src="http://lucid.bratliensoftware.com/js-music-theory/javascript/bsd.widgets.oscplayer.js"></script>
+  <script src="http://lucid.bratliensoftware.com/js-music-theory/javascript/bsd.mandolin.js"></script>
+  <style>
+    body { font-size: 13px; }
+    table { border-bottom: 1px solid black }
+    table { border-right: 1px solid black }
+    table td { padding: 0.3em; text-align: center; min-width: 1em;}
+    table td { border-top: 1px solid black; }
+    table td { border-left: 1px solid black; }
+    
+    .cell { position: relative; }
+    
+    
+    .fretboard-table { margin-bottom: 1.75em; }
+    
+    .corner { width: 33%; height: 33%;   position: absolute; 
+    border-radius: 4px;
+    }
+    
+    .corner-0 { left: 0; top: 0; }
+    .corner-1 { left: 33%; top: 0; }
+    .corner-2 { right: 0; top: 0; }
+    
+    .corner-3 { left: 0; top: 33%; }
+    .corner-4 { left: 33%; top: 33%; }
+    .corner-5 { right: 0; top: 33%; }
+    
+    .corner-6 { left: 0; bottom: 0%; }
+    .corner-7 { left: 33%; bottom: 0%; }
+    .corner-8 { right: 0; bottom: 0%; }
+    
+    .hidden { visibility: hidden; }  
+    
+    #pickers { width: 45em; overflow: auto; }
+    .color-picker { width: 2em; height: 2em; float: left; cursor: pointer;  border: 1px solid white; }
+
+    .cell { cursor: pointer; }
+    
+    
+  </style>
+  </head>
+<body>
+
+    <div id="pickers">   </div><!-- pickers -->
+  
+
+<script type="text/javascript">
+
+
+  context = new webkitAudioContext();
+  BSD.audioContext = context;
+
+
+
+function loadImpulseResponse(url, convolver) {
+  // Load impulse response asynchronously
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", url, true);
+  xhr.responseType = "arraybuffer";
+  
+  xhr.onload = function() { 
+    context.decodeAudioData(xhr.response, 
+      function onSuccess(decodedBuffer) {
+        // Decoding was successful, do something useful with the audio buffer
+        convolver.buffer = decodedBuffer;
+        isImpulseResponseLoaded = true;
+      }, 
+      function onFailure() {
+        alert("Decoding the audio buffer failed");
+      });
+  }
+  
+  xhr.onerror = function() { 
+      alert("error loading reverb");
+  }
+  
+  xhr.send();
+}
+
+
+
+
+
+
+
+
+  var campfire = BSD.PubSub({});
+
+
+  BSD.chosenColor = BSD.colorFromHex('#000000');
+  BSD.ColorPicker = function(spec) {
+    var self = {};
+    self.renderOn = function(html) {
+  ///console.log('hello');
+      var square = DOM.div('').addClass('color-picker');
+      square.css('background-color','#' + spec.color.toHex());
+      square.click(function() {
+        BSD.chosenColor = spec.color;
+        console.log('lcick',BSD.chosenColor.toHex());
+      });
+  ////console.log('html',html);
+      html.append(square);
+    };
+    return self;
+  };
+      
+  var pickers = jQuery('#pickers');
+  var palettes = [];
+  palettes.push(BSD.randomPalette(20,50));
+  palettes.each(function(pal) {
+    pal.each(function(randcolor) { 
+    var picker = BSD.ColorPicker({ color: randcolor});
+    picker.renderOn(pickers);
+    });
+  });
+
+
+var cscale = makeScale('Cmajor');
+var noteNames = cscale.noteNames();
+
+
+    
+      BSD.audioPlayer = BSD.Widgets.WaveTablePlayer({
+        gossip: campfire,
+        context: context,
+        name: 'Piano',//chosen, //'Piano',
+        polyphonyCount: 4,//polyphonyCount,
+        range: [-300,128]
+      });
+    /**
+    BSD.audioPlayer = BSD.Widgets.OSCPlayer({
+      gossip: campfire,
+      context: context,
+      name: 'Piano',
+      range: [-300,128]
+    });
+    ***/
+    
+
+
+
+  [0,1,2,3,4,5,6,7,8].each(function(o){
+    var mando = BSD.Mandolin({});
+    mando.subscribe('note-click',function(note) {
+      BSD.audioPlayer.playNote(note,1000);    
+    });    
+    mando.renderOn(jQuery(document.body));
+  });
+    
+</script>
+</body>
+</html>
