@@ -253,23 +253,59 @@ BSD.getWaveTableNames = function(cb) {
 BSD.Gonzo = function(spec) {
   var self = BSD.PubSub({});
   var destination = spec.destination;
+  var context = spec.context;
+
   self.playing = false;
   self.id = spec.id; ///just in case this is still needed...
 
+  var SINE = 0, SQUARE = 1, SAWTOOTH = 2, TRIANGLE = 3, CUSTOM = 4;
+
+
+  var ampEnvelope = context.createGain();
+  ampEnvelope.gain.value = 0.0; // default value
+  ampEnvelope.connect(destination);
+
   self.play = function(a,b,semitone,octave,duration)  {
-
-    var osc1 = context.createBufferSource();
-    osc1.connect(destination);
-
-    var pitchFrequency = midi2Hertz(semitone);
+    var osc1 = context.createOscillator();/////BufferSource();
+    ////////var osc1 = context.createBufferSource();
+    osc1.connect(ampEnvelope);
     
+    var pitchFrequency = midi2Hertz(semitone);
     ///////self.pitchFrequency = pitchFrequency;
     ///////var pitchRate = pitchFrequency * wave.getRateScale();
+    ////osc1.playbackRate = pitchFrequency;
+    osc1.frequency.value = pitchFrequency;
+    osc1.type = SINE;////[0,1,2,3].atRandom();
 
+    
+    
+    ampEnvelope.gain = 1.0;
+    var ampAttack = 0.056;
+    var ampDecay = 0.7; ///0.100;
+    
+    
+    var time = context.currentTime;
+    var ampAttackTime = time + ampAttack;
+
+    ampEnvelope.gain.setTargetAtTime(1, time, ampAttack);
+    ampEnvelope.gain.setTargetAtTime(0, ampAttackTime, ampDecay);
+    
+    
+    
     osc1.start(0);/////noteOn(0);
+    
+    setTimeout(function(){ osc1.stop();   },duration*2);
+    
+    
     osc1.looping = true;
-    setTimeout(function(){ osc1.stop(); },duration);
   };
+  
+  self.playNote = function(note,duration) {
+    self.play(false,false, note.value(), 0, duration);  
+  };
+  
+  
+  
   return self;
 }
 
@@ -303,6 +339,7 @@ BSD.Widgets.WaveTablePlayer = function(spec) {
     var result = BSD.Gonzo({ 
       id: id, 
       context: context, 
+      destination: context.destination
     });
 
     self.oscillators.push(result);

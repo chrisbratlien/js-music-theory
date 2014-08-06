@@ -13,25 +13,17 @@
   <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/dom.js"></script>
   <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/bsd.pubsub.js"></script>
   <script src="http://cdn.dev.bratliensoftware.com/javascript/color.js"></script>
-  <script src="http://lucid.bratliensoftware.com/js-music-theory/javascript/js-music-theory.js"></script>
 
+  <script src="javascript/bootup.js"></script>
+  <script src="javascript/js-music-theory.js"></script>
+  <script src="javascript/fft.js"></script>
+  <script src="javascript/wavetable.js"></script>
+  <script src="javascript/wavetableloader.js"></script>
+  <script src="javascript/staticaudiorouting.js"></script>
 
-
-  <script src="http://lucid.bratliensoftware.com/js-music-theory/javascript/fft.js"></script>
-  <script src="http://lucid.bratliensoftware.com/js-music-theory/javascript/wavetable.js"></script>
-  <script src="http://lucid.bratliensoftware.com/js-music-theory/javascript/wavetableloader.js"></script>
-  <script src="http://lucid.bratliensoftware.com/js-music-theory/javascript/staticaudiorouting.js"></script>
-
-
-
-
-  <script src="http://lucid.bratliensoftware.com/js-music-theory/javascript/bsd.widgets.wavetableplayer.js"></script>
-
-
-
-
-  <script src="http://lucid.bratliensoftware.com/js-music-theory/javascript/bsd.widgets.oscplayer.js"></script>
-  <script src="http://lucid.bratliensoftware.com/js-music-theory/javascript/bsd.mandolin.js"></script>
+  <script src="javascript/bsd.widgets.wavetableplayer.js?v=22"></script>
+  <script src="javascript/bsd.widgets.oscplayer.js"></script>
+  <script src="javascript/bsd.mandolin.js"></script>
   <style>
     body { font-size: 13px; }
     table { border-bottom: 1px solid black }
@@ -151,7 +143,20 @@ var cscale = makeScale('Cmajor');
 var noteNames = cscale.noteNames();
 
 
+
+
+
+      /***
+      BSD.audioPlayer = BSD.Gonzo({
+        id: 1, 
+        context: context, 
+        destination: context.destination
+      });
+      ***/
+      
+
     
+      
       BSD.audioPlayer = BSD.Widgets.WaveTablePlayer({
         gossip: campfire,
         context: context,
@@ -159,6 +164,7 @@ var noteNames = cscale.noteNames();
         polyphonyCount: 4,//polyphonyCount,
         range: [-300,128]
       });
+      
     /**
     BSD.audioPlayer = BSD.Widgets.OSCPlayer({
       gossip: campfire,
