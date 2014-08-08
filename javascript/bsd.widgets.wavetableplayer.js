@@ -250,7 +250,7 @@ BSD.getWaveTableNames = function(cb) {
 
 
 
-BSD.MandolinStringPairOscillator = function(spec) {
+BSD.MandolinStringOscillator = function(spec) {
   var self = BSD.PubSub({});
   var destination = spec.destination;
   var context = spec.context;
@@ -266,19 +266,31 @@ BSD.MandolinStringPairOscillator = function(spec) {
   ampEnvelope.connect(destination);
 
 
-  var volume = 1.0;
+  var volume = 0;
 
 
+  self.subscribe('set-master-volume',function(magnitude) {
+    console.log('MAG',magnitude,volume);
+    volume = magnitude;
+  });
+  
+  function randomInRange(min, max) {
+    return Math.random() * (max-min) + min;
+  }  
+  
 
-  self.play = function(a,b,semitone,octave,duration)  {
+  self.play = function(semitone,duration)  {
+
+
+    console.log('play',semitone,duration);
 
     var detune1 = 4.5;    
     var time = context.currentTime;
-    var ampAttack = 0.056;
+    var ampAttack = [0.056,0.099].atRandom();
     var ampDecay = 0.7; 
 
     ampEnvelope.gain = volume;
-    ampEnvelope.gain.setTargetAtTime(1, time, ampAttack);
+    ampEnvelope.gain.setTargetAtTime(volume, time, ampAttack);
     //ampEnvelope.gain.exponentialRampToValueAtTime(1,time+duration);
     
     
@@ -288,15 +300,15 @@ BSD.MandolinStringPairOscillator = function(spec) {
     
     
     [
-    { title: 'fundamental', freq: midi2Hertz(semitone), volumeCoeff: 1.0 },
-    { title: 'octave', freq: midi2Hertz(semitone+12), volumeCoeff: 0.5 },
-    { title: 'dominant', freq: midi2Hertz(semitone+19), volumeCoeff: 0.25 }
+    { title: 'fundamental', freq: midi2Hertz(semitone), volumeRange: [0.5,1.0] },
+    { title: 'octave', freq: midi2Hertz(semitone+12), volumeRange: [0.5,0.75] },
+    { title: 'dominant', freq: midi2Hertz(semitone+19), volumeRange: [0.3,0.5] }
     ].each(function(o){
       var osc = context.createOscillator();/////BufferSource();
       var gain = context.createGain();
       
-      
-      var myVolume = o.volumeCoeff * volume;
+      var myVolume = randomInRange(o.volumeRange[0],o.volumeRange[1]) * volume;
+
       osc.connect(gain);
       gain.connect(ampEnvelope);
     
@@ -322,11 +334,95 @@ BSD.MandolinStringPairOscillator = function(spec) {
   };
   
   self.playNote = function(note,duration) {
-    self.play(false,false, note.value(), 0, duration);  
+    self.play(note.value(),duration);  
   };
   
   return self;
 };
+
+
+
+BSD.Widgets.MandolinPlayer = function(spec) {
+
+
+  var self = BSD.Widgets.BasePlayer(spec);
+  var context = spec.context;
+  var oscillators = [];
+  self.oscillators = oscillators;
+
+
+  var pairs = [];
+
+  self.name = spec.name;
+
+  self.addNewPair = function() {
+    var id = self.oscillators.length + 1;  
+    var pair = [];
+    var string1 = BSD.MandolinStringOscillator({ 
+      id: id, 
+      context: context, 
+      destination: context.destination,
+      volume: 0
+    });
+    var string2 = BSD.MandolinStringOscillator({ 
+      id: id, 
+      context: context, 
+      destination: context.destination,
+      volume: 0
+    });
+    self.oscillators.push(string1);
+    self.oscillators.push(string2);
+
+    var pair = [string1,string2];
+    pairs.push(pair);
+  };
+  
+  var time = context.currentTime;
+  /////var isMonophonic = true;
+
+  var polyphonyCount = spec.polyphonyCount || 4;
+  for (var i = 0; i < polyphonyCount; i += 1) {
+    self.addNewPair();
+  }
+
+  self.play = function(semitone, duration) {   
+    var o = self.idlePairs().detect(function(o) { return true; }); //return first idle pair
+    if (!o) { 
+      console.log('could not find idle pair of oscillators');       
+      return false; 
+    }
+    
+    console.log('pair',o);
+    
+    var s1 = o[0];
+    var s2 = o[1];
+    
+    s1.play(semitone, duration);
+    s2.play(semitone, duration);
+  };
+
+
+  
+  self.idlePairs = function() {
+    return pairs.select(function(o){
+      var s1 = o[0];
+      var s2 = o[1];
+      return s1.playing == false && s2.playing == false;
+    });  
+  }
+
+
+
+
+  self.playNote = function(note,duration) {
+    self.play(note.value(), duration);  
+  };
+  
+  return self;
+};
+
+
+
 
 
 BSD.Widgets.WaveTablePlayer = function(spec) {
@@ -355,10 +451,11 @@ BSD.Widgets.WaveTablePlayer = function(spec) {
     });
     ****/  
 
-    var result = BSD.MandolinStringPairOscillator({ 
+    var result = BSD.MandolinStringOscillator({ 
       id: id, 
       context: context, 
-      destination: context.destination
+      destination: context.destination,
+      volume: 0
     });
 
     self.oscillators.push(result);
