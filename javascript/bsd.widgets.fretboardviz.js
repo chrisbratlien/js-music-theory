@@ -70,9 +70,6 @@ BSD.Widgets.FretboardViz = function(spec) {
 
 
 
-
-
-
     var fretLabelDiv = DOM.div().addClass('fret-labels');
     [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].each(function(fidx) {
       var labelDiv = DOM.div().addClass('fret-label').html(fidx);
@@ -82,36 +79,59 @@ BSD.Widgets.FretboardViz = function(spec) {
     board.append(DOM.div().addClass('clear'));
 
 
-    var opens = [76,71,67,62,57,52];
+    ////var opens = [76,71,67,62,57,52];
+    var opens = [64,59,55,50,45,40];
+    
+    
+    
+    
+    
     [0,1,2,3,4,5].each(function(stridx) {
       var stringDiv = DOM.div().addClass('string').addClass('string-' + stridx);
       [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].each(function(fidx) {
         var midinote = opens[stridx] + fidx;
         var thisNote = Note(midinote);
         var noteName = thisNote.name();
-        var nn = noteName.toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');          
+        var nn = noteName.replace(/b/g,'flat').replace(/#/g,'sharp').toLowerCase();          
         ////console.log(noteName);      
         
-        var fretDiv = DOM.div().addClass('fret').addClass('fret-' + fidx).addClass('midinote-' + midinote).addClass('note-' + nn); 
+        var fretDiv = DOM.div();
+        fretDiv.addClass('fret');
+        fretDiv.addClass('fret-' + fidx);
+        fretDiv.addClass('midinote-' + midinote);
+        fretDiv.addClass('note-' + nn); 
+      
+      
+        
+        if (nn.length == 1) {
+          fretDiv.html(nn.toUpperCase());
+        }
+        
         
         fretDiv.addClass('guid-' + spec.guid);
         
 
         fretDiv.on('hover',function(){
-          spec.gossip.publish('fretDivHover',fretDiv);
+          ///////self.publish('fretDivHover',fretDiv);
+          self.publish('div-hover',fretDiv);
         });
+        
+        
         
         
         fretDiv.click(function() {
-          //spec.audioPlayer.playNote(thisNote,timeout);
-          //spec.gossip.publish('playNote',{ note: thisNote, duration: 1000 });
-          spec.gossip.publish('noteClicked',thisNote);
+          //////self.publish('noteClicked',thisNote);
+          self.publish('play-note',thisNote);
         });
+        
+        
+        /***
         fretDiv.bind('touchstart',function() {
           ////spec.gossip.publish('playNote',{ note: thisNote, duration: 1000 });
           spec.gossip.publish('noteClicked',thisNote);
           ////spec.audioPlayer.playNote(thisNote,timeout);
         });
+        ***/
         
         
                 
@@ -192,6 +212,10 @@ BSD.Widgets.FretboardViz = function(spec) {
   
   ///spec.gossip.subscribe('play-chord',function(o) {
   self.subscribe('chordChange',function(o) {
+  
+    ////console.log('chordChange');
+  
+
     var chord = o.current.chord;
     var chordName = chord.fullAbbrev();    
     self.updateChordLabel(chordName);    
@@ -207,18 +231,30 @@ BSD.Widgets.FretboardViz = function(spec) {
       board.find('.fret').removeClass('prev');
       board.find('.fret').removeClass('color');
       board.find('.fret').removeClass('root');
-      board.find('.fret').html(null);
+      
+      
+
+      ////board.find('.fret').html(null);
   
       board.find('.compat-scale').removeClass('compat-scale');
       board.find('.compat-scale-root').removeClass('compat-scale-root');
       
   
   
-      var chordNotes = chord.notes();
-      var colorNotes = [chordNotes[1],chordNotes[3]]; //FIXME: very weak assumption
+     var chordNotes = chord.notes();
+     var colorNotes = [];
+      
+      colorNotes.push(chordNotes[1]);
+      if (chordNotes.length > 3) {
+        colorNotes.push(chordNotes[3]);         
+      }
+
   
       colorNotes.each(function(note) {
-        var nn = note.name().toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');          
+        
+        ////console.log('note',note,note.name());
+      
+        var nn = note.name().replace(/b/g,'flat').replace(/#/g,'sharp').toLowerCase();          
         board.find('.note-' + nn).addClass('color');
       });
 
@@ -265,7 +301,7 @@ BSD.Widgets.FretboardViz = function(spec) {
         });
       }
       if (scale) {
-        console.log('scale chosen',scale.fullName());
+        ////console.log('scale chosen',scale.fullName());
         legendScale.html(scale.fullName() + ' scale');
       }
       else {
@@ -274,19 +310,27 @@ BSD.Widgets.FretboardViz = function(spec) {
       }
       o.current.chord.notes().each(function(note) {
         var noteName = note.name();
-        var nn = noteName.toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');          
+        var nn = note.name().replace(/b/g,'flat').replace(/#/g,'sharp').toLowerCase();          
+    
+        
         if (note.abstractlyEqualTo(chord.rootNote)) {
             board.find('.note-' + nn).addClass('root');
         }
+        
+        
+        
+
         if (self.chordNoteState) {
           board.find('.note-' + nn).addClass('on').addClass('current').html(chordName);   ///(currentName);        
         }
         else {
-          board.find('.note-' + nn).addClass('on').addClass('current').html(noteName);        
+          board.find('.note-' + nn).addClass('on').addClass('current');////.html(noteName);        
         }
+        
+        
         if (scale) { 
           scale.notes().each(function(n) {
-            var scalenn = n.name().toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');              
+            var scalenn = n.name().replace(/b/g,'flat').replace(/#/g,'sharp').toLowerCase();              
             board.find('.note-' + scalenn).addClass('compat-scale');
             if (n.abstractlyEqualTo(scale.rootNote)) {
               board.find('.note-' + scalenn).addClass('compat-scale-root');          
@@ -294,12 +338,20 @@ BSD.Widgets.FretboardViz = function(spec) {
           });
         }     
       });
+      
+      
+      
+      
       o.next.chord.notes().each(function(note) {
+        ////console.log('got here!!');
+      
         var noteName = note.name();
-        var nn = noteName.toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');          
+        var nn = noteName.replace(/b/g,'flat').replace(/#/g,'sharp').toLowerCase();          
         board.find('.note-' + nn).addClass('next');//.html(noteName);              
         /////////console.log('next',noteName);
-      });      
+      });
+      
+         
     });
   });
   

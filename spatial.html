@@ -3,6 +3,8 @@
   <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  <title>Spatial</title>
+
     <link rel="stylesheet" href="style.css" media="screen" />
     <script type="text/javascript">
       if (typeof BSD == "undefined") { var BSD = {}; }
@@ -12,6 +14,12 @@
     <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/eachify.js"></script>
     <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/color.js"></script>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
+  
+
+
+
     <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/bsd.pubsub.js"></script>
     <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/dom.js"></script>
     <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/draggy.js"></script>
@@ -25,20 +33,12 @@
     <script type="text/javascript" src="javascript/bsd.widgets.procrastinator.js"></script>
     <script type="text/javascript" src="javascript/bsd.widgets.lightbox.js"></script>
     
-    
-    
-    <!-- wavetable dependencies -->
-    <script src="javascript/bpm-delay.js"></script>
-    <script src="javascript/waveshaper.js"></script>
-    <script src="javascript/wavetable.js"></script>
-    <script src="javascript/fft.js"></script>
-    <script src="javascript/wavetableloader.js"></script>
-    <script src="javascript/staticaudiorouting.js"></script>
 
     <script src="javascript/bsd.widgets.baseplayer.js"></script>
-    <script src="javascript/bsd.widgets.wavetableplayer.js?v=22"></script>
-    <script src="javascript/bsd.widgets.oscplayer.js"></script>
-
+    <script src="javascript/bsd.widgets.stringoscillator.js"></script>
+    <script src="javascript/bsd.widgets.mandolinplayer.js"></script>
+    <script src="javascript/bsd.widgets.guitarplayer.js"></script>
+    <script src="javascript/bsd.spatialnote.js"></script>
 
 
     <style type="text/css">
@@ -58,9 +58,33 @@ table td sub { font-size: 0.5em; }
 .midpoint { background: #eee; }  
 .root { background: purple; color: white;  }
 .start { background: yellow; color: black; }  
+
 .active { background: #f07; color: white;  }
 
+.active-alt { background: #70f; color: white;  }
+
+
+
+
+
+
+
+
 .slider-control label input { width: 50%; margin: 10px; }
+
+.slider-wrap { 
+  display:inline; 
+  float: left; 
+  margin: 15px; 
+  height: 220px;
+}
+
+.slider-wrap .slider {
+  height: 100%;
+
+}
+
+.sticky-note textarea { font-size: 1.5em; }
 
 pre { width: 50%; height: 100px; }
 
@@ -88,6 +112,8 @@ pre { width: 50%; height: 100px; }
           <h3>Example progressions</h3>
           <p>A- B-7b5 C D- E- F G A-</p>
           <p>CM7 D-7 E-7 FM7 G7 A-7 B-7b5 CM7</p>
+          <p>D-7 G7 C-7 F7 Bb-7 Eb7 Ab-7 Db7 Gb-7 B7 E-7 A7 D-7 G7 C-7 F7 Bb-7 Eb7 Ab-7 Db7 Gb-7 B7 E-7 A7</p>
+          <p>F#-7b5 B7b9 E-7b5 A7b9 F#-7b5 B7b9 E-7b5 A7b9</p>
           <h3>Tips</h3>
           <p>Root notes by themselves are assumed major, ex: A</p>
           <p>Use - or m for minor, ex: A- Em</p>
@@ -95,28 +121,36 @@ pre { width: 50%; height: 100px; }
           <p>Use 7 for dominant 7, ex: G7</p>
         </div>
       </div><!-- pull-right -->
-      <div class="pull-right slider-control volume-control">
+
+        <!--
         <label for="volume-input">Volume
           <input id="volume-input" type="range" min="0" max="1" step="0.01" value="0.05" />
         </label>
-      </div><!-- pull-right -->
-      <div class="pull-right slider-control speed-control">
-        <label for="speed-input">Speed
-          <input id="speed-input" type="range" min="0" max="2000" step="1" value="1000" />
-        </label>
-      </div><!-- pull-right -->
-      <div class="pull-right slider-control start-control">
-        <label for="start-input">Start
-          <input id="start-input" type="range" min="40" max="85" step="1" value="60" />
-          <span id="start-indicator">60</span>
-        </label>
-      </div><!-- pull-right -->
-      <div class="pull-right slider-control highest-control">
-        <label for="highest-input">Highest
-          <input id="highest-input" type="range" min="40" max="85" step="1" value="60" />
-          <span id="highest-indicator">60</span>
-        </label>
-      </div><!-- pull-right -->
+        -->
+        <div class="slider-wrap">
+          Volume: <br /><span id="volume-amount"></span>
+          <div class="slider" id="volume-input"></div>
+        </div>
+        <div class="slider-wrap">
+            Speed:<br /><span id="speed-amount"></span>
+            <div class="slider" id="speed-input" ></div>      
+        </div>
+        <div class="slider-wrap">
+            Detune:<br /> <span id="detune-amount"></span>
+          <div class="slider" id="detune-input"></div>
+        </div>
+        <div class="slider-wrap">
+            Start: <br /><span id="start-amount"></span>
+          <div class="slider" id="start-input"></div>
+        </div>
+        <div class="slider-wrap">
+            Highest: <br /><span id="highest-amount"></span>
+          <div class="slider" id="highest-input"></div>
+        </div>
+        <div style="clear: both;">&nbsp;</div>        
+      
+      
+      
       
     <div class="fretboard-wrap">
     </div>
@@ -126,135 +160,9 @@ pre { width: 50%; height: 100px; }
 	</div><!-- content -->
   <script type="text/javascript">
 
-BSD.spatialNotes = [];
-BSD.SpatialNoteCollection = function(a) {
-  var self = a;
-  
-  self.closestTo = function(other) {
-		var sorted = self.sortedByDistanceTo(other);
-    //console.log(sorted,'sorted');
-    var result = sorted.shift();  
-    //console.log('result',result);
-    return result.object;
-  };  
-
-  self.furthestFrom = function(other) {
-		var sorted = self.sortedByDistanceTo(other);
-    //console.log(sorted,'sorted');
-    var result = sorted.pop();  
-    //console.log('result',result);
-    return result.object;
-  };  
-
-	self.sortedByDistanceTo = function(other) {
-    var candidates = self.select(function(can){
-      return true; //can't decide whether to include/exclude a self-hit
-      return can.hash() !== other.hash();
-    }).collect(function(o) {
-      return {object: o, distance: o.distanceTo(other) }; 
-    });
-    ///console.log(candidates,'candidates');
-    var sorted = candidates.sort(function(a,b) {
-      return a.distance - b.distance;
-    });
-		return sorted;
-	};
 
 
-
-	self.midpoint = function() {
-		var avgX = self.map(function(sn) { return sn.x; }).average();
-		var avgY = self.map(function(sn) { return sn.y; }).average();
-		return [avgX,avgY];
-	};
-
-
-  self.abstractlyEqualTo = function(other) {
-    var result = self.select(function(can){ return can.abstractlyEqualTo(other); });
-    return BSD.SpatialNoteCollection(result);
-  };
-
-  self.equalTo = function(other) {
-    var result = self.select(function(can){ return can.equalTo(other); });
-    return BSD.SpatialNoteCollection(result);
-  };
-
-  self.noteValueGE = function(other) { 
-    var result = self.select(function(can){ return can.value() >= other.value(); });
-    return BSD.SpatialNoteCollection(result);
-  };  
-
-  self.noteValueGT = function(other) { 
-    var result = self.select(function(can){ return can.value() > other.value(); });
-    return BSD.SpatialNoteCollection(result);
-  };  
-
-  self.noteValueLE = function(other) { 
-    var result = self.select(function(can){ return can.value() <= other.value(); });
-    return BSD.SpatialNoteCollection(result);
-  };  
-
-  self.noteValueLT = function(other) { 
-    var result = self.spatialNotes.select(function(can){ return can.value() < other.value(); });
-    return BSD.SpatialNoteCollection(result);
-  };  
-
-  return self;
-};
-
-BSD.spatialNotes = BSD.SpatialNoteCollection([]);
-
-BSD.SpatialNote = function(spec) {
-  var self = BSD.PubSub({});
-  
-  self.x = parseInt(spec.position[0],10);
-  self.y = parseInt(spec.position[1],10);
-
-  self.note = spec.note;
-  self.cell = spec.cell;
-    
-  self.hash = function() {
-    return 'SpatialNote#(' + self.x +',' + self.y + ')';
-  };
- 
-  self.value = function() { 
-    return spec.note.value();
-  };
-  
-  self.abstractValue = function() {
-    return spec.note.abstractValue();
-  };
-  
-  self.abstractlyEqualTo = function(other) {
-    return other.abstractValue() == self.abstractValue();
-  };
-
-  self.equalTo = function(other) {
-    /////console.log('ok, got called',other.value(),self.value());
-    return other.value() == self.value();
-  };
- 
-  neighborsFromChord = function(chord) {
-  };
-
-  self.nearest = function(other) {
-    ///return BSD.spatialNotes.
-  };
-
-
-
-   
-  self.distanceTo = function(otherPoint) {
-    var a = self.x - otherPoint.x;
-    var b = self.y - otherPoint.y;
-    
-    var c = Math.sqrt(a*a + b*b); //Pythagorean, solve for c
-    return c;     
-  };  
-  return self;
-  
-  
-};
+ var campfire = BSD.PubSub({});
 
 
 
@@ -287,9 +195,13 @@ table.attr('cellpadding',0);
         var valley = open+fret;
         var note = Note(valley);
 
-        var cell = DOM.td();
-        cell.click(function(){
+        var cell = DOM.td().addClass('cell');
+        cell.on('click touchend',function(){
           campfire.publish('play-note',{ note: note, duration: 1000 });
+        });
+        
+        cell.on('mouseover',function(){
+          campfire.publish('div-hover',cell);
         });
 
         ////console.log('double check',note.value());
@@ -385,7 +297,6 @@ if (true) {
         context = new webkitAudioContext();
         BSD.audioContext = context;
       }
-      BSD.audioPlayer = false;
       BSD.chosenColor = BSD.colorFromHex('#000000');
       BSD.ColorPicker = function(spec) {
         var interface = {};
@@ -409,64 +320,38 @@ if (true) {
       });
 
 
- var campfire = BSD.PubSub({});
-  campfire.subscribe('BSD.Widgets.WaveTablePlayer loaded',function(o){
-    jQuery('#msg').html(o.name + ' loaded. You may begin rocking out');
-  });
 
 
   var polyphonyCount = 8;
-
     
-  var wavetableNames = [];
-  var chosen = false;
-    
-    BSD.getWaveTableNames(function(resp) {
-      wavetableNames = eval( '(' + resp + ')');
-      
-      chosen = wavetableNames.atRandom();
-      while (chosen.match(/square/i)) {
-        chosen = wavetableNames.atRandom();      
-      }      
-      while (chosen.match(/harsh/i)) {
-        chosen = wavetableNames.atRandom();      
-      }      
-      /**
-      while (chosen.match(/saw/i)) {
-        chosen = wavetableNames.atRandom();      
-      }
-      **/
-      
-      
-      
-      
-      BSD.audioPlayer = BSD.Widgets.WaveTablePlayer({
-        gossip: campfire,
-        context: context,
-        name: chosen, //'Piano',
-        polyphonyCount: polyphonyCount,
-        range: [-300,128]
-      });
-    });
-    
-    /***
-    
-    BSD.audioPlayer = BSD.Widgets.OSCPlayer({
+    BSD.leader = BSD.Widgets.GuitarPlayer({
       gossip: campfire,
       context: context,
-      name: 'Piano',
-      range: [-300,128]
-    });
-    
-    */
-    campfire.subscribe('play-note',function(payload) {
-      BSD.audioPlayer.playNote(payload.note,payload.duration);    
-    });    
-    campfire.subscribe('play-chord',function(o) {
-      BSD.audioPlayer.playChord(o.chord,o.duration);    
+      polyphonyCount: 16,//polyphonyCount,
+      range: [-300,80]
     });
 
-    var speedms = 500;
+    BSD.chunker = BSD.Widgets.GuitarPlayer({
+      gossip: campfire,
+      context: context,
+      polyphonyCount: 16,//polyphonyCount,
+      range: [-300,80]
+    });
+    
+    
+    
+    
+    campfire.subscribe('play-note',function(payload) {
+      BSD.leader.playNote(payload.note,payload.duration);    
+    });    
+    
+    campfire.subscribe('play-chord',function(o) {
+      BSD.chunker.playChord(o.chord,o.duration);    
+    });
+
+    var speedms = 700;
+    var start = 60;
+    var highest = 60;
 
     var speedFunction = function() { return speedms; }
 
@@ -474,76 +359,91 @@ if (true) {
       speedms = ms;
     });
     
-    var volumeInput = jQuery('#volume-input');
-    var volumeWait = BSD.Widgets.Procrastinator({
-      timeout: 250,
-      callback: function() {
-        var newVolume = volumeInput.val();
-        BSD.audioPlayer.publish('set-master-volume',newVolume);
+
+    var waiter = BSD.Widgets.Procrastinator({ timeout: 250 });
+
+    $( "#volume-input" ).slider({
+      orientation: "vertical",
+      range: "min",
+      min: 0,
+      max: 1,
+      step: 0.1,
+      value: 0,
+      slide: function( event, ui ) {
+        var newVolume = ui.value;
+        waiter.beg(BSD.leader,'set-master-volume',ui.value);
+        ////waiter.beg(BSD.chunker,'set-master-volume',ui.value);
+        jQuery( "#volume-amount" ).text( newVolume );
       }
     });
 
-    volumeInput.change(function(){
-      volumeWait.beg();
-    });
 
-
-
-    var speedInput = jQuery('#speed-input');
-    var speedWait = BSD.Widgets.Procrastinator({
-      timeout: 250,
-      callback: function() {
-        var newSpeed = speedInput.val();
-        campfire.publish('set-speed-ms',newSpeed);
+    $( "#speed-input" ).slider({
+      orientation: "vertical",
+      range: "min",
+      min: 250,
+      max: 800,
+      step: 20,
+      value: 700,
+      slide: function( event, ui ) {
+        var n = ui.value;
+        
+        waiter.beg(campfire,'set-speed-ms',n);        
+        //////campfire.publish('set-speed-ms',n);
+        jQuery( "#speed-amount" ).text( n );
       }
     });
 
-    speedInput.change(function(){
-      speedWait.beg();
+
+    $( "#detune-input" ).slider({
+      orientation: "vertical",
+      range: "min",
+      min: -7.0,
+      max: 7.0,
+      step: 0.25,
+      value: 0.0,
+      slide: function( event, ui ) {
+        var n = ui.value;
+        
+        waiter.beg(BSD.leader,'set-detune-semis',n);        
+        //////campfire.publish('set-speed-ms',n);
+        jQuery( "#detune-amount" ).text( n );
+      }
     });
     
-    
-///////////////////////
-    var startInput = jQuery('#start-input');
-    var startVal = parseInt(startInput.val(),10);
-    start = BSD.spatialNotes.select(function(o){ return o.value() == startVal; }).atRandom();
-    var startWait = BSD.Widgets.Procrastinator({
-      timeout: 250,
-      callback: function() {
-        //campfire.publish('set-start-note-value',startInput.val());
-        console.log('ok?');
-        var startVal = parseInt(startInput.val(),10);
-        console.log('startVal',startVal);
-        start = BSD.spatialNotes.select(function(o){ return o.value() == startVal; }).atRandom();
-        jQuery('#start-indicator').html(startVal);
+
+
+    $( "#start-input" ).slider({
+      orientation: "vertical",
+      range: "min",
+      min: 40,
+      max: 85,
+      step: 1,
+      value: 60,
+      slide: function( event, ui ) {
+        var n = ui.value;
+        start = BSD.spatialNotes.select(function(o){ return o.value() == n; }).atRandom();
+        jQuery( "#start-amount" ).text( n );
       }
     });
-    startInput.change(function(){
-      startWait.beg();
-    });
+    start = BSD.spatialNotes.select(function(o){ return o.value() == 60; }).atRandom();
 
-///////////////////////
-    var highestInput = jQuery('#highest-input');
-    var highestVal = parseInt(highestInput.val(),10);
-    highest = BSD.spatialNotes.select(function(o){ return o.value() == highestVal; }).atRandom();
-    var highestWait = BSD.Widgets.Procrastinator({
-      timeout: 250,
-      callback: function() {
-        //campfire.publish('set-highest-note-value',highestInput.val());
-        console.log('ok?');
-        var highestVal = parseInt(highestInput.val(),10);
-        console.log('highestVal',highestVal);
-        highest = BSD.spatialNotes.select(function(o){ return o.value() == highestVal; }).atRandom();
-        jQuery('#highest-indicator').html(highestVal);
+
+
+    $( "#highest-input" ).slider({
+      orientation: "vertical",
+      range: "min",
+      min: 40,
+      max: 85,
+      step: 1,
+      value: 60,
+      slide: function( event, ui ) {
+        var n = ui.value;
+        highest = BSD.spatialNotes.select(function(o){ return o.value() == n; }).atRandom();
+        jQuery( "#highest-amount" ).text( n );
       }
     });
-    highestInput.change(function(){
-      highestWait.beg();
-    });
-
-///////////////////////
-
-
+    highest = BSD.spatialNotes.select(function(o){ return o.value() == 60; }).atRandom();
 
 
   var queue = [];
@@ -577,12 +477,9 @@ if (true) {
 
 
 
-  campfire.subscribe('new-progression',function(progression) {
-
-    console.log('newp',progression);
+  campfire.subscribe('strategy-one',function(progression) {
 
 		campfire.publish('empty-queue',null);
-
 
 
   var obsoletePPprogressionChords = [
@@ -714,9 +611,99 @@ if (true) {
   console.log('queue',queue);
 	campfire.publish('process-queue',null);
 
+});
+
+
+campfire.subscribe('strategy-two',function(progression){
+  var firstChord = progression[0];
+  var topNote = firstChord.mySeventh();
+  var startingAbstract = topNote.abstractValue();
+  var currentTopAbstract = startingAbstract;//7
+  var currentTopReal = topNote.value();
+  var ring = [11,0,1,2,3,4,5,6,7,8,9,10];
+  var rp;
+  var save;
+  
+  progression.each(function(chord){
+    var unused = chord.notes();
+    var queuedCount = 0;
+    
+    
+    rp = currentTopAbstract; //point to the current top. then advance both to the next one.
+    while (unused.length > 0) {
+      hit = unused.detect(function(note){ return note.abstractValue() == rp;      });
+      if (hit) {
+        var hitRealValue = hit.value();
+        if (queuedCount == 0) {
+          while (hitRealValue < currentTopReal) { hitRealValue += 12; }                  
+          hitRealValue -= 12; //get it just underneath            
+          currentTopReal = hitRealValue; //set it as the new top.
+        }
+        else { //besides the top, make sure the other chord tones descend.
+          while (hitRealValue < save) { hitRealValue += 12; }                  
+          hitRealValue -= 12;  //get it just underneath 
+        }
+        
+        queue.push({ noteValue: hitRealValue, chordName: chord.fullName(), direction: 'sideways' });
+        save = hitRealValue;
+        
+        unused = unused.reject(function(note){  return note.abstractValue() == rp; }); //shorten.
+        queuedCount += 1;
+      }
+      rp = ring[rp];
+    }
+    currentTopAbstract = ring[currentTopAbstract]; //the topmost note allowed advances by one descent at a time.         
+  });
+  console.log('queue',queue);
+	campfire.publish('process-queue',null);
+});
+
+
+
+campfire.subscribe('strategy-three',function(progression){
+  var firstChord = progression[0];
+  var topNote = firstChord.mySeventh();
+  var startingAbstract = topNote.abstractValue();
+  var currentTopAbstract = startingAbstract;//7
+  var currentTopReal = topNote.value();
+  
+  progression.each(function(chord){
+    console.log('CTR',currentTopReal);
+    
+    var vals = chord.abstractNoteValues();
+    var overTop = [];
+    while (overTop.length == 0) {
+      vals = vals.map(function(n){  return n + 12; });
+      ///console.log('vals getting bigger',vals);
+      overTop = vals.select(function(v){  return v > currentTopReal; });
+    }
+    while (overTop.length > 0) {
+      /////console.log('whoahhh too high',vals);
+      vals.unshift(vals.pop()-12);
+      overTop = vals.select(function(v){  return v > currentTopReal; });
+    }
+    /////console.log('thats better, now flip...',vals);
+
+    vals.reverse();
+    console.log('yessss',vals);
+
+    vals.each(function(v){
+      queue.push({ noteValue: v, chordName: chord.fullName(), direction: 'sideways' });
+    });
+    currentTopReal = vals[0] -1;
+    
+  });
+  console.log('queue',queue);
+	campfire.publish('process-queue',null);
 
 });
 
+
+
+campfire.subscribe('new-progression',function(progression) {
+  console.log('newp',progression);
+  campfire.publish('strategy-three',progression);
+});
 
 campfire.subscribe('process-queue',function(o) {
 
@@ -735,11 +722,11 @@ campfire.subscribe('process-queue',function(o) {
 
   eachify(queue).eachPCN(function(o){
 		if (o.c == 0) {
-			maxHistory  = [3,5,7].atRandom();
+			maxHistory  = [5,7,9].atRandom();
 			console.log('maxHistory',maxHistory);
 		}
     var note = Note(o.current.noteValue);
-    var candidates = BSD.spatialNotes.equalTo(note);
+    var candidates = BSD.spatialNotes.abstractlyEqualTo(note);
 		if (snHistory.length < 2) { 
 			idealMPSN = lastSN;
 			discreteMPSN = lastSN;
@@ -753,6 +740,14 @@ campfire.subscribe('process-queue',function(o) {
 			});
 			discreteMPSN = BSD.spatialNotes.closestTo(idealMPSN); //from ideal to real-world
 		}
+		
+		
+		
+		//restrict candidates to under the highest.
+		candidates = candidates.noteValueLE(highest);///////select(function(o){ return o.value() <= highest.value(); });
+		
+		console.log('candidates',candidates);
+		
 
     var hit = candidates.closestTo(idealMPSN);
 		snHistory.push(hit); //new ones onto the end
@@ -770,12 +765,20 @@ campfire.subscribe('process-queue',function(o) {
 
 
   
+  
+  var alt = false;
+    
   eachify(sequence).eachPCN(function(o){
-    //console.log('oh',o);
+     
+    //////console.log('oh',o);
     ///var note = Note(o.current.noteValue);
     var spatialNote = o.current.spatialNote;
     var chordName = o.current.chordName;
     var direction = o.current.direction;
+
+    if (o.current.chordName != o.prev.chordName) {
+      alt = !alt;
+    }
     
     ///console.log('spatialNote',spatialNote);
     campfire.publish('play-note',{ note: spatialNote, duration: 1000 });
@@ -784,11 +787,22 @@ campfire.subscribe('process-queue',function(o) {
   		jQuery('.chord-name').html(chordName + ' ' + direction);
   		jQuery('.midpoint').removeClass('midpoint');//clear them all first
 
+
+
+      //////console.log('oh?',o);
+
       /**
 	   	discreteMPSN.cell.addClass('midpoint');
       lastSN.cell.removeClass('active');
       hit.cell.addClass('active');
       **/
+
+      jQuery('.cell').removeClass('active');
+      jQuery('.cell').removeClass('active-alt');
+
+
+      if (alt) { o.current.spatialNote.cell.addClass('active-alt'); }
+      else { o.current.spatialNote.cell.addClass('active'); }
       
   },speedFunction);
   
@@ -800,13 +814,13 @@ campfire.publish('process-queue',null);
 
 BSD.chunkify = function(ary,chunkSize) {
   var chunks = [];
-  while (ary.length > chunkSize) {
-    chunks.push(ary.splice(0,chunkSize));
+  var copy = ary.map(function(o){ return o; });
+  while (copy.length > chunkSize) {
+    chunks.push(copy.splice(0,chunkSize));
   }
-  chunks.push(ary);
+  chunks.push(copy);
   return chunks;
 };
-
 
 var pre = jQuery('.tablature');
 campfire.subscribe('tablature',function(sequence){
@@ -814,10 +828,20 @@ campfire.subscribe('tablature',function(sequence){
   var eventsPerRow = 30;  
   var staves = BSD.chunkify(sequence,eventsPerRow);
 
+  var stringNames = ['e','B','G','D','A','E'];
+  
+
   output += "\n";
   staves.each(function(staff){
  
     [0,1,2,3,4,5].each(function(string){
+    
+    
+      var stringName = stringNames[string];  
+    
+      output += stringName + '--';
+      
+      
       staff.each(function(o){
         var spatialNote = o.spatialNote;
         var ch = '---';
@@ -828,7 +852,7 @@ campfire.subscribe('tablature',function(sequence){
         ch = ch.substr(-3,3);
         
         output += ch;
-        console.log('spatialNote',spatialNote,spatialNote.y);
+        ///console.log('spatialNote',spatialNote,spatialNote.y);
       });
       output += "\n";
     });
@@ -845,9 +869,38 @@ campfire.subscribe('tablature',function(sequence){
 });
 
   setTimeout(function(){
-  BSD.audioPlayer.publish('set-master-volume',0.1);
-  console.log('volume',volumeInput.val());  
+    BSD.leader.publish('set-master-volume',0);
+    BSD.chunker.publish('set-master-volume',0);  
   },2000);
+  
+  var progHelp =jQuery('#progression-help');
+  progHelp.click(function(){
+    var lightbox = BSD.Widgets.Lightbox({
+       content: jQuery('#progression-help-content')
+    });
+    lightbox.show();
+  });
+  
+
+  jQuery(document).on('keydown',function(e) {
+    var c = e.keyCode || e.which;
+    ////console.log('BSD.currentFretDiv',BSD.currentFretDiv);
+    if (BSD.currentFretDiv && c == BSD.keycodes.f) {
+      BSD.currentFretDiv.trigger('click');    
+    }      
+  });
+  
+  campfire.subscribe('div-hover',function(div){
+    BSD.currentFretDiv = div;  
+  });
+  
+  var stickyNoteButton = jQuery('#sticky-note-button');
+  stickyNoteButton.click(function() {
+    var sticky = BSD.Widgets.StickyNote();
+    sticky.renderOn(jQuery(document.body));
+  });
+
+
 
  
   </script>

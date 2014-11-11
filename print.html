@@ -1,0 +1,57 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Guitar</title>
+  <!-- jquery && jQuery UI -->
+  <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+  <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
+<meta charset=utf-8 />
+<script>
+  if (typeof BSD == "undefined") {  var BSD = {};  }
+  if (typeof BSD.Widgets == "undefined") {  BSD.Widgets = {};  }
+</script>
+
+  <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/array.js"></script>
+  <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/dom.js"></script>
+  <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/bsd.pubsub.js"></script>
+
+
+  <script src="javascript/bsd.storage.js"></script>
+
+  <script src="javascript/base64.js"></script>
+  <link href="css/guitar-print.css" rel="stylesheet" type="text/css" media="print,screen">  
+  </head>
+<body>
+<div id="output"></div>
+<script type="text/javascript">
+
+
+BSD.toDataURI = function(content) {
+    var result = 'data:text/html;base64,' + Base64.encode(content);
+    return result;
+};
+
+
+BSD.fromDataURI = function(s) {
+  var parts = s.split(/base64,/);
+  if (parts.length < 2) { return "cannot parse"; }
+  var base64 = parts[1];
+  var content = Base64.decode(base64);
+  return content;
+}
+
+
+  var storage = BSD.Storage('local');
+  
+  var campfire = BSD.PubSub({});
+  var stuff = storage.reportDataURI;
+  var foo = BSD.fromDataURI(stuff);
+  console.log('foo',foo);
+  
+  jQuery('#output').append(foo);    
+    
+</script>
+</body>
+</html>

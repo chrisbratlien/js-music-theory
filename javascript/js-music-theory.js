@@ -134,6 +134,15 @@ JSMT.scaleMap = {
     'melodic minor' : { name: 'melodic minor', intervals: [0,2,3,5,7,9,11] },
 
 
+    'dorian' : { name: 'dorian', intervals: [0,2,3,5,7,9,10] },
+
+    'dominant' : { name: 'dominant', intervals: [0,2,4,5,7,9,10] },
+
+
+    'half whole diminished' : { name: 'half whole diminished', intervals: [0,1,3,4,6,7,9,10] },
+
+
+
     'mP' : { name: 'minor pentatonic', intervals: [0,3,5,7,10] },
     '-P' : { name: 'minor pentatonic', intervals: [0,3,5,7,10] },
 
@@ -144,42 +153,52 @@ JSMT.scaleMap = {
   };
 
 JSMT.chordMap = {
-    '': { name: 'major', intervals: [0,4,7] },
-    'M': { name: 'major', intervals: [0,4,7] },
-    '-':   { name: 'minor', intervals: [0,3,7] },
-    'm':   { name: 'minor', intervals: [0,3,7] },
-
-    'M7': { name: 'major7', intervals: [0,4,7,11] },
-
-    '7':   { name: 'dominant7', intervals: [0,4,7,10] },
-    'dom7':   { name: 'dominant7', intervals: [0,4,7,10] },
+    '': { name: 'major', intervals: [0,4,7] }, //verified
+    'M': { name: 'major', intervals: [0,4,7] }, //verified
+    '-':   { name: 'minor', intervals: [0,3,7] }, //verified
+    'm':   { name: 'minor', intervals: [0,3,7] }, //verified
 
 
-    '7b5':   { name: 'dominant7Flat5', intervals: [0,4,6,10] },
-    '7-5':   { name: 'dominant7Flat5', intervals: [0,4,6,10] },
-    '7+5':   { name: 'dominant7Sharp5', intervals: [0,4,8,10] },
-    '7#5':   { name: 'dominant7Sharp5', intervals: [0,4,8,10] },
+    '+':   { name: 'aug', intervals: [0,4,8] }, //verified
+
+
+    'sus4':  { name: 'sevenSuspended4', intervals: [0,5,7] }, //TODO: make sure
+    'sus':  { name: 'sevenSuspended4', intervals: [0,5,7] }, //TODO: make sure
+
+
+    'M7': { name: 'major7', intervals: [0,4,7,11] }, //verified
+
+    '7':   { name: 'dominant7', intervals: [0,4,7,10] }, //verified
+    'dom7':   { name: 'dominant7', intervals: [0,4,7,10] }, //verified
+
+
+    '7b5':   { name: 'dominant7Flat5', intervals: [0,4,6,10] }, //verified
+    '7-5':   { name: 'dominant7Flat5', intervals: [0,4,6,10] }, //verified
+    '7+5':   { name: 'dominant7Sharp5', intervals: [0,4,8,10] }, //verified
+    '7#5':   { name: 'dominant7Sharp5', intervals: [0,4,8,10] }, //verified
 
 
 
-    'm7': { name: 'minor7', intervals: [0,3,7,10] },
-    '-7': { name: 'minor7', intervals: [0,3,7,10] },
+    'm7': { name: 'minor7', intervals: [0,3,7,10] }, //verified
+    '-7': { name: 'minor7', intervals: [0,3,7,10] }, //verified
 
-    'm7b5':  { name: 'minor7Flat5', intervals: [0,3,6,10] },
-    '-7b5':  { name: 'minor7Flat5', intervals: [0,3,6,10] },
-    '-7-5':  { name: 'minor7Flat5', intervals: [0,3,6,10] },
-
-
-    '-7+5':  { name: 'minor7Sharp5', intervals: [0,3,8,10] },
+    'm7b5':  { name: 'minor7Flat5', intervals: [0,3,6,10] }, //verified
+    '-7b5':  { name: 'minor7Flat5', intervals: [0,3,6,10] }, //verified
+    '-7-5':  { name: 'minor7Flat5', intervals: [0,3,6,10] }, //verified
 
 
-    '7b9':  { name: 'sevenFlat9', intervals: [0,1,4,7,10] },
+    '-7+5':  { name: 'minor7Sharp5', intervals: [0,3,8,10] }, //verified
 
 
-    '7#9':  { name: 'sevenFlat9', intervals: [0,3,4,7,10] },
-    '7+9':  { name: 'sevenFlat9', intervals: [0,3,4,7,10] },
+    '7b9':  { name: 'sevenFlat9', intervals: [0,4,7,10,13] },
+    '7-9':  { name: 'sevenFlat9', intervals: [0,4,7,10,13] },
+
+
+    '7#9':  { name: 'sevenSharp9', intervals: [0,4,7,10,15] }, //verified
+    '7+9':  { name: 'sevenSharp9', intervals: [0,4,7,10,15] }, //verified
 
     '7sus4':  { name: 'sevenSuspended4', intervals: [0,5,7,10] },
+
 
 
     '6':  { name: 'six', intervals: [0,4,7,9] },
@@ -197,10 +216,29 @@ JSMT.chordMap = {
     'm9':   { name: 'minor9', intervals: [0,3,7,10,14] },
 
 
-    '13':   { name: 'dominant13', intervals: [0,4,7,10,2,9] },
+    '13':   { name: 'dominant13', intervals: [0,4,7,10,21] },
 
     'nothing':   { name: 'nothing', intervals: [] }
   };
+
+  
+  
+
+JSMT.chordTypes = [];
+
+
+JSMT.chordTypes.push({ id: 1, intervals: [0,4,7] });
+
+
+  
+  
+
+
+
+
+
+
+
 
 
 
@@ -220,6 +258,15 @@ var Note = function(foo) {
   self.equalTo = function(other) {
     return other.value() == self.value();
   };
+  
+  self.fourth = function() {
+    return self.plus(5);
+  };
+  
+  self.fifth = function() {
+    return self.plus(7);
+  };
+  
   
   
   self.value = function() {
@@ -299,6 +346,20 @@ var Note = function(foo) {
     return Scale({ rootNote: self, intervals: spec.intervals, name: spec.name, "abbrev": abbrev });          
   };
   
+  
+  self.lookupChord = function(abbrev) {
+  
+    var spec = JSMT.chordMap[abbrev];
+    
+    if (typeof spec == "undefined") {
+      console.log(abbrev,'not defined');
+    }
+    
+    return Chord({ rootNote: self, intervals: spec.intervals, name: spec.name, "abbrev": abbrev });          
+  
+  
+  }
+  
   self.chord = function(abbrev) {
     var spec = JSMT.chordMap[abbrev];
     
@@ -374,9 +435,17 @@ var RootNoteWithIntervals = function(spec) {
   
   self.constructor = RootNoteWithIntervals;
   
+  
+  
+  
+  
   self.name = spec.name || 'no name given';
   self.abbrev = spec.abbrev || 'no abbrev';
   self.rootNote = spec.rootNote;
+
+
+
+  /////console.log('self.name',self.name);
 
 
   self.intervals = function() { 
@@ -425,9 +494,16 @@ var RootNoteWithIntervals = function(spec) {
   self.noteNames = function() {
     return self.notes().map(function(note) { return note.name(); });    
   };
+
   self.noteValues = function() {
     return self.notes().map(function(note) { return note.value(); }).sort(function(a,b){return a-b});    
   };
+  self.abstractNoteValues = function() {
+    return self.notes().map(function(note) { return note.abstractValue(); }).sort(function(a,b){return a-b});    
+  };
+
+
+
 
   self.highestNoteValue = function() {
     var them = self.noteValues();
@@ -540,43 +616,6 @@ var RootNoteWithIntervals = function(spec) {
   };
 
 
-      
-
-
-  /*
-  self.containsNoteName = function(other) {
-    return self.noteNames().detect(function(nn) { return nn == other; });
-  };
-  self.containsNoteNameOfValue = function(other) {
-    return self.containsNoteName(other.name());
-  };
-  self.containsNoteNameOfNote = function(other) {
-    return self.containsNoteName(other.name());
-  };
-  self.containsNoteNamesOfRootNoteWithIntervals = function(other) {      
-    var strangers = other.noteNames().reject(function(each) {
-      return self.noteNames().detect(each);
-    }); 
-    return (strangers.length == 0);
-  };
-    
-  self.contains = function(other) {
-    if (typeof other === "string") {
-      return self.containsNoteName(other);
-    }
-    else if (typeof other === "number") {
-      return self.containsNoteNameOfValue(other);
-    }
-    else if (typeof other.value === "function") {
-      return self.containsNoteNameOfNote(other);
-    }
-    else if (typeof other.noteNames === "function") {
-      return self.containsNoteNamesOfRootNoteWithIntervals(other);
-    }
-  };
-
-  */
-
   self.containsNote = function(otherNote) {
     return self.notes().detect(function(n) { return n.abstractlyEqualTo(otherNote); });
   };
@@ -618,6 +657,23 @@ var RootNoteWithIntervals = function(spec) {
     //return self.exclusiveNoteNames(other).length;
     return other.noteNamesLackedBy(self).length;
   };
+  
+  
+  
+  self.plus = function(other) {
+    var nrn = self.rootNote.plus(other);
+    var result = self.constructor({ rootNote: nrn, intervals: spec.intervals, name: spec.name, abbrev: spec.abbrev });
+    return result;
+  }
+
+  
+  
+  
+  
+  
+  
+  
+  
 
   return self;
 };
@@ -661,11 +717,21 @@ var Scale = function(spec) {
 
 var Chord = function(spec) {
   var self = RootNoteWithIntervals(spec);
+  
+  /////console.log('Chord spec',spec);
+  
+  
   self.constructor = Chord;
 
   self.fullAbbrev = function() { //override superclass, don't want space separator
     return self.rootNote.name() + self.abbrev;
   };
+  
+  
+  
+  
+  
+  
 
   return self;
 };

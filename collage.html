@@ -4,17 +4,11 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   
-<title>Teacher</title>
+<title>Collage</title>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
 
-<link media="screen" href="css/testsuite.css" type="text/css" rel="stylesheet">
-<link media="screen,print" href="css/fretboard.css" type="text/css" rel="stylesheet">
-<link media="print" href="css/fretboard-print.css" type="text/css" rel="stylesheet">
-
-
-<link media="screen,print" href="css/teacher.css" type="text/css" rel="stylesheet">
 
 <script src="http://cdn.dev.bratliensoftware.com/javascript/array.js"></script>
 <script src="http://cdn.dev.bratliensoftware.com/javascript/bsd.pubsub.js"></script>
@@ -24,6 +18,7 @@
 <script src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
 
 
+<script src="javascript/bsd.storage.js"></script>
 <script src="javascript/bootup.js"></script>
 <script src="javascript/js-music-theory.js"></script>
 <script src="javascript/bsd.widgets.baseplayer.js"></script>
@@ -37,6 +32,8 @@
 <script src="javascript/bsd.mandolin.js"></script>
 
 <style type="text/css">
+#pickers { width: 100%; height: 200px; overflow: auto; }
+.color-picker { width: 2em; height: 2em; float: left; cursor: pointer;  border: 1px solid white; }
 .slider-wrap { 
   display:inline; 
   float: left; 
@@ -51,57 +48,238 @@
 
 #quiz-output .note { font-size: 3em; }
 
+input#url { padding: 3px; font-size: 1.2em; }
+#work-area { position: absolute; left: 0px; right: 100px; height: 100%;   border: 1px solid grey; }
+
+.rnd { display: inline-block; }
+
+/***
+.rnd { position: relative; top: 0; left: 0; display: inline-block; } 
+.rnd img { }
+***/
+
+
+
+
+#thumbs { height: 100%; position: absolute; right: 0; top: 0; bottom: 0; width: 100px; }
+
+#thumbs img { width: 100%; }
+
 </style>
+
+
+
+
+<link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.6/themes/cupertino/jquery-ui.css" />
+
+
+
 </head>
-<body id="css-zen-garden">
+<body>
   <div id="container">
-    <div id="intro">
-      <h1>Playing the Guitar in 20 Questions</h1>      
+    <div id="pickers">   </div><!-- pickers -->
+    <div class="slider-wrap">
+      Volume: <br /><span id="volume-amount"></span>
+      <div class="slider" id="volume-input"></div>
     </div>
-    <div id="supportingText">
-      
-      <div id="pickers">   </div><!-- pickers -->
-
-
-        <div class="slider-wrap">
-          Volume: <br /><span id="volume-amount"></span>
-          <div class="slider" id="volume-input"></div>
-        </div>
-        <div class="slider-wrap">
-            Detune:<br /> <span id="detune-amount"></span>
-          <div class="slider" id="detune-input"></div>
-        </div>
-        <div style="clear: both;">&nbsp;</div>        
-
-
-
-      <div id="main">
-
-        <ol>
-          <li>1. (optional) Pick a color</li>
-          <li>2. Click some numbered frets to define your first chord</li>
-          <li>3. Click Harmonize This! to see your chord harmonized across the major scale</li>
-        </ol>
-        <button id="quiz">Quiz</button>
-        <div id="quiz-output">
-          Find <span class="note"></span>
-        </div>
-      
-      
-      
-      
-      </div>
+    <div class="slider-wrap">
+      Detune:<br /> <span id="detune-amount"></span>
+      <div class="slider" id="detune-input"></div>
     </div>
-    
-    
-  </div>
-  
-  
-  
+    <div style="clear: both;">&nbsp;</div>        
+    Image URL <input type="text" id="url" />
+    <br />
+    <div id="work-area"></div>
+    <div id="thumbs"></div>
+  </div><!-- container -->
 <script type="text/javascript">
 
 
+
+/****
+BSD.primImage = function(spec) {
+  var self = BSD.PubSub({});
+  self.spec = spec;
+};
+****/
+
+BSD.Image = function(spec) {
+  var self = BSD.PubSub({});
+  self.spec = spec;
+  self.renderOn = function(wrap) {
+    var div = DOM.div().addClass('rnd');
+    ////div.css('display','inline-block');
+    var img = DOM.img().attr('src',spec.url);
+    div.append(img);
+
+    img.resizable({
+      resize: function(event,ui){
+        console.log('ui',ui);
+        console.log('event',event);      
+      }
+    });
+    div.draggable({
+      appendTo: 'body',
+      start: function(event, ui) {
+        isDraggingMedia = true;
+      },
+      stop: function(event, ui) {
+        isDraggingMedia = false;
+        // blah
+      }
+    });
+    
+    div.find('.ui-wrapper').css('height','50px');
+    div.find('.ui-wrapper').css('width','50px');
+    img.css('height','50px');
+    img.css('width','50px');
+    
+    
+    wrap.append(div);
+  };    
+
+  return self;
+};
+
+
+
+BSD.Thumb = function(spec) {
+  var self = BSD.PubSub({});
+  self.spec = spec;
+
+  var img = DOM.img().attr('src',spec.url);
+  self.img = img;
+  var rawImg = img.get(0);
+  self.rawImg = rawImg;
+  
+  self.renderOn = function(wrap) {
+    
+    img.on('click',function(){
+      self.publish('click',self);    
+    });
+    wrap.append(img);
+  };
+  
+  self.dataClone = function() {
+    // Create an empty canvas element
+    var canvas = document.createElement("canvas");
+    canvas.width = rawImg.width;
+    canvas.height = rawImg.height;
+
+    // Copy the image contents to the canvas
+    var ctx = canvas.getContext("2d");
+    ctx.drawImage(rawImg, 0, 0);
+
+    // Get the data-URL formatted image
+    // Firefox supports PNG and JPEG. You could check img.src to guess the
+    // original format, but be aware the using "image/jpg" will re-encode the image.
+    var dataURL = canvas.toDataURL();///"image/png");
+
+    var result = dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
+    return result;
+  }
+  
+  
+  
+  
+  
+
+  return self;
+};
+
+
+// Code taken from MatthewCrumley (http://stackoverflow.com/a/934925/298479)
+function getBase64Image(img) {
+    // Create an empty canvas element
+    var canvas = document.createElement("canvas");
+    canvas.width = img.width;
+    canvas.height = img.height;
+
+    // Copy the image contents to the canvas
+    var ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0);
+
+    // Get the data-URL formatted image
+    // Firefox supports PNG and JPEG. You could check img.src to guess the
+    // original format, but be aware the using "image/jpg" will re-encode the image.
+    var dataURL = canvas.toDataURL("image/png");
+
+    return dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
+}
+
+
+
+var storage = BSD.Storage('local');
+
+var imageSpecs = JSON.parse(storage.getItem('image-specs')) || [];
+var thumbSpecs = JSON.parse(storage.getItem('thumb-specs')) || [];
+
+var images = imageSpecs.map(function(o){ return BSD.Image(o); });
+var thumbs = thumbSpecs.map(function(o){ return BSD.Thumb(o); });
+
+var workArea = jQuery('#work-area');
+var thumbsWrap = jQuery('#thumbs');
+
+var urlInput = jQuery('#url');
+
+
+
+
 var campfire = BSD.PubSub({});
+
+
+campfire.subscribe('work-on-image',function(url){
+
+  
+  if (url.length == 0) { return false; }
+
+  var image = BSD.Image({ 
+    url: url
+  });
+  images.push(image);
+  image.renderOn(workArea);  
+  
+ 
+  var thumb = BSD.Thumb({ url: url });
+  
+  
+  var hit = thumbs.detect(function(o){ return o.spec.url == url; });
+  if (!hit) {
+    thumb.renderOn(thumbsWrap); 
+    thumbs.push(thumb); 
+    thumbSpecs = thumbs.map(function(o){ return o.spec; });
+    storage.setItem('thumb-specs',JSON.stringify(thumbSpecs));
+  }
+  
+  var imageSpecs = images.map(function(o){ return o.spec; });
+  storage.setItem('image-specs',JSON.stringify(imageSpecs));
+
+
+});
+
+
+
+
+urlInput.change(function(){
+  ////////console.log('this.value',this.value);
+  campfire.publish('work-on-image',this.value);
+});
+
+
+thumbs.each(function(thumb){
+    thumb.renderOn(thumbsWrap);
+    thumb.subscribe('click',function(o){
+      campfire.publish('work-on-image',o.spec.url);
+    });
+});
+
+
+
+
+
+
+
+
 
 if (typeof BSD == "undefined") {
   var BSD = {};    
@@ -201,7 +379,7 @@ window.addEventListener('touchstart', function() {
     guitar.renderOn(d);
 
     guitar.subscribe('fret-clicked',function(o) {
-      ///console.log('o?',o);
+      console.log('o?',o);
       var note = Note(o.value);
       BSD.audioPlayer.playNote(note,1000);    
     });    
@@ -266,14 +444,6 @@ window.addEventListener('touchstart', function() {
         jQuery( "#detune-amount" ).text( n );
       }
     });
-    
-    
-    
-    
-    
-    
-    
-    
     
     
     var volumeInput = jQuery('#volume-input');

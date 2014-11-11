@@ -10,7 +10,14 @@
     </script>
     <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/array.js"></script>
     <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/color.js"></script>
+
+
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
+
+
+
     <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/bsd.pubsub.js"></script>
     <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/dom.js"></script>
     <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/draggy.js"></script>
@@ -26,8 +33,15 @@
     <script src="javascript/wavetableloader.js"></script>
     <script src="javascript/staticaudiorouting.js"></script>
     <script src="javascript/bsd.widgets.oscplayer.js"></script>
-    <script src="javascript/bsd.widgets.wavetableplayer.js"></script>
+  
+  
+  
+    <script src="javascript/bsd.widgets.baseplayer.js"></script>
+    <script src="javascript/bsd.widgets.stringoscillator.js"></script>
+    <script src="javascript/bsd.widgets.guitarplayer.js"></script>
+    <script src="javascript/bsd.guitar.js"></script>
 
+    <script type="text/javascript" src="javascript/bsd.widgets.procrastinator.js"></script>
 
     <style type="text/css">
       #pickers { height: 40px; }
@@ -35,6 +49,12 @@
     </style>
 
 	<title>Rulers</title>
+
+
+
+
+
+
  </head>
   <body>
     <div id="content">
@@ -42,6 +62,10 @@
       <div class="pull-right">
         <button id="sticky-note-button">Sticky Note</button>
       </div><!-- pull-right -->
+
+
+
+
       <div class="pull-right">
         <label><strong>Progression</strong><br />
           <input id="progression" type="text" />    
@@ -78,46 +102,22 @@
         </label>      
       </div><!-- pull-right -->
 
+
+        <div class="slider-wrap">
+          Volume: <br /><span id="volume-amount"></span>
+          <div class="slider" id="volume-input"></div>
+        </div>
+        <div class="slider-wrap">
+            Detune:<br /> <span id="detune-amount"></span>
+          <div class="slider" id="detune-input"></div>
+        </div>
+        <div style="clear: both;">&nbsp;</div>        
+
+
       <button id="bookmark">Bookmark these rulers</button>
-
-      <label for="volume-input">Volume
-        <input id="volume-input" type="range" min="0" max="1" step="0.01" value="0.5" />
-      </label>
-
       <div id="rulers"></div><!--rulers -->
     </div><!-- content -->
     <script type="text/javascript">
-  
-
-
-BSD.Widgets.Procrastinator = function(spec) {
-
-  ///console.log('spec',spec);
-
-  var updateRequests = [];
-  var lastStamp = new Date().getTime();
-  var updateThresh = 1200;///500;
-  
-  function checkRequests() {
-    ////console.log('cr updateRequests.length',updateRequests.length);
-    if (updateRequests.length > 1) {
-      updateRequests.pop();
-      return;
-    }
-    spec.callback();
-    updateRequests.pop();
-  }
-
-  var self = {};
-  self.beg = function() {
-    if (updateRequests.length > 5) { return; }
-    updateRequests.push('blah');
-    setTimeout(function() { checkRequests(); } ,updateThresh);
-  };
-  
-  return self;
-};
-  
   
 BSD.ChordRulerPanel = function(spec) {
   var self = BSD.PubSub({});
@@ -312,10 +312,10 @@ BSD.ChordRulerPanel = function(spec) {
   });
 
 
-  var polyphonyCount = 8;
+  var polyphonyCount = 48;
 
     
-    BSD.audioPlayer = BSD.Widgets.WaveTablePlayer({
+    BSD.audioPlayer = BSD.Widgets.GuitarPlayer({
       gossip: campfire,
       context: context,
       name: 'Piano',
@@ -323,18 +323,9 @@ BSD.ChordRulerPanel = function(spec) {
       range: [-300,128]
     });
     
+
+
     /***
-    
-    BSD.audioPlayer = BSD.Widgets.OSCPlayer({
-      gossip: campfire,
-      context: context,
-      name: 'Piano',
-      range: [-300,128]
-    });
-    
-    */
-    
-    
     var volumeInput = jQuery('#volume-input');
     var volumeWait = BSD.Widgets.Procrastinator({
       callback: function() {
@@ -346,6 +337,55 @@ BSD.ChordRulerPanel = function(spec) {
     volumeInput.change(function(){
       volumeWait.beg();
     });
+
+    ***/
+
+
+
+
+
+
+
+    var waiter = BSD.Widgets.Procrastinator({ timeout: 250 });
+
+    $( "#volume-input" ).slider({
+      orientation: "vertical",
+      range: "min",
+      min: 0,
+      max: 1,
+      step: 0.1,
+      value: 0,
+      slide: function( event, ui ) {
+        var newVolume = ui.value;
+        waiter.beg(BSD.audioPlayer,'set-master-volume',ui.value);
+        jQuery( "#volume-amount" ).text( newVolume );
+      }
+    });
+
+
+
+
+    $( "#detune-input" ).slider({
+      orientation: "vertical",
+      range: "min",
+      min: -7.0,
+      max: 7.0,
+      step: 0.25,
+      value: 0.0,
+      slide: function( event, ui ) {
+        var n = ui.value;
+        
+        waiter.beg(BSD.audioPlayer,'set-detune-semis',n);        
+        //////campfire.publish('set-speed-ms',n);
+        jQuery( "#detune-amount" ).text( n );
+      }
+    });
+
+
+
+
+
+
 
 
 

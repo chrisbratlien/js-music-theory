@@ -1,22 +1,353 @@
 //shows the bars and chords of a progression, with a little piano roll player inside.
 
-  BSD.Widgets.Faker = function(spec) {
+
+  BSD.Widgets.FakerCell = function(spec) {
+    var self = BSD.PubSub({});
+
+    var chord = spec.chord;
   
-    var self = {};
+    var third = chord.notes()[1];
+  
+    var scale = false;
+    
+    var cDiv = DOM.div().addClass('faker-cell chord chord-' + spec.chordIndex);
+    var nameKeyDiv = DOM.div().addClass('name-key');
+    var chordNotesDiv = DOM.div().addClass('chord-notes');
+    //var scaleModeDiv = DOM.div().addClass('scale-mode').html('waiting...');
+    //var chordModeDiv = DOM.div().addClass('chord-mode').html('waiting...');
+    //var melodyDiv = DOM.div().addClass('melody').html('melody...waiting...');
+
+
+
+    self.subscribe('chord-change',function(o){
+      //console.log('oh',o,o.current.chordIndex);
+      if (o.current.chordIndex == spec.chordIndex) {  
+        cDiv.addClass('current');
+      }
+      else {
+        cDiv.removeClass('current');
+      }
+    
+    
+    });
+
+
+
+    var table = DOM.table();
+
+      var chordRow = DOM.tr();
+      var smRow = DOM.tr();
+      var cmRow = DOM.tr();
+      var melodyRow = DOM.tr();
+
+  
+    self.refresh = function() {
+      if (!scale) { return false; }
+      //scale could change, so need o refresh the scalemode and chordmode divs
+      /////scaleModeDiv.empty();
+
+      smRow.empty();
+      cmRow.empty();
+      melodyRow.empty();
+      
+      
+      
+      var myNotes = scale.notes();
+      while(! myNotes[0].abstractlyEqualTo(third)) {
+        var x = myNotes.shift();
+        var octave = x.plus(12);
+        myNotes.push(octave);
+      }
+      myNotes.push(myNotes[0].plus(12));
+      
+      
+      var foo = true;
+      myNotes.each(function(note){
+        var noteDiv = DOM.td().addClass('note');
+
+        
+        //////console.log('ok here is the chord',chord);
+        ////BSD.chord = chord;
+        var nextChordThird = chord.next.myThird();
+        var diff = note.abstractValue() - nextChordThird.abstractValue();
+        ///console.log('diff',diff);
+        
+        
+        if (Math.abs(diff) <= 2 && diff != 0) {
+          ///console.log('nearby');
+          noteDiv.addClass('near-next-third');
+        }
+        if (note.abstractlyEqualTo(nextChordThird)) {
+          noteDiv.addClass('next-third');
+        }
+
+
+
+
+        if (foo) {
+          foo = false;
+          noteDiv.addClass('third');
+        }
+        
+        
+        noteDiv.html(note.name());
+        noteDiv.on('click touchend',function(e){
+          e.preventDefault();        
+          self.publish('play-note',note);
+        });
+        noteDiv.on('mouseover',function(e){
+          e.preventDefault();        
+          self.publish('div-hover',noteDiv);
+        });
+        ////scaleModeDiv.append(noteDiv);
+        smRow.append(noteDiv);
+      });
+      /////scaleModeDiv.append(DOM.div().css('clear','both'));
+      
+      
+      
+      myNotes.each(function(note){
+        var noteDiv = DOM.td().addClass('note');
+        var nullDiv = DOM.td();
+        
+        noteDiv.html(note.name());
+        noteDiv.on('click touchend',function(e){
+          e.preventDefault();        
+          self.publish('play-note',note);
+        });
+        noteDiv.on('mouseover',function(e){
+          e.preventDefault();        
+          self.publish('div-hover',noteDiv);
+        });
+        nullDiv.on('mouseover',function(e){
+          e.preventDefault();        
+          self.publish('div-hover',nullDiv);
+          //null div has no click handler so the result is muted..
+        });
+
+
+        ////scaleModeDiv.append(noteDiv);
+        
+        if (chord.containsNote(note)){ 
+          cmRow.append(noteDiv);
+        }
+        else {
+          cmRow.append(nullDiv);
+        }
+      });
+      
+      
+      ///table.append(cmRow);
+
+
+      myNotes.each(function(note){
+        var noteDiv = DOM.td().addClass('note');
+        var nullDiv = DOM.td();
+        
+        var toggle = false;
+        
+        
+        noteDiv.on('click touchend',function(){
+          toggle = !toggle;
+          if (toggle) {
+            noteDiv.html(note.name());        
+          }
+          else {
+            noteDiv.html('&nbsp;');                  
+          }
+          
+          self.publish('play-note',note);
+        });
+        noteDiv.on('mouseover',function(e){
+          e.preventDefault();        
+          self.publish('div-hover',noteDiv);
+        });
+        nullDiv.on('mouseover',function(e){
+          e.preventDefault();
+          self.publish('div-hover',nullDiv);
+          //null div has no click handler so the result is muted..
+        });
+
+
+        ////scaleModeDiv.append(noteDiv);
+        
+        melodyRow.append(noteDiv);
+      });
+
+
+
+      /////table.append(melodyRow);
+      
+    };
+    
+    self.renderOn = function(wrap){
+
+      var title = DOM.span(chord.fullAbbrev());
+      nameKeyDiv.append(title);
+      ////nameKeyDiv.append(chord.fullAbbrev());
+      title.on('click touchend',function(e){
+        e.preventDefault();      
+        self.publish('play-chord',chord);
+      });
+      title.on('mouseover',function(e){
+        e.preventDefault();      
+        self.publish('div-hover',title);
+      });
+      
+      
+      
+
+
+      var compatibleScales = chord.compatibleScales();
+
+
+      var scaleDropdown = DOM.select();
+      var scaleItems = chord.compatibleScales().map(function(o){
+        return { label: o.fullName(), object: o };
+      });
+      
+
+      if (!scale) { scale = compatibleScales.detect(function(o) { return o.name == 'minor'; }) };
+      if (!scale) { scale = compatibleScales.detect(function(o) { return o.name == 'major'; }) };
+      if (!scale) { scale = compatibleScales.detect(function(o) { return o.name == 'harmonic minor'; }); };
+      if (!scale) { scale = compatibleScales[0]; }
+
+      
+      scaleItems.each(function(o){
+        var opt = DOM.option(o.label);        
+        scaleDropdown.append(opt);
+      });
+      scaleDropdown.val(scale.fullAbbrev());
+      
+      
+      nameKeyDiv.append(scaleDropdown);
+      scaleDropdown.change(function() {            
+        var selectedScale = chord.compatibleScales().detect(function(s) { 
+          return s.fullAbbrev() == scaleDropdown.val(); 
+        });
+        scale = selectedScale;
+        self.refresh();
+      });
+      
+
+      
+      chord.notes().each(function(note){
+        var noteDiv = DOM.td().addClass('note');
+        noteDiv.html(note.name());
+        noteDiv.on('click touchend',function(e){
+          e.preventDefault();        
+          self.publish('play-note',note);
+        });
+        noteDiv.on('mouseover',function(e){
+          e.preventDefault();        
+          self.publish('div-hover',noteDiv);
+        });
+        chordRow.append(noteDiv);
+      });
+    
+      cDiv.append(nameKeyDiv);
+      cDiv.append(chordNotesDiv);
+
+      table.append(chordRow);
+      table.append(smRow);
+      table.append(cmRow);
+      ////table.append(melodyRow);
+
+
+      cDiv.append(table);
+      ///cDiv.append(scaleModeDiv);
+      ///cDiv.append(chordModeDiv); 
+      //////cDiv.append(melodyDiv); 
+      wrap.append(cDiv); 
+    
+    
+      self.refresh();
+    };
+  
+    return self;  
+  }
+
+  BSD.Widgets.Faker = function(spec) {
+
+    var chordIndex = 0;
+  
+    var self = BSD.PubSub({});
     var map = {};
     var queue = [];
     
     var gossip = spec.gossip; //BSD.PubSub
     
-    var backplane = BSD.PubSub({});
+      var wrap = jQuery('#faker-wrap');
+
     
     self.enqueue = function(o) {
       queue.push(o);
     };
+
+    
+    self.subscribe('new-progression',function(bars) {
+    
+      wrap.empty();
+    
+      var q = [];
+    
+      bars.each(function(bar){
+        bar.each(function(chord){
+          q.push(chord);
+        });
+      });
+      
+      eachify(q).eachPCN(function(o){
+        var chord = o.current;
+        chord.next = o.next;
+        chord.saveThird = chord.notes()[1];
+        self.renderChordOn(wrap,chord);
+      });
+      
+    });
+    
+    
+    self.refresh = function() {};
+
+
+    self.renderChordOn = function(wrap,chord) {
+    
+      var cell = BSD.Widgets.FakerCell({
+        chord: chord,
+        chordIndex: chordIndex
+      });
+      cell.renderOn(wrap);
+
+      self.subscribe('chord-change',function(o){
+        cell.publish('chord-change',o);
+      });
+ 
+
+
+      //relay/route outgoing msgs
+      ['play-note','play-chord','div-hover'].each(function(topic){
+        cell.subscribe(topic,function(payload){
+          self.publish(topic,payload);
+        });
+      });
+    
+      chordIndex += 1;
+    };
+
+    self.renderBarOn = function(wrap,bar) {
+      var chordCount = bar.length;        
+      
+      
+      bar.each(function(chord) {
+        self.renderChordOn(wrap,chord);
+      });
+    };
+    
     self.go = function(progression) {    
 
       ////console.log("booo");
-      var wrap = jQuery('#faker-wrap');
+      wrap.append('faker');
+      
       var bars = progression.split('|');
       var last = false;
       

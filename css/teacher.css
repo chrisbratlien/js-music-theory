@@ -1,7 +1,37 @@
 #intro { width: 900px;}
 #supportingText { width: 900px;}
 
-#pickers { width: 45em; overflow: auto; }
+#pickers { width: 100%; height: 200px; overflow: auto; }
 .color-picker { width: 2em; height: 2em; float: left; cursor: pointer;  border: 1px solid white; }
 
 .guitar { margin:  2em; }
+
+
+
+.guitar .string .fret-number-0 { opacity: 0.5; }
+
+
+
+.fret.popular { background: yellow; }
+
+.count-0 { background: #dddddd; color: #dddddd; }
+.count-1 { background: #dddddd; color: #bbb; }
+.count-2 { background: #ded4d7; color: #bbb; }
+.count-3 { background: #dfcbd1; color: #aba; }
+.count-4 { background: #e1c2cb; }
+.count-5 { background: #e4b0bf; }
+.count-6 { background: #e69eb3; }
+.count-7 { background: #e98ca7; }
+.count-8 { background: #ec7a9b; }
+.count-9 { background: #ef688f; }
+.count-10 { background: #f25683; }
+.count-11 { background: #f44477; }
+.count-12 { background: #f7326b; }
+.count-high { background: #f7326b; }
+
+
+/** @media only screen and (max-width: 720px)  {**/
+@media only screen and (min-width : 604px) and (orientation: landscape) {
+
+  .guitar .string .fret { width: 32px; height: 20px; }
+}

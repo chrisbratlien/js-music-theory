@@ -1,0 +1,58 @@
+
+
+    body {  }
+
+        
+    #output { width: 100%; position: relative; margin: 0 auto; }
+    
+    .bar-wrap { position: relative; width: 25%; display: inline; float: left; overflow: hidden; 
+    
+    /** border: 1px solid red; **/
+    
+    }
+    
+    .chord-wrap { 
+      font-size: 6pt;
+      float: left; 
+      display: inline; 
+      position: relative; 
+
+      /** border: 1px solid green; **/
+      margin: 0 auto;
+    }
+    .chord-wrap h4 { font-size: 5pt;  }
+
+    .chord-wrap.length-2 { width: 50%; }
+    .chord-wrap.length-1 { width: 99%; }
+    
+    
+    
+    .chord-wrap .tonality { font-size: 4pt; font-weight: normal; }
+    .chord-wrap table { margin: 0 auto; font-size: 4pt; }
+
+    .cell { 
+      position: relative;
+      text-align: center;
+    }
+    
+    .cell { border: 1px solid #888; color: #888; } 
+    .cell.selected { background: #8de; border-color: #367; color: #367; }
+    
+    /**
+    .cell { border-radius: 1.8pt; font-size: 3pt; padding: 0.3em; }
+    .length-2 .cell { border-radius: 1.8pt; font-size: 3pt; padding: 0.2em; }
+    **/
+    
+    .cell { border-radius: 1.8pt; font-size: 6pt; padding: 0.3em; }
+    .length-2 .cell { border-radius: 1.8pt; font-size: 6pt; padding: 0.2em; }
+    
+    
+
+
+
+    
+    /**
+    ul.song-list { list-style-type: none; width: 140px; }
+    ul.song-list li { padding: 3px; font-size: 1.2em; cursor: pointer; }
+    ul.song-list li.selected{ background: #409; color: white; }
+    **/

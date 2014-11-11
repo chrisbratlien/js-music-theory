@@ -2,7 +2,27 @@ BSD.Widgets.BasePlayer = function(spec) {
   var context = spec.context;
   var ctx = context;
   var self = BSD.PubSub({});
+
+
+
+
+    var tooDamnHigh = (typeof spec.range == "undefined") ? 70 : spec.range[1];
+    var tooDamnLow = (typeof spec.range == "undefined") ? -300 : spec.range[0];
+
+    ///console.log('tooDamnHigh',tooDamnHigh);
+    ///console.log('tooDamnLow',tooDamnLow);
+
+
+
+
+
   var oscillators = [];
+
+
+
+
+
+
   self.oscillators = oscillators;
   
   self.idleOscillators = function() {
@@ -13,11 +33,20 @@ BSD.Widgets.BasePlayer = function(spec) {
 
 
   self.subscribe('set-master-volume',function(magnitude){
-    ///console.log('MAG222',magnitude);
+    //console.log('MAG222',magnitude);
     ///console.log('oscillators',oscillators);
     ////console.log('self.oscillators',self.oscillators);
     self.oscillators.each(function(o){ o.publish('set-master-volume',magnitude); });
   });
+
+  self.subscribe('set-detune-semis',function(magnitude){
+    //console.log('DETUNE MAG',magnitude);
+    ///console.log('oscillators',oscillators);
+    ////console.log('self.oscillators',self.oscillators);
+    self.oscillators.each(function(o){ o.publish('set-detune-semis',magnitude); });
+  });
+
+
 
 
   self.hush = function() {
@@ -27,15 +56,10 @@ BSD.Widgets.BasePlayer = function(spec) {
 
   self.playChord = function(chord,duration) {
     
-    var tooDamnHigh = (typeof spec.range == "undefined") ? 70 : spec.range[1];
-    var tooDamnLow = (typeof spec.range == "undefined") ? -300 : spec.range[0];
-
-    ///console.log('tooDamnHigh',tooDamnHigh);
-    ////console.log('tooDamnLow',tooDamnLow);
 
     var tooHigh = chord.notes().detect(function(n) { return n.value() > tooDamnHigh; });
     while (tooHigh) {
-      ////console.log('tooDamnHigh',chord.fullName());
+      console.log('tooDamnHigh',chord.fullName());
       chord = chord.invertDown();
       var tooHigh = chord.notes().detect(function(n) { return n.value() > tooDamnHigh; });
     }
@@ -48,7 +72,7 @@ BSD.Widgets.BasePlayer = function(spec) {
     }
           
     var midivalues = chord.notes().collect(function(n) { return n.value(); });
-    ////console.log(midivalues);
+    console.log('midivalues',midivalues);
     chord.notes().each(function(n) { self.playNote(n,duration); });
   };
   

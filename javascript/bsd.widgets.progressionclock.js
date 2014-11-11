@@ -16,22 +16,29 @@ BSD.Widgets.ProgressionClock = function(spec) {
     var timeout = 4000;
 
 
-    var self = {};
+    var self = BSD.PubSub({});
+    
+    
+    
+    
   
     self.guid = spec.guid;
   
   
     chordLabel = DOM.h2();
     noteLabel = DOM.label();
-    board = DOM.div().addClass('fretboard');
+    ////board = DOM.div().addClass('fretboard');
     
     
-    var progression = spec.progression;
+    //var progression = spec.progression;
   
-    self.progression = progression;
+    ///self.progression = progression;
 
 
     var delayLabel = DOM.label('Spinner delay');
+    
+    
+    
     var delayInput = DOM.input().attr('type','range').attr('min',0).attr('max',15000).val(timeout);
     delayInput.change(function(){ self.setDelay(this.value); });
     delayLabel.append(delayInput);
@@ -70,17 +77,21 @@ BSD.Widgets.ProgressionClock = function(spec) {
   
     var queue = [];
     
-    var spinner = false;  
+    var sequencer = BSD.Widgets.Sequencer({});  
+    
+    var setIntervalHandles = [];
+    
+    
   
     var leftPanel = DOM.div().addClass('panel panel-left');    
     var positionIndicator = DOM.ul().addClass('position-indicator');
 
     self.setDelay = function(ms) {
       timeout = ms;
-      spinner.timeout = ms;    
+      ////sequencer.timeout = ms;    
     };
     
-    self.spinnerDefaults = "not implemented";
+    self.sequencerDefaults = "not implemented";
         
     self.enqueue = function(obj) {
       queue.push(obj);
@@ -110,7 +121,9 @@ BSD.Widgets.ProgressionClock = function(spec) {
 
 
 
-      var bars = progression.split('|');
+      ////var bars = progression.split('|');
+      
+      var bars = spec.bars;
 
       for (var i = 0; i < bars.length; i += 1) {
         positionIndicator.append(DOM.li(i+1).addClass('bar-' + i));        
@@ -133,15 +146,24 @@ BSD.Widgets.ProgressionClock = function(spec) {
 
       var last = false;
       var barIndex = 0;
+      var chordIndex = 0;
       
       bars.each(function(bar) {
         var halfBar = false;
-        var chordNames = bar.split(/,|\ +/);
-        if (chordNames.length == 2) {
+        var chords = bar;
+        if (chords.length == 2) {
           halfBar = true;
         }
-        chordNames.each(function(name) {
-          var chord = makeChord(name);
+        
+
+        var baseTime = (new Date()).getTime()+5000; //five secs in future;
+          
+        
+        eachify(chords).eachPCN(function(o) {
+        
+          var chord = o.current;
+        
+          ///var chord = makeChord(name);
           var scales = chord.compatibleScales();
           var candidateNotes = chord.notes();        
           
@@ -150,8 +172,32 @@ BSD.Widgets.ProgressionClock = function(spec) {
             timeoutScale = 0.5;
           }
           
+          
+          
+          
+          baseTime += 1000;
+          
           ////console.log('enqueueing',chord.fullName(),timeoutScale);
-          self.enqueue({ chord: chord, scales: scales, barIndex: barIndex, halfBar: halfBar, timeoutScale: timeoutScale });  
+          self.enqueue({ 
+            when: baseTime,
+            callback: function() {
+              self.publish('chord-change',{ 
+                chord: chord, 
+                chordIndex: chordIndex, 
+                scales: scales, 
+                barIndex: barIndex, 
+                halfBar: halfBar, 
+                timeoutScale: timeoutScale 
+                
+              });             
+            }          
+          });
+          
+          
+
+          
+          chordIndex += 1;          
+          
         });
         barIndex += 1;        
       });
@@ -162,14 +208,24 @@ BSD.Widgets.ProgressionClock = function(spec) {
       var opts = self.spinnerDefaults;
       opts.items = queue;
       opts.callback = self.spinCallback; //implemented by inheriters
-      spinner = BSD.Widgets.Spinner(opts);
-      self.spinner = spinner;
+
+
+
+      //spinner = BSD.Widgets.Spinner(opts);
+      ///self.spinner = spinner;
+
+
+
+
+
+
+
       //spinner.spin();
     };
     
     self.start = function() {
       paused = false;
-      spinner.spin();
+      sequencer.resume();
     };
     self.play = self.start;
     
@@ -177,10 +233,11 @@ BSD.Widgets.ProgressionClock = function(spec) {
       paused = true;
       
       //console.log('asking spinner to pause');
-      spinner.pause();
+      sequencer.pause();
     };
     
 
+  /***
   self.currentChordIsProbably2of251 = function(o) { 
     return (o.next.chord.rootNote.isAFourthOf(o.current.chord.rootNote) // 5 is "a fourth of" 2
       && o.current.chord.hasMinorThirdInterval() 
@@ -192,143 +249,14 @@ BSD.Widgets.ProgressionClock = function(spec) {
       && o.prev.chord.hasMinorThirdInterval() 
       && o.current.chord.hasMajorThirdInterval());
   };
+  ***/
   
   self.spinCallback = function(o) {
-    spec.gossip.publish('chordChange',o); //NOTE: the future way to implement all this?
-
-    //////console.log(self.guid,'got called back');
-
-    var chord = o.current.chord;
-    var chordName = chord.fullAbbrev();
-    
-    self.updateChordLabel(chordName);
-    
-    self.withBoard(function(board) {
-
-      var findee = board.find('.fret');
-      ////console.log('cp findee',findee);
-
-
-      findee.removeClass('on');
-      findee.removeClass('current');
-      board.find('.fret').removeClass('next');
-      board.find('.fret').removeClass('prev');
-      board.find('.fret').removeClass('color');
-      board.find('.fret').removeClass('root');
-      board.find('.fret').html(null);
-  
-      board.find('.compat-scale').removeClass('compat-scale');
-      board.find('.compat-scale-root').removeClass('compat-scale-root');
-      
-      positionIndicator.find('li').removeClass('selected');
-      positionIndicator.find('.bar-' + o.current.barIndex).addClass('selected');
-  
-  
-      var chordNotes = chord.notes();
-      var colorNotes = [chordNotes[1],chordNotes[3]]; //FIXME: very weak assumption
-  
-      colorNotes.each(function(note) {
-        var nn = note.name().toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');          
-        board.find('.note-' + nn).addClass('color');
-      });
-
-
-      /*
-      var scale = o.current.scales.select(function(s){ return s.fullName().match(/major/); }).atRandom();
-      if (!scale) {
-        scale = o.current.scales.select(function(s){ return s.fullName().match(/harmonic minor/); }).atRandom();
-      }
-      if (!scale) {
-        scale = o.current.scales.select(function(s){ return s.fullName().match(/blues/); }).atRandom();
-      }
-      */
-
-
-      var scale = false;
-      
-      
-      var preferredGuesses = [];
-      if (self.currentChordIsProbably2of251(o)) {
-        //console.log('probably 2');      
-        preferredGuesses = ['blues','major','minor']; //the major here would be the 1 major.. but just in case that isn't found, still try for minor            
-      }
-      if (self.currentChordIsProbably5of251(o)) {
-        //console.log('probably 5');      
-        preferredGuesses = ['harmonic minor','major','blues','minor']; //the major here would be the 1 major.. but just in case that isn't found, still try for minor            
-      }
-
-      if (o.current.chord.hasDominantQuality()) {
-        preferredGuesses.push('major');
-      }
-      
-      preferredGuesses.push(o.current.chord.rootNote.scale('major').fullName()); //hail mary before we start guessing and hit an off-major.…      
-
-      //first go through the preferred, if any      
-      while (!scale && preferredGuesses.length > 0) {
-        var guess = preferredGuesses.shift();
-        scale = o.current.scales.detect(function(s) {
-          if (s.fullName().match(guess)) { return true; } 
-        });
-      }
-      if (scale) {
-        //console.log('found preferred',scale.fullName());
-      }
-
-      
-      if (!scale) {
-        var randomGuesses = ['major','harmonic minor','blues','pentatonic'];      
-        scale = o.current.scales.detect(function(s){ 
-          var guess;
-          guess = randomGuesses.atRandom();
-          if (s.fullName().match(guess)) { return true; } 
-          guess = randomGuesses.atRandom();
-          if (s.fullName().match(guess)) { return true; } 
-          guess = randomGuesses.atRandom();
-          if (s.fullName().match(guess)) { return true; } 
-          return false;
-        });
-      }
-      
-      o.current.chord.notes().each(function(note) {
-        var noteName = note.name();
-        var nn = noteName.toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');          
-  
-        if (note.abstractlyEqualTo(chord.rootNote)) {
-            board.find('.note-' + nn).addClass('root');
-        }
-  
-  
-        if (self.chordNoteState) {
-          board.find('.note-' + nn).addClass('on').addClass('current').html(chordName);   ///(currentName);        
-        }
-        else {
-          board.find('.note-' + nn).addClass('on').addClass('current').html(noteName);        
-        }
-        
-        
-        if (scale) { 
-          scale.notes().each(function(n) {
-            var scalenn = n.name().toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');              
-            board.find('.note-' + scalenn).addClass('compat-scale');
-            if (n.abstractlyEqualTo(scale.rootNote)) {
-              board.find('.note-' + scalenn).addClass('compat-scale-root');          
-            }
-          });
-        }     
-      });
-      
-      o.next.chord.notes().each(function(note) {
-        var noteName = note.name();
-        var nn = noteName.toLowerCase().replace(/b/g,'flat').replace(/#/g,'sharp');          
-        board.find('.note-' + nn).addClass('next');//.html(noteName);              
-        /////////console.log('next',noteName);
-      });
-      
-      ///spec.audioPlayer.playChord(o.current.chord,timeout);
-      /////spec.gossip.publish('playChord',{ chord: o.current.chord, timeout: timeout });    
-
-    });
-
+    ////spec.gossip.publish('chordChange',o); //NOTE: the future way to implement all this?
+    self.publish('chordChange',o);
+    positionIndicator.find('li').removeClass('selected');
+    positionIndicator.find('.bar-' + o.current.barIndex).addClass('selected');
+    return false; ////eventually get rid of the rest of this body.
   };
   self.spinnerDefaults = {
       timeout: timeout,

@@ -22,6 +22,7 @@
   <script src="javascript/staticaudiorouting.js"></script>
 
   <script src="javascript/bsd.widgets.baseplayer.js"></script>
+  <script src="javascript/bsd.widgets.mandolinplayer.js?v=22"></script>
   <script src="javascript/bsd.widgets.wavetableplayer.js?v=22"></script>
   <script src="javascript/bsd.widgets.oscplayer.js"></script>
   <script src="javascript/bsd.mandolin.js"></script>
@@ -76,37 +77,25 @@
   BSD.audioContext = context;
 
 
+//ios trick
+var unlocked = false;
+window.addEventListener('touchstart', function() {
+  if (unlocked) return false;
+  unlocked = true;
+  alert('unlocked');
+	// create empty buffer
+	var buffer = myContext.createBuffer(1, 1, 22050);
+	var source = myContext.createBufferSource();
+	source.buffer = buffer;
 
-function loadImpulseResponse(url, convolver) {
-  // Load impulse response asynchronously
-  var xhr = new XMLHttpRequest();
-  xhr.open("GET", url, true);
-  xhr.responseType = "arraybuffer";
+	// connect to output (your speakers)
+	source.connect(context.destination);
+
+	// play the file
+	source.noteOn(0);
+
+}, false);
   
-  xhr.onload = function() { 
-    context.decodeAudioData(xhr.response, 
-      function onSuccess(decodedBuffer) {
-        // Decoding was successful, do something useful with the audio buffer
-        convolver.buffer = decodedBuffer;
-        isImpulseResponseLoaded = true;
-      }, 
-      function onFailure() {
-        alert("Decoding the audio buffer failed");
-      });
-  }
-  
-  xhr.onerror = function() { 
-      alert("error loading reverb");
-  }
-  
-  xhr.send();
-}
-
-
-
-
-
-
 
 
   var campfire = BSD.PubSub({});
@@ -144,22 +133,15 @@ var cscale = makeScale('Cmajor');
 var noteNames = cscale.noteNames();
 
       
-    BSD.audioPlayer = BSD.Widgets.MandolinPlayer({
+    BSD.leader = BSD.Widgets.GuitarPlayer({
       gossip: campfire,
       context: context,
       name: 'Piano',//chosen, //'Piano',
       polyphonyCount: 8,//polyphonyCount,
       range: [-300,128]
     });
+
       
-    /**
-    BSD.audioPlayer = BSD.Widgets.OSCPlayer({
-      gossip: campfire,
-      context: context,
-      name: 'Piano',
-      range: [-300,128]
-    });
-    ***/
     
 
   var mandos = [];
@@ -167,7 +149,7 @@ var noteNames = cscale.noteNames();
   [0,1,2,3,4,5,6,7,8].each(function(o){
     var mando = BSD.Mandolin({});
     mando.subscribe('note-click',function(note) {
-      BSD.audioPlayer.playNote(note,1000);    
+      BSD.leader.playNote(note,1000);    
     });    
     mando.renderOn(jQuery(document.body));
     mandos.push(mando);
@@ -178,8 +160,10 @@ var noteNames = cscale.noteNames();
     
     var volumeInput = jQuery('#volume-input');
     volumeInput.change(function(){
-        BSD.audioPlayer.publish('set-master-volume',volumeInput.val());    
+        BSD.leader.publish('set-master-volume',volumeInput.val());    
     });
+    
+    BSD.leader.publish('set-master-volume',0.6);
     
     
 </script>

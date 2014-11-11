@@ -1,0 +1,92 @@
+
+
+    body {  }
+
+        
+    #output { width: 100%; position: relative; margin: 0 auto; }
+    
+    .bar-wrap { position: relative; display: inline; float: left; }
+    
+    /** border: 1px solid red; **/
+    
+
+    
+    .chord-wrap { 
+      float: left; 
+      display: inline; 
+      position: relative; 
+
+      /** border: 1px solid green; **/
+      margin: 0 auto;
+      width: 24%; 
+    }
+
+    .chord-wrap h4 { font-size: 1.1em;  }
+
+
+    .chord-wrap.length-2 { background: #ddd; }
+
+
+    /* .chord-wrap.length-1 { width: 99%; } **/
+    
+    
+    
+    .chord-wrap .tonality {    font-weight: normal; }
+
+    .chord-wrap table { margin: 0 auto; }
+
+    .cell { 
+      position: relative;
+      text-align: center;
+    }
+
+
+    /***    
+    .cell { border: 1px solid #888; color: #888; } 
+    .cell.selected { background: #8de; border-color: #367; color: #367; }
+    ***/
+
+
+    .cell { border: 1px solid #888; color: #888; } 
+    .cell.selected { background: #8de; border-color: #367; color: #367; }
+    
+    
+    .cell.selected { background:  #1BCDF2; }    
+    
+    .cell.selected { background: #97C6D0; }
+    
+    
+    .fret.selected.third { background: #FDBC22; }
+    
+    /**
+    
+    .fret.selected.seventh { background: #5ab; }
+
+    .fret.selected.root { background: black; }
+
+    **/
+
+    
+    .fret.selected.root { border-color: #145; }
+    
+    
+
+    .fret.next-third { background: #fef; }
+
+    
+    
+    
+    
+    
+    .cell { border-radius: 1em; font-size: 1em; padding: 0.3em; }
+
+    /**
+    .length-2 .cell { border-radius: 1em; font-size: 1em; padding: 0.2em; }
+    ***/
+
+    /**
+    .fret-0 { background: #ddd; color: #aaa; }
+    .fret-0.selected { background: #ade; border-color: #79a; color: #79a; }
+    ***/
+    
+    .fret-0 { opacity: 0.3; }

@@ -11,21 +11,17 @@ BSD.Widgets.Procrastinator = function(spec) {
   function checkRequests() {
     ////console.log('cr updateRequests.length',updateRequests.length);
     if (updateRequests.length > 1) {
-      updateRequests.shift();
+      updateRequests.pop();
       return;
     }
-    
-    var winner = updateRequests.shift();
-    winner.receiver.publish(winner.topic,winner.payload);
+    spec.callback();
+    updateRequests.pop();
   }
 
-  var self = BSD.PubSub({});
-  self.beg = function(receiver,topic,payload) {
+  var self = {};
+  self.beg = function() {
     if (updateRequests.length > 5) { return false; }
-    
-    /////console.log('yay!!!',receiver,topic,payload);
-    
-    updateRequests.push({ receiver: receiver, topic: topic, payload: payload });
+    updateRequests.push('blah');
     setTimeout(function() { checkRequests(); } ,timeout);
   };
   

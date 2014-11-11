@@ -1,13 +1,18 @@
 if (typeof BSD == "undefined") {  var BSD = {};  }
 BSD.Mandolin = function(spec) {
   var self = BSD.PubSub({});
+  var noteNames = makeScale('Cmajor').noteNames();
+
+
   self.renderOn = function(wrap) {
     var palette = BSD.randomPalette2(11,200);
     var table = DOM.table().addClass('fretboard-table');
     table.attr('cellspacing',0);
     table.attr('cellpadding',0);
     table.empty();
-    console.log('cscale',cscale);
+    
+    
+
     
     
     //var opens = [43,50,57,64];
