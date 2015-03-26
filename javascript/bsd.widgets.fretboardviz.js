@@ -13,12 +13,7 @@ function fisherYates ( myArray ) {
 
 BSD.Widgets.FretboardViz = function(spec) {
 
-    var timeout = 4000;
-
-
     var self = BSD.PubSub({}); //provides publish and subscribe
-    
-    
     
   
     self.guid = spec.guid;
@@ -29,13 +24,9 @@ BSD.Widgets.FretboardViz = function(spec) {
     board = DOM.div().addClass('fretboard');
     
     
-    var progression = spec.progression;
-  
-    self.progression = progression;
   
 
     chordNoteState = false;
-    queueState = false;
 
 
     var cnToggleLabel = DOM.label('Chord/Note text');
@@ -43,12 +34,6 @@ BSD.Widgets.FretboardViz = function(spec) {
     cnToggle.click(function() { chordNoteState = ! chordNoteState; });
     cnToggleLabel.append(cnToggle);
   
-    var queueToggleLabel = DOM.label('Chord/Note queue');
-    var queueToggle = DOM.input().attr('type','checkbox');
-    queueToggle.click(function() { queueState = ! queueState; });
-    queueToggleLabel.append(queueToggle);
-  
-    var queue = [];
     
   
     var rightPanel = DOM.div().addClass('panel panel-right');
@@ -113,10 +98,8 @@ BSD.Widgets.FretboardViz = function(spec) {
 
         fretDiv.on('hover',function(){
           ///////self.publish('fretDivHover',fretDiv);
-          self.publish('div-hover',fretDiv);
+          self.publish('note-hover',thisNote);
         });
-        
-        
         
         
         fretDiv.click(function() {
@@ -125,13 +108,6 @@ BSD.Widgets.FretboardViz = function(spec) {
         });
         
         
-        /***
-        fretDiv.bind('touchstart',function() {
-          ////spec.gossip.publish('playNote',{ note: thisNote, duration: 1000 });
-          spec.gossip.publish('noteClicked',thisNote);
-          ////spec.audioPlayer.playNote(thisNote,timeout);
-        });
-        ***/
         
         
                 
@@ -141,11 +117,6 @@ BSD.Widgets.FretboardViz = function(spec) {
       board.append(DOM.div().addClass('clear'));
     });
 
-    
-        
-    self.enqueue = function(obj) {
-      queue.push(obj);
-    };
 
 
     self.updateChordLabel = function(str) {
@@ -165,56 +136,29 @@ BSD.Widgets.FretboardViz = function(spec) {
 
 
     self.renderOn = function(wrap) {    
-      ///console.log('asasdfasdf');
-      ///console.log('progression',progression);
       wrap.empty();
-
-
-
-      var bars = progression.split('|');
-
-
 
       wrap.addClass('bsd-widgets-player');
       wrap.append(cnToggleLabel);      
-      wrap.append(queueToggleLabel);      
-      
       
       wrap.append(rightPanel);
-      
-      
-      
+
       rightPanel.append(chordLabel);
       rightPanel.append(noteLabel);
       rightPanel.append(legend);
       rightPanel.append(board);      
       rightPanel.append(DOM.div().addClass('clear'));
 
-
-
-
     };
-    
-
-  self.currentChordIsProbably2of251 = function(o) { 
-    return (o.next.chord.rootNote.isAFourthOf(o.current.chord.rootNote) // 5 is "a fourth of" 2
-      && o.current.chord.hasMinorThirdInterval() 
-      && o.next.chord.hasMajorThirdInterval());
-  };
-
-  self.currentChordIsProbably5of251 = function(o) {
-    return (o.current.chord.rootNote.isAFourthOf(o.prev.chord.rootNote) // 5 is "a fourth of" 2
-      && o.prev.chord.hasMinorThirdInterval() 
-      && o.current.chord.hasMajorThirdInterval());
-  };
   
   ///self.spinCallback = function(o) {
-  
   ///spec.gossip.subscribe('play-chord',function(o) {
-  self.subscribe('chordChange',function(o) {
+
+  self.subscribe('chord-change',function(o) {
   
     ////console.log('chordChange');
-  
+
+    console.log('o?',o);
 
     var chord = o.current.chord;
     var chordName = chord.fullAbbrev();    
@@ -249,6 +193,10 @@ BSD.Widgets.FretboardViz = function(spec) {
         colorNotes.push(chordNotes[3]);         
       }
 
+
+
+
+
   
       colorNotes.each(function(note) {
         
@@ -260,8 +208,14 @@ BSD.Widgets.FretboardViz = function(spec) {
 
       var scale = false;
       
-      
       var preferredGuesses = [];
+      
+      
+      var compatibleScales = chord.compatibleScales();
+
+
+
+      /***
       if (self.currentChordIsProbably2of251(o)) {
         //console.log('probably 2');      
         preferredGuesses = ['blues','major','minor']; //the major here would be the 1 major.. but just in case that isn't found, still try for minor            
@@ -270,26 +224,30 @@ BSD.Widgets.FretboardViz = function(spec) {
         //console.log('probably 5');      
         preferredGuesses = ['harmonic minor','major','blues','minor']; //the major here would be the 1 major.. but just in case that isn't found, still try for minor            
       }
-
-      if (o.current.chord.hasDominantQuality()) {
+      if (chord.hasDominantQuality()) {
         preferredGuesses.push('major');
       }
+      ****/
+
       
-      preferredGuesses.push(o.current.chord.rootNote.scale('major').fullName()); //hail mary before we start guessing and hit an off-major.…      
+      preferredGuesses.push(chord.rootNote.scale('major').fullName()); //hail mary before we start guessing and hit an off-major.…      
 
       //first go through the preferred, if any      
       while (!scale && preferredGuesses.length > 0) {
         var guess = preferredGuesses.shift();
-        scale = o.current.scales.detect(function(s) {
+        scale = compatibleScales.detect(function(s) {
           if (s.fullName().match(guess)) { return true; } 
         });
       }
       if (scale) {
         //console.log('found preferred',scale.fullName());
       }
+
+
+      /***
       if (!scale) {
         var randomGuesses = ['major','harmonic minor','blues','pentatonic'];      
-        scale = o.current.scales.detect(function(s){ 
+        scale = chord.scales.detect(function(s){ 
           var guess;
           guess = randomGuesses.atRandom();
           if (s.fullName().match(guess)) { return true; } 
@@ -300,15 +258,18 @@ BSD.Widgets.FretboardViz = function(spec) {
           return false;
         });
       }
+      ***/
+      
+      
       if (scale) {
         ////console.log('scale chosen',scale.fullName());
         legendScale.html(scale.fullName() + ' scale');
       }
       else {
-        console.log('**NO SCALE CHOSEN FOR CHORD ',o.current.chord.fullName());
+        console.log('**NO SCALE CHOSEN FOR CHORD ',chord.fullName());
         legendScale.html(null);
       }
-      o.current.chord.notes().each(function(note) {
+      chord.notes().each(function(note) {
         var noteName = note.name();
         var nn = note.name().replace(/b/g,'flat').replace(/#/g,'sharp').toLowerCase();          
     

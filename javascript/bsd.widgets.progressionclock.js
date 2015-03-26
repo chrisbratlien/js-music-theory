@@ -14,30 +14,16 @@ function fisherYates ( myArray ) {
 BSD.Widgets.ProgressionClock = function(spec) {
 
     var timeout = 4000;
-
-
     var self = BSD.PubSub({});
-    
-    
-    
-    
-  
     self.guid = spec.guid;
-  
   
     chordLabel = DOM.h2();
     noteLabel = DOM.label();
     ////board = DOM.div().addClass('fretboard');
-    
-    
     //var progression = spec.progression;
-  
     ///self.progression = progression;
 
-
     var delayLabel = DOM.label('Spinner delay');
-    
-    
     
     var delayInput = DOM.input().attr('type','range').attr('min',0).attr('max',15000).val(timeout);
     delayInput.change(function(){ self.setDelay(this.value); });
@@ -59,7 +45,6 @@ BSD.Widgets.ProgressionClock = function(spec) {
         togglePlay.html('pause');
       }
     });
-  
 
     chordNoteState = false;
     queueState = false;
@@ -79,14 +64,10 @@ BSD.Widgets.ProgressionClock = function(spec) {
     
     var sequencer = BSD.Widgets.Sequencer({
       tempo: 60,
-    
-    
     });  
     ///sequencer.tick(); //initial domino... bad metaphors both?
     
     var setIntervalHandles = [];
-    
-    
   
     var leftPanel = DOM.div().addClass('panel panel-left');    
     var positionIndicator = DOM.ul().addClass('position-indicator');
@@ -213,19 +194,9 @@ BSD.Widgets.ProgressionClock = function(spec) {
       //have to build the spinner after the queue has been filled up.
       var opts = self.spinnerDefaults;
       opts.items = queue;
-      opts.callback = self.spinCallback; //implemented by inheriters
-
-
 
       //spinner = BSD.Widgets.Spinner(opts);
       ///self.spinner = spinner;
-
-
-
-
-
-
-
       //spinner.spin();
     };
     
@@ -257,12 +228,6 @@ BSD.Widgets.ProgressionClock = function(spec) {
   };
   ***/
   
-  self.spinCallback = function(o) {
-    self.publish('chordChange',o);
-    positionIndicator.find('li').removeClass('selected');
-    positionIndicator.find('.bar-' + o.current.barIndex).addClass('selected');
-    return false; ////eventually get rid of the rest of this body.
-  };
   self.spinnerDefaults = {
       timeout: timeout,
       oneShot: false

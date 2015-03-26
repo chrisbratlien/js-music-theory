@@ -30,7 +30,7 @@ BSD.Widgets.Sequencer = function(spec) {
     timerQueue.push(o);
   };
   self.tick = function(){
-    //////console.log('tick',Math.random(),timerQueue);
+    ///console.log('tick',Math.random(),timerQueue);
     setTimeout(self.tick,tickMillis); //queue up next tick    
     if (self.paused) {    return false; }
     var now = (new Date).getTime();

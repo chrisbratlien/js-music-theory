@@ -190,6 +190,16 @@
     ul.song-list li { padding: 3px; font-size: 1.2em; cursor: pointer; }
     ul.song-list li.selected{ background: #409; color: white; }
 
+
+  .noselect {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+  }
+
   
 </style>
 
@@ -230,7 +240,7 @@
 
 
 <div id="progression-clock-wrap"></div>
-<div id="fretboard-viz-wrap"></div>
+<div id="fretboard-viz-wrap" class="noselect"></div>
 <div id="roll-wrap" class="roll-ui"></div>
 
 
@@ -402,17 +412,6 @@
     
     
 
-    /**
-    progressionClock = BSD.Widgets.ProgressionClock({ 
-      //obars: bars
-      bars: []
-    });
-    progressionClock.subscribe('chordChange',function(o){
-      BSD.faker.publish('chord-change',o);
-    });
-
-    ***/
-    
 
 
 
@@ -425,12 +424,24 @@
     fretboardViz.subscribe('noteClicked',function(n) {
       BSD.leader.playNote(n,1000);
     });
-        
+      
+      
+      
+    /***        
     fretboardViz.subscribe('div-hover',function(payload) {
     
       ///console.log('fbv hover',payload);
       BSD.currentFretDiv = payload;
     });
+    ***/
+    
+    
+    
+    fretboardViz.subscribe('note-hover',function(note){
+      BSD.currentNote = note;  
+    });
+    
+    
     fretboardViz.subscribe('play-note',function(note){    
       ////console.log('fbvz i heard play note',note);
       BSD.leader.playNote(note,1000);
@@ -447,28 +458,12 @@
     });
 
     campfire.subscribe('chord-change',function(o){
-      ///fretboardViz.publish('chordChange',o);
       fretboardViz.publish('chord-change',o);
       BSD.chunker.playChord(o.current.chord,1000);  
     });
 
 
-    /****
-    progressionClock.subscribe('chord-change',function(o){
-      fretboardViz.publish('chordChange',o);
-      BSD.chunker.playChord(o.current.chord,1000);    
-    
-    });
 
-    progressionClock.subscribe('chordChange',function(o){
-      fretboardViz.publish('chordChange',o);
-      BSD.chunker.playChord(o.current.chord,1000);    
-      
-    });
-        
-    progressionClock.renderOn(jQuery('#progression-clock-wrap'));
-    progressionClock.play();
-    *******/
     fretboardViz.renderOn(fretboardVizWrap);
 
     
@@ -495,6 +490,7 @@
 
 
   BSD.currentFretDiv = false;
+  BSD.currentNote = false;
 
 
 
@@ -569,9 +565,16 @@
     
     jQuery(document).on('keydown',function(e) {
       var c = e.keyCode || e.which;
+
+      if (BSD.currentNote && c == BSD.keycodes.f) {
+        BSD.leader.playNote(BSD.currentNote,1000);
+      }      
+      /***
       if (BSD.currentFretDiv && c == BSD.keycodes.f) {
         BSD.currentFretDiv.trigger('click');    
-      }      
+      }   
+      ***/   
+
     });
   });
 
@@ -670,7 +673,8 @@ $( "#speed-input" ).slider({
   
   BSD.songlist.renderOn(songlistWrap);
 
-
+  BSD.leader.publish('set-master-volume',0.01);
+  BSD.chunker.publish('set-master-volume',0.01);
   
 </script>
 <!--<div class="surface">SURFACE</div>-->
