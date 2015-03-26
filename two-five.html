@@ -2,9 +2,10 @@
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" nomanifest="js-music-theory.manifest">
 <head>
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   
-<title>Teacher</title>
+<title>Two Five</title>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
     <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
@@ -22,6 +23,10 @@
 <script src="http://cdn.dev.bratliensoftware.com/javascript/dom.js"></script>
 <script src="http://cdn.dev.bratliensoftware.com/javascript/draggy.js"></script>
 <script src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
+
+
+<!-- may try out some variations on eachify -->
+<script src="javascript/eachify.js"></script>
 
 
 <script src="javascript/bootup.js"></script>
@@ -50,16 +55,92 @@
 
 #quiz-output .note { font-size: 3em; }
 
+
+
+.ruler {
+  float: left; 
+  padding: 0; 
+  margin: 0; 
+  width: 8%;
+  cursor: pointer; 
+}
+
+.ruler .title { 
+  text-align: center; 
+  font-size: 1rem; 
+  line-height: 1.55rem;
+ }
+
+
+.ruler .cell {  
+  height: 50px; 
+  line-height: 50px; 
+  font-size: 50px;
+  padding: 3px; 
+  text-align: center; 
+  color: #bbb;
+}
+.ruler .active { background: #33b; color: white; }
+
+
+
+
+
+
+/* iphone 5 in portrait */
+@media only screen 
+and (min-device-width : 320px) 
+and (max-device-width : 568px) 
+and (orientation : portrait) { /* STYLES GO HERE */
+
+  
+
+}
+
+
+
+/* ipad in portrait or landscape */
+@media only screen 
+/** and (min-device-width : 768px) ***/
+/*** and (max-device-width : 1024px){ ***/   /* STYLES GO HERE */
+and (min-width : 768px) {
+
+
+  .ruler .cell {  
+    height: 20px; 
+    line-height: 20px; 
+    font-size: 20px; 
+  }
+
+
+}
+
+
+
+
+
+/* desktop and laptop */
+@media only screen and (min-width : 1224px) {
+
+
+  .ruler .cell {  
+    height: 10px; 
+    line-height: 10px; 
+    font-size: 10px; 
+  }
+
+}
+
+
+
+
+
+
 </style>
 </head>
 <body id="css-zen-garden">
   <div id="container">
-    <div id="intro">
-      <h1>Playing the Guitar in 20 Questions</h1>      
-    </div>
     <div id="supportingText">
-      
-      
       <button id="more-palettes">Redraw Palettes</button>
       <div id="pickers">   </div><!-- pickers -->
 
@@ -73,31 +154,17 @@
           <div class="slider" id="detune-input"></div>
         </div>
         <div style="clear: both;">&nbsp;</div>        
-
-
-
       <div id="main">
-
-        <ol>
-          <li>1. (optional) Pick a color</li>
-          <li>2. Click some numbered frets to define your first chord</li>
-          <li>3. Click Harmonize This! to see your chord harmonized across the major scale</li>
-        </ol>
-        <button id="quiz">Quiz</button>
-        <div id="quiz-output">
-          Find <span class="note"></span>
-        </div>
-      
-      
-      
-      
       </div>
+      <button id="redo">Redo</button>
+      
+      <label>Progression <br />
+        <input id="progression" />
+      </label>
+      
+      
     </div>
-    
-    
   </div>
-  
-  
   
 <script type="text/javascript">
 
@@ -198,6 +265,52 @@ window.addEventListener('touchstart', function() {
     campfire.publish('redraw-palettes');
   });
   campfire.publish('redraw-palettes');
+
+
+
+
+
+
+  BSD.parseProgression = function(progString) {
+    var barStrings = progString.split('|');
+    
+    var barIndex = 0;
+    var chordIndex = 0;
+    var flat = [];
+    
+    barStrings.each(function(barString){
+      var chordNames = barString.split(/,|\ +/);
+      var halfBar = false;
+      if (chordNames.length == 2) {
+        halfBar = true;
+      }
+      
+      
+      
+      chordNames.each(function(o){
+        var origChord = makeChord(o);        
+        var lowerChord = origChord.plus(-12);  
+        
+        flat.push({
+          barIndex: barIndex,
+          chordIndex: chordIndex,
+          chord: lowerChord,
+          halfBar: halfBar
+        });
+        chordIndex += 1;        
+      });
+      barIndex += 1;
+    });
+
+    return flat;
+    ///wait
+    var result = eachify(flat);
+    console.log('result',result);
+    return result;
+  };
+  
+
+
   
   
 
@@ -206,55 +319,7 @@ window.addEventListener('touchstart', function() {
   ////var degrees = include_degrees(id);
   //console.log(scalesByDegree.length);
   
-  var myScales = [
-    '',
-    '1,2,3,4,5,6,7',
-    '',
-    '1,2,3,4,5,6,7',
-    '1,2,3,4,5,6,7',
-    '1,2,3,4,5,6,7',
-    ''
-  ];
-  
-  
-  //for (var i = 0, l = myScales.length; i < l; i += 1) {
-  
-  myScales.each(function(scaleString){
-  
-    var d = DOM.div().addClass('guitar-wrap');
-    $('#main').append(d);
-    var guitar = Guitar({
-      degreeList: scaleString.split(','),
-      maxFrets: 24, 
-      //rootNote: Note("C")
-    });
-    JSMT.guitars.push(guitar);
-    guitar.renderOn(d);
-
-    guitar.subscribe('fret-clicked',function(o) {
-      ///console.log('o?',o);
-      var note = Note(o.value);
-      BSD.audioPlayer.playNote(note,1000);    
-    });    
-    
-    guitar.subscribe('fret-hover',function(o){
-      BSD.currentFretDiv = o.div;
-    });
-
-    guitar.subscribe('note-hover',function(note){
-      ////console.log('yayyy',note);
-      BSD.currentNote = note;  
-    });
-    
-    setInterval(guitar.renderHistory,4000);
-    
-    
-  
-  });
-  
-  
-  
-  ///}
+   ///}
       
     BSD.audioPlayer = BSD.Widgets.GuitarPlayer({
       ////gossip: campfire,
@@ -302,15 +367,6 @@ window.addEventListener('touchstart', function() {
       }
     });
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
     var volumeInput = jQuery('#volume-input');
     volumeInput.change(function(){
         BSD.audioPlayer.publish('set-master-volume',volumeInput.val());    
@@ -318,31 +374,12 @@ window.addEventListener('touchstart', function() {
     
     BSD.audioPlayer.publish('set-master-volume',0.01);
 
-
-
-  
-
   jQuery(document).on('keydown',function(e) {
     var c = e.keyCode || e.which;
     
-    ///console.log('BSD.currentFretDiv',BSD.currentFretDiv);
-
-
-    /*** possibly obsolete...not 100% sure though yet..    
-    if (BSD.currentFretDiv && c == BSD.keycodes.f) {
-      BSD.currentFretDiv.trigger('click');    
-    }
-    ****/
-    
-
-
     if (BSD.currentNote && c == BSD.keycodes.f) {
       BSD.audioPlayer.playNote(BSD.currentNote,1000);    
     }
-    
-    
-    
-    
           
   });
 
@@ -351,28 +388,127 @@ function getRandomArbitrary(min, max) {
 }
 
 
-
-  var quizOutput = jQuery('#quiz-output');
-  var btnQuiz = jQuery('#quiz');
-  btnQuiz.click(function(){
-    campfire.publish('quiz-me');
-  });
   
-  campfire.subscribe('quiz-me',function(){
-    var val = Math.floor(getRandomArbitrary(40,78));////Math.floor(Math.random() * 78) + 40;
-    console.log('val',val);
-    var pick = Note(val);
-    quizOutput.find('.note').html(pick.name());/////'What is ' + pick.name() + ' on string ' + string);
-    BSD.audioPlayer.playNote(pick,1000);    
+  
+  var main = jQuery('#main');
+
+  var flavors = ['-7','7','6','-7b5','7b9','M7','13','7#9'];
+  var flav = flavors.atRandom();
+
+
+    var flavorMap = {
+      '6': ['6','M7'],
+      '-7': ['7','7b9'],
+      '-7b5': ['7b9','7'],
+      '7b9': ['M7','-7','-7b5'],
+      '7': ['-7','M7','6','7'],
+      'M7': ['M7','-7']
+    };
+
+  ////var currentRootNote = JSMT.twelveNotes().atRandom();
+  var randColor = BSD.randomDarkColor(); ////palettes.atRandom().atRandom();
+
+
+  campfire.subscribe('repaint-wrap',function(payload) {
+
+
+    JSMT.allMIDIValues.select(function(o) {
+      return o >= 40 && o <= 70;
+    }).reverse().each(function(n){
+      var cell = DOM.div().addClass('cell');
+      var note = Note(n);
+      cell.append(note.utf8Name());
+      if (payload.chord.containsNote(note)) {
+        cell.css('background','#' + randColor.toHex());
+        cell.on('mouseout	mouseenter touchmove mouseover touchend',function(e){
+          ////console.log('hover',note);
+          //console.log('e',e);
+          if (e.shiftKey) { return false; }
+          BSD.audioPlayer.playNote(note,1000);
+        });
+        cell.addClass('active');  
+      }
+      payload.wrap.append(cell);
+    });
+    ////console.log(currentRootNote.name());  
   });
 
-  campfire.subscribe('quiz-me-repeat',function(){
-    campfire.publish('quiz-me');
-    setInterval(function(){
-      campfire.publish('quiz-me');
+
+  campfire.subscribe('do-it',function(chords){
+
+    randColor = BSD.randomDarkColor(); ////palettes.atRandom().atRandom();
+    main.empty();
+
+    chords.each(function(chord){  
+      
+      var alternates = flavors.map(function(txt){
+        var c = chord.rootNote.chord(txt);
+        return c;
+      });
+      
+      eachify(alternates).eachPCN(function(o){
+        o.current.next = o.next;
+        o.current.prev = o.prev;
+      });
+      
+      /////console.log('alternates',alternates);
+      
+      
+      chord = alternates.detect(function(alt){
+        return alt.abstractlyEqualTo(chord);
+      }); //upgrade chord to itself in the alternates
+      
+      
+      var ul = DOM.div().addClass('ruler');
+
+      var title = DOM.div().addClass('title');
+      var wrap = DOM.div().addClass('wrap');
+      
+      title.html(chord.utf8FullAbbrev());
+      title.on('click',function(){
+        chord = chord.next;
+        title.html(chord.utf8FullAbbrev());
+        wrap.empty();
+        campfire.publish('repaint-wrap',{ wrap: wrap, chord: chord });
+      });
+      campfire.publish('repaint-wrap',{ wrap: wrap, chord: chord });
+      
+      
+      ul.append(title);  
+      ul.append(wrap);
+      
+      main.append(ul);
+      
+    });
+  });
+
+  jQuery('#redo').click(function(){
+    var myChords = [];
+    var current = JSMT.twelveNotes().atRandom();
+    for (var i = 0; i < 12; i += 1) {
+      var chord = current.chord(flav);
+      myChords.push(chord);
+      current = current.fourth();
+      flav = flavorMap[flav].atRandom();
+    }
+    console.log('myChords',myChords);////.map(function(o){ return o.utf8FullAbbrev(); }));
+    ///return false;
+
+    //////currentRootNote = 
+
+    campfire.publish('do-it',myChords);
+  });
+  campfire.publish('do-it',[]);
+
+
+  var progInput = jQuery('#progression');
+  progInput.blur(function() { 
+    if (progInput.val().length == 0) { return false; }
+    var prog = BSD.parseProgression(this.value);
+    console.log('prog',prog);
     
-    },10000);
-  
+    var myChords = prog.map(function(o){  return o.chord; });
+    campfire.publish('do-it',myChords);
   });
 
 

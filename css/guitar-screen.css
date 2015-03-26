@@ -54,14 +54,15 @@
     .cell.selected { background:  #1BCDF2; }    
     
     .cell.selected { background: #97C6D0; }
+    .cell.selected { background: #d1d8ce; }
     
     
     .fret.selected.third { background: #FDBC22; }
     
-    /**
-    
-    .fret.selected.seventh { background: #5ab; }
+    .fret.selected.seventh { background:  #98AB8F; }
 
+
+    /**
     .fret.selected.root { background: black; }
 
     **/

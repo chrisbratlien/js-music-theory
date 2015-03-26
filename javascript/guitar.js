@@ -2,10 +2,10 @@ var Fret = function(spec) {
 
   //private
   var div = DOM.div();
+  div.addClass('fret');
+
   var elem = div;
-
-
-
+  var showNoteName = spec.showNoteName ? spec.showNoteName : true;
   //interface
   var self = BSD.PubSub({});
   
@@ -17,6 +17,7 @@ var Fret = function(spec) {
   self.string = spec.string || false;
   
   
+  div.addClass('fret-number-' + self.number);
   
   
   self.toString = function() {
@@ -58,11 +59,11 @@ var Fret = function(spec) {
       wait = true;
     }
   
-    elem.css('background','#' + color.toHex());
+    div.css('background','#' + color.toHex());
     var darker = color.minus(BSD.Color({ r: 0.5 * color.r, g: 0.5 * color.g, b: 0.5 * color.b }));   
     ////console.log(color.toHex(),'darker >>',darker.toHex()); 
     ///alert(darker.toHex());
-    /////elem.css('text-shadow','0px 1px 1px #' + darker.toHex());
+    /////div.css('text-shadow','0px 1px 1px #' + darker.toHex());
   };
 
   self.toggleLight = function(hexColor) {
@@ -78,6 +79,7 @@ var Fret = function(spec) {
     if (self.lit) {
       self.changeColor(color);
     }
+    self.redraw();
   };
   self.dim = function() {
     self.lit = false;
@@ -86,49 +88,43 @@ var Fret = function(spec) {
     }
     else {
       self.changeColor(BSD.Color({ r: 221, g: 221, b: 221 })); //#ddd
+      div.html(null);
     }
+  };
+  
+  self.recolor = function(c) {
+    self.harmonics().each(function(f) { //harmonics() includes itself
+      f.toggleLight(c);
+    });
   };
 
   self.renderOn = function(wrap) {
-    div.addClass('fret');
-    div.addClass('fret-number-' + self.number);
     if (self.fretted) {
       div.addClass('fretted');
-      div.html(JSMT.goShort(self.degree));  
       //////div.css('background','#777');          
     }  
           
     div.on('click',function() {
       ////console.log('obserrr',self);
-
       var grip = self.guitar().firstGrip;
       grip.frets.push(self);
-      
-      
-      ////self.toggleLight($('#color').val()); //harmonics() includes itself
+      self.recolor(BSD.chosenColor);
 
-
-      /***
-      self.harmonics().each(function(f) { //harmonics() includes itself
-        f.toggleLight(BSD.chosenColor);
-      });
-      ***/
-      
-      
       self.publish('fret-clicked',{ number: self.number, value: self.value, string: self.string });   
     });
     
     div.on('mouseover',function(){
-      self.publish('fret-hover',{ number: self.number, value: self.value, string: self.string, div: div }); 
+      //possibly obsolete self.publish('fret-hover',{ number: self.number, value: self.value, string: self.string, div: div }); 
+      
+      self.publish('note-hover', Note(self.value));////////{ number: self.number, value: self.value, string: self.string, div: div }); 
+      
+      
+      
     });
       
       
-    var note = Note(self.value);
-    var nn = note.name();
-    
-    if (nn.length == 1) {
-      div.html(nn);
-    }
+
+    self.redraw();
       
     ////div.html(Note(self.value).name());
     
@@ -137,6 +133,25 @@ var Fret = function(spec) {
           
       
     wrap.append(div);
+  };
+  
+  
+  self.redraw = function() {
+  
+ 
+    var note = Note(self.value);
+    var nn = note.name();
+    if (nn.length == 1) {
+      
+      if (showNoteName) {
+        div.html(nn);
+      }
+      else {
+        div.html(JSMT.goShort(self.degree));  
+      }
+      
+      
+    }
   };
   
   self.subscribe('histogram',function(histogram){
@@ -166,6 +181,11 @@ var Fret = function(spec) {
     ****/
     /////console.log('histogram',histogram,myAbstVal);
   
+  });
+  
+  self.subscribe('toggle-show-note-name',function(){
+    showNoteName = ! showNoteName;
+    self.redraw();
   });
   
   
@@ -228,20 +248,21 @@ var GuitarString = function(spec) {
     
   };
 
-  var foo = ['flat7','7','1','flat2','2','flat3','3','4','flat5','5','flat6','6'];
+  //var foo = ['flat7','7','1','flat2','2','flat3','3','4','flat5','5','flat6','6'];
+  var foo = ['1','flat2','2','flat3','3','4','flat5','5','flat6','6','flat7','7'];
 
   ////console.log('what is my root note?',spec.rootNote);
 
 
   for(var i = 0; i < spec.maxFrets; i++){   
-    var deg = foo[(self.rootNote+i)%12];
+    var deg = foo[(self.rootNote.value()+i)%12];
     
     
     /////console.log('fd',self.frettedDegrees);
     
     var newFret = Fret({
       number: i,
-      value: self.rootNote + i,
+      value: self.rootNote.value() + i,
       fretted: function() { return self.frettedDegrees.detect(function(x) { return x == deg; }) != false; } (),
       degree: deg,
       string: self
@@ -253,6 +274,13 @@ var GuitarString = function(spec) {
     newFret.subscribe('fret-hover',function(payload) {
       self.publish('fret-hover',payload);
     });
+
+
+
+    newFret.subscribe('note-hover',function(payload) {
+      ///console.log('okay!!!',payload);
+      self.publish('note-hover',payload);
+    });
     
     self.frets.push(newFret);  
   }
@@ -261,6 +289,26 @@ var GuitarString = function(spec) {
   self.subscribe('histogram',function(histogram) {
     self.frets.each(function(f) { f.publish('histogram',histogram); });
   });
+  
+  
+  self.subscribe('update',function(chosen){
+    ///console.log('new and improved recv',chosen);
+    self.frets.each(function(f){ 
+      var hit = chosen.detect(function(o) { return o == f.degree; });
+      //////console.log('f',f);
+      hit ? f.lightUp(BSD.chosenColor) : f.dim();
+    });
+    
+    //self.degreeList = chosen;
+    //self.redraw();
+    //self.strings.each(function(s) { s.publish('update',chosen); });
+  });
+  
+  
+  self.subscribe('toggle-show-note-name',function(){
+    self.frets.each(function(o){  o.publish('toggle-show-note-name'); });
+  });
+  
   
   return self;
 }
@@ -281,6 +329,10 @@ var Guitar = function(spec) {
   ////var starter = [0,7,3,10,5,0];
   var starter = [64,59,55,50,45,40];
 
+
+
+
+/***
   var rootOffsets = {
     'G': 0,
     'G#': 11,
@@ -300,11 +352,18 @@ var Guitar = function(spec) {
     'F#': 1,
     'Gb': 1
   };
+****/
+
+
+
 
 
   var div = DOM.div().addClass('guitar');
   var hoveredNote = DOM.div().addClass('hovered-note');
-  
+
+
+  var fretLegend = DOM.div().addClass('fret-legend string');
+  var showFretLegend = true;
   
   var rootNote = spec.rootNote || Note("G");
   
@@ -324,14 +383,27 @@ var Guitar = function(spec) {
 
   var picker = JSMT.DegreePicker({
     degreeString: '1,2,3,4,5,6,7',
-    onUpdate: function(chosen) {
-      /////console.log('chosen',chosen,typeof chosen);
-
-      self.degreeList = chosen;
-      self.redraw();
-    }
   });
 
+      /////console.log('chosen',chosen,typeof chosen);
+  picker.subscribe('update',function(chosen){
+    ////console.log('new and improved',chosen);
+    self.degreeList = chosen;
+    self.redraw();
+    self.strings.each(function(s) { s.publish('update',chosen); });
+  });
+  
+  
+  
+  self.toggleShowName = function() {
+    self.strings.each(function(o){  o.publish('toggle-show-note-name'); });
+  };
+  self.toggleShowFretLegend = function() {
+    showFretLegend  = ! showFretLegend;
+    
+    showFretLegend ? fretLegend.removeClass('hidden') : fretLegend.addClass('hidden');
+
+  };
 
 
   self.harmonizeFirstGrip = function() {
@@ -387,12 +459,26 @@ var Guitar = function(spec) {
     var harmonizeButton = jQuery('<button>Harmonize This!</button>');
     var clearButton = jQuery('<button>Clear</button>');
     var stickyNoteButton = DOM.button('Sticky Note');
-    stickyNoteButton.click(function() {
-      var sticky = BSD.Widgets.StickyNote();
+    
+    
+    var btnToggleName = DOM.button('Toggle Name');
+    var btnToggleFretLegend = DOM.button('Toggle Fret Legend');
+    
+    stickyNoteButton.click(function(e) {
+    
+      console.log(e,'sticky');
+    
+      var sticky = BSD.Widgets.StickyNote(e);
       sticky.renderOn(jQuery(document.body));
     });
+    
+    btnToggleName.click(function(){
+      self.toggleShowName();
+    });
 
-
+    btnToggleFretLegend.click(function(){
+      self.toggleShowFretLegend();
+    });
 
 
 
@@ -413,8 +499,8 @@ var Guitar = function(spec) {
     });
 
     wrap.append(stickyNoteButton);
-
-
+    wrap.append(btnToggleName);
+    wrap.append(btnToggleFretLegend);
     
     wrap.append(div);
     
@@ -425,7 +511,6 @@ var Guitar = function(spec) {
     **/
     
     
-    var fretLegend = DOM.div().addClass('fret-legend string');
     
     for (var i = 0; i < spec.maxFrets; i += 1) {
       fretLegend.append(DOM.span(i).addClass('fret'));
@@ -441,12 +526,15 @@ var Guitar = function(spec) {
     
   };
 
+
+  /**
   self.redraw = function() {
     ////console.log('redraw: degreeList',self.degreeList,typeof self.degreeList);
-    $(self.container).empty();
-    self.strings = self.buildStrings();
-    self.renderOn(self.container);
+    ////$(self.container).empty();
+    //self.strings = self.buildStrings();
+    ////self.renderOn(self.container);
   };
+  **/
   
   self.reset = function() {
     self.strings.each(function(s) {
@@ -456,6 +544,9 @@ var Guitar = function(spec) {
     });
   
   };
+
+  self.redraw = self.reset;
+  
   
   
   self.renderHistory = function() {
@@ -473,7 +564,10 @@ var Guitar = function(spec) {
     for (var i = 0, l = starter.length; i < l; i += 1) {
       var string = GuitarString({
         number: i+1,
-        "rootNote": starter[i] + rootOffsets[rootNote.name()],
+        //////////"rootNote": starter[i] + rootOffsets[rootNote.name()],
+        
+        rootNote: Note(starter[i]),
+        
         frettedDegrees: self.degreeList,
         maxFrets: spec.maxFrets,
         guitar: self
@@ -486,6 +580,11 @@ var Guitar = function(spec) {
       string.subscribe('fret-hover',function(payload) {
         self.publish('fret-hover',payload);
       });
+      string.subscribe('note-hover',function(payload) {
+        ///console.log('okay2!!!',payload);
+        self.publish('note-hover',payload);
+      });
+      
       
       result.push(string);    
     }

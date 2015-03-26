@@ -812,6 +812,52 @@ campfire.subscribe('process-queue',function(o) {
 campfire.publish('process-queue',null);
 
 
+
+campfire.subscribe('plot-spatial-note',function(o){
+
+  campfire.publish('play-note',{ note: o, duration: 1000 });
+
+    var note = o;
+    var candidates = BSD.spatialNotes.abstractlyEqualTo(note);
+		if (snHistory.length < 2) { 
+			idealMPSN = lastSN;
+			discreteMPSN = lastSN;
+		}
+		else {
+			var midpoint = snHistory.midpoint();
+			idealMPSN = BSD.SpatialNote({
+				note: lastSN.note, //dummy
+				cell: lastSN.cell, //dummy
+				position: midpoint
+			});
+			discreteMPSN = BSD.spatialNotes.closestTo(idealMPSN); //from ideal to real-world
+		}
+		
+		
+		
+		//restrict candidates to under the highest.
+		candidates = candidates.noteValueLE(highest);///////select(function(o){ return o.value() <= highest.value(); });
+		
+		console.log('candidates',candidates);
+
+    jQuery('.cell').removeClass('active');
+    jQuery('.cell').removeClass('active-alt');
+		
+
+    var hit = candidates.closestTo(idealMPSN);
+    hit.cell.addClass('active'); 
+
+
+		snHistory.push(hit); //new ones onto the end
+		while (snHistory.length > maxHistory) {
+			snHistory.shift(); //old ones come off the front
+		}
+
+});
+
+
+
+
 BSD.chunkify = function(ary,chunkSize) {
   var chunks = [];
   var copy = ary.map(function(o){ return o; });

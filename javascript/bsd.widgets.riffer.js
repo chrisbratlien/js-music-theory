@@ -21,15 +21,16 @@
       
       var newBar = false;
       
-      var bars = spec.progression.split('|');
-      bars.each(function(bar) {
-        newBar = true;
-        var chordNames = bar.split(/,|\ +/);
-        chordNames.each(function(name) {
+      var items = spec.progression;
+
+
+      items.each(function(o) {
+        ///newBar = true;
         
         
-        
-          var chord = makeChord(name);      
+        console.log('item',o);
+        var chord = o.chord;
+
           var row = DOM.tr();
           
           var chordCell = DOM.td(name).addClass('chord-name')
@@ -60,6 +61,7 @@
             row.append(cell);
           });
           
+          /***
           var ul = DOM.ul();
           var sorted = chord.compatibleScaleAbbrevs().sort(function(a,b) {
             var aRoot = a.substr(0,1).match(chord.rootNote.name());
@@ -86,10 +88,11 @@
             var li = DOM.li(s);
             ul.append(li);
           });
+          
           row.append(DOM.td(ul));
+          ***/
           table1.append(row);
         });
-      });
     };        
     return self;
   };

@@ -41,6 +41,11 @@ JSMT = {};
 
 
 
+JSMT.allMIDIValues = [];
+for(var i = 0; i < 128; i += 1) {
+    JSMT.allMIDIValues[i] = i;
+}
+
 
 
 JSMT.randLowColor = function() {
@@ -62,6 +67,20 @@ JSMT.strings = [];
 JSMT.guitars = [];
 
 JSMT.MAXFRETS = 36;
+
+
+
+JSMT.toUTF8 = function(str) {
+
+  if (str.match(/&#/)) { 
+    console.log('matched already-escaped chars...doing nothing');
+    return str; 
+  }
+  var result = str;
+  result = result.replace(/#/g,'&#9839;');
+  result = result.replace(/b/g,'&#9837;');
+  return result;
+};
 
 
 JSMT.goShort = function (orig) { 
@@ -112,7 +131,8 @@ var NotePrimitive = function(spec) {
 */
 
 JSMT.twelveTones = function() {
-    return ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+    //return ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+    return ["C","Db","D","Eb","E","F","F#","G","Ab","A","Bb","B"];
 };
 
 JSMT.twelveNotes = function() {
@@ -141,6 +161,14 @@ JSMT.scaleMap = {
 
     'half whole diminished' : { name: 'half whole diminished', intervals: [0,1,3,4,6,7,9,10] },
 
+    'whole half diminished' : { name: 'whole half diminished', intervals: [0,2,3,5,6,8,9,11] },
+
+    'diminished whole tone' : { name: 'diminished whole tone', intervals: [0,1,3,4,6,8,10] },
+
+    'major 6 diminished' : { name: 'major 6 diminished', intervals: [0,2,4,5,7,8,9,11] }, // (barry harris scale)
+
+
+    'whole tone' : { name: 'whole tone', intervals: [0,2,4,6,8,10] },
 
 
     'mP' : { name: 'minor pentatonic', intervals: [0,3,5,7,10] },
@@ -285,16 +313,45 @@ var Note = function(foo) {
   self.name = function() { 
     return self.nameFromValue(self.value());
   };
+  
+  
+  
+  self.utf8Name = function() {
+    var result = self.nameFromValue(self.value());
+    
+    return JSMT.toUTF8(result);
+    ///
+    
+    /***
+    
+    if (result.length == 2) {
+      if (result[1] == '#') {
+        result = result.replace(/#/,'&#9839;');
+      }
+      else {
+        result = result.replace(/b/,'&#9837;');
+      }
+    }
+    return result;
+    ****/
+  };
+  
+  
+  
   self.nameFromValue = function(value) {
     var sharps = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
     var flats = ["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"];    
 
     var idx = value%12;
+    var result = flats[idx];
 
-    return flats[idx];
-
+    if (result == 'Gb') {
+      result = 'F#';
+    }
+    return result;
 
   };
+  
   self.valueFromName = function(name) {
     var sharps = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
     var flats = ["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"];    
@@ -403,6 +460,36 @@ function makeChord(name) {
   return Note(rootName).chord(chordName);
 }
 
+
+function makeSpecFromValues(values) {
+  var lowest = values[0];
+  var rest = values.slice(1);
+  rest = rest.sort(function(a,b){return a-b});
+  var newRoot = Note(lowest);    
+  var newIntervals = rest.map(function(v) { return v - newRoot.value(); });
+  return { rootNote: newRoot, intervals: newIntervals };
+}
+
+function makeChordFromValues(values) {
+  return Chord(makeSpecFromValues(values));
+}
+
+function makeChordFromNotes(notes) {
+  var values = notes.map(function(o) { return o.value(); });
+  return makeChordFromValues(values);
+}
+
+function makeScaleFromValues(values) {
+  return Scale(makeSpecFromValues(values));
+}
+
+function makeScaleFromNotes(notes) {
+  var values = notes.map(function(o) { return o.value(); });
+  return makeScaleFromValues(values);
+}
+	
+
+
 function makeScale(name) {
   
   var rootName = false;
@@ -464,7 +551,8 @@ var RootNoteWithIntervals = function(spec) {
   };
   
   self.invertUp = function() {  
-    var values = self.noteValues();  
+    var values = self.noteValues();
+    
     var lowest = values[0];
     var rest = values.slice(1);
     rest.push(lowest+12);
@@ -524,6 +612,11 @@ var RootNoteWithIntervals = function(spec) {
   self.fullAbbrev = function() {
     return self.rootNote.name() + ' ' + self.abbrev;
   };
+
+  self.utf8FullAbbrev = function() {
+    return self.rootNote.utf8Name() + JSMT.toUTF8(self.abbrev);
+  };
+
   
   self.compatibleScales = function() {
     var result = [];
@@ -690,9 +783,30 @@ var Scale = function(spec) {
 
   self.degree = function(pos) {
 //    return self.notes()[pos-1];
-    var notes = self.notes();    
-    return notes[(pos - 1) % notes.length];
+    var bag = self.notes();    
+    var octave = bag.map(function(o){ return o.plus(12); });
+    var octave2 = bag.map(function(o){ return o.plus(24); });
+    octave.each(function(o){ bag.push(o); });
+    octave2.each(function(o){ bag.push(o); });
+    return bag[(pos - 1) % bag.length];  
+    //return notes[(pos - 1) % notes.length];
   };
+
+
+  self.degrees = function(them) {
+    var result = them.map(function(n){  return self.degree(n); });
+    return result;  
+  };
+
+  self.chordFromDegrees = function(them) {
+  
+    var degrees = self.degrees(them);
+    
+    
+  
+  }
+
+
   
   self.intervalForDegree = function(pos) {
     var count = self.intervals().length;
@@ -747,10 +861,10 @@ var Chord = function(spec) {
 
 
 JSMT.Pair = function(x,y) {
-  var interface = {};
-  interface.x = x;
-  interface.y = y;
-  return interface;
+  var self = {};
+  self.x = x;
+  self.y = y;
+  return self;
 };
 
 
@@ -807,7 +921,7 @@ JSMT.makeSwatch = function(starter) {
 
 JSMT.HarmonizeSession = function() {
 
-  var interface = {};
+  var self = {};
   var colorMap = {};
 
   var swatches = [];
@@ -828,94 +942,94 @@ JSMT.HarmonizeSession = function() {
     a.reverse(); //so that we pop the darker colors first
   });
   
-  interface.addShape = function(shape) {
+  self.addShape = function(shape) {
     if (typeof colorMap[shape] == 'undefined') {
       colorMap[shape] = swatches.pop();
     }
   };
   
-  interface.getColorForShape = function(shape) {
+  self.getColorForShape = function(shape) {
     var color = colorMap[shape].pop();
     /////console.log(shape,color.toHex());
     return color;
   };
   
-  return interface;
+  return self;
 }
 
 
 var Grip = function(spec) { //FIXME: grip is a lot like a chord, no?
-  var interface = spec;
+  var self = spec;
   
-  interface.frets = spec.frets || [];
+  self.frets = spec.frets || [];
   
   
-  interface.hasFrets = function() {
-    return interface.frets.length > 0;
+  self.hasFrets = function() {
+    return self.frets.length > 0;
   };
   
-  interface.lightUp = function(color) {
-    interface.frets.each(function(f){
+  self.lightUp = function(color) {
+    self.frets.each(function(f){
       f.lightUp(color);
     });
   };
 
-  interface.lightUpWithHarmonics = function(color) {
-    interface.lightUp(color);
-    interface.frets.each(function(f) {
+  self.lightUpWithHarmonics = function(color) {
+    self.lightUp(color);
+    self.frets.each(function(f) {
       f.harmonics().each(function(h) {
         h.lightUp(color);
       });
     });
   };
   
-  interface.numberSort = function(a,b) {
+  self.numberSort = function(a,b) {
     return a.number - b.number;
   };
 
 
 
-  interface.toggleLight = function(color) {
-    interface.frets.each(function(f){
+  self.toggleLight = function(color) {
+    self.frets.each(function(f){
       f.toggleLight(color);
     });
   };
 
 
-  interface.lit = function() {
-    var result = interface.frets.detect(function(f) { return f.lit; });
+  self.lit = function() {
+    var result = self.frets.detect(function(f) { return f.lit; });
     return (result != false);
   };
   
-  interface.unlit = function() {
-    return ! interface.lit();
+  self.unlit = function() {
+    return ! self.lit();
   };
 
-  interface.lowestFret = function() {
-    var them = interface.frets.sort(interface.numberSort);
+  self.lowestFret = function() {
+    var them = self.frets.sort(self.numberSort);
     return them[0];
   };
-  interface.lowestString = function() {
-    var them = interface.strings().sort(interface.numberSort);
+  self.lowestString = function() {
+    var them = self.strings().sort(self.numberSort);
     return them[0];
   };
   
-  interface.strings = function() {
-    return interface.frets.collect(function(f){ return f.string; });
+  self.strings = function() {
+    return self.frets.collect(function(f){ return f.string; });
   }
 
 
-  interface.shape = function() {
+  self.shape = function() {
     var pairs = [];    
 
-    ///console.log(interface,'grip');
+    ///console.log(self,'grip');
 
-    var ls = parseInt(interface.lowestString().number,10);
-    var lf = parseInt(interface.lowestFret().number,10);
-    var z = interface.frets.collect(function(f) { return f.degree; });
+    var ls = parseInt(self.lowestString().number,10);
+    var lf = parseInt(self.lowestFret().number,10);
+    var z = self.frets.collect(function(f) { return f.degree; });
     //console.log('z',z,'ls',ls,'lf',lf);
     
-    var pairs = interface.frets.collect(function(f) { 
+    var pairs = self.frets.collect(function(f) { 
       return [f.string.number - ls,f.number - lf]; 
     });
     
@@ -925,9 +1039,9 @@ var Grip = function(spec) { //FIXME: grip is a lot like a chord, no?
     return result;    
   };
 
-  interface.nextFrets = function() {
+  self.nextFrets = function() {
     var candidates = [];
-    interface.frets.each(function(f) {
+    self.frets.each(function(f) {
       var higherSet = f.higherFrettedFrets();
       if (higherSet.length > 0) {
        candidates.push(higherSet[0]); 
@@ -936,14 +1050,14 @@ var Grip = function(spec) { //FIXME: grip is a lot like a chord, no?
     return candidates;
   };
   
-  interface.nextGrip = function() {
-    var nextSet = interface.nextFrets();
+  self.nextGrip = function() {
+    var nextSet = self.nextFrets();
     ///console.log(nextSet,'next');
     return Grip({
       frets: nextSet
     });
   };
-  return interface;
+  return self;
 };
 
 
@@ -956,31 +1070,44 @@ JSMT.DegreePicker = function(spec) {
     state[d] = true;
   });  
   
-  var interface = {};
-  interface.renderOn = function(html) {
-    var label = jQuery('<label>Toggle Degrees (click on square to toggle)</label>');
-    var ul = jQuery('<ul class="toggler">');
-    degrees.each(function(d) {
-      var li = jQuery('<li>');
-      
-      if (state[d]) { 
+  var self = BSD.PubSub({});
+  
+
+  self.updateState = function(li,bool) {
+      if (bool) { 
         li.addClass('on'); 
         li.removeClass('off'); }
       else { 
         li.addClass('off'); 
         li.removeClass('on'); 
       }
+  };
+  
+  
+  self.renderOn = function(html) {
+    var label = DOM.label('Toggle Degrees');//////////jQuery('<label>Toggle Degrees (click on square to toggle)</label>');
+    var ul = DOM.ul().addClass('toggler');////////jQuery('<ul class="toggler">');
+    degrees.each(function(d) {
+      var li = DOM.li();/////jQuery('<li>');
+
+
+      self.updateState(li,state[d]);
+      
       
       li.html(JSMT.goShort(d));
       li.click(function() {
         state[d] = ! state[d];
         ///console.log(state[d]);
-        
+        self.updateState(li,state[d]);
+  
         var chosen = degrees.select(function(d) {
           return state[d];
         });
         
-        spec.onUpdate(chosen); //callback
+        ////////spec.onUpdate(chosen); //callback
+        
+        self.publish('update',chosen);
+        
       });
       ul.append(li);      
     });
@@ -988,5 +1115,5 @@ JSMT.DegreePicker = function(spec) {
     html.append(ul);
     html.append(jQuery('<div style="clear: both; ">&nbsp;</div>'));
   };
-  return interface;
+  return self;
 };

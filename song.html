@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" nomanifest="js-music-theory.manifest">
 <head>
 
-
+  <title>Song</title>
   <!-- jquery && jQuery UI -->
   <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
   <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
@@ -37,6 +37,7 @@
 
 <script src="javascript/bsd.widgets.baseplayer.js"></script>
 <script src="javascript/bsd.widgets.stringoscillator.js"></script>
+<script src="javascript/bsd.widgets.tonalityguru.js"></script>
 <script src="javascript/bsd.widgets.guitarplayer.js"></script>
 <script src="javascript/bsd.widgets.sequencer.js"></script>
 
@@ -231,7 +232,12 @@
 <div id="progression-clock-wrap"></div>
 <div id="fretboard-viz-wrap"></div>
 <div id="roll-wrap" class="roll-ui"></div>
+
+
+
 <div id="faker-wrap" class="roll-ui"></div>
+<div id="riffer-wrap" class="roll-ui"></div>
+
 <div id="table1-wrap"></div>
 <div id="table2-wrap"></div>
 
@@ -279,7 +285,7 @@
   var fretboardViz = false; /// global
 
   
-  BSD.parseProgression = function(progString) {
+  BSD.aaaaaparseProgression = function(progString) {
     var barStrings = progString.split('|');
     var bars = barStrings.map(function(barString){
       var chordNames = barString.split(/,|\ +/);
@@ -292,31 +298,97 @@
       return chords;
     });
     return bars;
-/***     
-      barStrings.each(function(bar) {
-        var chordNames = bar.split(/,|\ +/);
-        var newBar = true;
-        chordNames.each(function(name) {
-          var chord = makeChord(name);
-          var scales = chord.compatibleScales();
-          self.enqueue({ chord: chord, scales: scales, bar: bar, newBar: newBar });
-          newBar = false;
-        });
-      });
+  };
 
-****/
+
+  BSD.parseProgression = function(progString) {
+    var barStrings = progString.split('|');
+    
+    var barIndex = 0;
+    var chordIndex = 0;
+    var flat = [];
+    
+    barStrings.each(function(barString){
+      var chordNames = barString.split(/,|\ +/);
+      var halfBar = false;
+      if (chordNames.length == 2) {
+        halfBar = true;
+      }
+      
+      
+      
+      chordNames.each(function(o){
+        var origChord = makeChord(o);        
+        var lowerChord = origChord.plus(-12);  
+        
+        flat.push({
+          barIndex: barIndex,
+          chordIndex: chordIndex,
+          chord: lowerChord,
+          halfBar: halfBar
+        });
+        chordIndex += 1;        
+      });
+      barIndex += 1;
+    });
+
+    return flat;
+    ///wait
+    var result = eachify(flat);
+    console.log('result',result);
+    return result;
   };
   
+
   var progressionClock;
+  var sequencer = BSD.Widgets.Sequencer({ tempo: 60 });
   
   campfire.subscribe('lets-do-this',function(prog) {
-    ///console.log('lets-do-this');
+    var items = BSD.parseProgression(prog);
+    sequencer.flush();
+    var baseTime = (new Date()).getTime()+5000; //five secs in future;
+    var dt = 0;
+    eachify(items).eachPCN(function(o) {
+      dt += 2500; //smallest inc...
+      if (!o.halfBar) { dt += 2500; }
+      
+      
+      o.current.next = o.next;
+      o.current.current = o;
+      o.current.prev = o.prev;
+      
+      console.log('o is ',o);
+      /////return false;
+      
+      
+      sequencer.enqueue({ 
+        when: baseTime + dt,
+        callback: function() {
+          campfire.publish('chord-change',o);
+        }
+      });
+    });
+    sequencer.tick();
+    sequencer.start();
+  
 
-    BSD.faker.go(prog);
+
+
+    BSD.riffer = BSD.Widgets.Riffer({
+      progression: items,
+      gossip: campfire
+    });
+    BSD.riffer.renderOn(jQuery('#riffer-wrap'));
+
+
+    //////BSD.riffer.go(items);
+
+    BSD.faker = BSD.Widgets.Faker({
+      progression: items,
+    });
+    BSD.faker.go();
     
-    var bars = BSD.parseProgression(prog);
-    
-    BSD.faker.publish('new-progression',bars);
+    BSD.faker.publish('new-progression',items);
     BSD.faker.subscribe('play-chord',function(chord){
       campfire.publish('play-chord',{ chord: chord, duration: 1000 });
     });
@@ -330,18 +402,18 @@
     
     
 
-
+    /**
     progressionClock = BSD.Widgets.ProgressionClock({ 
-      gossip: campfire,
-      bars: bars,
-      guid: 'CHORXDY'
+      //obars: bars
+      bars: []
     });
-    
-
-
     progressionClock.subscribe('chordChange',function(o){
       BSD.faker.publish('chord-change',o);
     });
+
+    ***/
+    
+
 
 
     fretboardViz = BSD.Widgets.FretboardViz({ 
@@ -374,9 +446,19 @@
       BSD.leader.playNote(n,1000);
     });
 
+    campfire.subscribe('chord-change',function(o){
+      ///fretboardViz.publish('chordChange',o);
+      fretboardViz.publish('chord-change',o);
+      BSD.chunker.playChord(o.current.chord,1000);  
+    });
 
 
-
+    /****
+    progressionClock.subscribe('chord-change',function(o){
+      fretboardViz.publish('chordChange',o);
+      BSD.chunker.playChord(o.current.chord,1000);    
+    
+    });
 
     progressionClock.subscribe('chordChange',function(o){
       fretboardViz.publish('chordChange',o);
@@ -385,10 +467,12 @@
     });
         
     progressionClock.renderOn(jQuery('#progression-clock-wrap'));
+    progressionClock.play();
+    *******/
     fretboardViz.renderOn(fretboardVizWrap);
 
-    progressionClock.play();
     
+    /***
     campfire.subscribe('pause',function(o){
       progressionClock.pause();
     });
@@ -398,6 +482,8 @@
     });
     ///BSD.chordy = progressionClock;
     BSD.clock = progressionClock;
+    ***/
+    
   });
 
 
@@ -437,9 +523,17 @@
       range: [-300,80]
     });
   
+
+
+
+    /**
     BSD.faker = BSD.Widgets.Faker({
       gossip: campfire
     });
+    **/
+    
+
+
     var playing = false;
     var pauseButton = jQuery('#pause');
     pauseButton.click(function(){
@@ -452,8 +546,6 @@
       //BSD.audioPlayer.playNote(payload.note,payload.duration);    
       BSD.leader.playNote(payload.note,payload.duration);    
     });
-    
-    
     
     campfire.subscribe('noteClicked',function(n) {
       ////console.log('ahhwooot');
@@ -468,20 +560,12 @@
     });
     
     
-    
-    
     campfire.subscribe('fretDivHover',function(payload) {
       BSD.currentFretDiv = payload;
     });
     campfire.subscribe('div-hover',function(payload) {
       BSD.currentFretDiv = payload;
     });
-
-
-    
-    
-    
-    
     
     jQuery(document).on('keydown',function(e) {
       var c = e.keyCode || e.which;
@@ -492,14 +576,6 @@
   });
 
   campfire.publish('start-your-engines');
-
-
-  var loadingLabel = DOM.div('loading. . .').addClass('loading-label');
-  stage.append(loadingLabel);
-  campfire.subscribe('BSD.Widgets.WaveTablePlayer loaded',function(o){
-    loadingLabel.html(o.name + ' loaded. You may begin rocking out');
-  });
-
 
   var progInput = DOM.input().addClass('progression').attr('type','text');
   progInput.blur(function() { 
@@ -520,110 +596,12 @@
   });
   stage.append(exampleLabel);
 
-  bootSong = function(spec) {
-    var button = DOM.button(spec.title).click(function() {
-      jQuery('#table1-wrap').empty();
-      jQuery('#table1-wrap').append(DOM.h2(spec.title));
-      jQuery('#faker-wrap').empty();
-      progInput.val(spec.progression);
-      campfire.publish('lets-do-this',spec.progression);
-    });
-    stage.append(button);
-  }
-
   var stickyNoteButton = jQuery('#sticky-note-button');
   stickyNoteButton.click(function() {
     var sticky = BSD.Widgets.StickyNote();
     sticky.renderOn(jQuery(document.body));
   });
 
-  bootSong({
-    progression: 'F-7|F-7|Eb7|Eb7|Db7|C7sus4|F-7|F-7|F-7|F-7|Eb7|Eb7|Db7|C7sus4|F-7|F-7|Eb7|Eb7|F-7|F-7|Eb7 Db7|C7|F-7|F-7',
-    title: 'Song For My Father'
-  });
-
-  bootSong({
-    progression: 'CM7|CM7|F-7|Bb7|CM7|CM7|Bb-7|Eb7|AbM7|AbM7|A-7|D7|D-7|G7|CM7 EbM7|AbM7 DbM7',
-    title: 'Lady Bird'
-  });
-
-  bootSong({
-    title: 'St. Louis Blues',
-    progression: 'G7|G7|G7|G7|C7|C7|G7|E7+9|A-7|D7|G7 Bb7|A-7 D7',
-    ///var prog = 'G7|C7|G7|G7|C7|C7|G7|G7|D7|C7|G7|A-7 D7|G7|G7|G7|G7|C7|C7|G7|E7+9|A-7|D7|G7 Bb7|A-7 D7';
-    //var prog = 'G-7|G-7|D7|D7|D7|D7|G-7|D7+9|G-7|G-7|D7|D7|D7|D7|G-7 A7|D7|G7|C7|G7|G7|C7|C7|G7|G7|D7|C7|G7|A-7 D7|G7|G7|G7|G7|C7|C7|G7|E7+9|A-7|D7|G7 Bb7|A-7 D7';
-  });
-  bootSong({
-    title: 'Black Orpheus',
-    progression: 'A-7|B-7b5 E7b9|A-7|B-7b5 E7b9|A-7|D-7 G7|CM7|C#o7 A7b9|D-7|G7|C6|FM7|B-7b5|E7b9|A-7|B-7b5 E7b9|A-7|B-7b5 E7b9|A-7|B-7b5 E7b9|E-7b5|A7b9|D-7|D-7|D-7|B-7b5 E7b9|A-7|FM7|B-7b5|E7b9|A-7|B-7b5 E7b9'
-  });
-  bootSong({
-    title: 'All of Me',
-    progression:  'CM7|CM7|E7|E7|A7|A7|D-7|D-7|E7|E7|A-7|A-7|D7|D7|D-7|G7|CM7|CM7|E7|E7|A7|A7|D-7|D-7|FM7|F-7|E-7|A7|D-7|G7|C6 D#o7|D-7 G7'
-  });
-
-
-var atprog =     
-  'CM7|CM7|D7b5|D7b5|D-7|G7|CM7|CM7|' +
-  'CM7|CM7|D7b5|D7b5|D-7|G7|CM7|C7|' +
-  'FM7|FM7|FM7|FM7|' +
-  'D7|D7|D-7|G7 G7b9|' +
-  'CM7|CM7|D7b5|D7b5|D-7|G7|CM7|CM7';
-  bootSong({
-    title: 'Take the "A" Train',
-    progression: atprog  
-  });
-
-  
-
-
-var gentleRain =     
-
-  //with first ending
-  'A-6|A-6|B-7b5|E7|' +
-  'A-7 D7|G-7 C7|F6|F6|' +
-  'F#-7b5|B7b9|E-7b5|A7b9|' +
-  'D-7b5|B-7b5 E7|' + 
-    //first ending
-  'A-6|Bb7|' +
-
-  //with 2nd ending
-  'A-6|A-6|B-7b5|E7|' +
-  'A-7 D7|G-7 C7|F6|F6|' +
-  'F#-7b5|B7b9|E-7b5|A7b9|' +
-  'D-7b5|B-7b5 E7|' + 
-  //2nd ending
-  'A-7 D7|G-7 C7|' +
-  'F6|C7|F6|E-7|A-7|E7';
-  bootSong({
-    title: 'Gentle Rain',
-    progression: gentleRain  
-  });
-
-
-var lullaby =     
-
-
-  'F-7|G7 C7|F-|Bb-7 Eb7|' +
-  'AbM7 F-7|Bb-7 Eb7|' +
-  
-  //1st ending
-  'AbM7|Db7 C7|' +
-
-  //with 2nd ending  
-  'F-7|G7 C7|F-|Bb-7 Eb7|' +
-  'AbM7 F-7|Bb-7 Eb7|' +
-  
-  //2nd ending
-  'AbM7 Eb7|AbM7|F7|Bb-7|' +
-  'Bb-7 Eb7|AbM7|F7|Bb-7|' +
-  'Bb-7 Eb7|AbM7 C7|F-7|G7 C7|' +
-  'F-7|Bb-7 Eb7|AbM7 F-7|Bb-7 Eb7|' +
-  'AbM7 Eb7|AbM7';
-  bootSong({
-    title: 'Lullaby of Birdland',
-    progression: lullaby  
-  });
 
 
   
@@ -639,9 +617,9 @@ $( "#volume-input" ).slider({
   orientation: "vertical",
   range: "min",
   min: 0,
-  max: 1,
-  step: 0.1,
-  value: 0,
+  max: 0.1,
+  step: 0.01,
+  value: 0.01,
   slide: function( event, ui ) {
     var newVolume = ui.value;
     waiter.beg(BSD.leader,'set-master-volume',ui.value);

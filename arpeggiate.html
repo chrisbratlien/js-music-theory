@@ -142,11 +142,14 @@
   </label>
   <div id="output"></div>
 
+
+<div id="table-wrap"></div>
+
 <script type="text/javascript">
   context = new webkitAudioContext();
   BSD.audioContext = context;
   
-  BSD.volume = 0.01;
+  BSD.volume = 0;
   BSD.fromFret = 0;
   BSD.toFret = 13;
   BSD.detuneSemis = 0.0;
@@ -243,8 +246,8 @@ $( "#volume-input" ).slider({
   orientation: "vertical",
   range: "min",
   min: 0,
-  max: 0.1,
-  step: 0.01,
+  max: 1,
+  step: 0.05,
   value: BSD.volume,
   slide: function( event, ui ) {
     BSD.volume = ui.value;
@@ -347,173 +350,168 @@ jQuery('#to-fret-amount').text(BSD.toFret);
     BSD.songlist.publish('song-selected',song);
   });
   
-  BSD.songlist.subscribe('song-selected',function(song) {
   
-    BSD.currentSong = song;
-  
-    var bars = BSD.parseProgression(song.progression);
+BSD.Widgets.Arpeggiator = function(spec) {
 
-    var queue = [];
+  var self = BSD.PubSub({});  
+  self.renderOn = function(wrap) {
+
+    var table = DOM.table();
+    var hrow1 = DOM.tr();
     
-    var barCount = 0;
-    bars.each(function(bar){
-      var len = bar.length;
-      bar.each(function(chord){
-        queue.push({ chord: chord, bar: bar, barLength: bar.length, barCount: barCount });
+    hrow1.append(DOM.th('key'));
+    hrow1.append(DOM.th('ii').attr('colspan',7));
+    hrow1.append(DOM.th('&nbsp;'));
+    hrow1.append(DOM.th('V7').attr('colspan',7));
+    hrow1.append(DOM.th('&nbsp;'));
+    hrow1.append(DOM.th('I maj7').attr('colspan',7));
+    hrow1.append(DOM.th('&nbsp;'));
+    hrow1.append(DOM.th('ii-7b5').attr('colspan',7));
+    hrow1.append(DOM.th('&nbsp;'));
+    hrow1.append(DOM.th('V7b9').attr('colspan',7));
+    hrow1.append(DOM.th('&nbsp;'));
+    hrow1.append(DOM.th('i-7').attr('colspan',7));
+    table.append(hrow1);
+  
+  
+    
+    var hrow2 = DOM.tr();
+    
+    [0,1,2,3,4,5].each(function(){
+      hrow2.append(DOM.th('&nbsp;'));
+      [1,3,5,7,9,11,13].each(function(n){
+        hrow2.append(DOM.th(n));
       });
-      barCount +=1;
     });
-    
-
-
-    var saveBarCount = -1;
-    var barWrap = false;
-
-
-    output.empty();
-    output.append(DOM.h4(song.title));
-
-
-    eachify(queue).eachPCN(function(o) {
-    //eachify(bars).eachPCN(function(o){
-      o.current.next = o.next;
-      o.current.prev = o.prev;
-    });
-
-
-    eachify(queue).eachPCN(function(o) {
-    
-    
-      var bar = o.current.bar;
-      var chord = o.current.chord;
-      var currentChord = chord;
-      var nextChord = o.next.chord;
-      var nextChord2 = o.next.next.chord;
-      var prevChord = o.prev.chord;
-      
-      var barCount = o.current.barCount;
-      
-      
-      
-      
-      
-      
-      var len = bar.length;
-      if (barCount != saveBarCount) {
-        ///barWrap = DOM.div().addClass('bar-wrap');
-        ///output.append(barWrap);      
-        saveBarCount = barCount;
-      }
-      ////console.log('barCount',barCount,'barWrap',barWrap,'bc',barCount,'sbc',saveBarCount);
-      
-      /////bar.each(function(chord){
-      
-        var chordWrap = DOM.div().addClass('chord-wrap length-' + len);
-        //var wrap = DOM.div().addClass('chord-wrap length-' + len);
-        var gtar = BSD.Guitar({
-          fretRange: [BSD.fromFret,BSD.toFret],
-          scales: myScales
-        });
-        
-        gtars.push(gtar);
-        
-        
-        var barNumber = barCount + 1;
-        
-        chordWrap.append(DOM.h4(barNumber).addClass('bar-number'));
-        chordWrap.append(DOM.h4(currentChord.fullAbbrev()));
-        
-        
-
-        var guru = BSD.Widgets.TonalityGuru({});
-        var advice = guru.analyze(o);
-
-        
-        var tonalitySpan = DOM.span().addClass('tonality');
-        
-        var tonalityString = advice.tonalityScale ? advice.tonalityScale.fullName() : 'dunno';
-        tonalityString = tonalityString.replace(/harmonic\ minor/,'HM');
-        
-        tonalityString += ' (j' + advice.justification + ')';
-        tonalitySpan.html(tonalityString);
-        chordWrap.append(tonalitySpan);
-        
-        
-        gtar.renderOn(chordWrap);
-        gtar.subscribe('note-hover',function(note){
-          BSD.currentNote = note;  
-        });
-
-
-
-        if (advice.tonalityScale) {
-          advice.tonalityScale.notes().each(function(note){
-            gtar.plotNote(note,{});
-          });
-        }
-
-
-
-
-
-        /*******
-        if (tonalityScale) { 
-          tonalityScale.notes().each(function(note){
-            gtar.plotNote(note,{});
-          });
-        }
-        ********/
-        
-        var third = currentChord.myThird();
-        if (third) {
-          gtar.plotNote(third,{ class: 'third balls' });
-        }
-
-
-        gtar.plotNote(currentChord.rootNote,{ class: 'root balls' });
-
-        var seventh = currentChord.mySeventh();
-        if (seventh) {
-          gtar.plotNote(seventh,{ class: 'seventh balls' });
-        }
-
-
-        gtar.plotNote(nextChord.myThird(),{ class: 'next-third balls' });
-
-
-        
-        
-        //gtar.updateRange(fromInput.val(),toInput.val());
-        
-        ///barWrap.append(chordWrap);
-        output.append(chordWrap);
-      ////});
-
-    });
- 
-  });
   
-  jQuery('#print').click(function(){
+    table.append(hrow2);
 
-    var wrap = DOM.div();
+    JSMT.twelveTones().each(function(o){
+    
+      var row1 = DOM.tr();
+      var row2 = DOM.tr();
+      var row3 = DOM.tr();
+      var row4 = DOM.tr();
+  
+      var majorKey = makeScale(o + ' major');
+      var naturalMinorKey = makeScale(o + ' minor');
+      var harmonicMinorKey = makeScale(o + ' HM');
+    
+      var major251Two = majorKey.degrees([2,4,6,8,10,12,14]);////degrees([2,4,6,1,3,5,7]);
+      var major251Five = majorKey.degrees([5,7,9,11,13,15,17]);////degrees([5,7,2,4,6,1,3]);
+      var major251One = majorKey.degrees([1,3,5,7,9,11,13]);/////degrees([1,3,5,7,2,4,6]);
+  
+  
+      var minor251Two = harmonicMinorKey.degrees([2,4,6,8,10,12,14]); /////degrees([2,4,6,1,3,5,7]);
+      var minor251Five = harmonicMinorKey.degrees([5,7,9,11,13,15,17]); //degrees([5,7,2,4,6,1,3]);
+      var minor251One = naturalMinorKey.degrees([1,3,5,7,9,11,13]); ////degrees([1,3,5,7,2,4,6]);
+  
+      row1.append(DOM.th(o));
+      
+      major251Two.each(function(o){
+        var cell = DOM.td(o.name());
+        cell.click(function(){
+          self.publish('note-click',o);
+        });
+        cell.on('mouseover',function(){
+          self.publish('note-hover',o);
+        });
+        row1.append(cell);
+      });
+      row1.append(DOM.th('&nbsp;'));
+  
+      major251Five.each(function(o){
+        var cell = DOM.td(o.name());
+        cell.on('click',function(){
+          self.publish('note-click',o);
+        });
+        cell.on('mouseover',function(){
+          self.publish('note-hover',o);
+        });
+        row1.append(cell);
+      });
+      row1.append(DOM.th('&nbsp;'));
+  
+      major251One.each(function(o){
+        var cell = DOM.td(o.name());
+        cell.on('click',function(){
+          self.publish('note-click',o);
+        });
+        cell.on('mouseover',function(){
+          self.publish('note-hover',o);
+        });
+        row1.append(cell);
+      });
+      row1.append(DOM.th('&nbsp;'));
 
-    ////var link = jQuery('link');
 
-    ////////var newHead = jQuery('head');    
+      //minor
+      minor251Two.each(function(o){
+        var cell = DOM.td(o.name());
+        cell.on('click',function(){
+          self.publish('note-click',o);
+        });
+        cell.on('mouseover',function(){
+          self.publish('note-hover',o);
+        });
+        row1.append(cell);
+      });
+      row1.append(DOM.th('&nbsp;'));
+
+      minor251Five.each(function(o){
+        var cell = DOM.td(o.name());
+        cell.on('click',function(){
+          self.publish('note-click',o);
+        });
+        cell.on('mouseover',function(){
+          self.publish('note-hover',o);
+        });
+        row1.append(cell);
+      });
+      row1.append(DOM.th('&nbsp;'));
+
+      minor251One.each(function(o){
+        var cell = DOM.td(o.name());
+        cell.on('click',function(){
+          self.publish('note-click',o);
+        });
+        cell.on('mouseover',function(){
+          self.publish('note-hover',o);
+        });
+        row1.append(cell);
+      });
+      row1.append(DOM.th('&nbsp;'));
+
+      
+      table.append(row1);
+      table.append(row2);
+      table.append(row3);
+      table.append(row4);
+    });
+  
+  wrap.append(table);
+ 
+ };
+ 
+ return self; 
+};  
+  
+  var peggy = BSD.Widgets.Arpeggiator({});
+  peggy.renderOn(jQuery('#table-wrap'));
+  
+  
+  peggy.subscribe('note-click',function(o){
+    console.log('oh?',o.value());
+
+    var lower = o.plus(-12);
     
-    /////var newStyle = DOM.style();
+    BSD.leader.playNote(lower,1000);
+  });
+  peggy.subscribe('note-hover',function(note){
     
-    /////newStyle.append(jQuery('style').html());
-    
-    
-    ///wrap.append(newHead.html());
-    ////wrap.append(newStyle);
-    wrap.append(output.html());
-    
-    var rendered = BSD.toDataURI(wrap.html());
-    
-    storage.reportDataURI = rendered;
-    
+    var lower = note.plus(-12);    
+  
+    BSD.currentNote = lower;  
   });
   
     

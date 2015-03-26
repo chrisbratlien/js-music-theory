@@ -77,7 +77,12 @@ BSD.Widgets.ProgressionClock = function(spec) {
   
     var queue = [];
     
-    var sequencer = BSD.Widgets.Sequencer({});  
+    var sequencer = BSD.Widgets.Sequencer({
+      tempo: 60,
+    
+    
+    });  
+    ///sequencer.tick(); //initial domino... bad metaphors both?
     
     var setIntervalHandles = [];
     
@@ -95,6 +100,7 @@ BSD.Widgets.ProgressionClock = function(spec) {
         
     self.enqueue = function(obj) {
       queue.push(obj);
+      sequencer.enqueue(obj);
     };
 
 
@@ -252,7 +258,6 @@ BSD.Widgets.ProgressionClock = function(spec) {
   ***/
   
   self.spinCallback = function(o) {
-    ////spec.gossip.publish('chordChange',o); //NOTE: the future way to implement all this?
     self.publish('chordChange',o);
     positionIndicator.find('li').removeClass('selected');
     positionIndicator.find('.bar-' + o.current.barIndex).addClass('selected');

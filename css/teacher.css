@@ -8,26 +8,47 @@
 
 
 
-.guitar .string .fret-number-0 { opacity: 0.5; }
+.noselect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
 
+
+.hidden { visibility: none; }
+
+
+.guitar .string .fret-number-0 { opacity: 0.7; }
+
+.fret {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
 
 
 .fret.popular { background: yellow; }
 
-.count-0 { background: #dddddd; color: #dddddd; }
-.count-1 { background: #dddddd; color: #bbb; }
-.count-2 { background: #ded4d7; color: #bbb; }
-.count-3 { background: #dfcbd1; color: #aba; }
-.count-4 { background: #e1c2cb; }
-.count-5 { background: #e4b0bf; }
-.count-6 { background: #e69eb3; }
-.count-7 { background: #e98ca7; }
-.count-8 { background: #ec7a9b; }
-.count-9 { background: #ef688f; }
-.count-10 { background: #f25683; }
-.count-11 { background: #f44477; }
-.count-12 { background: #f7326b; }
-.count-high { background: #f7326b; }
+.count-0 { background: #dddddd; color: #fff; }
+.count-1 { background: #dddddd; color: #fff; }
+.count-2 { background: #ded4d7; color: #fff; }
+.count-3 { background: #dfcbd1; color: #fff; }
+.count-4 { background: #e1c2cb; color: #fff; }
+.count-5 { background: #e4b0bf; color: #fff; }
+.count-6 { background: #e69eb3; color: #fff;  }
+.count-7 { background: #e98ca7; color: #fff;  }
+.count-8 { background: #ec7a9b; color: #fff;  }
+.count-9 { background: #ef688f; color: #fff;  }
+.count-10 { background: #f25683; color: #fff;  }
+.count-11 { background: #f44477; color: #fff;  }
+.count-12 { background: #f7326b; color: #fff;  }
+.count-high { background: #f7326b; color: #fff;  }
 
 
 /** @media only screen and (max-width: 720px)  {**/

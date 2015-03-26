@@ -7,15 +7,25 @@ BSD.Widgets.Sequencer = function(spec) {
   var timerQueue = [];
   
   self.paused = true;
+  
+  self. tempoToMillis = function(bpm) {
+    var mpb = 1 / bpm;
+    tempms = mpb * 60 * 1000;
+    return tempms;
+  };
+  
   self.setTempo = function(bpm) {
     self.tempo = bpm;
-    var mpb = 1 / self.tempo;
-    
-    tempoMillis = mpb * 60 * 1000;
+    tempoMillis = self.tempoToMillis(bpm);
     tickMillis = tempoMillis / 2;
   };
+  self.flush = function() {
+    timerQueue = [];
+  };
+
 
   self.enqueue = function(o) { //o must obey { when: millis, callback: function } contract
+    console.log('enqueueing',o);
     o.fired = false;
     timerQueue.push(o);
   };
@@ -44,6 +54,9 @@ BSD.Widgets.Sequencer = function(spec) {
   self.stop = function() {
     self.paused = true;
   };
+  self.pause = self.stop;
+  
+  
   self.setTempo(self.tempo);
   self.tick();
   return self;

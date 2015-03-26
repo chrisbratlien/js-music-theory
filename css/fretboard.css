@@ -433,14 +433,14 @@ background: url(seafloor.jpg) no-repeat;
 
 
 .fretboard {margin-top: 10px; }
-
+.string { float: left; }
 
 
 .fret { background: #ddd; width:21px; height: 14px; text-align: center; font-weight: bold; float: left; margin: 1px; border-radius: 6px; }
 .clear { clear: both; }
 .fret:hover, .fret a:hover, td.fret:hover {cursor: pointer;}
 .fretted { color: #fff; }
-.fretted { font-size: 0.75em; font-weight: bold;}
+.fretted { font-weight: bold;}
 .includeDegrees { font-size: 1.2em; padding: 3px; color: #777; margin: 10px;}
 
 .toggler { list-style-type: none; }
@@ -450,6 +450,15 @@ background: url(seafloor.jpg) no-repeat;
 
 
 .sticky-note {  position: absolute; top: 0; left: 0; cursor:  pointer; box-shadow: 3px 3px 13px #aaa; z-index: 10; }
-.sticky-note textarea { background: #ffa; cursor:  pointer; border: 1px solid #dd8; width: 140px; height: 100px; font-family: Georgia; }
+.sticky-note textarea {
+  background: #FFA;
+  cursor: pointer;
+  border: 1px solid #DD8;
+  width: 140px;
+  height: 100px;
+  font-family: helvetica;
+  font-size: 1.2em;
+  padding: 0.5em;
+}
 
 
