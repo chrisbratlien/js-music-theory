@@ -68,11 +68,20 @@ function process($filename) {
   }
   
   
-  $path = sprintf("%s/data/music/%s/%s",dirname(__FILE__),$artist,$album);
+  $path = sprintf("%s/data/music/library/%s/%s",dirname(__FILE__),$artist,$album);
   if (!file_exists($path)) {
     mkdir($path,0777,true);
   }
+  
+  
   $full_file = sprintf("%s/%'.02d-%s.mp3",$path,$track_number,$title);
+
+  $mv = sprintf('mv %s %s',$filename,$full_file);
+
+  pr($mv,'mv');
+  pr($full_file,'full_file');
+
+
 
   rename($filename,$full_file);
 

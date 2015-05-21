@@ -1,6 +1,6 @@
 <?php
 
-
+require_once('local.php');
 
 if (!function_exists('pp')) { //Pretty Print
   function pp($obj,$label = '') {

@@ -314,50 +314,54 @@ BSD.audioFiles = [
   //'',
   //'',
   //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
-  //'',
 ];
 
 
- BSD.playing = false;
+BSD.playing = false;
   
+  
+BSD.MP3 = function(spec) {
+  var self = {};
+  self.spec = spec;
+  return self;
+};
+ 
 
+BSD.getSongs = function() {
+   var r = jQuery.ajax({
+      type: 'GET',
+      url: 'ws.php',
+      data: { action: 'get_songs' },
+      async: false
+    }).responseText;
+    var evaluated = eval('(' + r + ')');
+    
+    ///////console.log('evaluated',evaluated);
+    var conjured = evaluated.collect(function(o) { 
+      return BSD.MP3({
+        url: o
+      });
+    });
+    return conjured;
+};
+
+BSD.songs = BSD.getSongs();
 
 function getData(url) {
   request = new XMLHttpRequest();
-  //console.log('url',url);
+  console.log('getData url',url);
+  
+  url = url.replace(/&/,'%26');
+  
+  
+  
   request.open('GET', 'ws.php?action=get_audio&url=' + url, true);
   request.responseType = 'arraybuffer';
   request.onload = function() {
     var audioData = request.response;
+    
+    BSD.audioData = audioData;
+    
     audioCtx.decodeAudioData(audioData, function(buffer) {
         ////myBuffer = buffer;
         BSD.buffer = buffer;
@@ -366,7 +370,10 @@ function getData(url) {
         campfire.publish('new-buffer',buffer);
       },
 
-      function(e){"Error with decoding audio data" + e.err});
+      function(e){
+        console.log('e',e);
+      ////"Error with decoding audio data" + e.err
+      });
   }
   
   
@@ -717,18 +724,21 @@ BSD.Widgets.SongLibrary = function(spec) {
   self.redraw = function() {
 
     songList.empty();
-    songs.each(function(url){
-
+    songs.each(function(song){
+    
+      ////console.log('song',song);
+      var url = song.spec.url;
+      console.log('url',url);
       var li = DOM.li();
       var liThumb = DOM.img().addClass('li-thumb');
       
       li.click(function(){
-        self.publish('preview',url);
 
         songList.find('.selected').removeClass('selected');
         li.addClass('selected');
 
         selected = url;
+        self.publish('preview',url);
       });
       
       
@@ -744,7 +754,39 @@ BSD.Widgets.SongLibrary = function(spec) {
       
       li.append(liThumb);
       li.append('&nbsp;');
-      li.append(BSD.prettyURL(url));
+      //li.append(BSD.prettyURL(url));
+      
+      
+      
+      
+      
+      
+      ID3.loadTags(url, function() {
+
+        var tags = ID3.getAllTags(url);
+        /////console.log('tags',tags);
+        ///document.getElementById('title').textContent = tags.title || "";
+
+        var title = DOM.div(tags.title);
+        var album = DOM.div(tags.album);
+        var artist = DOM.div(tags.artist);
+
+        li.append(title);
+        li.append(DOM.label(tags.album));
+        li.append(DOM.label(tags.artist));
+
+        /**      
+        title.text(tags.title);
+        album.text(tags.album);
+        artist.text(tags.artist);
+        ***/
+        
+      });
+      
+      
+      
+      
+      
       songList.append(li);
     });
     
@@ -754,6 +796,9 @@ BSD.Widgets.SongLibrary = function(spec) {
   self.renderOn = function(wrap) {
   
     btnPlay.click(function(){
+      
+      console.log('selected',selected);
+    
       self.publish('play',selected);
     });
 
@@ -876,14 +921,23 @@ audioElem.on('playing',function(e){
 });
 
 campfire.subscribe('new-url',function(url){
+
+  if (url.match(/\ /)) {
+    url = encodeURIComponent(url);
+  }
+  console.log('new-url:: url',url);
+  
+  
   getData(url);
   audioElem.attr('src',url);
 });
 
 var lib = BSD.Widgets.SongLibrary({});
 lib.renderOn(jQuery('.song-library-wrap'));
-lib.publish('update',BSD.audioFiles);
+lib.publish('update',BSD.songs);//////BSD.audioFiles);
 lib.subscribe('play',function(url){
+
+  console.log('play!!',url);
   campfire.publish('new-url',url);
 });
 
