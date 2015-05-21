@@ -230,6 +230,15 @@
       Speed (delay):<br /> <span id="speed-amount">1000</span>
     <div class="slider" id="speed-input"></div>
   </div>
+
+  <div class="slider-wrap">
+      Repeats:<br /> <span id="repeats-amount">1</span>
+    <div class="slider" id="repeats-input"></div>
+  </div>
+
+
+  
+  
   <div style="clear: both;">&nbsp;</div>        
 
 
@@ -353,8 +362,32 @@
   var progressionClock;
   var sequencer = BSD.Widgets.Sequencer({ tempo: 60 });
   
+  
+  
+  
+  
+  
+  
+  
+  
+  
   campfire.subscribe('lets-do-this',function(prog) {
+
+
+    if (BSD.repeats > 0) {
+      var delim = '';
+      if (prog.match(/\|/)) { delim = '|'; }
+      for (var i = 0; i < BSD.repeats; i += 1) {
+        prog += delim + prog;
+      }     
+    }
+
+
+    //console.log('prog',prog);
+    ///return false;
+
     var items = BSD.parseProgression(prog);
+    
     sequencer.flush();
     var baseTime = (new Date()).getTime()+5000; //five secs in future;
     var dt = 0;
@@ -383,16 +416,18 @@
   
 
 
-
+    /***
     BSD.riffer = BSD.Widgets.Riffer({
       progression: items,
       gossip: campfire
     });
     BSD.riffer.renderOn(jQuery('#riffer-wrap'));
-
+    ***/
 
     //////BSD.riffer.go(items);
 
+
+    /****
     BSD.faker = BSD.Widgets.Faker({
       progression: items,
     });
@@ -410,7 +445,7 @@
       BSD.currentFretDiv = div;  
     });
     
-    
+    *********/
 
 
 
@@ -492,6 +527,8 @@
   BSD.currentFretDiv = false;
   BSD.currentNote = false;
 
+
+  BSD.repeats = 1;
 
 
 
@@ -665,6 +702,23 @@ $( "#speed-input" ).slider({
     
     waiter.beg(progressionClock,'set-speed-ms',n);        
     jQuery( "#speed-amount" ).text( n );
+  }
+});
+
+
+$( "#repeats-input" ).slider({
+  orientation: "vertical",
+  range: "min",
+  min: 0,
+  max: 50,
+  step: 1,
+  value: BSD.repeats,
+  slide: function( event, ui ) {
+    var n = ui.value;
+    
+    BSD.repeats = n;
+    
+    jQuery( "#repeats-amount" ).text( n );
   }
 });
 

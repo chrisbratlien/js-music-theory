@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+
+    <title>Looper</title>
+
+    <link rel="stylesheet" href="">
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    
+    
+<script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+<script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>    
+    
+  <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
+    
+    
+<script src="http://cdn.dev.bratliensoftware.com/javascript/array.js"></script>
+<script src="http://cdn.dev.bratliensoftware.com/javascript/color.js"></script>
+
+<script src="http://cdn.dev.bratliensoftware.com/javascript/bsd.pubsub.js"></script>
+
+
+<!-- may try out some variations on eachify -->
+<script src="http://cdn.dev.bratliensoftware.com/javascript/eachify.js"></script>
+
+<script src="http://cdn.dev.bratliensoftware.com/javascript/dom.js"></script>
+<script src="http://cdn.dev.bratliensoftware.com/javascript/draggy.js"></script>
+<script src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
+<script type="text/javascript" src="javascript/bsd.widgets.procrastinator.js"></script>
+
+
+<script src="javascript/js-music-theory.js"></script>
+
+
+<script src="lib/JavaScript-ID3-Reader/dist/id3-minimized.js"></script>
+
+    
+    <style>
+      .clear-both { clear: both; }
+    
+      .url { width: 100%; }
+      
+        .btn { text-align: center; padding: 0.5rem; }
+      
+      
+      .btn-start { width: 30%; height: 100px; }
+      .btn-end { width: 30%; height: 100px; }
+
+ 
+      .song-library .details { float: left; width: 45%; }
+      .song-library .song-list { float: left; height: 300px; overflow-y: auto; }
+
+
+      .song-library .thumb { max-width: 200px; }
+      .song-library .li-thumb { max-height: 40px; }
+
+      .song-list .selected { background: black; color: white; }
+      .song-list { list-style-type: none; font-size: 0.8rem; line-height: 1.2rem; }
+      
+      
+      
+      
+    
+    </style>
+    
+  </head>
+
+  <body>
+    <h1>decodeAudioData example</h1>
+
+
+    <h2>URL</h2>
+    <input class="url" value="" />
+    
+  <div class="slider-wrap">
+  Volume: <br /><span id="volume-amount">0</span>
+  <div class="slider" id="volume-input"></div>
+  </div>
+    
+    
+    <ul class="song-list"></ul>
+
+    <div class="song-library-wrap"></div>
+    
+
+
+    <button class="play">Play</button>
+    <button class="stop">Stop</button>
+
+    
+    <label>Loop Position: </label><span class="current-position">0</span>
+
+
+    <h2>Set playback rate</h2>
+    <input class="playback-rate-control" type="range" min="0.25" max="3" step="0.05" value="1">
+    <span class="playback-rate-value">1.0</span>
+
+    <h2>Set loop start and loop end</h2>
+    <input class="loopstart-control" type="range" min="0" max="20" step="0.1" value="0">
+    <span class="loopstart-value">0</span>
+
+    <input class="loopend-control" type="range" min="0" max="20" step="0.1" value="0">
+    <span class="loopend-value">0</span>
+
+    <br />
+    <br />
+       
+    <div class="btn btn-start">Start</div>
+    <div class="btn btn-end">End</div>
+   
+
+    <audio class="audio-elem" src="" controls></audio>
+    <br />
+    <input class="audio-elem-playback-rate-control" type="range" min="0.25" max="1.25" step="0.1" value="1">
+    <span class="audio-elem-playback-rate-value">1</span>
+   
+   
+    <pre></pre>
+  </body>
+<script type="text/javascript">
+
+// define variables
+
+
+var campfire = BSD.PubSub({});
+
+
+BSD.slugify = function(str) {
+  var result = str;
+  
+  result = result.replace(/\//g,'-');
+  result = result.replace(/\./g,'-');
+  result = result.replace(/\:/g,'-');
+
+
+  result = result.replace(/--/g,'-');
+  
+  return result;  
+  
+
+
+}
+
+
+BSD.prettyURL = function(str) {
+  var result = str.replace(/^.*\//g,'');
+  return result;
+}
+
+
+
+
+var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+var ampEnvelope = audioCtx.createGain();
+ampEnvelope.gain.value = 0.0; // default value
+ampEnvelope.connect(audioCtx.destination);
+
+
+var source = false;
+var songLength;
+
+var pre = document.querySelector('pre');
+var myScript = document.querySelector('script');
+var play = document.querySelector('.play');
+var stop = document.querySelector('.stop');
+
+var playbackControl = document.querySelector('.playback-rate-control');
+var playbackValue = document.querySelector('.playback-rate-value');
+
+var loopstartControl = document.querySelector('.loopstart-control');
+var loopstartValue = document.querySelector('.loopstart-value');
+
+var loopendControl = document.querySelector('.loopend-control');
+var loopendValue = document.querySelector('.loopend-value');
+
+// use XHR to load an audio track, and
+// decodeAudioData to decode it and stick it in a buffer.
+// Then we put the buffer into the source
+
+var audioElemPlaybackRateControl = jQuery('.audio-elem-playback-rate-control');
+var audioElemPlaybackRateValue = jQuery('.audio-elem-playback-rate-value');
+
+
+
+
+
+function nowStamp() {
+  return (new Date).getTime()
+}
+
+BSD.virtualTime = nowStamp();
+BSD.loopStart = 0;
+BSD.loopEnd = 0;
+
+
+BSD.elapsedSecondsSinceStamp = function(stamp) {
+  var result = (stamp - BSD.virtualTime) / 1000;
+  ////console.log('elapsed seconds',result);
+  return result;
+}
+
+BSD.elapsedSeconds = function() {
+  /////var result = (nowStamp() - BSD.virtualTime) / 1000;
+  var result = BSD.elapsedSecondsSinceStamp(nowStamp());
+  ////console.log('elapsed seconds',result);
+  return result;
+}
+BSD.loopLength = function() {
+  var result = BSD.loopEnd - BSD.loopStart;
+  ///console.log('loop length',result);
+  return result;
+}
+BSD.loopPosition = function() {
+  var offset = BSD.elapsedSeconds() % BSD.loopLength();
+  var result = parseFloat(BSD.loopStart) + parseFloat(offset);
+  ///console.log('loop pos',result);
+  return result;
+}
+
+
+BSD.keycodes = {
+    TAB: 9,
+    "RETURN": 13,
+    ENTER: 13,
+    SPACE: 32,
+    LEFT: 37,
+    UP: 38,
+    RIGHT: 39,
+    DOWN: 40,
+    PERIOD: 46,
+    a: 65,
+    b: 66,
+    LEFT_BRACKET: 219,
+    RIGHT_BRACKET: 221
+  };
+
+
+
+BSD.lsImagePrefix = 'imagedata::';
+
+
+
+
+BSD.audioFiles = [
+
+//walkin
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/01%20Walkin\'.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/01%20Walkin\'%202.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/02%20Walkin\'.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/02%20Walkin\'%202.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/03%20Walkin\'.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/03%20Walkin\'%202.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/03%20Walkin\'%203.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/04%20Walkin.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/05%20Walkin\'.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/05%20Walkin\'%202.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/08%20Walkin\'%20(Bonus%20Track).mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/Walkin\'.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/Walkin.mp3',
+
+//little sunflower
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/01%20Little%20Sunflower.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/02%20Little%20Sunflower.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/03%20Sunflower.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/06%20Little%20Sunflower.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/07%20Little%20Sunflower.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/09%20Little%20Sunflower.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/Little%20Sunflower.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/Little%20Sunflower%202.mp3',
+
+//autumn leaves
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/01%20Autumn%20Leaves.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/01%20Autumn%20Leaves%202.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/01%20Autumn%20Leaves%203.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/02%20Autumn%20Leaves.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/02%20Autumn%20Leaves%202.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/02%20Autumn%20Leaves%203.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/02%20Autumn%20Leaves%204.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/02%20Autumn%20Leaves%205.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/03%20Autumn%20Leaves.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/03%20Autumn%20Leaves%202.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/04%20Autumn%20Leaves.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/06%20Autumn%20Leaves.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/06%20Autumn%20Leaves%202.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/06%20Autumn%20Leaves%203.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/1-106%20Autumn%20Leaves.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/2-01%20Autumn%20Leaves.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/11%20Autumn%20Leaves.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/11%20Autumn%20Leaves%202.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/12%20Autumn%20Leaves.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/13%20Autumn%20Leaves.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/13%20Autumn%20Leaves%202.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/14%20Autumn%20Leaves.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/16%20Autumn%20Leaves.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/19%20Autumn%20Leaves.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/20%20Autumn%20Leaves.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/55%20Autumn%20Leaves.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/Autumn%20Leaves%20(slower).mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/Autumn%20Leaves.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/Autumn%20Leaves%202.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/Autumn%20Leaves%203.mp3',
+'http://lucid.bratliensoftware.com/js-music-theory/data/music/2015%20Spring%20Jazz%20101/Autumn%20Leaves%204.mp3',
+
+
+  'http://lucid.bratliensoftware.com/js-music-theory/data/music/Mega Jazz Binge/02 Ba-Lue Bolivar Ba-Lues-Are.mp3',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+  //'',
+];
+
+
+ BSD.playing = false;
+  
+
+
+function getData(url) {
+  request = new XMLHttpRequest();
+  //console.log('url',url);
+  request.open('GET', 'ws.php?action=get_audio&url=' + url, true);
+  request.responseType = 'arraybuffer';
+  request.onload = function() {
+    var audioData = request.response;
+    audioCtx.decodeAudioData(audioData, function(buffer) {
+        ////myBuffer = buffer;
+        BSD.buffer = buffer;
+        ///console.log('buffer',buffer);
+        
+        campfire.publish('new-buffer',buffer);
+      },
+
+      function(e){"Error with decoding audio data" + e.err});
+  }
+  
+  
+  request.send();
+}
+
+// wire up buttons to stop and play audio, and range slider control
+
+
+play.onclick = function() {
+  campfire.publish('set-loop-start',BSD.loopStart);
+}
+
+stop.onclick = function() {
+  source.stop(0);
+}
+
+playbackControl.oninput = function() {
+  source.playbackRate.value = playbackControl.value;
+  playbackValue.innerHTML = playbackControl.value;
+}
+
+loopstartControl.oninput = function() {
+  campfire.publish('set-loop-start',loopstartControl.value);
+}
+
+loopendControl.oninput = function() {
+  campfire.publish('set-loop-end',loopendControl.value);
+}
+
+
+jQuery(document).on('keydown',function(e) {
+  var c = e.keyCode || e.which;
+  ///console.log('c',c);
+
+  if (c == BSD.keycodes.a) { //set loop start
+    campfire.publish('set-loop-start',BSD.loopPosition());
+  }
+  
+  if (c == BSD.keycodes.b) { //set loop start
+    campfire.publish('set-loop-end-and-restart',BSD.loopPosition());
+  }
+
+
+  if (c == BSD.keycodes.SPACE) { //set loop start
+    campfire.publish('toggle-start-stop');
+  }
+
+  if (c == BSD.keycodes.LEFT_BRACKET) { //set loop start
+    campfire.publish('set-loop-start',BSD.loopStart - 1);
+  }
+  
+
+  if (c == BSD.keycodes.RIGHT_BRACKET) { //set loop start
+    campfire.publish('set-loop-end',BSD.loopEnd + 1);
+  }
+
+  
+});
+
+
+var waiter = BSD.Widgets.Procrastinator({ timeout: 250 });
+
+
+$( "#volume-input" ).slider({
+  orientation: "vertical",
+  range: "min",
+  min: 0,
+  max: 0.5,
+  step: 0.01,
+  value: 0.01,
+  slide: function( event, ui ) {
+    var newVolume = ui.value;
+    waiter.beg(campfire,'set-master-volume',ui.value);
+    jQuery( "#volume-amount" ).text( newVolume );
+  }
+});
+
+
+
+
+campfire.subscribe('set-master-volume',function(o){
+  ampEnvelope.gain.value = o;
+});
+
+
+
+campfire.subscribe('set-loop-start',function(secs){
+  ////console.log('start at ' + secs);
+
+  BSD.loopStart = secs;
+  
+  if (source) { source.stop(); }
+
+  source = audioCtx.createBufferSource();
+  BSD.source = source;
+  
+  BSD.buffer.sampleRate = 22500;
+  
+  source.buffer = BSD.buffer;
+  source.loop = true;
+  source.loopStart = BSD.loopStart;
+  source.loopEnd = BSD.loopEnd;
+
+  source.playbackRate.value = playbackControl.value;
+  source.connect(ampEnvelope);
+
+
+  loopstartControl.value = BSD.loopStart;
+  loopstartValue.innerHTML = BSD.loopStart;
+
+
+  source.start(0,BSD.loopStart);
+  BSD.virtualTime = nowStamp();
+
+
+});
+
+campfire.subscribe('set-loop-end',function(secs){
+  ///console.log('end at ' + secs);
+
+  if (secs > songLength) {
+    secs = songLength;
+  }
+
+  BSD.loopEnd = secs;
+
+  if (source) {
+    source.loopEnd = BSD.loopEnd;
+  }
+  loopendControl.value = BSD.loopEnd;
+  loopendValue.innerHTML = BSD.loopEnd;
+});
+
+
+campfire.subscribe('set-loop-end-and-restart',function(secs){
+  campfire.publish('set-loop-end',secs);
+  campfire.publish('set-loop-start',BSD.loopStart);
+});
+
+
+
+
+
+campfire.subscribe('toggle-start-stop',function(secs){
+  
+  if (BSD.playing) { source.stop(); }
+  else { 
+    campfire.publish('set-loop-start',BSD.loopStart);
+  }
+  BSD.playing = ! BSD.playing;
+
+});
+
+campfire.subscribe('new-buffer',function(buffer){
+
+  
+  songLength = buffer.duration;
+  
+  loopstartControl.setAttribute('max', Math.floor(songLength));
+  loopendControl.setAttribute('max', Math.floor(songLength));
+  BSD.loopEnd = Math.floor(songLength);
+  BSD.loopStart = 0;
+  
+  ////foo2(buffer);
+  
+  campfire.publish('set-loop-end',BSD.loopEnd);
+  campfire.publish('set-loop-start',BSD.loopStart);
+});
+
+
+jQuery('.url').change(function(){
+
+  campfire.publish('new-url',this.value);
+});
+
+
+setInterval(function() {
+  var pos = Math.floor(BSD.loopPosition());
+
+  jQuery('.current-position').html(pos);
+},1000);
+
+
+
+jQuery('.btn-start').click(function(){
+    campfire.publish('set-loop-start',BSD.loopPosition());
+});
+
+jQuery('.btn-end').click(function(){
+    campfire.publish('set-loop-end-and-restart',BSD.loopPosition());
+});
+
+
+function prob(tol) {
+  var result = Math.random();
+  return (result < tol);
+}
+
+
+function modder(orig,mod) {
+  var copy = []
+  for (var i = 0, j = 0; i < orig.length; i++) {
+    if (i%mod == 0) { j += 1; }
+    copy[i] = orig[j];
+  }
+  return copy;
+}
+
+
+  function midi2Hertz(x) {
+    return Math.pow(2,(x-69)/12)*440;
+  }
+
+
+function valueAt(i,freq,sampleRate) {
+  ///Math.sin(Math.PI * 1/2 * (4*i)/441 )
+  var result = Math.sin(Math.PI * 2 * (i/(sampleRate/freq)));
+  return result;
+}
+
+
+function foo(buffer,midiNote) {
+  var channels = 2;
+  var frameCount = audioCtx.sampleRate * 15.0;
+
+  ///var anotherArray = new Float32Array;
+
+  // Fill the buffer with white noise;
+  // just random values between -1.0 and 1.0
+  for (var channel = 0; channel < channels; channel++) {
+    // This gives us the actual array that contains the data
+    var nowBuffering = buffer.getChannelData(channel);
+
+    ////console.log('combined',combined);
+
+    var rootFreq = midi2Hertz(midiNote);
+    var octaveFreq = midi2Hertz(midiNote+12);
+    var fifthFreq = midi2Hertz(midiNote+12+7);
+    var fourthFreq = midi2Hertz(midiNote+12+7+5); //another octave
+    var thirdFreq = midi2Hertz(midiNote+12+7+5+4); //a third again
+
+
+    BSD.nowBuffering = nowBuffering;
+
+    for (var i = 0; i < frameCount; i++) {
+
+      var root = valueAt(i,rootFreq,buffer.sampleRate);
+      var octave = valueAt(i,octaveFreq,buffer.sampleRate);
+      var fifth = valueAt(i,fifthFreq,buffer.sampleRate);
+      var fourth = valueAt(i,fourthFreq,buffer.sampleRate);
+      var third = valueAt(i,thirdFreq,buffer.sampleRate);
+      
+
+      var combined = (0.4 * root) + (0.2 * octave) + (0.1 * fifth) + (0.05 * fourth) + (0.25 * third);
+
+      nowBuffering[i] = combined;
+    }
+    
+    
+    ///buffer.copyToChannel(nowBuffering,0,0);
+  }
+  /////console.log('nowBuffering',nowBuffering);
+}
+
+function foo2(buffer) {
+  var channels = 2;
+  var frameCount = buffer.length * 0.25;
+  
+  console.log('foo2::frameCount',frameCount);
+  
+
+
+  // Fill the buffer with white noise;
+  // just random values between -1.0 and 1.0
+  for (var channel = 0; channel < channels; channel++) {
+    // This gives us the actual array that contains the data
+    var nowBuffering = buffer.getChannelData(channel);
+
+    for (var i = frameCount; i > 0; i -= 1) {
+      var halfIdx = Math.floor(i/2);
+      /////console.log('i',i,'half',halfIdx);
+      nowBuffering[i] = nowBuffering[halfIdx];
+    
+      ////nowBuffering[i] = valueAt(i,440,buffer.sampleRate) * 0.75;
+    }
+
+  
+
+  }
+
+}
+
+
+var orig = [1,2,3,4,5];
+
+
+var audioElem = jQuery('.audio-elem');
+
+BSD.HTMLaudioElem = audioElem[0];
+
+
+
+/*****
+var songList = jQuery('.song-list');
+BSD.audioFiles.each(function(o){
+  var li = DOM.li();
+  
+  li.html(o);
+  
+  li.click(function(){
+    songList.find('.selected').removeClass('selected');
+    li.addClass('selected');
+
+
+    
+    campfire.publish('new-url',o);
+    ////getData(o);
+  });
+  
+  songList.append(li);  
+
+});
+********/
+
+
+BSD.Widgets.SongLibrary = function(spec) {
+  var self = BSD.PubSub({});
+
+  var songs = [];
+
+  var content = DOM.div().addClass('song-library');
+  
+  var details = DOM.div().addClass('details');
+  
+  var artist = DOM.div();
+  var album = DOM.div();
+  var title = DOM.div();
+  var thumb = DOM.img().addClass('thumb');
+  
+  var btnPlay = DOM.button('Play/Queue').addClass('btn btn-play');
+  var btnRandom = DOM.button('Random pick').addClass('btn btn-random');
+  
+  var selected = false;
+  
+  
+  var songList = DOM.ul().addClass('song-list');
+  self.redraw = function() {
+
+    songList.empty();
+    songs.each(function(url){
+
+      var li = DOM.li();
+      var liThumb = DOM.img().addClass('li-thumb');
+      
+      li.click(function(){
+        self.publish('preview',url);
+
+        songList.find('.selected').removeClass('selected');
+        li.addClass('selected');
+
+        selected = url;
+      });
+      
+      
+      var base64 = false;
+      
+      if (!base64 && localStorage[BSD.lsImagePrefix + url]) {
+        base64 = localStorage[BSD.lsImagePrefix + url];
+        liThumb.attr('src',base64);
+      };
+      if (!base64) {
+        liThumb.attr('src','images/no-album-art.png');
+      }
+      
+      li.append(liThumb);
+      li.append('&nbsp;');
+      li.append(BSD.prettyURL(url));
+      songList.append(li);
+    });
+    
+  };
+
+
+  self.renderOn = function(wrap) {
+  
+    btnPlay.click(function(){
+      self.publish('play',selected);
+    });
+
+
+    btnRandom.click(function(){
+      selected = songs.atRandom();
+      self.publish('preview',selected);
+    });
+
+
+    details.append(artist);
+    details.append(album);
+    details.append(title);    
+    details.append(thumb);
+    details.append(btnPlay);
+    details.append(btnRandom);
+
+
+    content.append(details);
+    content.append(songList);
+    content.append(DOM.div().addClass('clear-both'));
+
+
+    
+    wrap.append(content);
+    self.redraw();
+  }
+
+
+  ////self.display(url);
+
+  self.subscribe('preview',function(url){
+  
+  
+    ID3.loadTags(url, function() {
+
+      var tags = ID3.getAllTags(url);
+      console.log('tags',tags);
+      ///document.getElementById('title').textContent = tags.title || "";
+      
+      title.text(tags.title);
+      album.text(tags.album);
+      artist.text(tags.artist);
+
+      
+
+      var base64String;
+      var base64;
+
+
+      if (!base64 && localStorage[BSD.lsImagePrefix + url]) {
+        base64 = localStorage[BSD.lsImagePrefix + url];
+        thumb.attr('src',base64);
+      };
+      
+      if (!base64 && tags.picture) {
+        image = tags.picture;     
+        base64String = "";
+        for (var i = 0; i < image.data.length; i++) {
+            base64String += String.fromCharCode(image.data[i]);
+        }
+        base64 = "data:" + image.format + ";base64," +
+                window.btoa(base64String);
+        thumb.attr('src',base64);
+        localStorage[BSD.lsImagePrefix + url] = base64; //save it off...
+      }
+      
+      if (!base64) {
+        thumb.attr('src','images/no-album-art.png');
+      }
+      
+    }, {
+      tags: ["title","artist","album","picture"]
+    });
+  });
+
+  self.subscribe('update',function(them){
+    songs = them;
+    self.redraw();
+  });
+
+  return self;
+}
+
+
+
+
+
+
+
+audioElemPlaybackRateControl.change(function(){
+
+  audioElem[0].playbackRate = this.value;
+  
+  
+  
+  audioElemPlaybackRateValue.text(this.value);
+});
+
+audioElem.on('timeupdate',function(e){
+
+  ////console.log('e',e);
+  ///console.log('currentTime',this.currentTime);
+
+  if (this.currentTime < BSD.loopStart) { this.currentTime = BSD.loopStart; }
+  if (this.currentTime > BSD.loopEnd) { this.currentTime = BSD.loopStart; }
+
+});
+
+audioElem.on('progress',function(e){
+
+  //console.log('progress e',e);
+
+
+});
+
+
+audioElem.on('playing',function(e){
+  console.log('playing e',e);
+});
+
+campfire.subscribe('new-url',function(url){
+  getData(url);
+  audioElem.attr('src',url);
+});
+
+var lib = BSD.Widgets.SongLibrary({});
+lib.renderOn(jQuery('.song-library-wrap'));
+lib.publish('update',BSD.audioFiles);
+lib.subscribe('play',function(url){
+  campfire.publish('new-url',url);
+});
+
+
+
+// dump script to pre element
+
+pre.innerHTML = myScript.innerHTML;
+  </script>
+</html>

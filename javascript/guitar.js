@@ -112,8 +112,11 @@ var Fret = function(spec) {
 
       self.publish('fret-clicked',{ number: self.number, value: self.value, string: self.string });   
     });
+   
+   
+    /////cell.on('mouseout	mouseenter touchmove mouseover touchend',function(e){
     
-    div.on('mouseover',function(){
+    div.on('mouseout	mouseenter touchmove mouseover touchend',function(){
       //possibly obsolete self.publish('fret-hover',{ number: self.number, value: self.value, string: self.string, div: div }); 
       
       self.publish('note-hover', Note(self.value));////////{ number: self.number, value: self.value, string: self.string, div: div }); 

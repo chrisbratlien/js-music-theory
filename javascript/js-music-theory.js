@@ -47,6 +47,21 @@ for(var i = 0; i < 128; i += 1) {
 }
 
 
+JSMT.weekOfYear = function() {
+  var that = new Date();
+  var onejan = new Date(that.getFullYear(),0,1);
+  return Math.ceil((((that - onejan) / 86400000) + onejan.getDay()+1)/7);
+};
+
+JSMT.majorKeyOfTheWeek = function() {
+  var idx = JSMT.weekOfYear() % 12;
+  var them = JSMT.twelveNotes();
+  return them[idx];
+}
+
+
+
+
 
 JSMT.randLowColor = function() {
 
@@ -242,6 +257,7 @@ JSMT.chordMap = {
 
     '-9':   { name: 'minor9', intervals: [0,3,7,10,14] },
     'm9':   { name: 'minor9', intervals: [0,3,7,10,14] },
+    'M9':   { name: 'major9', intervals: [0,4,7,11,14] },
 
 
     '13':   { name: 'dominant13', intervals: [0,4,7,10,21] },

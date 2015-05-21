@@ -158,7 +158,7 @@ BSD.Widgets.FretboardViz = function(spec) {
   
     ////console.log('chordChange');
 
-    console.log('o?',o);
+    //console.log('o?',o);
 
     var chord = o.current.chord;
     var chordName = chord.fullAbbrev();    

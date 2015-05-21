@@ -1,5 +1,6 @@
 if (typeof BSD == "undefined") { var BSD = {}; }
 BSD.keycodes = {
+  d: 68,
   f: 70
 };
 

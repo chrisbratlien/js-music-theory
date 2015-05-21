@@ -244,6 +244,11 @@ window.addEventListener('touchstart', function() {
     guitar.subscribe('note-hover',function(note){
       ////console.log('yayyy',note);
       BSD.currentNote = note;  
+
+      if (BSD.strum) {
+        BSD.audioPlayer.playNote(note,1000);          
+      }
+
     });
     
     setInterval(guitar.renderHistory,4000);
@@ -339,12 +344,27 @@ window.addEventListener('touchstart', function() {
     if (BSD.currentNote && c == BSD.keycodes.f) {
       BSD.audioPlayer.playNote(BSD.currentNote,1000);    
     }
+
+    if (BSD.currentNote && c == BSD.keycodes.d) {
+      BSD.strum = true;
+      ////BSD.audioPlayer.playNote(BSD.currentNote,1000);    
+    }
+    
+    if (e.shiftKey) {
+      BSD.strum = true;
+    }
     
     
     
-    
-          
   });
+  
+  jQuery(document).on('keyup',function(e) {
+    BSD.strum = false;
+  });
+  
+  
+  
+  
 
 function getRandomArbitrary(min, max) {
     return Math.random() * (max - min) + min;
