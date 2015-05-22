@@ -60,10 +60,11 @@
       .song-library .thumb { max-width: 200px; }
       .song-library .li-thumb { max-height: 40px; }
 
+
       .song-list .selected { background: black; color: white; }
-      .song-list { list-style-type: none; font-size: 0.8rem; line-height: 1.2rem; }
+      .song-list { list-style-type: none; font-size: 0.8rem; line-height: 1.2rem; min-width: 300px; }
       
-      
+      .song-list li { cursor: pointer; }      
       
       
     
@@ -83,9 +84,11 @@
   <div class="slider" id="volume-input"></div>
   </div>
     
-    
-    <ul class="song-list"></ul>
 
+
+
+    Search <input class="search-input" />    
+    <ul class="song-list"></ul>
     <div class="song-library-wrap"></div>
     
 
@@ -318,38 +321,77 @@ BSD.audioFiles = [
 
 
 BSD.playing = false;
+
+
+
+BSD.db = [];
+
+
+
+
+
+
+
+
+
   
   
-BSD.MP3 = function(spec) {
-  var self = {};
+BSD.MP3 = function(url) {
+  var self = BSD.PubSub({});
+  var spec = {};
   self.spec = spec;
+  ID3.loadTags(url, function() {
+    var tags = ID3.getAllTags(url);
+    spec.url = url;
+    spec.tags = tags;
+    self.publish('loaded',self);
+  });
+  
+  
+  
+  
+  
+  self.subscribe('loaded',function(){
+    var allTagsArray = [];
+    allTagsArray = allTagsArray.concat(spec.tags.artist.toLowerCase().split(/\ +/));
+    allTagsArray = allTagsArray.concat(spec.tags.title.toLowerCase().split(/\ +/));
+    allTagsArray = allTagsArray.concat(spec.tags.album.toLowerCase().split(/\ +/));
+    ///console.log('ALLs',allTagsArray);
+
+    var allTagsString = allTagsArray.join('/');
+    ///console.log('AllTagsString',allTagsString);    
+
+    self.allTagsArray = allTagsArray;    
+    self.allTagsString = allTagsString;    
+  });
+  
+  
+  
   return self;
 };
  
 
-BSD.getSongs = function() {
-   var r = jQuery.ajax({
-      type: 'GET',
-      url: 'ws.php',
-      data: { action: 'get_songs' },
-      async: false
-    }).responseText;
-    var evaluated = eval('(' + r + ')');
-    
-    ///////console.log('evaluated',evaluated);
-    var conjured = evaluated.collect(function(o) { 
-      return BSD.MP3({
-        url: o
-      });
-    });
-    return conjured;
+BSD.getSongs = function(callback) {
+ var r = jQuery.ajax({
+    type: 'GET',
+    url: 'ws.php',
+    data: { action: 'get_songs' },
+    async: false
+  }).responseText;
+  var evaluated = eval('(' + r + ')');
+  
+  ///////console.log('evaluated',evaluated);
+  var conjured = evaluated.collect(function(url) { 
+     return BSD.MP3(url);
+  });
+  return conjured;
 };
 
 BSD.songs = BSD.getSongs();
 
 function getData(url) {
   request = new XMLHttpRequest();
-  console.log('getData url',url);
+  /////console.log('getData url',url);
   
   url = url.replace(/&/,'%26');
   
@@ -442,7 +484,7 @@ $( "#volume-input" ).slider({
   orientation: "vertical",
   range: "min",
   min: 0,
-  max: 0.5,
+  max: 1.0,
   step: 0.01,
   value: 0.01,
   slide: function( event, ui ) {
@@ -677,38 +719,12 @@ BSD.HTMLaudioElem = audioElem[0];
 
 
 
-/*****
-var songList = jQuery('.song-list');
-BSD.audioFiles.each(function(o){
-  var li = DOM.li();
-  
-  li.html(o);
-  
-  li.click(function(){
-    songList.find('.selected').removeClass('selected');
-    li.addClass('selected');
-
-
-    
-    campfire.publish('new-url',o);
-    ////getData(o);
-  });
-  
-  songList.append(li);  
-
-});
-********/
-
 
 BSD.Widgets.SongLibrary = function(spec) {
   var self = BSD.PubSub({});
-
   var songs = [];
-
   var content = DOM.div().addClass('song-library');
-  
   var details = DOM.div().addClass('details');
-  
   var artist = DOM.div();
   var album = DOM.div();
   var title = DOM.div();
@@ -717,18 +733,18 @@ BSD.Widgets.SongLibrary = function(spec) {
   var btnPlay = DOM.button('Play/Queue').addClass('btn btn-play');
   var btnRandom = DOM.button('Random pick').addClass('btn btn-random');
   
-  var selected = false;
-  
-  
+  var selectedURL = false;
+  var selectedSong = false;
+
+
+
   var songList = DOM.ul().addClass('song-list');
   self.redraw = function() {
-
     songList.empty();
     songs.each(function(song){
-    
-      ////console.log('song',song);
+      ///console.log('song',song);
       var url = song.spec.url;
-      console.log('url',url);
+      /////console.log('url',url);
       var li = DOM.li();
       var liThumb = DOM.img().addClass('li-thumb');
       
@@ -737,8 +753,17 @@ BSD.Widgets.SongLibrary = function(spec) {
         songList.find('.selected').removeClass('selected');
         li.addClass('selected');
 
-        selected = url;
-        self.publish('preview',url);
+        selectedURL = url;
+        selectedSong = song;
+
+        /////self.publish('preview-url',url);
+        self.publish('preview-song',song); //migrate to this...
+      });
+      
+
+      li.on('dblclick',function(){
+        self.publish('preview-song',song);
+        self.publish('play-song',song);
       });
       
       
@@ -756,36 +781,27 @@ BSD.Widgets.SongLibrary = function(spec) {
       li.append('&nbsp;');
       //li.append(BSD.prettyURL(url));
       
+      var tags = song.spec.tags;
       
-      
-      
-      
-      
-      ID3.loadTags(url, function() {
 
-        var tags = ID3.getAllTags(url);
-        /////console.log('tags',tags);
-        ///document.getElementById('title').textContent = tags.title || "";
 
-        var title = DOM.div(tags.title);
-        var album = DOM.div(tags.album);
-        var artist = DOM.div(tags.artist);
+      try {
+      
+      var title = DOM.div(tags.title);
+      
+      }      
+      catch (err) {
+        console.log(err,tags);
+      
+      }
 
-        li.append(title);
-        li.append(DOM.label(tags.album));
-        li.append(DOM.label(tags.artist));
 
-        /**      
-        title.text(tags.title);
-        album.text(tags.album);
-        artist.text(tags.artist);
-        ***/
-        
-      });
-      
-      
-      
-      
+      var album = DOM.div(tags.album);
+      var artist = DOM.div(tags.artist);
+    
+      li.append(DOM.div(artist));
+      li.append(DOM.div(title));
+      li.append(DOM.div(album));
       
       songList.append(li);
     });
@@ -794,20 +810,17 @@ BSD.Widgets.SongLibrary = function(spec) {
 
 
   self.renderOn = function(wrap) {
-  
-    btnPlay.click(function(){
-      
-      console.log('selected',selected);
-    
-      self.publish('play',selected);
-    });
 
+
+    btnPlay.click(function(){
+      console.log('selected',selectedSong);
+      self.publish('play-song',selectedSong);
+    });
 
     btnRandom.click(function(){
-      selected = songs.atRandom();
-      self.publish('preview',selected);
+      selectedSong = songs.atRandom();
+      self.publish('preview-song',selectedSong);
     });
-
 
     details.append(artist);
     details.append(album);
@@ -821,58 +834,42 @@ BSD.Widgets.SongLibrary = function(spec) {
     content.append(songList);
     content.append(DOM.div().addClass('clear-both'));
 
-
-    
     wrap.append(content);
     self.redraw();
   }
 
-
   ////self.display(url);
 
-  self.subscribe('preview',function(url){
-  
-  
-    ID3.loadTags(url, function() {
+  self.subscribe('preview-song',function(song){
+    var tags = song.spec.tags;
+    console.log('preview-song :: tags',tags);
+    title.text(tags.title);
+    album.text(tags.album);
+    artist.text(tags.artist);
 
-      var tags = ID3.getAllTags(url);
-      console.log('tags',tags);
-      ///document.getElementById('title').textContent = tags.title || "";
-      
-      title.text(tags.title);
-      album.text(tags.album);
-      artist.text(tags.artist);
+    var base64String;
+    var base64;
 
-      
-
-      var base64String;
-      var base64;
-
-
-      if (!base64 && localStorage[BSD.lsImagePrefix + url]) {
-        base64 = localStorage[BSD.lsImagePrefix + url];
-        thumb.attr('src',base64);
-      };
-      
-      if (!base64 && tags.picture) {
-        image = tags.picture;     
-        base64String = "";
-        for (var i = 0; i < image.data.length; i++) {
-            base64String += String.fromCharCode(image.data[i]);
-        }
-        base64 = "data:" + image.format + ";base64," +
-                window.btoa(base64String);
-        thumb.attr('src',base64);
-        localStorage[BSD.lsImagePrefix + url] = base64; //save it off...
+    if (!base64 && localStorage[BSD.lsImagePrefix + song.spec.url]) {
+      base64 = localStorage[BSD.lsImagePrefix + song.spec.url];
+      thumb.attr('src',base64);
+    };
+    
+    if (!base64 && tags.picture) {
+      image = tags.picture;     
+      base64String = "";
+      for (var i = 0; i < image.data.length; i++) {
+          base64String += String.fromCharCode(image.data[i]);
       }
-      
-      if (!base64) {
-        thumb.attr('src','images/no-album-art.png');
-      }
-      
-    }, {
-      tags: ["title","artist","album","picture"]
-    });
+      base64 = "data:" + image.format + ";base64," +
+              window.btoa(base64String);
+      thumb.attr('src',base64);
+      localStorage[BSD.lsImagePrefix + song.spec.url] = base64; //save it off...
+    }
+    
+    if (!base64) {
+      thumb.attr('src','images/no-album-art.png');
+    }
   });
 
   self.subscribe('update',function(them){
@@ -882,10 +879,6 @@ BSD.Widgets.SongLibrary = function(spec) {
 
   return self;
 }
-
-
-
-
 
 
 
@@ -925,21 +918,66 @@ campfire.subscribe('new-url',function(url){
   if (url.match(/\ /)) {
     url = encodeURIComponent(url);
   }
-  console.log('new-url:: url',url);
-  
-  
+  ///console.log('new-url:: url',url);
   getData(url);
   audioElem.attr('src',url);
 });
 
-var lib = BSD.Widgets.SongLibrary({});
-lib.renderOn(jQuery('.song-library-wrap'));
-lib.publish('update',BSD.songs);//////BSD.audioFiles);
-lib.subscribe('play',function(url){
+var library = BSD.Widgets.SongLibrary({});
+library.renderOn(jQuery('.song-library-wrap'));
 
-  console.log('play!!',url);
+setTimeout(function() {
+
+  library.publish('update',BSD.songs);//////BSD.audioFiles);
+
+
+},2000);
+
+library.subscribe('play-url',function(url){
+  console.log('play-url!!',url);
   campfire.publish('new-url',url);
 });
+
+library.subscribe('play-song',function(song){
+  console.log('play-song!!',song);
+  campfire.publish('new-url',song.spec.url);
+});
+
+
+
+var waiter = BSD.Widgets.Procrastinator({ timeout: 300 });
+
+var searchInput = jQuery('.search-input');
+console.log('searchInput',searchInput);
+
+
+searchInput.keydown(function(e){
+  e.stopPropagation(); // so that 'a' and 'b' are still loopStart and loopEnd points elsewhere...
+});
+
+searchInput.keyup(function(e){
+
+  console.log('keyiuppp');
+  waiter.beg(campfire,'do-search',searchInput.val());
+});
+
+campfire.subscribe('do-search',function(query){
+
+  console.log('query!',query);
+
+  var searchString = query.toLowerCase();
+  var keywords = searchString.split(/\ +/);
+
+  var candidates = BSD.songs.select(function(song){
+    var failure = keywords.detect(function(word){
+      return !song.allTagsString || !song.allTagsString.match(word);
+    });
+    return !failure;
+  });
+  library.publish('update',candidates);
+});
+
+
 
 
 
