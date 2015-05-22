@@ -2,5 +2,5 @@
 
 
 function get_bloginfo($key) {
-  return 'http://localhost/js-music-theory';
+  return 'http://localhost/jsmt';
 }
