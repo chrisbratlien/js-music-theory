@@ -32,16 +32,7 @@ BSD.Ruler = function(spec) {
   ///console.log('spec',spec);
   
   ////spec.items.reverse(); //get things in the right order now.
-
-
-
-  var self = {};
-  var backplane = BSD.PubSub({});
-  
-  self.publish = backplane.publish;
-  self.subscribe = backplane.subscribe;
-
-
+  var self = BSD.PubSub({});
 
   var twelve = JSMT.twelveNotes();
 
@@ -119,6 +110,44 @@ BSD.Ruler = function(spec) {
     palette.rotate(1);
     self.reload();
   };
+  
+  self.drop2 = function() {
+
+    console.log('state',state);
+
+    var on = state.map(function(o,i){ 
+      if (o) { return i; }
+      return false;
+    });
+    
+    var dropped = on.select(function(o,i) {
+      if (i == on.length-2) { return o - 12; }
+      return o;
+    });
+    var sorted = dropped.sort();
+    
+    console.log('sorted',sorted);
+    
+    
+    console.log('on',on);
+    var vals = on.select(function(o){ return o; });
+    console.log('vals',vals);
+    
+    var newGuy = JSMT.rnwiFromNoteValues(vals);
+
+    var droppedGuy = newGuy.drop2();
+
+    state = BSD.allMIDIValues.map(function(o){
+      return false;
+    });
+    droppedGuy.noteValues().each(function(o) {
+      state[o] = true;
+    });
+    ////console.log('newGuy',newGuy.spec,'droped',droppedGuy);
+    
+
+    self.reload();
+  }
 
   self.renderOn = function(wrap) {
     self.reload();
@@ -198,6 +227,12 @@ BSD.Ruler = function(spec) {
     rulerDiv.append(btnShiftDown);
     btnShiftDown.click(function(){
       self.shiftDown();
+    });
+
+    var btnDrop2 = DOM.div('drop2').addClass('control block shift-down');
+    rulerDiv.append(btnDrop2);
+    btnDrop2.click(function(){
+      self.drop2();
     });
 
 
@@ -332,6 +367,8 @@ BSD.DegreeRuler = function(spec) {
     if (typeof pattern[v-60] == "undefined") { return false; }
     return pattern[v-60].on;
   });
+  console.log('state',state);
+  
   var self = BSD.Ruler({
     state: state,
     foo: 'bar'
