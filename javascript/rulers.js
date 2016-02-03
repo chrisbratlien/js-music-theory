@@ -111,43 +111,53 @@ BSD.Ruler = function(spec) {
     self.reload();
   };
   
-  self.drop2 = function() {
-
-    console.log('state',state);
-
+  self.updateStateFromNoteValues = function(values) {
+    state = BSD.allMIDIValues.map(function(o){
+      return false;
+    });
+    values.each(function(o) {
+      state[o] = true;
+    });
+  };
+  
+  self.onValues = function() {
     var on = state.map(function(o,i){ 
       if (o) { return i; }
       return false;
     });
-    
-    var dropped = on.select(function(o,i) {
-      if (i == on.length-2) { return o - 12; }
-      return o;
-    });
-    var sorted = dropped.sort();
-    
-    console.log('sorted',sorted);
-    
-    
-    console.log('on',on);
-    var vals = on.select(function(o){ return o; });
-    console.log('vals',vals);
-    
-    var newGuy = JSMT.rnwiFromNoteValues(vals);
-
+    var values = on.select(function(o){ return o; }); 
+    return values;  
+  };
+  
+  self.drop2 = function() {
+    ///console.log('state',state);
+    var on = self.onValues();
+    var newGuy = JSMT.rnwiFromNoteValues(on);
     var droppedGuy = newGuy.drop2();
-
-    state = BSD.allMIDIValues.map(function(o){
-      return false;
-    });
-    droppedGuy.noteValues().each(function(o) {
-      state[o] = true;
-    });
-    ////console.log('newGuy',newGuy.spec,'droped',droppedGuy);
-    
-
+    self.updateStateFromNoteValues(droppedGuy.noteValues());
     self.reload();
-  }
+  };
+
+  self.invertUp = function() {
+    var on = self.onValues();
+    var newGuy = JSMT.rnwiFromNoteValues(on);
+    var droppedGuy = newGuy.invertUp();
+    self.updateStateFromNoteValues(droppedGuy.noteValues());
+    self.reload();
+  };
+
+  self.invertDown = function() {
+    var on = self.onValues();
+    var newGuy = JSMT.rnwiFromNoteValues(on);
+    var droppedGuy = newGuy.invertDown();
+    self.updateStateFromNoteValues(droppedGuy.noteValues());
+    self.reload();
+  };
+  
+
+
+
+
 
   self.renderOn = function(wrap) {
     self.reload();
@@ -235,8 +245,17 @@ BSD.Ruler = function(spec) {
       self.drop2();
     });
 
+    var btnInvertUp = DOM.div('invert up').addClass('control block shift-down');
+    rulerDiv.append(btnInvertUp);
+    btnInvertUp.click(function(){
+      self.invertUp();
+    });
 
-    
+    var btnInvertDown = DOM.div('invert down').addClass('control block shift-down');
+    rulerDiv.append(btnInvertDown);
+    btnInvertDown.click(function(){
+      self.invertDown();
+    });
 
 
     close.bind('touchend',function() { close.trigger('click'); }); //touchstart could cause too many things to accidentally get touched if the DOM shifts neighbors over
