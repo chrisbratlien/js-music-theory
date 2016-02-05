@@ -262,6 +262,12 @@ JSMT.chordMap = {
 
     '13':   { name: 'dominant13', intervals: [0,4,7,10,21] },
 
+
+    '-13':   { name: 'minor 13', intervals: [0,3,7,10,21] },
+    'm13':   { name: 'minor 13', intervals: [0,3,7,10,21] },
+
+
+
     'nothing':   { name: 'nothing', intervals: [] }
   };
 

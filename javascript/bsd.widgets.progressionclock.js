@@ -63,7 +63,7 @@ BSD.Widgets.ProgressionClock = function(spec) {
     var queue = [];
     
     var sequencer = BSD.Widgets.Sequencer({
-      tempo: 60,
+      tempo: 120,
     });  
     ///sequencer.tick(); //initial domino... bad metaphors both?
     
@@ -162,7 +162,7 @@ BSD.Widgets.ProgressionClock = function(spec) {
           
           
           
-          baseTime += 1000;
+          baseTime += 500;
           
           ////console.log('enqueueing',chord.fullName(),timeoutScale);
           self.enqueue({ 
