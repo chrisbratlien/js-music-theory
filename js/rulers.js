@@ -32,16 +32,7 @@ BSD.Ruler = function(spec) {
   ///console.log('spec',spec);
   
   ////spec.items.reverse(); //get things in the right order now.
-
-
-
-  var self = {};
-  var backplane = BSD.PubSub({});
-  
-  self.publish = backplane.publish;
-  self.subscribe = backplane.subscribe;
-
-
+  var self = BSD.PubSub({});
 
   var twelve = JSMT.twelveNotes();
 
@@ -119,6 +110,54 @@ BSD.Ruler = function(spec) {
     palette.rotate(1);
     self.reload();
   };
+  
+  self.updateStateFromNoteValues = function(values) {
+    state = BSD.allMIDIValues.map(function(o){
+      return false;
+    });
+    values.each(function(o) {
+      state[o] = true;
+    });
+  };
+  
+  self.onValues = function() {
+    var on = state.map(function(o,i){ 
+      if (o) { return i; }
+      return false;
+    });
+    var values = on.select(function(o){ return o; }); 
+    return values;  
+  };
+  
+  self.drop2 = function() {
+    ///console.log('state',state);
+    var on = self.onValues();
+    var newGuy = JSMT.rnwiFromNoteValues(on);
+    var droppedGuy = newGuy.drop2();
+    self.updateStateFromNoteValues(droppedGuy.noteValues());
+    self.reload();
+  };
+
+  self.invertUp = function() {
+    var on = self.onValues();
+    var newGuy = JSMT.rnwiFromNoteValues(on);
+    var droppedGuy = newGuy.invertUp();
+    self.updateStateFromNoteValues(droppedGuy.noteValues());
+    self.reload();
+  };
+
+  self.invertDown = function() {
+    var on = self.onValues();
+    var newGuy = JSMT.rnwiFromNoteValues(on);
+    var droppedGuy = newGuy.invertDown();
+    self.updateStateFromNoteValues(droppedGuy.noteValues());
+    self.reload();
+  };
+  
+
+
+
+
 
   self.renderOn = function(wrap) {
     self.reload();
@@ -200,8 +239,23 @@ BSD.Ruler = function(spec) {
       self.shiftDown();
     });
 
+    var btnDrop2 = DOM.div('drop2').addClass('control block shift-down');
+    rulerDiv.append(btnDrop2);
+    btnDrop2.click(function(){
+      self.drop2();
+    });
 
-    
+    var btnInvertUp = DOM.div('inv <i class="fa fa-level-up"></i>').addClass('control block shift-down');
+    rulerDiv.append(btnInvertUp);
+    btnInvertUp.click(function(){
+      self.invertUp();
+    });
+
+    var btnInvertDown = DOM.div('inv <i class="fa fa-level-down"></i>').addClass('control block shift-down');
+    rulerDiv.append(btnInvertDown);
+    btnInvertDown.click(function(){
+      self.invertDown();
+    });
 
 
     close.bind('touchend',function() { close.trigger('click'); }); //touchstart could cause too many things to accidentally get touched if the DOM shifts neighbors over
@@ -332,6 +386,8 @@ BSD.DegreeRuler = function(spec) {
     if (typeof pattern[v-60] == "undefined") { return false; }
     return pattern[v-60].on;
   });
+  console.log('state',state);
+  
   var self = BSD.Ruler({
     state: state,
     foo: 'bar'

@@ -209,7 +209,7 @@ function getBase64Image(img) {
 
 
 
-var storage = BSD.Storage('local');
+var storage = BSD.Storage('JSMT::');
 
 var imageSpecs = JSON.parse(storage.getItem('image-specs')) || [];
 var thumbSpecs = JSON.parse(storage.getItem('thumb-specs')) || [];

@@ -198,8 +198,14 @@ JSMT.scaleMap = {
 JSMT.chordMap = {
     '': { name: 'major', intervals: [0,4,7] }, //verified
     'M': { name: 'major', intervals: [0,4,7] }, //verified
+    'Major': { name: 'major', intervals: [0,4,7] }, //verified
+    'major': { name: 'major', intervals: [0,4,7] }, //verified
+    'Maj': { name: 'major', intervals: [0,4,7] }, //verified
+    'maj': { name: 'major', intervals: [0,4,7] }, //verified
     '-':   { name: 'minor', intervals: [0,3,7] }, //verified
     'm':   { name: 'minor', intervals: [0,3,7] }, //verified
+    'minor':   { name: 'minor', intervals: [0,3,7] }, //verified
+    'min':   { name: 'minor', intervals: [0,3,7] }, //verified
 
 
     '+':   { name: 'aug', intervals: [0,4,8] }, //verified
@@ -296,6 +302,8 @@ var Note = function(foo) {
   ////var self = spec;/////NotePrimitive(spec);
   
   var self = {};
+
+  self.spec = foo;
   
   self.abstractValue = function() {
     return self.value() % 12;
@@ -484,13 +492,12 @@ function makeChord(name) {
 
 
 function makeSpecFromValues(values) {
-  var lowest = values[0];
-  var rest = values.slice(1);
-  rest = rest.sort(function(a,b){return a-b});
-  var newRoot = Note(lowest);    
-  var newIntervals = rest.map(function(v) { return v - newRoot.value(); });
-  return { rootNote: newRoot, intervals: newIntervals };
+  var o = JSMT.rnwiFromNoteValues(values);
+  var result = o.spec;
+  return result;
 }
+
+
 
 function makeChordFromValues(values) {
   return Chord(makeSpecFromValues(values));
@@ -535,6 +542,23 @@ function makeScale(name) {
 
 
 
+JSMT.rnwiFromNoteValues = function(noteValues) {
+
+  console.log('incoming noteValues',noteValues);
+  var sorted = noteValues.sort();
+
+  var first = sorted[0];
+  //console.log('sorted',sorted);
+  //console.log('incoming noteValues',noteValues);
+  
+  var result = RootNoteWithIntervals({
+    rootNote: Note(first),
+    intervals: sorted.map(function(n){  return n - first; })
+  });
+  return result;
+};
+
+
 
 var RootNoteWithIntervals = function(spec) {
 
@@ -542,16 +566,14 @@ var RootNoteWithIntervals = function(spec) {
 
   var self = {};
   
+  self.spec = spec;
+  
   self.constructor = RootNoteWithIntervals;
   
   
-  
-  
-  
   self.name = spec.name || 'no name given';
-  self.abbrev = spec.abbrev || 'no abbrev';
+  self.abbrev = spec.abbrev || 'no abbrev given';
   self.rootNote = spec.rootNote;
-
 
 
   /////console.log('self.name',self.name);
@@ -592,6 +614,32 @@ var RootNoteWithIntervals = function(spec) {
     });
   };
   
+
+
+  self.drop2 = function() {
+  
+    var nv = self.noteValues();
+    ////console.log('nv before',nv);
+    
+    var dropped = nv.map(function(o,i){
+      if (i == nv.length-2) { //2nd to highest 
+        return o - 12; 
+      }
+      return o;
+    });
+    
+    var sorted = dropped.sort();
+    
+    console.log('dropped after',dropped);
+  
+    var newGuy = JSMT.rnwiFromNoteValues(sorted);    
+    var result = self.constructor(newGuy.spec);
+    return result;
+  };
+
+
+
+
   
   
   self.noteFromInterval = function(interval) {

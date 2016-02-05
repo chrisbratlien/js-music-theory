@@ -182,7 +182,7 @@ table.attr('cellpadding',0);
 	var fretRange = [];
 	var maxFrets = 22;
 	
-	for (var i = 0; i < maxFrets; i += 1) { fretRange.push(i); };
+	for (var i = options.minFret; i < options.maxFret; i += 1) { fretRange.push(i); };
 
 //console.log('cscale',cscale);
     [0,1,2,3,4,5].each(function(stringIndex) {
@@ -247,6 +247,8 @@ if (true) {
   var fretboardWrap = jQuery('.fretboard-wrap');
 
   makeTable(jQuery(fretboardWrap),{
+    minFret: 0,
+    maxFret: 22,
     scale: makeScale('C major'),
     //pick a root note below //
     rootNote: Note('C'),

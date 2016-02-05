@@ -30,6 +30,7 @@
 <script src="javascript/bsd.widgets.stringoscillator.js"></script>
 <script src="javascript/bsd.widgets.guitarplayer.js"></script>
 <script type="text/javascript" src="javascript/bsd.widgets.procrastinator.js"></script>
+<script src="javascript/bsd.storage.js"></script>
 
 
 
@@ -269,9 +270,20 @@ window.addEventListener('touchstart', function() {
       range: [-300,128]
     });
       
-    
+      
+    var storage = BSD.Storage('JSMT::');
     
     var waiter = BSD.Widgets.Procrastinator({ timeout: 250 });
+
+
+    BSD.volume = 0;
+    storage.getItem('volume',function(o){
+        BSD.volume = parseFloat(o);
+        waiter.beg(BSD.audioPlayer,'set-master-volume',BSD.volume);
+        jQuery( "#volume-amount" ).text( BSD.volume );
+    });
+
+
 
     $( "#volume-input" ).slider({
       orientation: "vertical",
@@ -279,10 +291,11 @@ window.addEventListener('touchstart', function() {
       min: 0,
       max: 0.1,
       step: 0.01,
-      value: 0.01,
+      value: BSD.volume,
       slide: function( event, ui ) {
         var newVolume = ui.value;
-        waiter.beg(BSD.audioPlayer,'set-master-volume',ui.value);
+        waiter.beg(BSD.audioPlayer,'set-master-volume',newVolume);
+        storage.setItem('volume',newVolume);  
         ////waiter.beg(BSD.chunker,'set-master-volume',ui.value);
         jQuery( "#volume-amount" ).text( newVolume );
       }
@@ -315,15 +328,16 @@ window.addEventListener('touchstart', function() {
     
     
     
-    
+
+
+    /****    
     var volumeInput = jQuery('#volume-input');
     volumeInput.change(function(){
-        BSD.audioPlayer.publish('set-master-volume',volumeInput.val());    
+      var level = volumeInput.val();
+      BSD.audioPlayer.publish('set-master-volume',level);  
+        storage.setItem('volume',level);  
     });
-    
-    BSD.audioPlayer.publish('set-master-volume',0.01);
-
-
+    ***/
 
   
 

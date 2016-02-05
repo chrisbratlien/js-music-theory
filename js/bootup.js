@@ -28,3 +28,13 @@ function midi2Hertz(x,detuneSemitoneOffset) {
 }
 
 
+BSD.importJSON = function(url,callback) {
+    jQuery.ajax({
+      type: 'GET',
+      url: url,
+      dataType: 'json',
+      success: callback
+    });
+};
+
+var campfire = BSD.PubSub({});

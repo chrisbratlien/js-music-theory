@@ -1,3 +1,5 @@
+if (typeof BSD == "undefined") { BSD = {}; }
+if (typeof BSD.Widgets == "undefined") { BSD.Widgets = {}; }
 BSD.Widgets.BasePlayer = function(spec) {
   var context = spec.context;
   var ctx = context;

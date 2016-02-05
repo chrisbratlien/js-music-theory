@@ -32,7 +32,6 @@ BSD.Widgets.SongList = function(spec) {
 
 BSD.songlist = BSD.Widgets.SongList({});
 
-
 var gentleRain =  'A-6|A-6|B-7b5|E7|' +
   'A-7 D7|G-7 C7|F6|F6|' +
   'F#-7b5|B7b9|E-7b5|A7b9|' +
@@ -166,10 +165,16 @@ BSD.songlist.addSong({
   title: 'Walkin\''
 });
 
-
-
-
-
-
-
-
+BSD.songlist.addSong({
+  progression: (
+    'D-7 G7|E-7 A7|D-7 G7|CM7|' +  
+    'E-7b5|A+7 A7 F#o A7|D-7|F-7 Bb7|' +
+    'CM7|B-7b5 E7|G-7 C7|FM7|' +
+    'B-7b5 E7b9|A-7|D7|D-7 G7|' +
+    'F#-7b5 B7b9|E-7 A7|D-7 G7|CM7|' +
+    'E-7b5|A7sus4 A7|D-7|F-7 Bb7|' +
+    'A-7|B-7b5 E7b9|A-7|D7|' +
+    'D-7|G7|C6 F7|E-7 A7'
+    ),
+  title: 'I Should Care'
+});
