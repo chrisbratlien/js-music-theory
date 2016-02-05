@@ -36,3 +36,5 @@ BSD.importJSON = function(url,callback) {
       success: callback
     });
 };
+
+var campfire = BSD.PubSub({});

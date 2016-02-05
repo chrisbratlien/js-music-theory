@@ -198,8 +198,14 @@ JSMT.scaleMap = {
 JSMT.chordMap = {
     '': { name: 'major', intervals: [0,4,7] }, //verified
     'M': { name: 'major', intervals: [0,4,7] }, //verified
+    'Major': { name: 'major', intervals: [0,4,7] }, //verified
+    'major': { name: 'major', intervals: [0,4,7] }, //verified
+    'Maj': { name: 'major', intervals: [0,4,7] }, //verified
+    'maj': { name: 'major', intervals: [0,4,7] }, //verified
     '-':   { name: 'minor', intervals: [0,3,7] }, //verified
     'm':   { name: 'minor', intervals: [0,3,7] }, //verified
+    'minor':   { name: 'minor', intervals: [0,3,7] }, //verified
+    'min':   { name: 'minor', intervals: [0,3,7] }, //verified
 
 
     '+':   { name: 'aug', intervals: [0,4,8] }, //verified
