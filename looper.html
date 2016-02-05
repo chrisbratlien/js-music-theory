@@ -820,6 +820,7 @@ BSD.Widgets.SongLibrary = function(spec) {
     btnRandom.click(function(){
       selectedSong = songs.atRandom();
       self.publish('preview-song',selectedSong);
+      self.publish('play-song',selectedSong);
     });
 
     details.append(artist);

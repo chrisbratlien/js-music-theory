@@ -245,13 +245,13 @@ BSD.Ruler = function(spec) {
       self.drop2();
     });
 
-    var btnInvertUp = DOM.div('invert up').addClass('control block shift-down');
+    var btnInvertUp = DOM.div('inv <i class="fa fa-level-up"></i>').addClass('control block shift-down');
     rulerDiv.append(btnInvertUp);
     btnInvertUp.click(function(){
       self.invertUp();
     });
 
-    var btnInvertDown = DOM.div('invert down').addClass('control block shift-down');
+    var btnInvertDown = DOM.div('inv <i class="fa fa-level-down"></i>').addClass('control block shift-down');
     rulerDiv.append(btnInvertDown);
     btnInvertDown.click(function(){
       self.invertDown();
