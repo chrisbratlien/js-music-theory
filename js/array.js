@@ -1,14 +1,5 @@
 ///////////Array prototype versions //////////
-Array.prototype.collect = function(fn) { 
-  var result = [];
-  for (var i = 0; i < this.length; i += 1) {
-    result.push(fn(this[i]));
-  }
-  return result;
-};
-
-//map is same as collect
-Array.prototype.map = Array.prototype.collect;
+Array.prototype.collect = Array.prototype.map;
 
 //select returns an array containing only the elements which pass the test
 Array.prototype.select = function(test) {

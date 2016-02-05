@@ -23,13 +23,12 @@ Array.prototype.rotate = (function() {
 })();
 
 
-BSD.allMIDIValues = [];
-for(var i = 0; i < 128; i += 1) {
-    BSD.allMIDIValues[i] = i;
-} 
+BSD.rulerPalette = BSD.randomPalette2(120,70);
+
+
 
 BSD.Ruler = function(spec) {
-  ///console.log('spec',spec);
+  console.log('spec',spec);
   
   ////spec.items.reverse(); //get things in the right order now.
   var self = BSD.PubSub({});
@@ -57,7 +56,7 @@ BSD.Ruler = function(spec) {
   }
   
 
-  var palette = BSD.randomPalette2(128,70);
+  var palette = BSD.rulerPalette;///BSD.randomPalette2(128,70);
 
   
   self.allMIDINotes = function() {
@@ -121,6 +120,7 @@ BSD.Ruler = function(spec) {
   };
   
   self.onValues = function() {
+    console.log('state',state);
     var on = state.map(function(o,i){ 
       if (o) { return i; }
       return false;
@@ -239,19 +239,19 @@ BSD.Ruler = function(spec) {
       self.shiftDown();
     });
 
-    var btnDrop2 = DOM.div('drop2').addClass('control block shift-down');
+    var btnDrop2 = DOM.div('drop2').addClass('control block btn-drop2');
     rulerDiv.append(btnDrop2);
     btnDrop2.click(function(){
       self.drop2();
     });
 
-    var btnInvertUp = DOM.div('inv <i class="fa fa-level-up"></i>').addClass('control block shift-down');
+    var btnInvertUp = DOM.div('inv <i class="fa fa-level-up"></i>').addClass('control block btn-invert-up');
     rulerDiv.append(btnInvertUp);
     btnInvertUp.click(function(){
       self.invertUp();
     });
 
-    var btnInvertDown = DOM.div('inv <i class="fa fa-level-down"></i>').addClass('control block shift-down');
+    var btnInvertDown = DOM.div('inv <i class="fa fa-level-down"></i>').addClass('control block btn-invert-down');
     rulerDiv.append(btnInvertDown);
     btnInvertDown.click(function(){
       self.invertDown();
@@ -426,7 +426,11 @@ BSD.NoteRuler = function(spec) {
 };
 
 BSD.NullRuler = function() {
-  return BSD.DegreeRuler({ title: '(empty)', degrees: '' });
+  return BSD.DegreeRuler({ 
+    title: '(empty)', 
+    degrees: '', 
+  
+  });
 };
 
 

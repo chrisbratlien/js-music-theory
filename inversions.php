@@ -50,15 +50,25 @@ get_header(); ?>
 <label><strong>Progression</strong><br />
   <input id="progression" type="text" />    
   <input id="scale" type="text" />    
-  <input id="catch" type="text" />    
+  <div id="focus-trap" ></div>
 </label>      
 <div class="fretboard-wrap"></div>
+<div id="rulers"></div><!--rulers -->
 <?php 
+
 
 //js
 add_action('wp_footer',function(){
 ?>
+<script type="text/javascript" src="js/rulers.js"></script>
+
+
 <script type="text/javascript">
+
+  var focusTrap = jQuery('#focus-trap');
+
+  var rulersWrap = jQuery('#rulers');
+
   var context = new webkitAudioContext();
   BSD.audioContext = context;
 
@@ -70,7 +80,6 @@ add_action('wp_footer',function(){
       range: [-300,128]
     });
       
-    var storage = BSD.Storage('JSMT::');
     
     var waiter = BSD.Widgets.Procrastinator({ timeout: 250 });
 
@@ -119,6 +128,7 @@ add_action('wp_footer',function(){
     	});
     });
     waiter.beg(campfire,'new-progression',result);
+    focusTrap.focus();
   });
 
 
@@ -128,6 +138,7 @@ add_action('wp_footer',function(){
     var scale = makeScale(scaleInput.val());
     console.log('scale',scale);
     waiter.beg(campfire,'new-scale',scale);
+    focusTrap.focus();
   });
 
 
@@ -231,7 +242,7 @@ table.attr('cellpadding',0);
         }
         ***/
 				cell.append(noteName);
-				cell.append(DOM.sub(valley));
+				//cell.append(DOM.sub(valley));
         
         if (options.rootNote && note.abstractlyEqualTo(options.rootNote)) {
          cell.addClass('root');
@@ -274,7 +285,7 @@ table.attr('cellpadding',0);
 
 
   campfire.subscribe('note-hover',function(note){
-    console.log('note',note.name());
+    //console.log('note',note.name());
     BSD.currentNote = note;
       if (BSD.strum) {
         BSD.audioPlayer.playNote(note,1000);          
@@ -288,7 +299,36 @@ table.attr('cellpadding',0);
       campfire.publish('new-chord',{ chord: chord, index: i });
     });
   });
-    
+  
+BSD.rulers = [];
+
+  campfire.subscribe('new-chord',function(o){  
+    var chord = o.chord;
+    var state = BSD.allMIDIValues.map(function(tf){ return false; });
+    chord.noteValues().each(function(nv) {  state[nv] = true; });
+    var ruler = BSD.Ruler({
+      items: [],
+      state: state
+    });
+    ruler.subscribe('click',function(o){
+      campfire.publish('play-note',{ note: o, duration: 1000 });
+    });
+    ruler.subscribe('play-chord',function(o){
+      console.log('play-chord?',o);
+      campfire.publish('play-chord',{ chord: o, duration: 1000});
+    });    
+    ruler.renderOn(rulersWrap);
+    BSD.rulers.push(ruler);
+  });  
+  
+  campfire.subscribe('play-note',function(payload) {
+    BSD.audioPlayer.playNote(payload.note,payload.duration);    
+  });    
+  campfire.subscribe('play-chord',function(o) {
+    BSD.audioPlayer.playChord(o.chord,o.duration);    
+  });
+
+  
     
 //makeChord('C').notes().forEach(function(note) { var frets = BSD.guitarData.select(function(f) { return f.noteValue == note.value(); }); console.log('frets',frets); })
     

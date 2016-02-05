@@ -38,3 +38,59 @@ BSD.importJSON = function(url,callback) {
 };
 
 var campfire = BSD.PubSub({});
+var storage = BSD.Storage('JSMT::');
+
+
+   
+function getUrlVars() {
+    var vars = {};
+    var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+        vars[key] = value;
+    });
+    return vars;
+}
+
+
+function midi2Hertz(x) {
+  return Math.pow(2,(x-69)/12)*440;
+}
+
+BSD.hzTable = [];
+var a = 440; // a is 440 hz...
+for (var x = 0; x <= 127; ++x)
+{
+BSD.hzTable[x] = midi2Hertz(x);
+}
+
+
+
+function loadImpulseResponse(url, convolver) {
+    // Load impulse response asynchronously
+
+    var request = new XMLHttpRequest();
+    request.open("GET", url, true);
+    request.responseType = "arraybuffer";
+
+    request.onload = function() { 
+        convolver.buffer = context.createBuffer(request.response, false);
+        isImpulseResponseLoaded = true;
+    }
+    request.onerror = function() { 
+        alert("error loading reverb");
+    }
+
+    request.send();
+}
+
+
+
+
+
+var context;
+
+
+BSD.allMIDIValues = [];
+for(var i = 0; i < 128; i += 1) {
+    BSD.allMIDIValues[i] = i;
+} 
+

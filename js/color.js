@@ -56,74 +56,113 @@ BSD.randomPalette = function(size,threshold) {
 
 
 
+BSD.randomPalette2 = function(size,threshold) {
+  var results = [];
+  
+  var first = BSD.randomColor();  
+  results.push(first);
+
+  var last = first;    
+  while(results.length < size) {
+    var test = BSD.randomColor();
+    var distance = Math.abs(test.distanceTo(last));
+    while (distance < (threshold - threshold*0.1) || distance > (threshold + threshold*0.1)) {
+      var test = BSD.randomColor();  
+      var distance = Math.abs(test.distanceTo(last));
+    }    
+    ////console.log('distance',distance);
+    results.push(test);    
+    last = test;
+  }      
+  return results;
+};
+
 
 BSD.Color = function(spec){
-  var interface = {};
-  interface.r = spec.r;
-  interface.g = spec.g;
-  interface.b = spec.b;
+  var self = {};
+  self.r = spec.r;
+  self.g = spec.g;
+  self.b = spec.b;
 
-  interface.brightness = function() {
-    return interface.r + interface.g + interface.b;
+  self.brightness = function() {
+    return self.r + self.g + self.b;
   };
   
-  interface.isBright = function() {
-    return interface.brightness() > 384;
+  self.isBright = function() {
+    return self.brightness() > 384;
   };
-  interface.isDark = function() {
-    return ! interface.isBright();
+  self.isDark = function() {
+    return ! self.isBright();
   };  
-  interface.isSomewhatDark = function() {
-    var b = interface.brightness();
+  self.isSomewhatDark = function() {
+    var b = self.brightness();
     
     return (b > 128 && b < 480);
-    ///return interface.brightness() < 256;
-    ///return interface.brightness() < 300;
+    ///return self.brightness() < 256;
+    ///return self.brightness() < 300;
   };
-  interface.isReallyDark = function() {
-    return interface.brightness() < 192;
+  self.isReallyDark = function() {
+    return self.brightness() < 192;
   };
-  interface.distanceTo = function(other) {
-    var dr = interface.r - other.r;
-    var dg = interface.g - other.g;
-    var db = interface.b - other.b;
+  self.distanceTo = function(other) {
+    var dr = self.r - other.r;
+    var dg = self.g - other.g;
+    var db = self.b - other.b;
     return Math.sqrt(dr*dr + dg*dg + db*db);
   };
   
   
+  self.complement = function() {
+    return BSD.Color({
+      r: 255 - self.r,
+      g: 255 - self.g,
+      b: 255 - self.b
+    });
+  }
   
-  interface.minus = function(other) {
+  
+  
+  
+  self.equals = function(other) {
+    return (
+      self.r == other.r &&
+      self.g == other.g &&
+      self.b == other.b
+    );  
+  };
+
+  self.minus = function(other) {
     return BSD.Color({  
-      r: interface.r - other.r,
-      g: interface.g - other.g,
-      b: interface.b - other.b,
+      r: self.r - other.r,
+      g: self.g - other.g,
+      b: self.b - other.b
     });  
   };
   
-  interface.plus = function(other) {
+  self.plus = function(other) {
     return BSD.Color({  
-      r: interface.r + other.r,
-      g: interface.g + other.g,
-      b: interface.b + other.b,
+      r: self.r + other.r,
+      g: self.g + other.g,
+      b: self.b + other.b
     });  
   };
 
-  interface.dividedBy = function(x) {
+  self.dividedBy = function(x) {
     return BSD.Color({  
-      r: interface.r / x,
-      g: interface.g / x,
-      b: interface.b / x
+      r: self.r / x,
+      g: self.g / x,
+      b: self.b / x
     });  
   };
-  interface.delta = function(other) {
-    return other.minus(interface);
+  self.delta = function(other) {
+    return other.minus(self);
   };
-  interface.upTo = function(other,steps) {
+  self.upTo = function(other,steps) {
     
     var result = [];
-    var delta = interface.delta(other).dividedBy(steps);  
+    var delta = self.delta(other).dividedBy(steps);  
     ////console.log(delta,'delta');
-    var next = interface;
+    var next = self;
 
     result.push(next);
     for(var i = 0; i < steps; i += 1) {
@@ -132,20 +171,20 @@ BSD.Color = function(spec){
     }
     return result;
   };
-  interface.toHex = function() {
-    var result = ('00' + Math.floor(interface.r).toString(16)).substr(-2) + ('00' + Math.floor(interface.g).toString(16)).substr(-2) + ('00' + Math.floor(interface.b).toString(16)).substr(-2);
+  self.toHex = function() {
+    var result = ('00' + Math.floor(self.r).toString(16)).substr(-2) + ('00' + Math.floor(self.g).toString(16)).substr(-2) + ('00' + Math.floor(self.b).toString(16)).substr(-2);
     ///console.log(result);
     return result;
   };
   
   
-  interface.renderOn = function(html) {
+  self.renderOn = function(html) {
   
-    var str = interface.toHex();
+    var str = self.toHex();
     ////console.log(str,'str');
   
     jQuery(html).css('background-color','#' + str);
   }
   
-  return interface;
+  return self;
 }

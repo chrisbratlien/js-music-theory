@@ -165,8 +165,16 @@ JSMT.scaleMap = {
     'HM' : { name: 'harmonic minor', intervals: [0,2,3,5,7,8,11] },
     'harmonic minor' : { name: 'harmonic minor', intervals: [0,2,3,5,7,8,11] },
 
+    'MM' : { name: 'melodic minor', intervals: [0,2,3,5,7,9,11] },
     'mm' : { name: 'melodic minor', intervals: [0,2,3,5,7,9,11] },
     'melodic minor' : { name: 'melodic minor', intervals: [0,2,3,5,7,9,11] },
+
+    'MM4' : { name: 'melodic minor mode 4', intervals: [0,2,4,6,7,9,10] },
+    'mm4' : { name: 'melodic minor mode 4', intervals: [0,2,4,6,7,9,10] },
+
+
+    'MM7' : { name: 'melodic minor mode 7', intervals: [0,1,3,4,6,8,10] },
+    'mm7' : { name: 'melodic minor mode 7', intervals: [0,1,3,4,6,8,10] },
 
 
     'dorian' : { name: 'dorian', intervals: [0,2,3,5,7,9,10] },
@@ -216,6 +224,18 @@ JSMT.chordMap = {
 
 
     'M7': { name: 'major7', intervals: [0,4,7,11] }, //verified
+    'maj7': { name: 'major7', intervals: [0,4,7,11] }, //verified
+    'Maj7': { name: 'major7', intervals: [0,4,7,11] }, //verified
+
+
+
+
+
+    'mM7': { name: 'minorMajor7', intervals: [0,3,7,11] }, //verified
+    'minmaj7': { name: 'minorMajor7', intervals: [0,3,7,11] }, //verified
+
+
+
 
     '7':   { name: 'dominant7', intervals: [0,4,7,10] }, //verified
     'dom7':   { name: 'dominant7', intervals: [0,4,7,10] }, //verified

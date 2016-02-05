@@ -1,47 +1,16 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta name="viewport" content="initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-    <link rel="stylesheet" href="style.css" media="screen" />
-    <script type="text/javascript">
-      if (typeof BSD == "undefined") { var BSD = {}; }
-      if (typeof BSD.Widgets == "undefined") { BSD.Widgets = {}; }
-    </script>
-    <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/array.js"></script>
-    <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/color.js"></script>
+<?php 
 
+add_action('wp_head',function(){
+?>
 
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-    <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
-
-
-
+    <!--
     <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/bsd.pubsub.js"></script>
     <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/dom.js"></script>
     <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/draggy.js"></script>
     <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
     <script type="text/javascript" src="javascript/js-music-theory.js"></script>
-    <script type="text/javascript" src="javascript/bsd.widgets.lightbox.js"></script>
-    <script type="text/javascript" src="javascript/rulers.js"></script>
-    <!-- wavetable dependencies -->
-    <script src="javascript/bpm-delay.js"></script>
-    <script src="javascript/waveshaper.js"></script>
-    <script src="javascript/wavetable.js"></script>
-    <script src="javascript/fft.js"></script>
-    <script src="javascript/wavetableloader.js"></script>
-    <script src="javascript/staticaudiorouting.js"></script>
-    <script src="javascript/bsd.widgets.oscplayer.js"></script>
-  
-  
-  
-    <script src="javascript/bsd.widgets.baseplayer.js"></script>
-    <script src="javascript/bsd.widgets.stringoscillator.js"></script>
-    <script src="javascript/bsd.widgets.guitarplayer.js"></script>
-    <script src="javascript/bsd.guitar.js"></script>
+    -->
 
-    <script type="text/javascript" src="javascript/bsd.widgets.procrastinator.js"></script>
 
 
 
@@ -54,13 +23,12 @@
 
 	<title>Rulers</title>
 
+<?php
+});
 
 
-
-
-
- </head>
-  <body>
+get_header();?>  
+  
     <div id="content">
       <div id="msg" class="loading-label">loading...</div>
       <div class="pull-right">
@@ -121,6 +89,34 @@
       <button id="bookmark">Bookmark these rulers</button>
       <div id="rulers"></div><!--rulers -->
     </div><!-- content -->
+
+
+<?php
+
+add_action('wp_footer',function() {
+?>
+<script type="text/javascript" src="js/color.js"></script>
+<script type="text/javascript" src="js/bsd.widgets.lightbox.js"></script>
+<script type="text/javascript" src="js/rulers.js"></script>
+<!-- wavetable dependencies -->
+<script src="js/bpm-delay.js"></script>
+<script src="js/waveshaper.js"></script>
+<script src="js/wavetable.js"></script>
+<script src="js/fft.js"></script>
+<script src="js/wavetableloader.js"></script>
+<script src="js/staticaudiorouting.js"></script>
+<script src="js/bsd.widgets.oscplayer.js"></script>
+
+
+
+<script src="js/bsd.widgets.baseplayer.js"></script>
+<script src="js/bsd.widgets.stringoscillator.js"></script>
+<script src="js/bsd.widgets.guitarplayer.js"></script>
+<script src="js/bsd.guitar.js"></script>
+
+<script type="text/javascript" src="js/bsd.widgets.procrastinator.js"></script>
+
+
     <script type="text/javascript">
   
 BSD.ChordRulerPanel = function(spec) {
@@ -132,7 +128,9 @@ BSD.ChordRulerPanel = function(spec) {
       var button = DOM.button();
       button.html(b.name);
       button.click(function() {
-        var ruler = b.constructor();
+        var ruler = b.constructor({
+          ////////palette: BSD.randomPalette2(128,70),
+        });
         ruler.subscribe('click',function(o){
           self.publish('click',o);
         });
@@ -150,53 +148,7 @@ BSD.ChordRulerPanel = function(spec) {
 };
   
   
-    
-      function getUrlVars() {
-          var vars = {};
-          var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
-              vars[key] = value;
-          });
-          return vars;
-      }
-
-
-      function midi2Hertz(x) {
-        return Math.pow(2,(x-69)/12)*440;
-      }
-      
-      BSD.hzTable = [];
-      var a = 440; // a is 440 hz...
-      for (var x = 0; x <= 127; ++x)
-      {
-      BSD.hzTable[x] = midi2Hertz(x);
-      }
-
-      
-      
-      function loadImpulseResponse(url, convolver) {
-          // Load impulse response asynchronously
-      
-          var request = new XMLHttpRequest();
-          request.open("GET", url, true);
-          request.responseType = "arraybuffer";
-      
-          request.onload = function() { 
-              convolver.buffer = context.createBuffer(request.response, false);
-              isImpulseResponseLoaded = true;
-          }
-          request.onerror = function() { 
-              alert("error loading reverb");
-          }
-      
-          request.send();
-      }
-
-
-
-
-      
-      var context;
-      
+       
       /* audio stuff */
       if (typeof webkitAudioContext != "undefined") {
         context = new webkitAudioContext();
@@ -329,39 +281,29 @@ BSD.ChordRulerPanel = function(spec) {
     
 
 
-    /***
-    var volumeInput = jQuery('#volume-input');
-    var volumeWait = BSD.Widgets.Procrastinator({
-      callback: function() {
-        var newVolume = volumeInput.val();
-        BSD.audioPlayer.publish('set-master-volume',newVolume);
-      }
-    });
-
-    volumeInput.change(function(){
-      volumeWait.beg();
-    });
-
-    ***/
-
-
-
-
-
-
-
     var waiter = BSD.Widgets.Procrastinator({ timeout: 250 });
 
+    BSD.volume = 0;
+    storage.getItem('volume',function(o){
+        BSD.volume = parseFloat(o);
+        waiter.beg(BSD.audioPlayer,'set-master-volume',BSD.volume);
+        jQuery( "#volume-amount" ).text( BSD.volume );
+    });
+
+
+
     $( "#volume-input" ).slider({
-      orientation: "vertical",
+      orientation: "horizontal",
       range: "min",
       min: 0,
-      max: 1,
-      step: 0.1,
-      value: 0,
+      max: 0.1,
+      step: 0.01,
+      value: BSD.volume,
       slide: function( event, ui ) {
         var newVolume = ui.value;
-        waiter.beg(BSD.audioPlayer,'set-master-volume',ui.value);
+        waiter.beg(BSD.audioPlayer,'set-master-volume',newVolume);
+        storage.setItem('volume',newVolume);  
+        ////waiter.beg(BSD.chunker,'set-master-volume',ui.value);
         jQuery( "#volume-amount" ).text( newVolume );
       }
     });
@@ -496,10 +438,12 @@ BSD.ChordRulerPanel = function(spec) {
   
     
     
-    
-  progHelp.trigger('click');  
-  
-    
+  storage.getItem('progHelpShown',function(o){
+    if (!o) {
+      progHelp.trigger('click');
+      storage.setItem('progHelpShown',true);
+    }
+  });  
     
     
   },100);
@@ -509,6 +453,7 @@ BSD.ChordRulerPanel = function(spec) {
     
     
     </script>
+<?php    
+});    
 
-	</body>
-</html>
+get_footer();
