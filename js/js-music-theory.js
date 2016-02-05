@@ -258,6 +258,9 @@ JSMT.chordMap = {
     'o7':  { name: 'diminished 7', intervals: [0,3,6,9] },
 
 
+    '6/9':  { name: 'sixNine', intervals: [0,4,7,9,14] },
+
+
 
     '9':   { name: 'dominant9', intervals: [0,4,7,10,14] },
 

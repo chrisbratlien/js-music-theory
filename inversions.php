@@ -49,6 +49,7 @@ get_header(); ?>
 <div class="boards"></div>
 <label><strong>Progression</strong><br />
   <input id="progression" type="text" />    
+  <input id="scale" type="text" />    
   <input id="catch" type="text" />    
 </label>      
 <div class="fretboard-wrap"></div>
@@ -120,6 +121,17 @@ add_action('wp_footer',function(){
     waiter.beg(campfire,'new-progression',result);
   });
 
+
+  var scaleInput = jQuery('#scale');
+  scaleInput.on('change blur',function() { 
+    if (scaleInput.val().length == 0) { return false; }
+    var scale = makeScale(scaleInput.val());
+    console.log('scale',scale);
+    waiter.beg(campfire,'new-scale',scale);
+  });
+
+
+
 function makeTable(wrap,options) {
 
 ////var scale = options.scale;
@@ -175,6 +187,19 @@ table.attr('cellpadding',0);
           
           });
         });
+        campfire.subscribe('new-scale',function(scale){
+          cell.attr('class','cell');//remove extra classes
+          colorCells.each(function(o) {
+            o.attr('class','color-cell'); //remove extra classes
+          });
+          scale.notes().each(function(scaleNote){
+            if (note.abstractlyEqualTo(scaleNote)) {
+              colorCells[0].addClass('chord-0');
+              cell.addClass('chord-0');
+            }
+          });
+        });        
+        
 
         
         cell.on('click touchend',function(){
