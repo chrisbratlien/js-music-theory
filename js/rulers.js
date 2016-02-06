@@ -203,6 +203,10 @@ BSD.Ruler = function(spec) {
     });
   };
   
+  self.close = function() {
+      rulerDiv.remove();    
+  }
+  
   self.reload = function() {
     rulerDiv.empty();
 
@@ -210,6 +214,8 @@ BSD.Ruler = function(spec) {
     classes.each(function(c) {
       rulerDiv.addClass(c);
     });
+    
+    
 
     var close = DOM.div().addClass('control block close');
     rulerDiv.append(close);
@@ -217,7 +223,7 @@ BSD.Ruler = function(spec) {
       if (!confirm('confirm removal of this ruler?')) {
         return false;
       }
-      rulerDiv.remove();    
+      self.close();
     });
 
 
@@ -226,6 +232,15 @@ BSD.Ruler = function(spec) {
     btnPlayAll.click(function(){
       self.publish('play-chord',self.chord());
     });
+    btnPlayAll.hover(
+      function(){
+        self.publish('current-chord',self.chord());
+      },
+      function(){
+        self.publish('current-chord',false);
+      }
+    );
+    
 
     var btnShiftUp = DOM.div('+').addClass(' control block shift-up');
     rulerDiv.append(btnShiftUp);

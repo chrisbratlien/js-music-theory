@@ -92,7 +92,7 @@ td { border: 1px solid #eee; }
 .ruler .control:active { background: white; color: black; }
 .ruler .control.play-all { background: green; height: 50px; max-height: 50px; line-height: 50px; } 
 .ruler .control.play-all:active { background: #0f0; }
-.ruler .control.close { background: #f44; } 
+.ruler .control.close { background: #f44; float: none; } 
 .ruler .control.close:active { background: #f00; } 
 
 /* Smartphones (portrait and landscape) ----------- */

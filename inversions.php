@@ -8,6 +8,9 @@ add_action('wp_head',function(){
   .cell { cursor: pointer; }
 
 
+  .cell.hidden { visibility: hidden; }
+
+
   .cell.chord-0 { background: rgba(255,0,0,0.5); }
   .cell.chord-1 { background: rgba(255,255,0,0.5) }
   .cell.chord-2 { background: rgba(0,0,255,0.5); }
@@ -19,8 +22,7 @@ add_action('wp_head',function(){
   .cell.chord-1.chord-2.chord-3 { background: black; color: white; }
   
   
-  
-    /**
+  /**
   .color-cell.chord-0 { background: rgba(255,0,0,0.33); }
   .color-cell.chord-1 { background: rgba(0,255,0,0.33); }
   .color-cell.chord-2 { background: rgba(0,0,255,0.33); }
@@ -45,6 +47,18 @@ get_header(); ?>
 
 
 <i class="fa fa-plus fa-2x"></i>YAY
+
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+
+<span id="fret-range-amount"></span>
+<div class="slider-wrap header-column">
+  <div class="slider" id="fret-range-input"></div>
+</div>
+
 
 <div class="boards"></div>
 <label><strong>Progression</strong><br />
@@ -110,6 +124,35 @@ add_action('wp_footer',function(){
     });
 
 
+    BSD.minFret = 0;
+    BSD.maxFret = 22;
+
+    $( "#fret-range-input" ).slider({
+      orientation: "horizontal",
+      range: true,
+      min: 0,
+      max: 22,
+      step: 1,
+      values: [BSD.minFret,BSD.maxFret],
+      slide: function( event, ui ) {
+        console.log(event,ui);
+        BSD.minFret = ui.values[0]; 
+        BSD.maxFret = ui.values[1]; 
+        
+        
+        campfire.publish('update-fret-range',{ min: BSD.minFret, max: BSD.maxFret });
+        jQuery('#fret-range-amount').text(BSD.minFret + ' - ' + BSD.maxFret);
+        ///var newVolume = ui.value;
+        ////waiter.beg(BSD.audioPlayer,'set-master-volume',newVolume);
+        ///storage.setItem('volume',newVolume);  
+        ////waiter.beg(BSD.chunker,'set-master-volume',ui.value);
+        ///jQuery( "#volume-amount" ).text( newVolume );
+      }
+    });
+
+
+
+
     BSD.importJSON('data/guitar.json',function(o) { 
       BSD.guitarData = o;
     });
@@ -173,6 +216,19 @@ table.attr('cellpadding',0);
         var note = Note(valley);
 
         var cell = DOM.td().addClass('cell');
+        
+        campfire.subscribe('update-fret-range',function(o) {
+          if (fret < o.min) { 
+            cell.addClass('hidden'); 
+            return false;
+          }
+          if (fret > o.max) {  
+            cell.addClass('hidden'); 
+            return false;
+          }
+          cell.removeClass('hidden');
+        });
+        
         
         var colorCells = [];
         colorCells.push(DOM.div().addClass('color-cell'));
@@ -268,8 +324,8 @@ table.attr('cellpadding',0);
 
   var fretboardWrap = jQuery('.fretboard-wrap');
     makeTable(jQuery(fretboardWrap),{
-      minFret: 0,
-      maxFret: 5,
+      minFret: BSD.minFret,
+      maxFret: BSD.maxFret,
       ///scale: makeScale('C major'),
       //pick a root note below //
       ////rootNote: chord.rootNote,////Note('C'),
@@ -293,14 +349,18 @@ table.attr('cellpadding',0);
 
   });
 
+
+  BSD.rulers = [];
+
   campfire.subscribe('new-progression',function(prog){
+    BSD.rulers.each(function(o){  o.close(); })
+    BSD.rulers = [];
     console.log('prog',prog);
     prog.each(function(chord,i){
       campfire.publish('new-chord',{ chord: chord, index: i });
     });
   });
   
-BSD.rulers = [];
 
   campfire.subscribe('new-chord',function(o){  
     var chord = o.chord;
@@ -317,6 +377,11 @@ BSD.rulers = [];
       console.log('play-chord?',o);
       campfire.publish('play-chord',{ chord: o, duration: 1000});
     });    
+    ruler.subscribe('current-chord',function(o){
+      BSD.currentChord = o;
+      BSD.currentNote = false;
+    });
+
     ruler.renderOn(rulersWrap);
     BSD.rulers.push(ruler);
   });  
@@ -349,6 +414,12 @@ BSD.rulers = [];
     if (BSD.currentNote && c == BSD.keycodes.f) {
       BSD.audioPlayer.playNote(BSD.currentNote,1000);    
     }
+
+    if (BSD.currentChord && c == BSD.keycodes.f) {
+      BSD.audioPlayer.playChord(BSD.currentChord,1000);    
+    }
+
+
 
     if (BSD.currentNote && c == BSD.keycodes.d) {
       BSD.strum = true;
