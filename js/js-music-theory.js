@@ -175,6 +175,7 @@ JSMT.scaleMap = {
 
     'MM7' : { name: 'melodic minor mode 7', intervals: [0,1,3,4,6,8,10] },
     'mm7' : { name: 'melodic minor mode 7', intervals: [0,1,3,4,6,8,10] },
+    'alt' : { name: 'altered', intervals: [0,1,3,4,6,8,10] },
 
 
     'dorian' : { name: 'dorian', intervals: [0,2,3,5,7,9,10] },

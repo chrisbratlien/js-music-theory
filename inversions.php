@@ -5,7 +5,9 @@ add_action('wp_head',function(){
 ?>
 <style type="text/css">
 
-  .cell { cursor: pointer; }
+  .fretboard-wrap { margin: 1rem; }
+
+  .cell { cursor: pointer; width: 30px; height: 30px; text-align: center; color: rgba(0,0,0,0.5); }
 
 
   .cell.hidden { visibility: hidden; }
@@ -23,20 +25,43 @@ add_action('wp_head',function(){
   
   
   /**
-  .color-cell.chord-0 { background: rgba(255,0,0,0.33); }
-  .color-cell.chord-1 { background: rgba(0,255,0,0.33); }
-  .color-cell.chord-2 { background: rgba(0,0,255,0.33); }
-  ***/
-
-
+  .scale-0 { background: rgba(255,0,0,0.5); } 
+  .scale-0 { background: rgba(0,0,255,0.5); } 
+  .scale-1 { background: rgba(255,255,0,0.5); } 
+  .scale-0.scale-1 { background: rgba(127,255,255,0.5); } 
+  **/
 
 
   td { position: relative; }
   .color-cell { float: left; width: 30%; height: 10px; }
-  .color-cell { float: left; width: 30%; height: 100%; }
-   .color-cell { position: absolute; top: 0; left: 0; width: 100%; height: 100%; } 
+  .color-cell { float: left; width: 1rem; height: 1rem; }
+  
+  .color-cell { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 1rem; 
+    height: 1rem; 
+    top: 33%; 
+    border-radius: 1rem;
+  }
+  
+  .scale-0-root .color-cell-0 { border-radius: 0; }
+  .scale-1-root .color-cell-1 { border-radius: 0; }
+   
 
-  .cell { border: 1px solid #eee; padding: 1rem; }
+  .color-cell-0 { left: 0;  } 
+  .color-cell-1 { left: 33%;  } 
+  .color-cell-2 { left: 66%;  } 
+    
+ 
+  .color-cell-0.on { background: rgba(255,0,0,0.5); }  
+  .color-cell-1.on { background: rgba(0,127,255,0.5); }  
+  .color-cell-2.on { background: rgba(0,0,255,0.5); }  
+   
+   
+
+  .cell { border: 1px solid #eee;  }
 
 </style>
 
@@ -45,29 +70,30 @@ add_action('wp_head',function(){
 
 get_header(); ?>
 
-
-<i class="fa fa-plus fa-2x"></i>YAY
-
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-
-<span id="fret-range-amount"></span>
-<div class="slider-wrap header-column">
-  <div class="slider" id="fret-range-input"></div>
+<div class="container-fluid">
+  <div class="row-fluid">
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    
+    <span id="fret-range-amount"></span>
+    <div class="slider-wrap header-column">
+      <div class="slider" id="fret-range-input"></div>
+    </div>
+    
+    
+    <div class="boards"></div>
+    <label><strong>Progression</strong><br />
+      <input id="progression" type="text" />    
+      <input id="scales" type="text" />    
+      <div id="focus-trap" ></div>
+    </label>      
+    <div class="fretboard-wrap"></div>
+    <div id="rulers"></div><!--rulers -->
+  </div>
 </div>
-
-
-<div class="boards"></div>
-<label><strong>Progression</strong><br />
-  <input id="progression" type="text" />    
-  <input id="scale" type="text" />    
-  <div id="focus-trap" ></div>
-</label>      
-<div class="fretboard-wrap"></div>
-<div id="rulers"></div><!--rulers -->
 <?php 
 
 
@@ -175,12 +201,20 @@ add_action('wp_footer',function(){
   });
 
 
-  var scaleInput = jQuery('#scale');
+  var scaleInput = jQuery('#scales');
+  
   scaleInput.on('change blur',function() { 
     if (scaleInput.val().length == 0) { return false; }
-    var scale = makeScale(scaleInput.val());
-    console.log('scale',scale);
-    waiter.beg(campfire,'new-scale',scale);
+    var result = [];
+    var scaleString = scaleInput.val();
+    scaleString.split(/\ +/).each(function(o) {
+
+      var scale = makeScale(o);
+      console.log('scale',scale);
+      result.push(scale);    
+    });
+    waiter.beg(campfire,'new-scales',result);
+
     focusTrap.focus();
   });
 
@@ -231,40 +265,42 @@ table.attr('cellpadding',0);
         
         
         var colorCells = [];
-        colorCells.push(DOM.div().addClass('color-cell'));
-        colorCells.push(DOM.div().addClass('color-cell'));
-        colorCells.push(DOM.div().addClass('color-cell'));
-
-        colorCells.each(function(o){
-          cell.append(o);
+        [0,1,2].forEach(function(o,i){
+          var cc = DOM.div().addClass('color-cell color-cell-' + i);
+          colorCells.push(cc);
+          cell.append(cc);        
         });
 
         campfire.subscribe('new-progression',function(o){
           cell.attr('class','cell');//remove extra classes
-          colorCells.each(function(o) {
-            o.attr('class','color-cell'); //remove extra classes
-          });
+          campfire.publish('update-fret-range',{ min: BSD.minFret, max: BSD.maxFret });
         });        
         campfire.subscribe('new-chord',function(o){
           o.chord.notes().each(function(chordNote){
             if (note.abstractlyEqualTo(chordNote)) {
-              colorCells[o.index].addClass('chord-' + o.index);
-              cell.addClass('chord-' + o.index);
+              colorCells[o.index].addClass('on'); //component
+              cell.addClass('chord-' + o.index); //combined
             }
-          
           });
         });
-        campfire.subscribe('new-scale',function(scale){
-          cell.attr('class','cell');//remove extra classes
-          colorCells.each(function(o) {
-            o.attr('class','color-cell'); //remove extra classes
-          });
+        campfire.subscribe('new-scale',function(o){
+          ///cell.attr('class','cell');//remove extra classes
+          //colorCells.each(function(o) {
+          //  o.attr('class','color-cell'); //remove extra classes
+          ///});
+          var scale = o.scale;
           scale.notes().each(function(scaleNote){
             if (note.abstractlyEqualTo(scaleNote)) {
-              colorCells[0].addClass('chord-0');
-              cell.addClass('chord-0');
+              colorCells[o.index].addClass('on');
+              cell.addClass('scale-' + o.index);
             }
           });
+          if (note.abstractlyEqualTo(scale.rootNote)) {
+              cell.addClass('scale-' + o.index + '-root');
+          }
+          
+          campfire.publish('update-fret-range',{ min: BSD.minFret, max: BSD.maxFret });
+          
         });        
         
 
@@ -278,34 +314,15 @@ table.attr('cellpadding',0);
           campfire.publish('note-hover',note);
         });
 
-        ////console.log('double check',note.value());
-       
-
-        /***        
-        var spatialNote = BSD.SpatialNote({
-          note: note,
-          cell: cell,
-          position: [fret,stringIndex]
-        });
-        
-        BSD.spatialNotes.push(spatialNote);
-        ***/
         
         var noteName = note.name();
-
-        /***
-        if (noteNames.indexOf(noteName) > -1) {
-        }
-        ***/
 				cell.append(noteName);
-				//cell.append(DOM.sub(valley));
         
         if (options.rootNote && note.abstractlyEqualTo(options.rootNote)) {
          cell.addClass('root');
         }
           
         row.append(cell);
-        //console.log(note.name());
       });
       table.append(row);
     });
@@ -360,6 +377,14 @@ table.attr('cellpadding',0);
       campfire.publish('new-chord',{ chord: chord, index: i });
     });
   });
+
+
+  campfire.subscribe('new-scales',function(scales){
+    scales.each(function(scale,i){
+      campfire.publish('new-scale',{ scale: scale, index: i });
+    });
+  });
+
   
 
   campfire.subscribe('new-chord',function(o){  
