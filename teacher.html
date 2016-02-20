@@ -24,13 +24,13 @@
 <script src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
 
 
+<script src="js/bsd.storage.js"></script>
 <script src="javascript/bootup.js"></script>
 <script src="javascript/js-music-theory.js"></script>
 <script src="javascript/bsd.widgets.baseplayer.js"></script>
 <script src="javascript/bsd.widgets.stringoscillator.js"></script>
 <script src="javascript/bsd.widgets.guitarplayer.js"></script>
 <script type="text/javascript" src="javascript/bsd.widgets.procrastinator.js"></script>
-<script src="javascript/bsd.storage.js"></script>
 
 
 
@@ -111,15 +111,23 @@ if (typeof BSD == "undefined") {
 BSD.chosenColor = BSD.colorFromHex('#888888');
 BSD.ColorPicker = function(spec) {
   var self = {};
-  self.renderOn = function(html) {
+  self.renderOn = function(wrap) {
 ///console.log('hello');
     var square = DOM.div('').addClass('color-picker');
     square.css('background-color','#' + spec.color.toHex());
-    square.click(function() {
+    
+    var handler = function() {
       BSD.chosenColor = spec.color;
+    };
+    
+    square.click(function() {
+      handler();
+      var newGuy = square.clone();
+      newGuy.click(handler);
+      wrap.append(newGuy);    
     });
 ////console.log('html',html);
-    html.append(square);
+    wrap.append(square);
   };
   return self;
 };
