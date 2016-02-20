@@ -63,6 +63,8 @@
       
       <button id="more-palettes">Redraw Palettes</button>
       <div id="pickers">   </div><!-- pickers -->
+      <div id="selected-colors">   </div>
+      <div style="clear: both;">&nbsp;</div>        
 
 
         <div class="slider-wrap">
@@ -110,7 +112,7 @@ if (typeof BSD == "undefined") {
 }
 BSD.chosenColor = BSD.colorFromHex('#888888');
 BSD.ColorPicker = function(spec) {
-  var self = {};
+  var self = BSD.PubSub({});
   self.renderOn = function(wrap) {
 ///console.log('hello');
     var square = DOM.div('').addClass('color-picker');
@@ -121,10 +123,11 @@ BSD.ColorPicker = function(spec) {
     };
     
     square.click(function() {
-      handler();
-      var newGuy = square.clone();
-      newGuy.click(handler);
-      wrap.append(newGuy);    
+      self.publish('click',spec.color);
+      ////handler();
+      ///var newGuy = square.clone();
+      //newGuy.click(handler);
+      //wrap.append(newGuy);    
     });
 ////console.log('html',html);
     wrap.append(square);
@@ -166,6 +169,7 @@ window.addEventListener('touchstart', function() {
   BSD.currentFretDiv = false;
   
   var pickers = jQuery('#pickers');
+  var selectedColors = jQuery('#selected-colors');
   
   var morePalettes = jQuery('#more-palettes');
   
@@ -197,8 +201,12 @@ window.addEventListener('touchstart', function() {
     palettes.push(BSD.randomPalette2(10,30));
     palettes.each(function(pal) {
       pal.each(function(randcolor) { 
-      var picker = BSD.ColorPicker({ color: randcolor});
-      picker.renderOn(pickers);
+        var picker = BSD.ColorPicker({ color: randcolor});
+        picker.renderOn(pickers);
+        picker.subscribe('click',function(color){
+          BSD.chosenColor = color;    
+          picker.renderOn(selectedColors);
+        });
       });
     });
   });
