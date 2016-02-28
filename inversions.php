@@ -7,7 +7,7 @@ add_action('wp_head',function(){
 
   .fretboard-wrap { margin: 1rem; }
 
-  .cell { cursor: pointer; width: 30px; height: 30px; text-align: center; color: rgba(0,0,0,0.5); }
+  .cell { cursor: pointer; width: 30px; height: 30px; text-align: center; color: rgba(0,0,0,0.25); }
 
 
   .cell.hidden { visibility: hidden; }
@@ -33,8 +33,14 @@ add_action('wp_head',function(){
 
 
   td { position: relative; }
+
+
+
+
   .color-cell { float: left; width: 30%; height: 10px; }
-  .color-cell { float: left; width: 1rem; height: 1rem; }
+  .color-cell { float: left; width: 1rem; height: 1rem; 
+  
+  }
   
   .color-cell { 
     position: absolute; 
@@ -44,20 +50,35 @@ add_action('wp_head',function(){
     height: 1rem; 
     top: 33%; 
     border-radius: 1rem;
+    background: red;
+    background: rgba(255,0,0,0.5);
+
   }
   
-  .scale-0-root .color-cell-0 { border-radius: 0; }
-  .scale-1-root .color-cell-1 { border-radius: 0; }
-   
+  .scale-0-root .color-cell:nth-child(1) { border-radius: 0; }
+  .scale-1-root .color-cell:nth-child(2) { border-radius: 0; }
 
-  .color-cell-0 { left: 0;  } 
-  .color-cell-1 { left: 33%;  } 
-  .color-cell-2 { left: 66%;  } 
-    
- 
-  .color-cell-0.on { background: rgba(255,0,0,0.5); }  
-  .color-cell-1.on { background: rgba(0,127,255,0.5); }  
-  .color-cell-2.on { background: rgba(0,0,255,0.5); }  
+  .color-cell-count-1 .color-cell { 
+    left: 33%;
+  }
+  .scale-1.color-cell-count-1 .color-cell { 
+    background: blue;
+    background: rgba(0,127,255,0.5);
+  }
+
+
+  .color-cell-count-2 .color-cell:nth-child(1) { 
+    background: red;
+    background: rgba(255,0,0,0.5);
+    left: 15%;
+  }
+
+  .color-cell-count-2 .color-cell:nth-child(2) { 
+    background: blue;
+    background: rgba(0,127,255,0.5);
+    left: 60%;
+  }
+  
    
    
 
@@ -265,11 +286,16 @@ table.attr('cellpadding',0);
         
         
         var colorCells = [];
+        
+
+        /**
         [0,1,2].forEach(function(o,i){
           var cc = DOM.div().addClass('color-cell color-cell-' + i);
           colorCells.push(cc);
           cell.append(cc);        
         });
+        ***/
+        
 
         campfire.subscribe('new-progression',function(o){
           cell.attr('class','cell');//remove extra classes
@@ -278,10 +304,13 @@ table.attr('cellpadding',0);
         campfire.subscribe('new-chord',function(o){
           o.chord.notes().each(function(chordNote){
             if (note.abstractlyEqualTo(chordNote)) {
-              colorCells[o.index].addClass('on'); //component
+              var cc = DOM.div().addClass('color-cell on');//// color-cell-' + i);
+              colorCells.push(cc);
+              cell.append(cc);        
               cell.addClass('chord-' + o.index); //combined
             }
           });
+          cell.addClass('color-cell-count-' + colorCells.length);          
         });
         campfire.subscribe('new-scale',function(o){
           ///cell.attr('class','cell');//remove extra classes
@@ -291,10 +320,24 @@ table.attr('cellpadding',0);
           var scale = o.scale;
           scale.notes().each(function(scaleNote){
             if (note.abstractlyEqualTo(scaleNote)) {
-              colorCells[o.index].addClass('on');
+
+
+              var cc = DOM.div().addClass('color-cell on');//// color-cell-' + i);
+              colorCells.push(cc);
+              cell.append(cc);        
+
+
+              //colorCells[o.index].addClass('on');
               cell.addClass('scale-' + o.index);
+
+
             }
           });
+
+          cell.addClass('color-cell-count-' + colorCells.length);          
+
+
+
           if (note.abstractlyEqualTo(scale.rootNote)) {
               cell.addClass('scale-' + o.index + '-root');
           }
