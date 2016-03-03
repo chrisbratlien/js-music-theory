@@ -378,7 +378,7 @@ BSD.ChordRulerPanel = function(spec) {
     btnBookmark.click(function(){
       var sets = BSD.rulers.select(function(ruler) { return ! ruler.deleted; }).map(function(ruler) { return ruler.allMIDIValuesCurrentlyOn(); });
       ////console.log('sets',JSON.stringify(sets));
-      var url = 'rulers.html?rulers=' + JSON.stringify(sets);
+      var url = 'rulers?rulers=' + JSON.stringify(sets);
       ////console.log(url);
       window.location.href = url;
     });
