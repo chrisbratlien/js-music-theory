@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>12 Fretboards</title>
+    <meta charset=utf-8 />
+    <style type="text/css">
+      body { font-size: 10px;
+        opacity: 0.5;
+      }
+      .inner { font-size: 10px; width: 45%; margin-left: 2%; float: left; }
+      table { 
+      border-bottom: 1px solid black; }
+      table { border-right: 1px solid black }
+      table td { padding: 0.2em; text-align: center; min-width: 1em;}
+      table td { border-top: 1px solid black; }
+      table td { border-left: 1px solid black; }
+      .fretboard-table { margin-bottom: 1.75em; }    
+      .stage { width: 90%; margin-left: 5%; }
+    </style>
+  </head>
+  <body>
+    <div class="stage">
+    </div>
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+    <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/array.js"></script>
+    <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/dom.js"></script>
+    <script src="http://cdn.dev.bratliensoftware.com/javascript/color.js"></script>
+    <script src="http://lucid.bratliensoftware.com/js-music-theory/javascript/js-music-theory.js"></script>
+
+    <script type="text/javascript">
+
+      var cscale = makeScale('Cmajor');
+      var noteNames = cscale.noteNames();
+      
+      
+      
+      function makeTable(wrap) {
+        
+        var inner = DOM.div().addClass('inner');
+        
+       var table = DOM.table().addClass('fretboard-table');
+      table.attr('cellspacing',0);
+      table.attr('cellpadding',0);
+        
+        table.empty();
+      
+      
+      console.log('cscale',cscale);
+          [64,59,55,50,45,40].each(function(open) { 
+            var row = DOM.tr();     [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].each(function(fret){ 
+              
+              var cell = DOM.td();
+              var note = Note(open+fret);
+             
+              var noteName = note.name();
+              
+              
+              if (true || noteNames.indexOf(noteName) > -1) {
+                
+        cell.html(noteName);
+                
+              }
+        
+              row.append(cell);
+              //console.log(note.name());
+            });
+            table.append(row);
+          });
+        inner.append(table);
+        wrap.append(inner);
+        }
+      
+      
+      for (var i = 0; i < 12 ; i++) {
+        makeTable(jQuery('.stage'));
+      }
+          
+    
+    
+    
+    
+    
+    </script>
+  </body>
+</html>

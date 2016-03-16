@@ -83,13 +83,15 @@ var Fret = function(spec) {
   };
   self.dim = function() {
     self.lit = false;
+    /**
     if (self.fretted) {
       self.changeColor(BSD.Color({ r: 119, g: 119, b: 119 })); //'#777'
     }
-    else {
+    else
+    {
+    **/
       self.changeColor(BSD.Color({ r: 221, g: 221, b: 221 })); //#ddd
-      div.html(null);
-    }
+      //div.html(null);
   };
   
   self.recolor = function(c) {
@@ -161,8 +163,6 @@ var Fret = function(spec) {
     var myAbstVal = self.value % 12;
     
     var count = histogram[myAbstVal];
-    
-    
     
     div.attr('class',
            function(i, c){
