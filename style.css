@@ -1,7 +1,15 @@
 body { font-family: Lucida Grande; }
 
+@media print { 
+  .screen-only { display: none;  }
+  .noprint { display: none;  }
+}
+
 
 table { overflow: auto; }
+
+
+
 
 
 

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-    <title><?php echo apply_filters('wp_title','WEEPY'); ?></title>
+    <title><?php echo apply_filters('wp_title','JSMT'); ?></title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
 
 
@@ -34,7 +34,7 @@
   <body <?php body_class(); ?>>
   
   
-   <header class="navbar navbar-fixed-top navbar-inverse navbar-music-player" id="top" role="banner">
+   <header class="navbar navbar-fixed-top navbar-inverse navbar-music-player noprint" id="top" role="banner">
       <div class="container">
         <div class="navbar-header">
           <div class="current-song-info header-column">
