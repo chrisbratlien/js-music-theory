@@ -356,6 +356,12 @@ var Note = function(foo) {
     if (typeof foo == "number") {
       return foo;
     }
+    
+    if (foo.match(/^\d+$/)) {
+      return parseInt(foo,10);
+    }
+    
+    
     if (typeof foo == "string") {
       return self.valueFromName(foo);
     }
@@ -528,7 +534,9 @@ function makeChordFromValues(values) {
 }
 
 function makeChordFromNotes(notes) {
-  var values = notes.map(function(o) { return o.value(); });
+  var values = notes.map(function(o) { 
+    return o.value(); 
+  });
   return makeChordFromValues(values);
 }
 

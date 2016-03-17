@@ -16,7 +16,6 @@
       <!-- <link href="lib/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">-->
     
       <link rel="stylesheet" href="style.css?v=2.1">
-      <link rel="stylesheet" href="lib/font-awesome-4.5.0/css/font-awesome.min.css">
 
 
 
