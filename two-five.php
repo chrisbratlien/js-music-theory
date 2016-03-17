@@ -1,89 +1,52 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" nomanifest="js-music-theory.manifest">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  
-<title>Two Five</title>
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-    <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
+<?php
 
-<link media="screen" href="css/testsuite.css" type="text/css" rel="stylesheet">
-<link media="screen,print" href="css/fretboard.css" type="text/css" rel="stylesheet">
-<link media="print" href="css/fretboard-print.css" type="text/css" rel="stylesheet">
-
-
-<link media="screen,print" href="css/teacher.css" type="text/css" rel="stylesheet">
-
-<script src="http://cdn.dev.bratliensoftware.com/javascript/array.js"></script>
-<script src="http://cdn.dev.bratliensoftware.com/javascript/bsd.pubsub.js"></script>
-<script src="http://cdn.dev.bratliensoftware.com/javascript/color.js"></script>
-<script src="http://cdn.dev.bratliensoftware.com/javascript/dom.js"></script>
-<script src="http://cdn.dev.bratliensoftware.com/javascript/draggy.js"></script>
-<script src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
-
-
-<!-- may try out some variations on eachify -->
-<script src="javascript/eachify.js"></script>
-
-
-<script src="javascript/bootup.js"></script>
-<script src="javascript/js-music-theory.js"></script>
-<script src="javascript/bsd.widgets.baseplayer.js"></script>
-<script src="javascript/bsd.widgets.stringoscillator.js"></script>
-<script src="javascript/bsd.widgets.guitarplayer.js"></script>
-<script type="text/javascript" src="javascript/bsd.widgets.procrastinator.js"></script>
-
-
-
-<script src="javascript/guitar.js"></script>
-
+add_action('wp_head',function(){
+?>
 <style type="text/css">
-.slider-wrap { 
-  display:inline; 
-  float: left; 
-  margin: 15px; 
-  height: 220px;
-}
-
-.slider-wrap .slider {
-  height: 100%;
-
-}
 
 #quiz-output .note { font-size: 3em; }
 
 
 
+#main { 
+  float: left;
+  width: 100%; 
+}
+
 .ruler {
+  position: relative;
   float: left; 
   padding: 0; 
   margin: 0; 
-  width: 8%;
   cursor: pointer; 
+}
+
+.ruler div { 
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
 }
 
 .ruler .title { 
   text-align: center; 
   font-size: 1rem; 
   line-height: 1.55rem;
- }
+  max-width: none;
+}
 
 
 .ruler .cell {  
+
   height: 50px; 
   line-height: 50px; 
+
   font-size: 50px;
   padding: 3px; 
   text-align: center; 
   color: #bbb;
 }
 .ruler .active { background: #33b; color: white; }
-
-
-
 
 
 
@@ -129,47 +92,42 @@ and (min-width : 768px) {
     font-size: 10px; 
   }
 
+  #progression { width: 100%: }
+
 }
 
-
-
-
-
-
 </style>
-</head>
-<body id="css-zen-garden">
-  <div id="container">
-    <div id="supportingText">
+
+<?php
+
+});
+
+get_header();
+?>
       <button id="more-palettes">Redraw Palettes</button>
-      <div id="pickers">   </div><!-- pickers -->
-
-
-        <div class="slider-wrap">
-          Volume: <br /><span id="volume-amount"></span>
-          <div class="slider" id="volume-input"></div>
-        </div>
-        <div class="slider-wrap">
-            Detune:<br /> <span id="detune-amount"></span>
-          <div class="slider" id="detune-input"></div>
-        </div>
-        <div style="clear: both;">&nbsp;</div>        
-      <div id="main">
+      <div class="noprint">
+        <br/>
+        <br/>
       </div>
-      <button id="redo">Redo</button>
+      <div id="pickers">   </div><!-- pickers -->
       
-      <label>Progression <br />
-        <input id="progression" />
-      </label>
+      <div class="progression-form">
+        <button id="redo">Redo</button>
+        <label>Progression</label>
+        <input type="text" id="progression" class="form-control" />
       
-      
-    </div>
-  </div>
-  
+      </div>
+      <br />
+      <div id="main"></div>
+
+<?php
+
+add_action('wp_footer',function(){
+?>
+ 
 <script type="text/javascript">
 
-
-var campfire = BSD.PubSub({});
+///var campfire = BSD.PubSub({});
 
 if (typeof BSD == "undefined") {
   var BSD = {};    
@@ -214,9 +172,6 @@ window.addEventListener('touchstart', function() {
 	source.noteOn(0);
 
 }, false);
-  
-  
-  
   
   
   
@@ -272,7 +227,11 @@ window.addEventListener('touchstart', function() {
 
 
   BSD.parseProgression = function(progString) {
-    var barStrings = progString.split('|');
+    var barStrings = progString.split(/\ +|\|/);
+    
+    barStrings = barStrings.select(function(o){ return o.length > 0; });
+    
+    
     
     var barIndex = 0;
     var chordIndex = 0;
@@ -308,19 +267,7 @@ window.addEventListener('touchstart', function() {
     console.log('result',result);
     return result;
   };
-  
-
-
-  
-  
-
-  //var degreeStr = $('#include_degrees-' + id).val();
-  //zz id = fretboardID.replace(/fretboard-/,'');
-  ////var degrees = include_degrees(id);
-  //console.log(scalesByDegree.length);
-  
-   ///}
-      
+        
     BSD.audioPlayer = BSD.Widgets.GuitarPlayer({
       ////gossip: campfire,
       context: context,
@@ -333,13 +280,22 @@ window.addEventListener('touchstart', function() {
     
     var waiter = BSD.Widgets.Procrastinator({ timeout: 250 });
 
+
+    BSD.volume = 0;
+    storage.getItem('volume',function(o){
+        BSD.volume = parseFloat(o);
+        waiter.beg(BSD.audioPlayer,'set-master-volume',BSD.volume);
+        jQuery( "#volume-amount" ).text( BSD.volume );
+    });
+
+
     $( "#volume-input" ).slider({
-      orientation: "vertical",
+      orientation: "horizontal",
       range: "min",
       min: 0,
       max: 0.1,
       step: 0.01,
-      value: 0.01,
+      value: BSD.volume,
       slide: function( event, ui ) {
         var newVolume = ui.value;
         waiter.beg(BSD.audioPlayer,'set-master-volume',ui.value);
@@ -349,31 +305,7 @@ window.addEventListener('touchstart', function() {
     });
 
 
-
-
-    $( "#detune-input" ).slider({
-      orientation: "vertical",
-      range: "min",
-      min: -7.0,
-      max: 7.0,
-      step: 0.25,
-      value: 0.0,
-      slide: function( event, ui ) {
-        var n = ui.value;
-        
-        waiter.beg(BSD.audioPlayer,'set-detune-semis',n);        
-        //////campfire.publish('set-speed-ms',n);
-        jQuery( "#detune-amount" ).text( n );
-      }
-    });
-    
-    var volumeInput = jQuery('#volume-input');
-    volumeInput.change(function(){
-        BSD.audioPlayer.publish('set-master-volume',volumeInput.val());    
-    });
-    
-    BSD.audioPlayer.publish('set-master-volume',0.01);
-
+   
   jQuery(document).on('keydown',function(e) {
     var c = e.keyCode || e.which;
     
@@ -411,6 +343,8 @@ function getRandomArbitrary(min, max) {
 
   campfire.subscribe('repaint-wrap',function(payload) {
 
+    var state = {};
+
 
     JSMT.allMIDIValues.select(function(o) {
       return o >= 40 && o <= 70;
@@ -418,16 +352,48 @@ function getRandomArbitrary(min, max) {
       var cell = DOM.div().addClass('cell');
       var note = Note(n);
       cell.append(note.utf8Name());
-      if (payload.chord.containsNote(note)) {
+      
+      var isChordTone = payload.chord.containsNote(note);
+      
+      state[n] = isChordTone;
+
+      if (isChordTone) {
         cell.css('background','#' + randColor.toHex());
-        cell.on('mouseout	mouseenter touchmove mouseover touchend',function(e){
-          ////console.log('hover',note);
-          //console.log('e',e);
-          if (e.shiftKey) { return false; }
-          BSD.audioPlayer.playNote(note,1000);
-        });
         cell.addClass('active');  
       }
+
+      
+      cell.on('mouseenter mouseover touchend',function(e){
+        ////console.log('hover',note);
+        //console.log('e',e);
+        if (e.shiftKey) { return false; }
+        if (isChordTone && state[n]) {
+          BSD.audioPlayer.playNote(note,1000);
+        }
+        campfire.publish('note-hover',note);
+      });
+      
+      cell.click(function(){
+        state[n] = (state[n]) ? false : true;
+
+
+        if (state[n] && isChordTone) {
+          cell.css('background','#' + randColor.toHex());
+          cell.addClass('active');  
+        }
+        else if (state[n]) {
+          cell.css('background','#' + BSD.chosenColor.toHex());
+          cell.addClass('active');  
+        }
+        else {
+          cell.css('background','inherit');
+          cell.removeClass('active');  
+        }
+      
+      });
+      
+      
+      
       payload.wrap.append(cell);
     });
     ////console.log(currentRootNote.name());  
@@ -512,7 +478,60 @@ function getRandomArbitrary(min, max) {
   });
 
 
+  campfire.subscribe('note-hover',function(note){
+    //console.log('note',note.name());
+    BSD.currentNote = note;
+      if (BSD.strum) {
+        BSD.audioPlayer.playNote(note,1000);          
+      }
+  });
 
-</script>  
-</body>
-</html>
+
+  jQuery(document).on('keydown',function(e) {
+    var c = e.keyCode || e.which;
+    
+    console.log(c);///'BSD.currentFretDiv',BSD.currentFretDiv);
+
+
+    /*** possibly obsolete...not 100% sure though yet..    
+    if (BSD.currentFretDiv && c == BSD.keycodes.f) {
+      BSD.currentFretDiv.trigger('click');    
+    }
+    ****/
+    
+
+
+    if (BSD.currentNote && c == BSD.keycodes.f) {
+      BSD.audioPlayer.playNote(BSD.currentNote,1000);    
+    }
+
+    if (BSD.currentChord && c == BSD.keycodes.f) {
+      BSD.audioPlayer.playChord(BSD.currentChord,1000);    
+    }
+
+
+
+    if (BSD.currentNote && c == BSD.keycodes.d) {
+      BSD.strum = true;
+      ////BSD.audioPlayer.playNote(BSD.currentNote,1000);    
+    }
+    
+    if (e.shiftKey) {
+      BSD.strum = true;
+    }
+    
+    
+    
+  });
+  
+  jQuery(document).on('keyup',function(e) {
+    BSD.strum = false;
+  });
+
+
+
+</script>
+
+<?php
+});
+  get_footer();

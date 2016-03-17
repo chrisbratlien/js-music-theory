@@ -1,6 +1,11 @@
 ///////////Array prototype versions //////////
 Array.prototype.collect = Array.prototype.map;
 
+Array.prototype.reject = function(test) { //return all but those which pass the test
+  return this.select(function(element) { return !test(element); });
+}
+
+
 //select returns an array containing only the elements which pass the test
 Array.prototype.select = function(test) {
   var result = [];

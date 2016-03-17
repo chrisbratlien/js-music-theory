@@ -816,7 +816,11 @@ var RootNoteWithIntervals = function(spec) {
   };
 
   self.notesNotFoundIn = function(other) {
-    return self.notes().reject(function(n) { return other.containsNote(n); });
+  
+    var selfNotes = self.notes();
+    return selfNotes.reject(function(n) { 
+      return other.containsNote(n); 
+    });
   };
 
 
