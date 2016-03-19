@@ -41,6 +41,8 @@ add_action('wp_head',function(){
   
  
   .controls { margin-left: 0.4rem; }
+  .controls .fa-close { cursor: pointer; }
+
   /**
   .control.play-all { background: green; height: 50px; max-height: 50px; line-height: 50px; } 
   .control.play-all:active { background: #0f0; }
@@ -74,7 +76,11 @@ get_header(); ?>
 
 </div><!-- color-pickers-wrap -->
 
-
+<div class="navbar-spacer screen-only noprint">
+  <button class="btn btn-info btn-add-fretboard noprint"><i class="fa fa-plus"></i> Add Fretboard</button>
+  <br />
+  <br />
+</div>
 <div class="stage"></div>
 
 <?php
@@ -249,6 +255,13 @@ add_action('wp_footer',function(){
           controls.append(playAll);
           inner.append(controls);
           
+          var close = DOM.div('<i class="fa fa-3x fa-close"></i> ').addClass('noprint');
+
+          close.click(function(){
+            inner.remove();
+          });
+          controls.append(close);
+          
           wrap.append(inner);
         };
         
@@ -257,10 +270,15 @@ add_action('wp_footer',function(){
 
       BSD.boards = [];
       
+      
+
+
       var stage = jQuery('.stage');
-      for (var i = 0; i < 12 ; i++) {
+      
+      function makeFretboardOn(wrap) {
+
         var board = BSD.Widgets.Fretboard({});
-        board.renderOn(stage);
+        board.renderOn(wrap);
         
         board.subscribe('play-notes',function(notes){
           campfire.publish('play-notes',notes);
@@ -270,7 +288,22 @@ add_action('wp_footer',function(){
         });
         
         BSD.boards.push(board);
+      
       }
+      
+      
+      for (var i = 0; i < 12 ; i++) {
+        makeFretboardOn(stage);
+      }
+
+
+
+    jQuery('.btn-add-fretboard').click(function(){
+      makeFretboardOn(stage); 
+    });
+      
+
+
 
   var context = new webkitAudioContext();
   BSD.audioContext = context;
