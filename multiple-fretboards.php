@@ -7,7 +7,8 @@ add_action('wp_head',function(){
 <title>12 Fretboards</title>
 
 <style type="text/css">
-  body { font-size: 10px;
+  body { 
+    font-size: 10px;
   }
 
   .inner { font-size: 10px; width: 45%; margin-left: 2%; float: left; }
@@ -28,13 +29,17 @@ add_action('wp_head',function(){
   table td { border-top: 1px solid  rgba(0,0,0,0.5); }
   table td { border-left: 1px solid  rgba(0,0,0,0.5); }
   .fretboard-table { margin-bottom: 1.75em; }    
-  .stage { width: 90%; margin-left: 5%; }
+  .stage { width: 100%; margin: 0; }
   
   .cell { cursor: pointer; }
   table td { cursor: pointer; }
   
 
   @media print  { 
+
+    body { font-size: 7pt; }
+    .inner { font-size: 7pt; }
+    
     .stage { color: rgba(0,0,0,0.5); }
   
   }
@@ -201,7 +206,7 @@ add_action('wp_footer',function(){
           table.empty();
           //console.log('cscale',cscale);
           [64,59,55,50,45,40].each(function(open) { 
-            var row = DOM.tr();     [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15].each(function(fret){ 
+            var row = DOM.tr();     [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17].each(function(fret){ 
               
               var cell = DOM.td();
               
@@ -223,9 +228,17 @@ add_action('wp_footer',function(){
                 
                 if (state[midiValue]) {
                   var hex = BSD.chosenColor.toHex();
-                  console.log('hex',hex);
+                  
+                  var sum = BSD.chosenColor.r + BSD.chosenColor.g + BSD.chosenColor.b;
+                  
+                  console.log('hex',hex,'sum',sum);
                   cell.css('background-color','#' + hex);
                   cell.css('color','white');
+
+                  
+                  (sum > 500) ? cell.css('color','#333') : cell.css('color','white');
+
+
                 }
                 else {
                   cell.css('background-color','inherit');
