@@ -244,7 +244,9 @@ JSMT.chordMap = {
 
     '7b5':   { name: 'dominant7Flat5', intervals: [0,4,6,10] }, //verified
     '7-5':   { name: 'dominant7Flat5', intervals: [0,4,6,10] }, //verified
+
     '7+5':   { name: 'dominant7Sharp5', intervals: [0,4,8,10] }, //verified
+    '+7':   { name: 'dominant7Sharp5', intervals: [0,4,8,10] }, //verified
     '7#5':   { name: 'dominant7Sharp5', intervals: [0,4,8,10] }, //verified
 
 
