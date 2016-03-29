@@ -17,7 +17,7 @@ BSD.Widgets.Sequencer = function(spec) {
   self.setTempo = function(bpm) {
     self.tempo = bpm;
     tempoMillis = self.tempoToMillis(bpm);
-    tickMillis = tempoMillis / 2;
+    tickMillis = tempoMillis / 4;
   };
   self.flush = function() {
     timerQueue = [];
