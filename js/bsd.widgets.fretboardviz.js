@@ -213,7 +213,21 @@ BSD.Widgets.FretboardViz = function(spec) {
       
       var compatibleScales = chord.compatibleScales();
 
+      compatibleScales = compatibleScales.select(function(o){
+        return o.rootNote.abstractlyEqualTo(chord.rootNote);
+      });
+      scale = compatibleScales.atRandom();
 
+
+      console.log('compatScal',compatibleScales);
+
+      /**
+      preferredGuesses.push('lydian');
+      preferredGuesses.push('harmonic minor');
+      preferredGuesses.push('dorian');
+      preferredGuesses.push('mixolydian');
+      preferredGuesses.push('major');
+      **/
 
       /***
       if (self.currentChordIsProbably2of251(o)) {
@@ -229,6 +243,8 @@ BSD.Widgets.FretboardViz = function(spec) {
       }
       ****/
 
+
+      /***
       
       preferredGuesses.push(chord.rootNote.scale('major').fullName()); //hail mary before we start guessing and hit an off-major.…      
 
@@ -243,11 +259,12 @@ BSD.Widgets.FretboardViz = function(spec) {
         //console.log('found preferred',scale.fullName());
       }
 
-
-      /***
+      ***/
+      
+      
       if (!scale) {
-        var randomGuesses = ['major','harmonic minor','blues','pentatonic'];      
-        scale = chord.scales.detect(function(s){ 
+        var randomGuesses = ['lydian','harmonic minor','dorian','mixolydian','major'];      
+        scale = compatibleScales.detect(function(s){ 
           var guess;
           guess = randomGuesses.atRandom();
           if (s.fullName().match(guess)) { return true; } 
@@ -258,7 +275,6 @@ BSD.Widgets.FretboardViz = function(spec) {
           return false;
         });
       }
-      ***/
       
       
       if (scale) {

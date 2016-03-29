@@ -79,7 +79,8 @@ BSD.StringOscillator = function(spec) {
     
       var rate = o.freq * Math.pow(2.0, -detune1/1200);
       osc.frequency.value = rate;
-      osc.type = (Math.random() > 0.9) ? SINE : TRIANGLE;/////].atRandom();//SINE;
+      //////osc.type = (Math.random() > 0.9) ? SINE : TRIANGLE;/////].atRandom();//SINE;
+      osc.type = 'sine';
   
       gain.gain.setTargetAtTime(myVolume, time, ampAttack);
       gain.gain.setTargetAtTime(0, time + ampAttack, ampDecay);

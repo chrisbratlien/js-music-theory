@@ -183,7 +183,6 @@ BSD.songlist.addSong({
 
 BSD.songlist.addSong({
   progression: (
-  
     'Bb6 G7|C-7 F7|BbM7 EbM7|D-7 Db7|' +
     'C-7|F7|Bb6 G7b9|C-7 F7|' +
     'Bb6 G7|C-7 F7|BbM7 EbM7|D-7 Db7|' +
@@ -196,6 +195,19 @@ BSD.songlist.addSong({
   title: 'I\'ve got the World on a String'
 });
 
+BSD.songlist.addSong({
+  progression: (
+    'CM7|CM7|F#-7b5|B7|' +
+    'FM7|FM7|F-7|Bb7|' +
+    'E-7|A7b9|D-7|B-7b5 E+7|' +
+    'A-7|D7|D-7|Ab7 G7|' +
+    'CM7|CM7|F#-7b5|B7|' +
+    'FM7|FM7|F-7|Bb7|' +
+    'E-7|A7b9|D-7|G7b9|' +
+    'CM7|F7|CM7|G+7'
+  ),
+  title: 'Summer Samba'
+});
 
 
 
