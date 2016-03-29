@@ -178,3 +178,24 @@ BSD.songlist.addSong({
     ),
   title: 'I Should Care'
 });
+
+
+
+BSD.songlist.addSong({
+  progression: (
+  
+    'Bb6 G7|C-7 F7|BbM7 EbM7|D-7 Db7|' +
+    'C-7|F7|Bb6 G7b9|C-7 F7|' +
+    'Bb6 G7|C-7 F7|BbM7 EbM7|D-7 Db7|' +
+    'C-7|F7|Bb6|Bb6|' +
+    'D7|D7|G7b9|G7b9|' +
+    'C7|C7|C-7|F7|' +
+    'Bb6 G7|C-7 F7|BbM7 EbM7|D-7 Db7|' +
+    'C-7|F7|Bb6 G7b9|C-7 F7'
+  ),
+  title: 'I\'ve got the World on a String'
+});
+
+
+
+

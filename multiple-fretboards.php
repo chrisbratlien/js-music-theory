@@ -17,17 +17,18 @@ add_action('wp_head',function(){
 
 
   table { 
-    border-bottom: 1px solid rgba(0,0,0,0.5); 
-    border-right: 1px solid  rgba(0,0,0,0.5); 
+    border-bottom: 1px solid rgba(0,0,0,0.1); 
+    border-right: 1px solid  rgba(0,0,0,0.1); 
   }
   table td { 
     padding: 0.2em; text-align: center; 
     width: 1.7em;
     height: 1.5em;    
     text.align: center;
+    border-radius: 1rem;
   }
-  table td { border-top: 1px solid  rgba(0,0,0,0.5); }
-  table td { border-left: 1px solid  rgba(0,0,0,0.5); }
+  table td { border-top: 1px solid  rgba(0,0,0,0.1); }
+  table td { border-left: 1px solid  rgba(0,0,0,0.1); }
   .fretboard-table { margin-bottom: 1.75em; }    
   .stage { width: 100%; margin: 0; }
   
@@ -214,6 +215,9 @@ add_action('wp_footer',function(){
               var note = Note(midiValue);
              
               var noteName = note.name();
+              
+              noteName = JSMT.toUTF8(noteName);
+              
               
               
               if (true || noteNames.indexOf(noteName) > -1) {

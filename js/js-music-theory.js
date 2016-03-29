@@ -92,8 +92,8 @@ JSMT.toUTF8 = function(str) {
     return str; 
   }
   var result = str;
-  result = result.replace(/#/g,'&#9839;');
-  result = result.replace(/b/g,'&#9837;');
+  result = result.replace(/#/g,'♯');
+  result = result.replace(/b/g,'♭');
   return result;
 };
 
