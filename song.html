@@ -226,10 +226,19 @@
       Detune:<br /> <span id="detune-amount">0</span>
     <div class="slider" id="detune-input"></div>
   </div>
+
+
   <div class="slider-wrap">
       Speed (delay):<br /> <span id="speed-amount">1000</span>
     <div class="slider" id="speed-input"></div>
   </div>
+
+
+  <div class="slider-wrap">
+      Tempo<br /> <span id="tempo-amount">60</span>
+    <div class="slider" id="tempo-input"></div>
+  </div>
+
 
   <div class="slider-wrap">
       Repeats:<br /> <span id="repeats-amount">1</span>
@@ -360,18 +369,15 @@
   
 
   var progressionClock;
-  var sequencer = BSD.Widgets.Sequencer({ tempo: 60 });
-  
-  
-  
-  
-  
-  
-  
+  var sequencer = BSD.Widgets.Sequencer({ tempo: BSD.tempo }); 
   
   
   
   campfire.subscribe('lets-do-this',function(prog) {
+
+
+    sequencer.setTempo(BSD.tempo);//////BSD.Widgets.Sequencer({ tempo: BSD.tempo }); 
+
 
 
     if (BSD.repeats > 0) {
@@ -391,9 +397,21 @@
     sequencer.flush();
     var baseTime = (new Date()).getTime()+5000; //five secs in future;
     var dt = 0;
+    
+    
+    var beatMS = 60000 / BSD.tempo; //////// * (1000 / 60); //convert bpm to ms.
+    
+    var halfBarMS = beatMS * 2;
+    var fullBarMS = beatMS * 4;
+    
     eachify(items).eachPCN(function(o) {
-      dt += 2500; //smallest inc...
-      if (!o.halfBar) { dt += 2500; }
+      
+      if (o.current.halfBar) { 
+        dt += halfBarMS; 
+      }
+      else {
+        dt += fullBarMS;
+      }
       
       
       o.current.next = o.next;
@@ -693,15 +711,33 @@ $( "#detune-input" ).slider({
 $( "#speed-input" ).slider({
   orientation: "vertical",
   range: "min",
-  min: 400,
+  min: 100,
   max: 2000,
-  step: 100,
+  step: 50,
   value: 1000,
   slide: function( event, ui ) {
     var n = ui.value;
     
     waiter.beg(progressionClock,'set-speed-ms',n);        
     jQuery( "#speed-amount" ).text( n );
+  }
+});
+
+BSD.tempo = 100;
+$( "#tempo-input" ).slider({
+  orientation: "vertical",
+  range: "min",
+  min: 60,
+  max: 140,
+  step: 1,
+  value: BSD.tempo,
+  slide: function( event, ui ) {
+    var n = ui.value;
+    BSD.tempo = n;
+    sequencer.setTempo(BSD.tempo);//////BSD.Widgets.Sequencer({ tempo: BSD.tempo }); 
+
+    ////waiter.beg(progressionClock,'set-tempo',n);        
+    jQuery( "#tempo-amount" ).text( n );
   }
 });
 
