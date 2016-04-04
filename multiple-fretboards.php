@@ -216,7 +216,7 @@ add_action('wp_footer',function(){
              
               var noteName = note.name();
               
-              noteName = JSMT.toUTF8(noteName);
+              //noteName = JSMT.toUTF8(noteName);
               
               
               
