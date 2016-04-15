@@ -206,10 +206,13 @@ add_action('wp_footer',function(){
           
           table.empty();
           //console.log('cscale',cscale);
-          [64,59,55,50,45,40].each(function(open) { 
+          [64,59,55,50,45,40].forEach(function(open,stringIdx) { 
             var row = DOM.tr();     [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17].each(function(fret){ 
               
               var cell = DOM.td();
+              
+              cell.addClass('fret-' + fret);
+              cell.addClass('string-' + (stringIdx+1));
               
               var midiValue = open+fret;
               var note = Note(midiValue);

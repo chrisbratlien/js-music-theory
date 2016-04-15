@@ -40,6 +40,11 @@ if (typeof String.prototype.supplant == 'undefined') {
 JSMT = {};
 
 
+JSMT.midi2Hertz = function(x) {
+    return Math.pow(2,(x-69)/12)*440;
+};
+
+
 
 JSMT.allMIDIValues = [];
 for(var i = 0; i < 128; i += 1) {
