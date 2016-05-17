@@ -4,6 +4,7 @@
 add_filter('wp_title',function($o){ return 'Multiple Fretboards'; });
 add_action('wp_head',function(){
 ?>
+
 <title>12 Fretboards</title>
 
 <style type="text/css">
@@ -100,6 +101,10 @@ add_action('wp_footer',function(){
     
     <script src="http://lucid.bratliensoftware.com/js-music-theory/javascript/js-music-theory.js"></script>
     -->
+    
+    <script src="http://cdn.dev.bratliensoftware.com/javascript/draggy.js"></script>
+    <script src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
+    
     <script type="text/javascript">
 
 
@@ -267,6 +272,17 @@ add_action('wp_footer',function(){
           var controls = DOM.div().addClass('controls noprint');
           
           var playAll = DOM.button('<i class="fa fa-play"></i>').addClass('btn btn-success control play-all');
+
+
+          var stickyNoteButton = DOM.button('<i class="fa fa-sticky-note-o"></i>').addClass('btn btn-info');
+          stickyNoteButton.click(function(e) {
+            ///console.log(e,'sticky');
+          
+            var sticky = BSD.Widgets.StickyNote(e);
+            sticky.renderOn(jQuery(document.body));
+          });
+          controls.append(stickyNoteButton);
+          
 
 
           playAll.click(function(){
