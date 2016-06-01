@@ -193,15 +193,21 @@ add_action('wp_footer',function(){
         var self = BSD.PubSub({});
         self.spec = spec;
         
-        
-        var state = {};
-        
         self.selectedNotes = function() {
-          var numbers = Object.keys(state).select(function(n){ return state[n]; });
+          console.log('selectedNotes data',spec.data);
+        
+          var numbers = spec.data.select(function(o) {
+            return o.selected;
+          }).map(function(o) { 
+            return o.noteValue; 
+          });    
+          
+          ////Object.keys(state).select(function(n){ return state[n]; });
+          
           console.log('numbers',numbers);
           var result = numbers.map(function(n) { return Note(n); });
           return result;
-        }
+        };
         
         self.renderOn = function(wrap) {      
           var inner = DOM.div().addClass('inner');
@@ -212,7 +218,15 @@ add_action('wp_footer',function(){
           table.empty();
           //console.log('cscale',cscale);
           [64,59,55,50,45,40].forEach(function(open,stringIdx) { 
-            var row = DOM.tr();     [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17].each(function(fret){ 
+            var row = DOM.tr();     
+            [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17].each(function(fret){ 
+
+
+              var fretData = spec.data.detect(function(o){
+                return (o.string == stringIdx + 1) && o.fret == fret;
+              });
+              
+              //console.log('fretData',fretData);
               
               var cell = DOM.td();
               
@@ -226,8 +240,6 @@ add_action('wp_footer',function(){
               
               //noteName = JSMT.toUTF8(noteName);
               
-              
-              
               if (true || noteNames.indexOf(noteName) > -1) {
                 
                 cell.html(noteName);
@@ -235,12 +247,13 @@ add_action('wp_footer',function(){
               }
               
               cell.click(function(){
+                console.log('click!!');
+
+                fretData.selected = ! fretData.selected; //toggle its state
               
-                state[midiValue] = (state[midiValue]) ? false : true;
                 
-                if (state[midiValue]) {
+                if (fretData.selected) {
                   var hex = BSD.chosenColor.toHex();
-                  
                   var sum = BSD.chosenColor.r + BSD.chosenColor.g + BSD.chosenColor.b;
                   
                   console.log('hex',hex,'sum',sum);
@@ -313,7 +326,9 @@ add_action('wp_footer',function(){
       
       function makeFretboardOn(wrap) {
 
-        var board = BSD.Widgets.Fretboard({});
+        var board = BSD.Widgets.Fretboard({
+          data: JSON.parse(JSON.stringify(BSD.guitarData))
+        });
         board.renderOn(wrap);
         
         board.subscribe('play-notes',function(notes){
@@ -328,9 +343,6 @@ add_action('wp_footer',function(){
       }
       
       
-      for (var i = 0; i < 12 ; i++) {
-        makeFretboardOn(stage);
-      }
 
 
 
@@ -414,7 +426,7 @@ add_action('wp_footer',function(){
   jQuery(document).on('keydown',function(e) {
     var c = e.keyCode || e.which;
     
-    console.log(c);///'BSD.currentFretDiv',BSD.currentFretDiv);
+    //console.log(c);///'BSD.currentFretDiv',BSD.currentFretDiv);
 
 
     /*** possibly obsolete...not 100% sure though yet..    
@@ -452,6 +464,14 @@ add_action('wp_footer',function(){
     BSD.strum = false;
   });
       
+    
+  BSD.importJSON('data/guitar.json',function(o) { 
+    BSD.guitarData = o;
+    for (var i = 0; i < 12 ; i++) {
+      makeFretboardOn(stage);
+    }
+  });
+    
     
       
     </script>
