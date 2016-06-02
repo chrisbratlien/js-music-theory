@@ -27,9 +27,17 @@ add_action('wp_head',function(){
     height: 1.5em;    
     text.align: center;
     border-radius: 1rem;
+    border-top: 1px solid  rgba(0,0,0,0.1); 
+    border-left: 1px solid  rgba(0,0,0,0.1); 
+  
+  
+    -webkit-user-select: none;   /* Chrome/Safari/Opera */
+    -khtml-user-select: none;    /* Konqueror */
+    -moz-user-select: none;      /* Firefox */
+    -ms-user-select: none;       /* Internet Explorer/Edge */
+    user-select: none;      
+  
   }
-  table td { border-top: 1px solid  rgba(0,0,0,0.1); }
-  table td { border-left: 1px solid  rgba(0,0,0,0.1); }
   .fretboard-table { margin-bottom: 1.75em; }    
   .stage { width: 100%; margin: 0; }
   
@@ -148,6 +156,8 @@ add_action('wp_footer',function(){
       
       var palettes = [];
       
+      var savedColors = {};
+      
       campfire.subscribe('redraw-palettes',function(){
         pickers.empty();
         palettes = [];
@@ -173,7 +183,11 @@ add_action('wp_footer',function(){
             picker.renderOn(pickers);
             picker.subscribe('click',function(color){
               BSD.chosenColor = color;    
-              picker.renderOn(selectedColors);
+              var hex = color.toHex();
+              if (!savedColors[hex]) {
+                savedColors[hex] = true;
+                picker.renderOn(selectedColors);
+              }
             });
           });
         });
