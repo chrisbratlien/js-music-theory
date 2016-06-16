@@ -270,7 +270,7 @@ add_action('wp_footer',function(){
                   var hex = BSD.chosenColor.toHex();
                   var sum = BSD.chosenColor.r + BSD.chosenColor.g + BSD.chosenColor.b;
                   
-                  console.log('hex',hex,'sum',sum);
+                  console.log('hex',hex,'sum',sum,'rgb:',BSD.chosenColor.r,BSD.chosenColor.g,BSD.chosenColor.b);
                   cell.css('background-color','#' + hex);
                   cell.css('color','white');
 
