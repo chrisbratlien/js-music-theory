@@ -30,12 +30,13 @@ function midi2Hertz(x,detuneSemitoneOffset) {
 
 
 
-BSD.importJSON = function(url,callback) {
+BSD.importJSON = function(url,callback,error) {
     jQuery.ajax({
       type: 'GET',
       url: url,
       dataType: 'json',
-      success: callback
+      success: callback,
+      error: error
     });
 };
 

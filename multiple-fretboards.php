@@ -116,7 +116,7 @@ add_action('wp_footer',function(){
     <script type="text/javascript">
 
 
-
+      BSD.foo = [];
 
       BSD.chosenColor = BSD.colorFromHex('#888888');
       BSD.ColorPicker = function(spec) {
@@ -229,13 +229,23 @@ add_action('wp_footer',function(){
           table.attr('cellspacing',0);
           table.attr('cellpadding',0);
           
+          
+          
           table.empty();
           //console.log('cscale',cscale);
           [64,59,55,50,45,40].forEach(function(open,stringIdx) { 
             var row = DOM.tr();     
             [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17].each(function(fret){ 
 
+              /***
+              BSD.foo.push({
+                fret: fret,
+                string: stringIdx+1,
+                midiValue: open+fret
+              });
+              ***/
 
+                  
               var fretData = spec.data.detect(function(o){
                 return (o.string == stringIdx + 1) && o.fret == fret;
               });
@@ -252,6 +262,9 @@ add_action('wp_footer',function(){
              
               var noteName = note.name();
               
+
+              
+
               //noteName = JSMT.toUTF8(noteName);
               
               if (true || noteNames.indexOf(noteName) > -1) {
@@ -270,7 +283,7 @@ add_action('wp_footer',function(){
                   var hex = BSD.chosenColor.toHex();
                   var sum = BSD.chosenColor.r + BSD.chosenColor.g + BSD.chosenColor.b;
                   
-                  console.log('hex',hex,'sum',sum,'rgb:',BSD.chosenColor.r,BSD.chosenColor.g,BSD.chosenColor.b);
+                  console.log('hex',hex,'sum',sum);
                   cell.css('background-color','#' + hex);
                   cell.css('color','white');
 
@@ -367,7 +380,7 @@ add_action('wp_footer',function(){
 
 
 
-  var context = new webkitAudioContext();
+  var context = new AudioContext();
   BSD.audioContext = context;
 
     BSD.audioPlayer = BSD.Widgets.GuitarPlayer({
@@ -484,6 +497,10 @@ add_action('wp_footer',function(){
     for (var i = 0; i < 12 ; i++) {
       makeFretboardOn(stage);
     }
+  },
+  function(e){
+    console.log('e',e);
+  
   });
     
     
