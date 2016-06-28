@@ -272,7 +272,7 @@ window.addEventListener('touchstart', function() {
       ////gossip: campfire,
       context: context,
       ////name: 'Piano',//chosen, //'Piano',
-      polyphonyCount: 48,//polyphonyCount,
+      polyphonyCount: 96,//polyphonyCount,
       range: [-300,128]
     });
       
@@ -324,7 +324,7 @@ function getRandomArbitrary(min, max) {
   
   var main = jQuery('#main');
 
-  var flavors = ['-7','7','6','-6','-7b5','7b9','M7','13','7#9','-9','9','M9','-13','+7']; //fixme, what should this do? why are we limiting these?
+  var flavors = ['-7','7','6','-6','-7b5','7b9','M7','13','7#9','-9','9','M9','-13','+7','']; //fixme, what should this do? why are we limiting these?
   var flav = flavors.atRandom();
 
 
