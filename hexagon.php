@@ -26,7 +26,8 @@ get_header();
 
 add_action('wp_footer',function(){
 ?>
-<script src="lib/Hexagon.js/hexagon.js"></script> 
+<!--<script src="lib/Hexagon.js/hexagon.js"></script> -->
+<script src="js/hexagon.js"></script>
 <script type="text/javascript">
 
 ///var campfire = BSD.PubSub({});
