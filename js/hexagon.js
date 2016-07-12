@@ -19,6 +19,10 @@ function HexagonGrid(canvasId, radius) {
     //this.canvas.addEventListener("mousedown", this.clickEvent.bind(this), false);
     var evtName = HAS_TOUCH ? 'touchstart' : 'mousedown';
     this.canvas.addEventListener(evtName, this.clickEvent.bind(this), false);
+
+    if (!HAS_TOUCH) {
+      this.canvas.addEventListener('mousemove', this.hoverEvent.bind(this), false);
+    }
 };
 
 
@@ -204,6 +208,21 @@ HexagonGrid.prototype.isPointInTriangle = function isPointInTriangle(pt, v1, v2,
 
     return ((b1 == b2) && (b2 == b3));
 };
+
+
+HexagonGrid.prototype.hoverEvent = function (e) {
+
+    ///console.log('hoverEvent',e);
+    var mouseX = e.pageX;
+    var mouseY = e.pageY;
+
+    var localX = mouseX - this.canvasOriginX;
+    var localY = mouseY - this.canvasOriginY;
+
+    var tile = this.getSelectedTile(localX, localY);
+    
+    this.msgs.publish('tile-hovered',tile);
+}
 
 HexagonGrid.prototype.clickEvent = function (e) {
     var mouseX = e.pageX;

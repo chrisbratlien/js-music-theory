@@ -323,9 +323,15 @@ function getRandomArbitrary(min, max) {
     var hexagonGrid = new HexagonGrid("HexCanvas", 55);
     hexagonGrid.drawHexGrid(7, 10, 50, 50, true);
     hexagonGrid.msgs.subscribe('tile-clicked',function(o){ 
-      console.log('o?',o); 
+      //console.log('o?',o); 
       var n = Note(o.midiValue);
       campfire.publish('play-note', { note: n, duration: 1000 });
+    });
+    hexagonGrid.msgs.subscribe('tile-hovered',function(o){ 
+      //console.log('o?',o); 
+      var n = Note(o.midiValue);
+      BSD.currentNote = n;
+      ///campfire.publish('play-note', { note: n, duration: 1000 });
     });
     
     

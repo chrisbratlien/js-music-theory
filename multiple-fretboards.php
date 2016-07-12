@@ -44,6 +44,8 @@ add_action('wp_head',function(){
   .cell { cursor: pointer; }
   table td { cursor: pointer; }
   
+  .hide-text td { color: transparent; }
+
 
   @media print  { 
 
@@ -93,6 +95,8 @@ get_header(); ?>
 
 <div class="navbar-spacer screen-only noprint">
   <button class="btn btn-info btn-add-fretboard noprint"><i class="fa fa-plus"></i> Add Fretboard</button>
+  <button class="btn btn-info btn-toggle-text noprint">Toggle Text</button>
+
   <br />
   <br />
 </div>
@@ -312,6 +316,10 @@ add_action('wp_footer',function(){
           var controls = DOM.div().addClass('controls noprint');
           
           var playAll = DOM.button('<i class="fa fa-play"></i>').addClass('btn btn-success control play-all');
+          playAll.click(function(){
+            self.publish('play-notes',self.selectedNotes());
+          });
+          controls.append(playAll);
 
 
           var stickyNoteButton = DOM.button('<i class="fa fa-sticky-note-o"></i>').addClass('btn btn-info');
@@ -322,13 +330,11 @@ add_action('wp_footer',function(){
             sticky.renderOn(jQuery(document.body));
           });
           controls.append(stickyNoteButton);
+
+
+
           
 
-
-          playAll.click(function(){
-            self.publish('play-notes',self.selectedNotes());
-          });
-          controls.append(playAll);
           inner.append(controls);
           
           var close = DOM.div('<i class="fa fa-3x fa-close"></i> ').addClass('noprint');
@@ -502,6 +508,15 @@ add_action('wp_footer',function(){
     console.log('e',e);
   
   });
+
+  
+  var btnToggleText = jQuery('.btn-toggle-text');
+  var hideText = false;
+  btnToggleText.click(function(){
+    hideText = ! hideText;
+    hideText ? jQuery('html').addClass('hide-text') : jQuery('html').removeClass('hide-text');
+  });
+  
     
     
       
