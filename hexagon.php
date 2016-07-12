@@ -2,6 +2,7 @@
 
 add_action('wp_head',function(){
 ?>
+<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 <style type="text/css">
 </style>
 <?php
@@ -30,7 +31,9 @@ add_action('wp_footer',function(){
 <script src="js/hexagon.js"></script>
 <script type="text/javascript">
 
-///var campfire = BSD.PubSub({});
+
+
+var HAS_TOUCH = ('ontouchstart' in window);
 
 if (typeof BSD == "undefined") {
   var BSD = {};    
@@ -244,112 +247,6 @@ function getRandomArbitrary(min, max) {
   var randColor = BSD.randomDarkColor(); ////palettes.atRandom().atRandom();
 
 
-  campfire.subscribe('repaint-wrap',function(payload) {
-
-    var state = {};
-
-
-    JSMT.allMIDIValues.select(function(o) {
-      return o >= 40 && o <= 70;
-    }).reverse().each(function(n){
-      var cell = DOM.div().addClass('cell');
-      var note = Note(n);
-      cell.append(note.utf8Name());
-      
-      var isChordTone = payload.chord.containsNote(note);
-      
-      state[n] = isChordTone;
-
-      if (isChordTone) {
-        cell.css('background','#' + randColor.toHex());
-        cell.addClass('active');  
-      }
-
-      
-      cell.on('mouseenter mouseover touchend',function(e){
-        ////console.log('hover',note);
-        //console.log('e',e);
-        if (e.shiftKey) { return false; }
-        if (isChordTone && state[n]) {
-          BSD.audioPlayer.playNote(note,1000);
-        }
-        campfire.publish('note-hover',note);
-      });
-      
-      cell.click(function(){
-        state[n] = (state[n]) ? false : true;
-
-
-        if (state[n] && isChordTone) {
-          cell.css('background','#' + randColor.toHex());
-          cell.addClass('active');  
-        }
-        else if (state[n]) {
-          cell.css('background','#' + BSD.chosenColor.toHex());
-          cell.addClass('active');  
-        }
-        else {
-          cell.css('background','inherit');
-          cell.removeClass('active');  
-        }
-      
-      });
-      
-      
-      
-      payload.wrap.append(cell);
-    });
-    ////console.log(currentRootNote.name());  
-  });
-
-
-  campfire.subscribe('do-it',function(chords){
-
-    randColor = BSD.randomDarkColor(); ////palettes.atRandom().atRandom();
-    main.empty();
-
-    chords.each(function(chord){  
-      
-      var alternates = flavors.map(function(txt){
-        var c = chord.rootNote.chord(txt);
-        return c;
-      });
-      
-      eachify(alternates).eachPCN(function(o){
-        o.current.next = o.next;
-        o.current.prev = o.prev;
-      });
-      
-      /////console.log('alternates',alternates);
-      
-      
-      chord = alternates.detect(function(alt){
-        return alt.abstractlyEqualTo(chord);
-      }); //upgrade chord to itself in the alternates
-      
-      
-      var ul = DOM.div().addClass('ruler');
-
-      var title = DOM.div().addClass('title');
-      var wrap = DOM.div().addClass('wrap');
-      
-      title.html(chord.utf8FullAbbrev());
-      title.on('click',function(){
-        chord = chord.next;
-        title.html(chord.utf8FullAbbrev());
-        wrap.empty();
-        campfire.publish('repaint-wrap',{ wrap: wrap, chord: chord });
-      });
-      campfire.publish('repaint-wrap',{ wrap: wrap, chord: chord });
-      
-      
-      ul.append(title);  
-      ul.append(wrap);
-      
-      main.append(ul);
-      
-    });
-  });
 
   jQuery('#redo').click(function(){
     var myChords = [];
@@ -368,17 +265,6 @@ function getRandomArbitrary(min, max) {
     campfire.publish('do-it',myChords);
   });
   campfire.publish('do-it',[]);
-
-
-  var progInput = jQuery('#progression');
-  progInput.blur(function() { 
-    if (progInput.val().length == 0) { return false; }
-    var prog = BSD.parseProgression(this.value);
-    console.log('prog',prog);
-    
-    var myChords = prog.map(function(o){  return o.chord; });
-    campfire.publish('do-it',myChords);
-  });
 
 
   campfire.subscribe('note-hover',function(note){
@@ -434,7 +320,7 @@ function getRandomArbitrary(min, max) {
 
 ///////////////////////
 
-    var hexagonGrid = new HexagonGrid("HexCanvas", 50);
+    var hexagonGrid = new HexagonGrid("HexCanvas", 55);
     hexagonGrid.drawHexGrid(7, 10, 50, 50, true);
     hexagonGrid.msgs.subscribe('tile-clicked',function(o){ 
       console.log('o?',o); 

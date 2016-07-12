@@ -16,13 +16,15 @@ function HexagonGrid(canvasId, radius) {
     this.canvasOriginX = 0;
     this.canvasOriginY = 0;
     
-    this.canvas.addEventListener("mousedown", this.clickEvent.bind(this), false);
+    //this.canvas.addEventListener("mousedown", this.clickEvent.bind(this), false);
+    var evtName = HAS_TOUCH ? 'touchstart' : 'mousedown';
+    this.canvas.addEventListener(evtName, this.clickEvent.bind(this), false);
 };
 
 
 HexagonGrid.prototype.midiValueOf = function(x,y) {
 
-  var result = 60;
+  var result = 70;
 
   for (var i = 0; i < x; i += 1) {
     if (i%2 == 0 ) { result -= 3; }
@@ -220,6 +222,6 @@ HexagonGrid.prototype.clickEvent = function (e) {
         var drawy = tile.column % 2 == 0 ? (tile.row * this.height) + this.canvasOriginY + 6 : (tile.row * this.height) + this.canvasOriginY + 6 + (this.height / 2);
         var drawx = (tile.column * this.side) + this.canvasOriginX;
 
-        this.drawHex(drawx, drawy - 6, "rgba(110,110,70,0.3)", "");
+        //this.drawHex(drawx, drawy - 6, "rgba(110,110,70,0.3)", "");
     } 
 };
