@@ -279,7 +279,7 @@ function getRandomArbitrary(min, max) {
   jQuery(document).on('keydown',function(e) {
     var c = e.keyCode || e.which;
     
-    console.log(c);///'BSD.currentFretDiv',BSD.currentFretDiv);
+    ///console.log(c);///'BSD.currentFretDiv',BSD.currentFretDiv);
 
 
     /*** possibly obsolete...not 100% sure though yet..    
@@ -320,8 +320,15 @@ function getRandomArbitrary(min, max) {
 
 ///////////////////////
 
-    var hexagonGrid = new HexagonGrid("HexCanvas", 55);
-    hexagonGrid.drawHexGrid(7, 10, 50, 50, true);
+    var radius = 55;
+    var hexRows = 8;
+    var hexColumns = 30;
+    if (!HAS_TOUCH) {
+      radius = 15;
+    }
+    
+    var hexagonGrid = new HexagonGrid("HexCanvas", radius);
+    hexagonGrid.drawHexGrid(hexRows, hexColumns, 50, 50, true);
     hexagonGrid.msgs.subscribe('tile-clicked',function(o){ 
       //console.log('o?',o); 
       var n = Note(o.midiValue);

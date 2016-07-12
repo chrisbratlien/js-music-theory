@@ -67,6 +67,7 @@ HexagonGrid.prototype.drawHexGrid = function (rows, cols, originX, originY, isDe
 
             if (isDebug) {
                 debugText = col + "," + row + ':' + this.midiValueOf(col,row);
+                debugText = this.midiValueOf(col,row);
             }
 
             this.drawHex(currentHexX, currentHexY, "#ddd", debugText);
