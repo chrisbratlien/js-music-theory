@@ -216,7 +216,7 @@ add_action('wp_footer',function(){
         self.spec = spec;
         
         self.selectedNotes = function() {
-          console.log('selectedNotes data',spec.data);
+          ///console.log('selectedNotes data',spec.data);
         
           var numbers = spec.data.select(function(o) {
             return o.selected;
