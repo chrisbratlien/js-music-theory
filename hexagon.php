@@ -320,7 +320,7 @@ function getRandomArbitrary(min, max) {
 
 ///////////////////////
 
-    var radius = 55;
+    var radius = 35;
     var hexRows = 8;
     var hexColumns = 30;
     if (!HAS_TOUCH) {

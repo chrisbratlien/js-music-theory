@@ -60,6 +60,10 @@ add_action('wp_head',function(){
   .controls { margin-left: 0.4rem; }
   .controls .fa-close { cursor: pointer; }
 
+  .color-grey { color: #888; }
+  .color-white  { color: white; }
+
+
   /**
   .control.play-all { background: green; height: 50px; max-height: 50px; line-height: 50px; } 
   .control.play-all:active { background: #0f0; }
@@ -289,10 +293,13 @@ add_action('wp_footer',function(){
                   
                   console.log('hex',hex,'sum',sum);
                   cell.css('background-color','#' + hex);
-                  cell.css('color','white');
+                  //cell.css('color','white');
+
+                  cell.removeClass('color-white');
+                  cell.removeClass('color-grey');
 
                   
-                  (sum > 500) ? cell.css('color','#333') : cell.css('color','white');
+                  (sum > 500) ? cell.addClass('color-grey') : cell.addClass('color-white');
 
 
                 }
