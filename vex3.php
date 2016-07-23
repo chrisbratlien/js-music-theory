@@ -635,7 +635,9 @@ BSD.midiOctave = function(o) {
         
         vfNotes.push(vfNote);
         thisGroup.push(vfNote);
-      });     
+      });
+      
+      vfNotes.push(new VF.BarNote());     
 
 
       var beam = new Vex.Flow.Beam(thisGroup);
@@ -643,7 +645,7 @@ BSD.midiOctave = function(o) {
       
       
       var text = new Vex.Flow.TextNote({
-          text: "Render this",
+          text: chord.fullAbbrev(),
           font: {
               family: "Arial",
               size: 12,
@@ -657,7 +659,7 @@ BSD.midiOctave = function(o) {
 
       texts.push(text);
 
-
+      
       
       
       //Vex.Flow.Formatter.FormatAndDraw(context, stave, thisGroup);
@@ -677,6 +679,7 @@ BSD.midiOctave = function(o) {
           beat_value: 8,
           resolution: Vex.Flow.RESOLUTION
       });
+      voice2.setStrict(false);
       voice2.addTickables(texts);
 
       var formatter = new Vex.Flow.Formatter();
