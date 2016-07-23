@@ -617,6 +617,7 @@ BSD.midiOctave = function(o) {
     var vfNotes = [];
     var thisGroup = [];
     var beams = [];
+    var texts = [];
     chords.forEach(function(chord){
     
       thisGroup = [];
@@ -639,7 +640,26 @@ BSD.midiOctave = function(o) {
 
       var beam = new Vex.Flow.Beam(thisGroup);
       beams.push(beam);
+      
+      
+      var text = new Vex.Flow.TextNote({
+          text: "Render this",
+          font: {
+              family: "Arial",
+              size: 12,
+              weight: ""
+          },
+          duration: 'w'               
+      })
+      .setLine(2)
+      .setStave(stave)
+      .setJustification(Vex.Flow.TextNote.Justification.LEFT);      
 
+      texts.push(text);
+
+
+      
+      
       //Vex.Flow.Formatter.FormatAndDraw(context, stave, thisGroup);
       //beam.setContext(context).draw();
     });
@@ -650,6 +670,24 @@ BSD.midiOctave = function(o) {
     beams.forEach(function(beam){
       beam.setContext(context).draw();
     });
+
+
+      var voice2 = new Vex.Flow.Voice({
+          num_beats: vfNotes.length * 4,
+          beat_value: 8,
+          resolution: Vex.Flow.RESOLUTION
+      });
+      voice2.addTickables(texts);
+
+      var formatter = new Vex.Flow.Formatter();
+      formatter.format([voice2], 400);
+
+
+      texts.forEach(function(text){
+        text.setContext(context).draw();
+      });
+
+
 
 
 
