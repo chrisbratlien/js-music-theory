@@ -102,7 +102,7 @@ get_header(); ?>
         <label>Progression</label>
         <input type="text" id="progression" class="form-control" />
     </div>
-    <div id="boo"></div>
+    <div id="stage" class="stage"></div>
 
 <?php
 
@@ -365,6 +365,33 @@ add_action('wp_footer',function(){
   BSD.audioContext = context;
 
 
+
+  BSD.parseProgressionIntoBars = function(progString) {
+    var barStrings = progString.split('|');
+    
+    
+    barStrings = barStrings.select(function(o){ return o.trim().length > 0; });
+    console.log('barStrings',barStrings);
+    
+    var bars = barStrings.map(function(barString){
+      var chordNames = barString.split(/,|\ +/);
+      chordNames = chordNames.select(function(o){ return o.trim().length > 0; });
+      
+      console.log('chordNames',chordNames);
+      
+      var chords = chordNames.map(function(o){
+        var origChord = makeChord(o);
+        return origChord;/////.plus(-12);
+      });
+      return chords;
+    });
+    
+    console.log('bars???',bars);
+    
+    return bars;
+  };
+
+
   BSD.parseProgression = function(progString) {
     var barStrings = progString.split(/\ +|\|/);
     
@@ -374,7 +401,7 @@ add_action('wp_footer',function(){
     
     var barIndex = 0;
     var chordIndex = 0;
-    var flat = [];
+    var them = [];
     
     barStrings.each(function(barString){
       var chordNames = barString.split(/,|\ +/);
@@ -389,7 +416,7 @@ add_action('wp_footer',function(){
         var origChord = makeChord(o);        
         //var lowerChord = origChord.plus(-12);  
         
-        flat.push({
+        them.push({
           barIndex: barIndex,
           chordIndex: chordIndex,
           chord: origChord, //lowerChord,
@@ -400,7 +427,8 @@ add_action('wp_footer',function(){
       barIndex += 1;
     });
 
-    return flat;
+    return them;
+
     ///wait
     var result = eachify(flat);
     console.log('result',result);
@@ -548,13 +576,16 @@ add_action('wp_footer',function(){
 
 
   var progInput = jQuery('#progression');
-  progInput.blur(function() { 
+  progInput.change(function() { 
     if (progInput.val().length == 0) { return false; }
-    var prog = BSD.parseProgression(this.value);
-    console.log('prog',prog);
+    var bars = BSD.parseProgressionIntoBars(this.value);
+    console.log('bars',bars);
     
-    var myChords = prog.map(function(o){  return o.chord; });
-    campfire.publish('do-it',myChords);
+    campfire.publish('do-bars',bars);
+    //var myChords = prog.map(function(o){  return o.chord; });
+    ///campfire.publish('do-it',myChords);
+    
+    
   });
 
 
@@ -563,30 +594,22 @@ VF = Vex.Flow;
 
 
 
-  var div = document.getElementById("boo");
-  var renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
+  /////var div = document.getElementById("boo");
   
-  // Configure the rendering context.
-  renderer.resize(500, 500);
-  var context = renderer.getContext();
-  context.setFont("Arial", 10, "").setBackgroundFillStyle("#eed");
   
   // Create a stave of width 400 at position 10, 40 on the canvas.
-  
-  var stave = new VF.Stave(10, 40, 400);
-  // Add a clef and time signature.
-  stave.addClef("treble").addTimeSignature("4/4");
 
-    stave.setContext(context).draw();
+BSD.chunkify = function(ary,chunkSize) {
+  var chunks = [];
+  var aryCopy = ary.select(function(o){ return true; }); 
+  while (aryCopy.length > chunkSize) {
+    chunks.push(aryCopy.splice(0,chunkSize));
+  }
+  chunks.push(aryCopy);
+  return chunks;
+};
 
-  /***
   
-  
-  // Connect it to the rendering context and draw!
-  stave.setContext(context).draw();
-  ***/
-  ////////////////////////////////////////
-  ////////////////////////////////////////////////////////
 
 
 BSD.midiOctave = function(o) {
@@ -599,108 +622,133 @@ BSD.midiOctave = function(o) {
 };
 
 
-  campfire.subscribe('do-it',function(chords){
+  var stage = jQuery('#stage');
 
+  campfire.subscribe('do-bars',function(bars){
+    console.log('bars',bars);
     ///randColor = BSD.randomDarkColor(); ////palettes.atRandom().atRandom();
     ///main.empty();
- 
-    var vfChords = chords.map(function(chord){  
-      var keys = chord.notes().map(function(note){
-        var key = note.name().toLowerCase() + '/' + BSD.midiOctave(note);        
-        return key;
-      });
-      var result = new VF.StaveNote({ keys: keys, duration: "q" });
-      return result;
-    });
 
 
-    var vfNotes = [];
-    var thisGroup = [];
-    var beams = [];
-    var texts = [];
-    chords.forEach(function(chord){
+
+    var lines = BSD.chunkify(bars,4);
+    lines.forEach(function(line){
+      console.log('line',line);
+      
+      var staveWrap = DOM.div().addClass('stave-wrap');
+      var renderer = new VF.Renderer(staveWrap[0], VF.Renderer.Backends.SVG);
+      
+      // Configure the rendering context.
+      renderer.resize(1500, 100);
+      var context = renderer.getContext();
+      context.setFont("Arial", 10, "").setBackgroundFillStyle("#eed");
+
+      var stave = new VF.Stave(0,0, 1500);
+      // Add a clef and time signature.
+      stave.addClef("treble").addTimeSignature("4/4");
+      stave.setContext(context).draw();
+
+      
+      bars.forEach(function(bar){
+  
+  
+        var chords = bar;
+  
+  
+        ////////////////////////////////////////////////////////
     
-      thisGroup = [];
+        
+     
+        var vfChords = chords.map(function(chord){  
+          var keys = chord.notes().map(function(note){
+            var key = note.name().toLowerCase() + '/' + BSD.midiOctave(note);        
+            return key;
+          });
+          var result = new VF.StaveNote({ keys: keys, duration: "q" });
+          return result;
+        });
+    
+    
+        var vfNotes = [];
+        var thisGroup = [];
+        var beams = [];
+        var texts = [];
+        chords.forEach(function(chord){
+        
+          thisGroup = [];
+              
+          chord.notes().forEach(function(note) {
+            var nn = note.name().toLowerCase();
+            var key = nn +  '/' + BSD.midiOctave(note);
+            ///console.log('key',key,'nn',nn);
+            var vfNote = new VF.StaveNote({ keys: [key], duration: "8" });
+            var acc = nn.match(/#|b$/);  
+            if (acc && nn.length > 1){
+              vfNote.addAccidental(0, new Vex.Flow.Accidental(acc[0]));
+            }
+            
+            
+            vfNotes.push(vfNote);
+            thisGroup.push(vfNote);
+          });
           
-      chord.notes().forEach(function(note) {
-        var nn = note.name().toLowerCase();
-        var key = nn +  '/' + BSD.midiOctave(note);
-        console.log('key',key,'nn',nn);
-        var vfNote = new VF.StaveNote({ keys: [key], duration: "8" });
-        var acc = nn.match(/#|b$/);  
-        if (acc && nn.length > 1){
-          vfNote.addAccidental(0, new Vex.Flow.Accidental(acc[0]));
-        }
-        
-        
-        vfNotes.push(vfNote);
-        thisGroup.push(vfNote);
-      });
-      
-      vfNotes.push(new VF.BarNote());     
-
-
-      var beam = new Vex.Flow.Beam(thisGroup);
-      beams.push(beam);
-      
-      
-      var text = new Vex.Flow.TextNote({
-          text: chord.fullAbbrev(),
-          font: {
-              family: "Arial",
-              size: 12,
-              weight: ""
-          },
-          duration: 'w'               
-      })
-      .setLine(2)
-      .setStave(stave)
-      .setJustification(Vex.Flow.TextNote.Justification.LEFT);      
-
-      texts.push(text);
-
-      
-      
-      
-      //Vex.Flow.Formatter.FormatAndDraw(context, stave, thisGroup);
-      //beam.setContext(context).draw();
-    });
-
-
-
-    Vex.Flow.Formatter.FormatAndDraw(context, stave, vfNotes);
-    beams.forEach(function(beam){
-      beam.setContext(context).draw();
-    });
-
-
-      var voice2 = new Vex.Flow.Voice({
-          num_beats: vfNotes.length * 4,
-          beat_value: 8,
-          resolution: Vex.Flow.RESOLUTION
-      });
-      voice2.setStrict(false);
-      voice2.addTickables(texts);
-
-      var formatter = new Vex.Flow.Formatter();
-      formatter.format([voice2], 400);
-
-
-      texts.forEach(function(text){
-        text.setContext(context).draw();
-      });
-
-
-
-
-
-   /***
-    var context = new Vex.Flow.Renderer($("#boo")[0],
-      Vex.Flow.Renderer.Backends.CANVAS)
-      .resize(500, 500)
-      .getContext();
-    ***/      
-      
+          vfNotes.push(new VF.BarNote());     
+    
+    
+          var beam = new Vex.Flow.Beam(thisGroup);
+          beams.push(beam);
+          
+          
+          var text = new Vex.Flow.TextNote({
+              text: chord.fullAbbrev(),
+              font: {
+                  family: "Arial",
+                  size: 12,
+                  weight: ""
+              },
+              duration: 'w'               
+          })
+          .setLine(2)
+          .setStave(stave)
+          .setJustification(Vex.Flow.TextNote.Justification.LEFT);      
+    
+          texts.push(text);
+    
+          
+          
+          
+          //Vex.Flow.Formatter.FormatAndDraw(context, stave, thisGroup);
+          //beam.setContext(context).draw();
+        });
+    
+    
+    
+        Vex.Flow.Formatter.FormatAndDraw(context, stave, vfNotes);
+        beams.forEach(function(beam){
+          beam.setContext(context).draw();
+        });
+    
+    
+          var voice2 = new Vex.Flow.Voice({
+              num_beats: vfNotes.length * 4,
+              beat_value: 8,
+              resolution: Vex.Flow.RESOLUTION
+          });
+          voice2.setStrict(false);
+          voice2.addTickables(texts);
+    
+          var formatter = new Vex.Flow.Formatter();
+          formatter.format([voice2], 400);
+    
+    
+          texts.forEach(function(text){
+            text.setContext(context).draw();
+          });
+          
+  
+      }); //bars
+      stage.append(staveWrap);
+    }); //lines
     
     ///var stave = new Vex.Flow.Stave(10, 40, 450);
 
@@ -731,10 +779,6 @@ BSD.midiOctave = function(o) {
     Vex.Flow.Formatter.FormatAndDraw(context, stave, vfNotes);
     beam1.setContext(context).draw();
     **/
-
-    
-    ////Vex.Flow.Formatter.FormatAndDraw(context, stave, vfNotes);////all_notes);
-    
   
   });
     
