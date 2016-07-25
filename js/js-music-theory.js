@@ -329,12 +329,29 @@ JSMT.chordTypes.push({ id: 1, intervals: [0,4,7] });
 
 
 
-var Note = function(foo) {
+var Note = function(foo,accidental) {
   ////var self = spec;/////NotePrimitive(spec);
   
   var self = {};
 
   self.spec = foo;
+  
+  
+  self.accidental = accidental || false;
+  
+  if (typeof foo == 'string') {
+    
+    var acc = foo.match(/#|b$/);
+    if (acc && foo.length > 1) { 
+      var m = acc[0];
+      var map = { 
+        'b': 'flat', 
+        '#': 'sharp' 
+      };
+      self.accidental = map[m]; 
+    }
+  }
+  
   
   self.abstractValue = function() {
     return self.value() % 12;
@@ -378,7 +395,7 @@ var Note = function(foo) {
   };
   
   self.name = function() { 
-    return self.nameFromValue(self.value());
+    return self.nameFromValue(self.value(),self.accidental);
   };
   
   
@@ -405,18 +422,40 @@ var Note = function(foo) {
   
   
   
-  self.nameFromValue = function(value) {
+  self.sharpNameFromValue = function(value) {
+    var names = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+    var idx = value%12;
+    var result = names[idx];
+    return result;
+  };
+
+  self.flatNameFromValue = function(value) {
+    var names = ["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"];    
+    var idx = value%12;
+    var result = names[idx];
+    return result;
+  };
+  
+  self.nameFromValue = function(value,accidental) {
+    var result = false;
     var sharps = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
     var flats = ["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"];    
-
+    var map = {
+      'sharp': sharps,
+      'flat': flats
+    };
     var idx = value%12;
-    var result = flats[idx];
-
-    if (result == 'Gb') {
-      result = 'F#';
+    if (accidental) {
+      result = map[accidental][idx];    
+    }
+    else {
+      //the old way i did it.
+      var result = flats[idx];    
+      if (result == 'Gb') {
+        result = 'F#';
+      }
     }
     return result;
-
   };
   
   self.valueFromName = function(name) {
@@ -438,10 +477,10 @@ var Note = function(foo) {
   
   self.plus = function(other) {
     if (typeof other == "number") {
-      return Note(self.value() + other);
+      return Note(self.value() + other,self.accidental);
     }
     else {
-      return Note(self.value() + other.value());
+      return Note(self.value() + other.value(),self.accidental);
     }
   };
   
@@ -615,6 +654,9 @@ var RootNoteWithIntervals = function(spec) {
   self.rootNote = spec.rootNote;
 
 
+
+
+
   /////console.log('self.name',self.name);
 
 
@@ -682,7 +724,7 @@ var RootNoteWithIntervals = function(spec) {
   
   
   self.noteFromInterval = function(interval) {
-    return Note(self.rootNote.value() + interval)
+    return Note(self.rootNote.value() + interval,self.rootNote.accidental)
   };
   
   self.notes = function() {
