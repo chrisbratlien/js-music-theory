@@ -631,10 +631,8 @@ BSD.midiOctave = function(o) {
 
 
 
-    var lines = BSD.chunkify(bars,4);
-    lines.forEach(function(line){
-      console.log('line',line);
-      
+
+
       var staveWrap = DOM.div().addClass('stave-wrap');
       var renderer = new VF.Renderer(staveWrap[0], VF.Renderer.Backends.SVG);
       
@@ -647,6 +645,60 @@ BSD.midiOctave = function(o) {
       // Add a clef and time signature.
       stave.addClef("treble").addTimeSignature("4/4");
       stave.setContext(context).draw();
+
+      /////////////
+      
+      
+      var c = new VF.StaveNote({ keys: ['c/4'], duration: "8" });
+      var e = new VF.StaveNote({ keys: ['e/4'], duration: "8" });
+      var g = new VF.StaveNote({ keys: ['g/4'], duration: "8" });
+      var b = new VF.StaveNote({ keys: ['b/4'], duration: "8" });
+
+      var beam = new Vex.Flow.Beam([c,e,g,b]);
+
+      var textNote = new Vex.Flow.TextNote({
+          text: 'Cmaj7',
+          font: {
+              family: "Arial",
+              size: 12,
+              weight: ""
+          },
+          duration: 'w'               
+      })
+      .setLine(2)
+      .setStave(stave);
+
+
+      Vex.Flow.Formatter.FormatAndDraw(context, stave, [c,e,g,b]);
+      Vex.Flow.Formatter.FormatAndDraw(context, stave, [textNote]);
+
+      beam.setContext(context).draw();
+
+      var barNote = new VF.BarNote();     
+      Vex.Flow.Formatter.FormatAndDraw(context, stave, [barNote]);
+
+      var barNote = new VF.BarNote();     
+      Vex.Flow.Formatter.FormatAndDraw(context, stave, [barNote]);
+
+      var barNote = new VF.BarNote();     
+      Vex.Flow.Formatter.FormatAndDraw(context, stave, [barNote]);
+
+
+
+      stage.append(staveWrap);
+      return false;
+      return false;
+      return false;
+      return false;
+      return false;
+      return false;
+      
+
+
+    var lines = BSD.chunkify(bars,4);
+    lines.forEach(function(line){
+      console.log('line',line);
+      
 
       var vfStaveNotes = [];
       var beams = [];
