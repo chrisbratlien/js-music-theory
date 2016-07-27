@@ -5,8 +5,6 @@ add_filter('wp_title',function($o){ return 'Vex3'; });
 add_action('wp_head',function(){
 ?>
 
-<title>12 Fretboards</title>
-
 <style type="text/css">
   body { 
     font-size: 10px;
@@ -104,6 +102,14 @@ get_header(); ?>
     </div>
     <div id="stage" class="stage"></div>
 
+
+    <div class="vex-tabdiv vex-prog"
+        width=680 scale=1.0 editor="true"
+        editor_width=680 editor_height=330>
+tabstave notation=true tablature=false
+notes Cn-D-E/4 F#/5        
+    </div>
+
 <?php
 
 add_action('wp_footer',function(){
@@ -118,7 +124,7 @@ add_action('wp_footer',function(){
     
     <script src="http://cdn.dev.bratliensoftware.com/javascript/draggy.js"></script>
     <script src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
-    <script src="lib/vexflow/releases/vexflow-debug.js"></script>
+    <script src="lib/vextab/releases/vextab-div.js"></script>
     <script type="text/javascript">
 
 
@@ -590,9 +596,6 @@ add_action('wp_footer',function(){
 
 
 
-VF = Vex.Flow;
-
-
 
   /////var div = document.getElementById("boo");
   
@@ -624,7 +627,59 @@ BSD.midiOctave = function(o) {
 
   var stage = jQuery('#stage');
 
+  var myVex = jQuery('.vex-prog');
+
   campfire.subscribe('do-bars',function(bars){
+    console.log('bars',bars);
+    var msg = '';
+    var lines = BSD.chunkify(bars,4);
+    lines.forEach(function(line){
+      console.log('line',line);
+      msg += "tabstave notation=true tablature=false\n";
+
+      msg += 'notes :8 ';
+
+      textMsg = 'text :h,';
+      var chordNames = [];
+
+      bars.forEach(function(bar){
+        var chords = bar;
+        /***
+        var vfChords = chords.map(function(chord){  
+          var keys = chord.notes().map(function(note){
+            var key = note.name().toLowerCase() + '/' + BSD.midiOctave(note);        
+            return key;
+          });
+          var result = new VF.StaveNote({ keys: keys, duration: "q" });
+          return result;
+        });
+        ***/
+        
+        chords.forEach(function(chord){
+          var keys = chord.notes().map(function(note){
+            var nn = note.name().replace(/b$/,'@');///Case();
+            var key = nn +  '/' + BSD.midiOctave(note);
+            return key;
+          });
+          
+          msg += ' ' + keys.join('-');
+          
+          //textMsg += chord.fullAbbrev() + ',';
+          chordNames.push(chord.fullAbbrev());
+        });
+    
+        msg += ' | ';
+        //textMsg += ' | ';
+      
+      });
+      textMsg += chordNames.join(',');
+      msg += "\n" + textMsg + "\n";
+    });
+    jQuery('.editor').val(msg);
+    jQuery('.editor').trigger('change');
+  });
+  
+  campfire.subscribe('was-do-bars',function(bars){
     console.log('bars',bars);
     ///randColor = BSD.randomDarkColor(); ////palettes.atRandom().atRandom();
     ///main.empty();
@@ -797,36 +852,7 @@ BSD.midiOctave = function(o) {
       stage.append(staveWrap);
     }); //lines
     
-    ///var stave = new Vex.Flow.Stave(10, 40, 450);
-
-    //NOTE: generateBeams on the notes before you format the notes
-        
-    /****
-    auto beams example
-    var beams = Vex.Flow.Beam.generateBeams(vfStaveNotes);
-    Vex.Flow.Formatter.FormatAndDraw(context, stave, vfStaveNotes);
     
-    beams.forEach(function(beam) {
-      beam.setContext(context).draw();
-    });
-    ***/
-
-    /***
-    manual beams example
-    var group1 = vfStaveNotes;
-    var beam1 = new Vex.Flow.Beam(group1);
-    Vex.Flow.Formatter.FormatAndDraw(context, stave, vfStaveNotes);
-    beam1.setContext(context).draw();
-    ***/
-
-
-    /**    
-    var group1 = vfStaveNotes;
-    var beam1 = new Vex.Flow.Beam(group1);
-    Vex.Flow.Formatter.FormatAndDraw(context, stave, vfStaveNotes);
-    beam1.setContext(context).draw();
-    **/
-  
   });
     
       

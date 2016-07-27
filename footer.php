@@ -29,7 +29,7 @@
   <!-- <script src="js/draggy.js"></script>
   <script src="js/sticky-note.js"></script>-->
   
-  <script src="lib/JavaScript-ID3-Reader/dist/id3-minimized.js"></script>
+  <!--<script src="lib/JavaScript-ID3-Reader/dist/id3-minimized.js"></script>-->
   <!-- <script src="lib/Kali/build/kali.js"></script>-->
   
   <script src="js/bsd.storage.js"></script>
