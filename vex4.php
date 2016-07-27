@@ -615,6 +615,9 @@ BSD.chunkify = function(ary,chunkSize) {
   
 
 
+var nextThird = ['C','E','G','B','D','F','A','C'];
+
+
 BSD.midiOctave = function(o) {
   if (typeof o == "object") {
     o = o.value();
@@ -654,11 +657,50 @@ BSD.midiOctave = function(o) {
           return result;
         });
         ***/
-        
         chords.forEach(function(chord){
-          var keys = chord.notes().map(function(note){
-            var nn = note.name().replace(/b$/,'@');///Case();
-            var key = nn +  '/' + BSD.midiOctave(note);
+        
+        
+          var distance = 0;    
+          
+          var saveNote = chord.rootNote;
+          var saveLetter = saveNote.name().substr(0,1);
+          var thirdIndex = nextThird.indexOf(saveLetter);
+          var preferredLetter = saveLetter;
+
+          var displayNotes = [];
+          
+          
+          
+          chord.notes().forEach(function(note,i){
+            console.log('note',note.name(),'saveLetter',saveLetter);
+            distance = note.value() - saveNote.value();
+            if (distance == 3 || distance == 4) {
+              var choices = [note.flatNameFromValue(note.value()),note.sharpNameFromValue(note.value())];
+              preferredLetter = nextThird[nextThird.indexOf(saveLetter) + 1];
+              
+              var winner = choices.detect(function(o){
+                return o.match(preferredLetter);
+              });
+              displayNotes.push({ name: winner, note: note });
+              
+              
+              console.log('choices',choices,'saveLetter',saveLetter,'preferred',preferredLetter,'winner',winner);
+            }
+            else {
+              displayNotes.push({ name: note.name(), note: note });
+            }
+          
+            saveNote = note;
+            saveLetter = preferredLetter;
+          
+          });
+                
+          console.log('displayNotes',displayNotes);
+        
+        
+          var keys = displayNotes.map(function(o){
+            var nn = o.name.replace(/b$/,'@');///Case();
+            var key = nn +  '/' + BSD.midiOctave(o.note);
             return key;
           });
           
