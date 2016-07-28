@@ -638,6 +638,9 @@ BSD.midiOctave = function(o) {
   campfire.subscribe('do-bars',function(bars){
     console.log('bars',bars);
 
+    saveChord = false;
+    firstChord = false;
+
     bars.each(function(chords){
       chords.each(function(chord){
         if (!firstChord) { 
