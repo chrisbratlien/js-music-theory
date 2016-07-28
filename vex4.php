@@ -657,41 +657,40 @@ BSD.midiOctave = function(o) {
     
     
     var msg = '';
+    var noteMsg = "";
+
+        var chordDurationMap = {
+          1: ':w',
+          2: ':h',
+          4: ':q'
+        };
+        var notesDurationMap = {
+          1: ':q',
+          2: ':8',
+          4: ':16'
+        };
+    
     var lines = BSD.chunkify(bars,4);
     lines.forEach(function(line){
       console.log('line',line);
       msg += "tabstave notation=true tablature=false\n";
 
-      msg += 'notes :8 ';
 
-      textMsg = 'text :h,';
-      var chordNames = [];
+      textMsg = "";///'text :h,';
 
       bars.forEach(function(bar){
         var chords = bar;
-        /***
-        var vfChords = chords.map(function(chord){  
-          var keys = chord.notes().map(function(note){
-            var key = note.name().toLowerCase() + '/' + BSD.midiOctave(note);        
-            return key;
-          });
-          var result = new VF.StaveNote({ keys: keys, duration: "q" });
-          return result;
-        });
-        ***/
+
+
+        noteMsg += "\nnotes ";
+
         chords.forEach(function(chord){
-        
-        
           var distance = 0;    
-          
           var saveNote = chord.rootNote;
           var saveLetter = saveNote.name().substr(0,1);
           var thirdIndex = nextThird.indexOf(saveLetter);
           var preferredLetter = saveLetter;
-
           var displayNotes = [];
-          
-          
           
           chord.notes().forEach(function(note,i){
             console.log('note',note.name(),'saveLetter',saveLetter);
@@ -704,24 +703,17 @@ BSD.midiOctave = function(o) {
                 return o.match(preferredLetter);
               });
               displayNotes.push({ name: winner, note: note });
-              
-              
               console.log('choices',choices,'saveLetter',saveLetter,'preferred',preferredLetter,'winner',winner);
             }
             else {
               displayNotes.push({ name: note.name(), note: note });
             }
-          
             saveNote = note;
             saveLetter = preferredLetter;
-          
           });
                 
           console.log('displayNotes',displayNotes);
-        
-        
           var nextChord = chord.next;
-        
           var placeThem = function(o) {
             if (o.note.equalTo(chord.myThird())) {
               return -145;
@@ -729,9 +721,7 @@ BSD.midiOctave = function(o) {
             if (chord.next) {
               return -1 * Math.abs(o.note.abstractValue() - chord.next.myThird().abstractValue());           
             }
-            
             return o.note.abstractValue();
-            
           };
         
           console.log('before',displayNotes);
@@ -744,17 +734,20 @@ BSD.midiOctave = function(o) {
             return key;
           });
           
-          msg += ' ' + keys.join('-');
-          
-          //textMsg += chord.fullAbbrev() + ',';
-          chordNames.push(chord.fullAbbrev());
+          //msg += ' ' + keys.join('-');
+          noteMsg += ' ' + notesDurationMap[chords.length] + ' ' + keys.join('-');
         });
-    
-        msg += ' | ';
-        //textMsg += ' | ';
-      
+        noteMsg += " | \n";
+        console.log('noteMsg',noteMsg);
+        
+        var chordNames = chords.map(function(chord){
+          return chord.fullAbbrev();
+        }).join(',');
+        var duration = chordDurationMap[chords.length];
+        textMsg += "\ntext " + duration + ',' + chordNames + "\n"; 
       });
-      textMsg += chordNames.join(',');
+      ///textMsg += chordNames.join(',');
+      msg += "\n" + noteMsg + "\n";
       msg += "\n" + textMsg + "\n";
     });
     jQuery('.editor').val(msg);
