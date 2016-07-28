@@ -97,3 +97,16 @@ for(var i = 0; i < 128; i += 1) {
     BSD.allMIDIValues[i] = i;
 } 
 
+
+BSD.sorter = function(selectorFunc) {
+    var sortFunc = function(a,b) {
+      var sA = selectorFunc(a);
+      var sB = selectorFunc(b);
+      if (sA < sB) { return -1; }
+      if (sA > sB) { return 1; }
+      return 0;
+    };
+    return sortFunc;
+};
+
+

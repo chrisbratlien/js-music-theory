@@ -632,8 +632,27 @@ BSD.midiOctave = function(o) {
 
   var myVex = jQuery('.vex-prog');
 
+  var saveChord = false;
+  var firstChord = false;
+  
   campfire.subscribe('do-bars',function(bars){
     console.log('bars',bars);
+
+    bars.each(function(chords){
+      chords.each(function(chord){
+        if (!firstChord) { 
+          firstChord = chord; 
+        }
+        if (saveChord) {
+          saveChord.next = chord;
+          chord.prev = saveChord;
+        }
+        saveChord = chord;
+      });
+    });
+    saveChord.next = firstChord;
+    
+    
     var msg = '';
     var lines = BSD.chunkify(bars,4);
     lines.forEach(function(line){
@@ -698,7 +717,25 @@ BSD.midiOctave = function(o) {
           console.log('displayNotes',displayNotes);
         
         
-          var keys = displayNotes.map(function(o){
+          var nextChord = chord.next;
+        
+          var placeThem = function(o) {
+            if (o.note.equalTo(chord.myThird())) {
+              return -145;
+            }
+            if (chord.next) {
+              return -1 * Math.abs(o.note.abstractValue() - chord.next.myThird().abstractValue());           
+            }
+            
+            return o.note.abstractValue();
+            
+          };
+        
+          console.log('before',displayNotes);
+          var sortedNotes = displayNotes.sort(BSD.sorter(placeThem));
+          console.log('sorted',sortedNotes);
+        
+          var keys = sortedNotes.map(function(o){
             var nn = o.name.replace(/b$/,'@');///Case();
             var key = nn +  '/' + BSD.midiOctave(o.note);
             return key;
