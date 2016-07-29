@@ -45,6 +45,9 @@ add_action('wp_head',function(){
   .hide-text td { color: transparent; }
 
 
+  .vex-prog { margin-top: 2em; }
+
+
   @media print  { 
 
     body { font-size: 7pt; }
@@ -627,6 +630,8 @@ BSD.midiOctave = function(o) {
   return result;
 };
 
+
+ VEXTAB_USE_SVG = true;
 
   var stage = jQuery('#stage');
 
