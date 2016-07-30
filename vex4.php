@@ -233,13 +233,13 @@ add_action('wp_footer',function(){
     
     
     barStrings = barStrings.select(function(o){ return o.trim().length > 0; });
-    console.log('barStrings',barStrings);
+    ///console.log('barStrings',barStrings);
     
     var bars = barStrings.map(function(barString){
       var chordNames = barString.split(/,|\ +/);
       chordNames = chordNames.select(function(o){ return o.trim().length > 0; });
       
-      console.log('chordNames',chordNames);
+      ///console.log('chordNames',chordNames);
       
       var chords = chordNames.map(function(o){
         var origChord = makeChord(o);
@@ -248,7 +248,7 @@ add_action('wp_footer',function(){
       return chords;
     });
     
-    console.log('bars???',bars);
+    ////console.log('bars???',bars);
     
     return bars;
   };
@@ -345,7 +345,7 @@ add_action('wp_footer',function(){
     console.log('notes??',notes);
     var chord = makeChordFromNotes(notes);
     
-    console.log('chord??',chord);
+    ///console.log('chord??',chord);
     
     campfire.publish('play-chord',{ chord: chord, duration: 1000 });
   });    
@@ -515,7 +515,6 @@ BSD.midiOctave = function(o) {
     
     
     var msg = '';
-    var noteMsg = "";
 
         var chordDurationMap = {
           1: ':w',
@@ -533,16 +532,18 @@ BSD.midiOctave = function(o) {
       console.log('barsOfLine',barsOfLine);
       msg += "tabstave notation=true tablature=false\n";
 
-
-      textMsg = "";///'text :h,';
-
+      var textMsg = '';
+      var noteMsg = "";
+ 
       barsOfLine.forEach(function(bar){
         var chords = bar;
+        noteMsg += 'notes ';
 
-
-        noteMsg += "\nnotes ";
 
         chords.forEach(function(chord){
+        
+          ////noteMsg += 'notes ';
+        
           var distance = 0;    
           var saveNote = chord.rootNote;
           var saveLetter = saveNote.name().substr(0,1);
@@ -551,7 +552,7 @@ BSD.midiOctave = function(o) {
           var displayNotes = [];
           
           chord.notes().forEach(function(note,i){
-            console.log('note',note.name(),'saveLetter',saveLetter);
+            ////console.log('note',note.name(),'saveLetter',saveLetter);
             distance = note.value() - saveNote.value();
             if (distance == 3 || distance == 4) {
               var choices = [note.flatNameFromValue(note.value()),note.sharpNameFromValue(note.value())];
@@ -564,7 +565,7 @@ BSD.midiOctave = function(o) {
               if (!winner) { winner = choices[0]; }
               
               displayNotes.push({ name: winner, note: note });
-              console.log('choices',choices,'saveLetter',saveLetter,'preferred',preferredLetter,'winner',winner);
+              ///console.log('choices',choices,'saveLetter',saveLetter,'preferred',preferredLetter,'winner',winner);
             }
             else {
               displayNotes.push({ name: note.name(), note: note });
@@ -573,7 +574,7 @@ BSD.midiOctave = function(o) {
             saveLetter = preferredLetter;
           });
                 
-          console.log('displayNotes',displayNotes);
+          ///console.log('displayNotes',displayNotes);
           var nextChord = chord.next;
           var placeThem = function(o) {
           
@@ -596,9 +597,9 @@ BSD.midiOctave = function(o) {
             return o.note.abstractValue();
           };
         
-          console.log('before',displayNotes);
+          //console.log('before',displayNotes);
           var sortedNotes = displayNotes.sort(BSD.sorter(placeThem));
-          console.log('sorted',sortedNotes);
+          //console.log('sorted',sortedNotes);
         
           var keys = sortedNotes.map(function(o){
             var nn = o.name.replace(/b$/,'@');///Case();
@@ -609,8 +610,8 @@ BSD.midiOctave = function(o) {
           //msg += ' ' + keys.join('-');
           noteMsg += ' ' + notesDurationMap[chords.length] + ' ' + keys.join('-');
         });
-        noteMsg += " | \n";
-        console.log('noteMsg',noteMsg);
+        noteMsg += "| \n";
+        //console.log('noteMsg',noteMsg);
         
         var chordNames = chords.map(function(chord){
           return chord.fullAbbrev();
