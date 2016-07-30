@@ -592,7 +592,12 @@ BSD.midiOctave = function(o) {
               
               var target = next3 || next7;
             
-              return -1 * Math.abs(o.note.abstractValue() - target.abstractValue());           
+              var distance = -1 * Math.abs(o.note.abstractValue() - target.abstractValue());
+              if (distance == 0) { 
+                return -144; 
+              } 
+            
+              return distance;
             }
             return o.note.abstractValue();
           };
