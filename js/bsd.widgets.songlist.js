@@ -13,7 +13,7 @@ BSD.Widgets.SongList = function(spec) {
     ul.empty();
     songs.each(function(song){
       var li = DOM.li(song.title);
-      li.on('click',function(){
+      li.click(function(){
         ul.find('.selected').removeClass('selected');
         li.addClass('selected');
         self.publish('song-selected',song);

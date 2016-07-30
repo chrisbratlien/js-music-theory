@@ -1,7 +1,7 @@
 <?php 
 
 
-add_filter('wp_title',function($o){ return 'Vex3'; });
+add_filter('wp_title',function($o){ return 'Vex4'; });
 add_action('wp_head',function(){
 ?>
 
@@ -65,6 +65,11 @@ add_action('wp_head',function(){
   .color-white  { color: white; }
 
 
+
+  ul.song-list { list-style-type: none; width: 140px; }
+  ul.song-list li { padding: 3px; font-size: 1.2em; cursor: pointer; }
+  ul.song-list li.selected{ background: #409; color: white; }
+
   /**
   .control.play-all { background: green; height: 50px; max-height: 50px; line-height: 50px; } 
   .control.play-all:active { background: #0f0; }
@@ -82,7 +87,6 @@ get_header(); ?>
 
 
 <div class="navbar-spacer screen-only noprint">
-  <br />
   <br />
   <br />
   <br />
@@ -112,6 +116,7 @@ get_header(); ?>
 tabstave notation=true tablature=false
 notes Cn-D-E/4 F#/5        
     </div>
+  <div id="song-list-wrap"></div>
 
 <?php
 
@@ -127,6 +132,7 @@ add_action('wp_footer',function(){
     
     <script src="http://cdn.dev.bratliensoftware.com/javascript/draggy.js"></script>
     <script src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
+    <script src="js/bsd.widgets.songlist.js"></script>
     <script src="lib/vextab/releases/vextab-div.js"></script>
     <script type="text/javascript">
 
@@ -217,160 +223,7 @@ add_action('wp_footer',function(){
       var noteNames = cscale.noteNames();
       
 
-      BSD.Widgets.Fretboard = function(spec) {
-
-        var self = BSD.PubSub({});
-        self.spec = spec;
-        
-        self.selectedNotes = function() {
-          ///console.log('selectedNotes data',spec.data);
-        
-          var numbers = spec.data.select(function(o) {
-            return o.selected;
-          }).map(function(o) { 
-            return o.noteValue; 
-          });    
-          
-          ////Object.keys(state).select(function(n){ return state[n]; });
-          
-          console.log('numbers',numbers);
-          var result = numbers.map(function(n) { return Note(n); });
-          return result;
-        };
-        
-        self.renderOn = function(wrap) {      
-          var inner = DOM.div().addClass('inner');
-          var table = DOM.table().addClass('fretboard-table');
-          table.attr('cellspacing',0);
-          table.attr('cellpadding',0);
-          
-          
-          
-          table.empty();
-          //console.log('cscale',cscale);
-          [64,59,55,50,45,40].forEach(function(open,stringIdx) { 
-            var row = DOM.tr();     
-            [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17].each(function(fret){ 
-
-              /***
-              BSD.foo.push({
-                fret: fret,
-                string: stringIdx+1,
-                midiValue: open+fret
-              });
-              ***/
-
-                  
-              var fretData = spec.data.detect(function(o){
-                return (o.string == stringIdx + 1) && o.fret == fret;
-              });
-              
-              //console.log('fretData',fretData);
-              
-              var cell = DOM.td();
-              
-              cell.addClass('fret-' + fret);
-              cell.addClass('string-' + (stringIdx+1));
-              
-              var midiValue = open+fret;
-              var note = Note(midiValue);
-             
-              var noteName = note.name();
-              
-
-              
-
-              //noteName = JSMT.toUTF8(noteName);
-              
-              if (true || noteNames.indexOf(noteName) > -1) {
-                
-                cell.html(noteName);
-                
-              }
-              
-              cell.click(function(){
-                console.log('click!!');
-
-                fretData.selected = ! fretData.selected; //toggle its state
-              
-                
-                if (fretData.selected) {
-                  var hex = BSD.chosenColor.toHex();
-                  var sum = BSD.chosenColor.r + BSD.chosenColor.g + BSD.chosenColor.b;
-                  
-                  console.log('hex',hex,'sum',sum);
-                  cell.css('background-color','#' + hex);
-                  //cell.css('color','white');
-
-                  cell.removeClass('color-white');
-                  cell.removeClass('color-grey');
-
-                  
-                  (sum > 500) ? cell.addClass('color-grey') : cell.addClass('color-white');
-
-
-                }
-                else {
-                  cell.css('background-color','inherit');
-                  cell.css('color','inherit');
-                }              
-              
-              });
-              
-              cell.hover(function(){
-                self.publish('note-hover',note);
-              });
-          
-              row.append(cell);
-              //console.log(note.name());
-            });
-            table.append(row);
-          });
-          inner.append(table);
-          var controls = DOM.div().addClass('controls noprint');
-          
-          var playAll = DOM.button('<i class="fa fa-play"></i>').addClass('btn btn-success control play-all');
-          playAll.click(function(){
-            self.publish('play-notes',self.selectedNotes());
-          });
-          controls.append(playAll);
-
-
-          var stickyNoteButton = DOM.button('<i class="fa fa-sticky-note-o"></i>').addClass('btn btn-info');
-          stickyNoteButton.click(function(e) {
-            ///console.log(e,'sticky');
-          
-            var sticky = BSD.Widgets.StickyNote(e);
-            sticky.renderOn(jQuery(document.body));
-          });
-          controls.append(stickyNoteButton);
-
-
-
-          
-
-          inner.append(controls);
-          
-          var close = DOM.div('<i class="fa fa-3x fa-close"></i> ').addClass('noprint');
-
-          close.click(function(){
-            inner.remove();
-          });
-          controls.append(close);
-          
-          wrap.append(inner);
-        };
-        
-        return self;
-      };
-
-      BSD.boards = [];
-      
-      
-
-
-
-  var context = new AudioContext();
+    var context = (window.AudioContext) ? new AudioContext : new webkitAudioContext;
   BSD.audioContext = context;
 
 
@@ -676,14 +529,14 @@ BSD.midiOctave = function(o) {
         };
     
     var lines = BSD.chunkify(bars,4);
-    lines.forEach(function(line){
-      console.log('line',line);
+    lines.forEach(function(barsOfLine){
+      console.log('barsOfLine',barsOfLine);
       msg += "tabstave notation=true tablature=false\n";
 
 
       textMsg = "";///'text :h,';
 
-      bars.forEach(function(bar){
+      barsOfLine.forEach(function(bar){
         var chords = bar;
 
 
@@ -707,6 +560,9 @@ BSD.midiOctave = function(o) {
               var winner = choices.detect(function(o){
                 return o.match(preferredLetter);
               });
+              
+              if (!winner) { winner = choices[0]; }
+              
               displayNotes.push({ name: winner, note: note });
               console.log('choices',choices,'saveLetter',saveLetter,'preferred',preferredLetter,'winner',winner);
             }
@@ -720,11 +576,22 @@ BSD.midiOctave = function(o) {
           console.log('displayNotes',displayNotes);
           var nextChord = chord.next;
           var placeThem = function(o) {
-            if (o.note.equalTo(chord.myThird())) {
+          
+            var m3 = chord.myThird();
+            var m7 = chord.mySeventh();
+            var onTheOne = m3 || m7;
+          
+            if (o.note.equalTo(onTheOne)) {
               return -145;
             }
             if (chord.next) {
-              return -1 * Math.abs(o.note.abstractValue() - chord.next.myThird().abstractValue());           
+            
+              var next3 = chord.next.myThird();
+              var next7 = chord.next.mySeventh();
+              
+              var target = next3 || next7;
+            
+              return -1 * Math.abs(o.note.abstractValue() - target.abstractValue());           
             }
             return o.note.abstractValue();
           };
@@ -759,180 +626,16 @@ BSD.midiOctave = function(o) {
     jQuery('.editor').trigger('change');
   });
   
-  campfire.subscribe('was-do-bars',function(bars){
-    console.log('bars',bars);
-    ///randColor = BSD.randomDarkColor(); ////palettes.atRandom().atRandom();
-    ///main.empty();
-
-
-
-
-
-      var staveWrap = DOM.div().addClass('stave-wrap');
-      var renderer = new VF.Renderer(staveWrap[0], VF.Renderer.Backends.SVG);
-      
-      // Configure the rendering context.
-      renderer.resize(1500, 100);
-      var context = renderer.getContext();
-      context.setFont("Arial", 10, "").setBackgroundFillStyle("#eed");
-
-      var stave = new VF.Stave(0,0, 1500);
-      // Add a clef and time signature.
-      stave.addClef("treble").addTimeSignature("4/4");
-      stave.setContext(context).draw();
-
-      /////////////
-      
-      
-      var c = new VF.StaveNote({ keys: ['c/4'], duration: "8" });
-      var e = new VF.StaveNote({ keys: ['e/4'], duration: "8" });
-      var g = new VF.StaveNote({ keys: ['g/4'], duration: "8" });
-      var b = new VF.StaveNote({ keys: ['b/4'], duration: "8" });
-
-      var beam = new Vex.Flow.Beam([c,e,g,b]);
-
-      var textNote = new Vex.Flow.TextNote({
-          text: 'Cmaj7',
-          font: {
-              family: "Arial",
-              size: 12,
-              weight: ""
-          },
-          duration: 'w'               
-      })
-      .setLine(2)
-      .setStave(stave);
-
-
-      Vex.Flow.Formatter.FormatAndDraw(context, stave, [c,e,g,b]);
-      Vex.Flow.Formatter.FormatAndDraw(context, stave, [textNote]);
-
-      beam.setContext(context).draw();
-
-      var barNote = new VF.BarNote();     
-      Vex.Flow.Formatter.FormatAndDraw(context, stave, [barNote]);
-
-      var barNote = new VF.BarNote();     
-      Vex.Flow.Formatter.FormatAndDraw(context, stave, [barNote]);
-
-      var barNote = new VF.BarNote();     
-      Vex.Flow.Formatter.FormatAndDraw(context, stave, [barNote]);
-
-
-
-      stage.append(staveWrap);
-      return false;
-      return false;
-      return false;
-      return false;
-      return false;
-      return false;
-      
-
-
-    var lines = BSD.chunkify(bars,4);
-    lines.forEach(function(line){
-      console.log('line',line);
-      
-
-      var vfStaveNotes = [];
-      var beams = [];
-      var texts = [];
-
-
-
-      bars.forEach(function(bar){
-        var chords = bar;
-
-        var vfChords = chords.map(function(chord){  
-          var keys = chord.notes().map(function(note){
-            var key = note.name().toLowerCase() + '/' + BSD.midiOctave(note);        
-            return key;
-          });
-          var result = new VF.StaveNote({ keys: keys, duration: "q" });
-          return result;
-        });
-    
-    
-        var vfThisBarNotes = [];
   
+   var songlistWrap = jQuery('#song-list-wrap');
   
-        chords.forEach(function(chord){
-          var vfThisChordNotes = [];
-
-
-
-          var text = new Vex.Flow.TextNote({
-              text: chord.fullAbbrev(),
-              font: {
-                  family: "Arial",
-                  size: 12,
-                  weight: ""
-              },
-              duration: 'w'               
-          })
-          .setLine(2)
-          .setStave(stave);
-          
-          //.setJustification(Vex.Flow.TextNote.Justification.LEFT);      
-    
-          ///vfStaveNotes.push(text);
-          texts.push(text);
-
-
-              
-          chord.notes().forEach(function(note) {
-            var nn = note.name().toLowerCase();
-            var key = nn +  '/' + BSD.midiOctave(note);
-            ///console.log('key',key,'nn',nn);
-            var vfNote = new VF.StaveNote({ keys: [key], duration: "8" });
-            var acc = nn.match(/#|b$/);  
-            if (acc && nn.length > 1){
-              vfNote.addAccidental(0, new Vex.Flow.Accidental(acc[0]));
-            }
-            
-            
-            vfStaveNotes.push(vfNote);
-            vfThisBarNotes.push(vfNote);
-            vfThisChordNotes.push(vfNote);
-          });
-    
-          var beam = new Vex.Flow.Beam(vfThisChordNotes);
-          beams.push(beam);
-        }); //chords in a bar
-
-        vfStaveNotes.push(new VF.BarNote());     
+  BSD.songlist.renderOn(songlistWrap);
+  BSD.songlist.refresh();
   
-      }); //bars
-
-      Vex.Flow.Formatter.FormatAndDraw(context, stave, vfStaveNotes);
-      beams.forEach(function(beam){
-        beam.setContext(context).draw();
-      });
-
-
-      var voice2 = new Vex.Flow.Voice({
-          num_beats: chords.length,
-          beat_value: 2,
-          resolution: Vex.Flow.RESOLUTION
-      });
-      //voice2.setStrict(false);
-      voice2.addTickables(texts);
-
-      var formatter = new Vex.Flow.Formatter();
-      formatter.format([voice2], 750);
-
-
-      texts.forEach(function(text){
-        text.setContext(context).draw();
-      });
-
-
-      
-      stage.append(staveWrap);
-    }); //lines
-    
-    
+  BSD.songlist.subscribe('song-selected',function(song){
+    progInput.val(song.progression);
+    progInput.trigger('change');
+  
   });
     
       
