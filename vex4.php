@@ -111,8 +111,8 @@ get_header(); ?>
 
 
     <div class="vex-tabdiv vex-prog"
-        width=680 scale=1.0 editor="true"
-        editor_width=680 editor_height=330>
+        width="" scale=1.0 editor="true"
+        editor_width="680" editor_height=330>
 tabstave notation=true tablature=false
 notes Cn-D-E/4 F#/5        
     </div>
@@ -489,6 +489,10 @@ BSD.midiOctave = function(o) {
   var stage = jQuery('#stage');
 
   var myVex = jQuery('.vex-prog');
+  
+  myVex.attr('width',jQuery(window).width() * 0.9);
+  
+  
 
   var saveChord = false;
   var firstChord = false;
@@ -576,44 +580,99 @@ BSD.midiOctave = function(o) {
                 
           ///console.log('displayNotes',displayNotes);
           var nextChord = chord.next;
-          var placeThem = function(o) {
           
-            var m3 = chord.myThird();
-            var m7 = chord.mySeventh();
-            var onTheOne = m3 || m7;
           
-            if (o.note.equalTo(onTheOne)) {
-              return -145;
-            }
-            if (chord.next) {
-            
-              var next3 = chord.next.myThird();
-              var next7 = chord.next.mySeventh();
-              
-              var target = next3 || next7;
-            
-              var distance = -1 * Math.abs(o.note.abstractValue() - target.abstractValue());
-              if (distance == 0) { 
-                return -144; 
-              } 
-            
-              return distance;
-            }
-            return o.note.abstractValue();
+
+          var m3 = chord.myThird();
+          var m7 = chord.mySeventh();
+          var onTheOne = m3 || m7;
+          var next3 = chord.next.myThird();
+          var next7 = chord.next.mySeventh();
+          
+          var target = next3 || next7;
+          
+          var placeFirstAndLast = function(nextNote) {
+            var aFunc = function(o) {
+              if (o.note.equalTo(onTheOne)) {
+                return -145;
+              }
+              if (chord.next) {
+                var distance = -1 * Math.abs(o.note.abstractValue() - target.abstractValue());
+                if (distance == 0) { 
+                  return -144; 
+                } 
+                return distance;
+              }
+              return o.note.abstractValue();
+            };
+            return aFunc;
           };
-        
           //console.log('before',displayNotes);
-          var sortedNotes = displayNotes.sort(BSD.sorter(placeThem));
+          var sortedNotes = displayNotes.sort(BSD.sorter(placeFirstAndLast(target)));
           //console.log('sorted',sortedNotes);
+
         
-          var keys = sortedNotes.map(function(o){
+          var notesToBePlayed = [];
+          
+          var noteCount = 0; //4 eighth notes for this single chord
+          if (chords.length == 1) {
+            noteCount = 8; //8 eighth notes for this single chord
+          }
+          else if (chords.length == 2) {
+            noteCount = 4;
+          }
+          else if (chords.length == 4) {
+            noteCount = 2;
+          }
+
+
+
+          /////
+          var first = sortedNotes[0];
+          var last = sortedNotes[sortedNotes.length-1];
+
+          notesToBePlayed.push(first);
+          var prevPad = first;
+          while (notesToBePlayed.length < noteCount - 1) {
+            var pad = false;
+            pad = sortedNotes.atRandom();
+            while (prevPad && pad.note.abstractlyEqualTo(prevPad.note)) {
+              pad = sortedNotes.atRandom();
+            }
+            while (notesToBePlayed.length == noteCount - 2 && pad.note.abstractlyEqualTo(last.note)) {
+              pad = sortedNotes.atRandom();
+            }
+            
+            notesToBePlayed.push(pad);
+            prevPad = pad;
+          }
+          
+          notesToBePlayed.push(last);
+
+          //// more stuff in here!!
+          //from scales..
+          
+          ///from chord...
+          
+          ///up to 8 if less and there's 1 chord in bar. (chords.length == 1).
+          
+          
+          //shore up octaves between chords
+          
+          
+        
+        
+        
+          var keys = notesToBePlayed.map(function(o){
             var nn = o.name.replace(/b$/,'@');///Case();
             var key = nn +  '/' + BSD.midiOctave(o.note);
             return key;
           });
           
           //msg += ' ' + keys.join('-');
-          noteMsg += ' ' + notesDurationMap[chords.length] + ' ' + keys.join('-');
+
+          noteMsg += ' ' + ':8' + ' ' + keys.join('-');
+          ///noteMsg += ' ' + notesDurationMap[chords.length] + ' ' + keys.join('-');
         });
         noteMsg += "| \n";
         //console.log('noteMsg',noteMsg);

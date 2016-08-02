@@ -222,6 +222,11 @@ JSMT.chordMap = {
     'min':   { name: 'minor', intervals: [0,3,7] }, //verified
 
 
+    'dim':  { name: 'diminished', intervals: [0,3,6] },
+    'o':  { name: 'diminished', intervals: [0,3,6] },
+
+
+
     '+':   { name: 'aug', intervals: [0,4,8] }, //verified
 
 

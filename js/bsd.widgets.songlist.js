@@ -11,6 +11,11 @@ BSD.Widgets.SongList = function(spec) {
   };
   self.refresh = function() {
     ul.empty();
+
+    var byTitle = function(o) { return o.title; }
+
+    var sorted = songs.sort(BSD.sorter(byTitle));
+
     songs.each(function(song){
       var li = DOM.li(song.title);
       li.click(function(){
@@ -208,6 +213,29 @@ BSD.songlist.addSong({
   ),
   title: 'Summer Samba'
 });
+
+
+BSD.songlist.addSong({
+  progression: (
+  
+  'Eb-7 Bb7b9|E-7 D7|DbM7 Gb7|F-7 Eo7|' +
+  'Eb-7|C-7b5 F7|Bb-7 Eb7 Eb-7 Ab7|Db6 Bb7|' +
+  
+  'Eb-7 Bb7b9|E-7 D7|DbM7 Gb7|F-7 Eo7|' +
+  'Eb-7|C-7b5 F7|Bb-7 Eb7 Eb-7 Ab7|Db A7|' +
+  
+  'DM7 DM7 E-7 A7|D D G-7 C7|F#-7 B-7 E-7 A7|DM7|' +
+  'D-7 G7|CM7 Ebo|D-7 G7|C7 B7 Bb7 Bb7|' +
+
+  'Eb-7 Bb7b9|E-7 D7|DbM7 Gb7|F-7 Eo7|' +
+  'Eb-7|C-7b5 F7|Bb-7 Eb7 Eb-7 Ab7|Db6 Bb7'
+
+  ),
+  title: 'Body and Soul'
+});
+
+
+
 
 
 
