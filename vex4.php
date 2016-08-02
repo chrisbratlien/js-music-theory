@@ -639,7 +639,8 @@ BSD.midiOctave = function(o) {
             while (prevPad && pad.note.abstractlyEqualTo(prevPad.note)) {
               pad = sortedNotes.atRandom();
             }
-            while (notesToBePlayed.length == noteCount - 2 && pad.note.abstractlyEqualTo(last.note)) {
+            while (notesToBePlayed.length == noteCount - 2 
+              && (pad.note.abstractlyEqualTo(last.note) || pad.note.abstractlyEqualTo(prevPad.note))) {
               pad = sortedNotes.atRandom();
             }
             
