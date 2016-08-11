@@ -393,7 +393,7 @@ add_action('wp_footer',function(){
 
 
 
-  var context = new AudioContext();
+  var context = (window.AudioContext) ? new AudioContext : new webkitAudioContext;
   BSD.audioContext = context;
 
     BSD.audioPlayer = BSD.Widgets.GuitarPlayer({
