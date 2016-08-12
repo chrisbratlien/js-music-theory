@@ -221,7 +221,7 @@ add_action('wp_footer',function(){
           var numbers = spec.data.select(function(o) {
             return o.selected;
           }).map(function(o) { 
-            return o.noteValue; 
+            return o.midiValue;////noteValue; 
           });    
           
           ////Object.keys(state).select(function(n){ return state[n]; });
