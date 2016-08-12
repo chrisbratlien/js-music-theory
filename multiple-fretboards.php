@@ -227,7 +227,7 @@ add_action('wp_footer',function(){
           
           ////Object.keys(state).select(function(n){ return state[n]; });
           
-          console.log('numbers',numbers);
+          //console.log('numbers',numbers);
           var result = numbers.map(function(n) { return Note(n); });
           return result;
         };
@@ -283,7 +283,7 @@ add_action('wp_footer',function(){
               }
               
               cell.click(function(){
-                console.log('click!!');
+                //console.log('click!!');
 
                 fretData.selected = ! fretData.selected; //toggle its state
               
@@ -292,7 +292,7 @@ add_action('wp_footer',function(){
                   var hex = BSD.chosenColor.toHex();
                   var sum = BSD.chosenColor.r + BSD.chosenColor.g + BSD.chosenColor.b;
                   
-                  console.log('hex',hex,'sum',sum);
+                  ////console.log('hex',hex,'sum',sum);
                   cell.css('background-color','#' + hex);
                   //cell.css('color','white');
 
@@ -440,10 +440,10 @@ add_action('wp_footer',function(){
   });    
   campfire.subscribe('play-notes',function(notes) {
 
-    console.log('notes??',notes);
+    //console.log('notes??',notes);
     var chord = makeChordFromNotes(notes);
     
-    console.log('chord??',chord);
+    ///console.log('chord??',chord);
     
     campfire.publish('play-chord',{ chord: chord, duration: 1000 });
   });    

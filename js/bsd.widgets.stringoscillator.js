@@ -47,7 +47,7 @@ BSD.StringOscillator = function(spec) {
 
     var detune1 = 4.5;    
     var time = context.currentTime;
-    var ampAttack = [0.056,0.099].atRandom();
+    var ampAttack = Math.random() / 10; //////[0.056,0.099,0.07,0.5].atRandom();
     var ampDecay = 0.7; 
 
 
@@ -61,7 +61,7 @@ BSD.StringOscillator = function(spec) {
     
     
     ampAttack = 1 - (semitone / 74);
-    if (ampAttack < 0) { ampAttack = 0;}
+    if (ampAttack < 0) { ampAttack = 0.01;}
     
     
     [

@@ -627,7 +627,7 @@ function makeScale(name) {
 
 JSMT.rnwiFromNoteValues = function(noteValues) {
 
-  console.log('incoming noteValues',noteValues);
+  //console.log('incoming noteValues',noteValues);
   var sorted = noteValues.sort();
 
   var first = sorted[0];

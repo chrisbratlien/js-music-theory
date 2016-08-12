@@ -61,7 +61,7 @@ BSD.Widgets.BasePlayer = function(spec) {
 
     var tooHigh = chord.notes().detect(function(n) { return n.value() > tooDamnHigh; });
     while (tooHigh) {
-      console.log('tooDamnHigh',chord.fullName());
+      //console.log('tooDamnHigh',chord.fullName());
       chord = chord.invertDown();
       var tooHigh = chord.notes().detect(function(n) { return n.value() > tooDamnHigh; });
     }
@@ -74,7 +74,7 @@ BSD.Widgets.BasePlayer = function(spec) {
     }
           
     var midivalues = chord.notes().collect(function(n) { return n.value(); });
-    console.log('midivalues',midivalues);
+    ///console.log('midivalues',midivalues);
     chord.notes().each(function(n) { self.playNote(n,duration); });
   };
   
