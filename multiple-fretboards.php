@@ -220,8 +220,9 @@ add_action('wp_footer',function(){
         
           var numbers = spec.data.select(function(o) {
             return o.selected;
-          }).map(function(o) { 
-            return o.midiValue;////noteValue; 
+          }).map(function(o) {
+            if (typeof o.noteValue !== "undefined") { return o.noteValue; }
+            return o.midiValue;
           });    
           
           ////Object.keys(state).select(function(n){ return state[n]; });
