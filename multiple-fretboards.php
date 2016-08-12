@@ -305,7 +305,7 @@ add_action('wp_footer',function(){
                 }
                 else {
                   cell.css('background-color','inherit');
-                  cell.css('color','inherit');
+                  ///cell.css('color','inherit');
                 }              
               
               });
