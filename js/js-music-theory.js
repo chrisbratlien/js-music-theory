@@ -365,6 +365,11 @@ var Note = function(foo,accidental) {
   self.abstractlyEqualTo = function(otherNote) {
     return otherNote.abstractValue() == self.abstractValue();
   };
+
+  self.abstractDistanceTo = function(other) {
+    return Math.abs(other.abstractValue() - self.abstractValue());
+  };
+
   
   self.equalTo = function(other) {
     return other.value() == self.value();
@@ -655,7 +660,19 @@ var RootNoteWithIntervals = function(spec) {
   
   
   self.name = spec.name || 'no name given';
-  self.abbrev = spec.abbrev || 'no abbrev given';
+
+  
+  self.abbrev = spec.abbrev;
+  if (!self.abbrev) {
+    if (spec.name == 'major') {
+      self.abbrev = ''; //ok to be blank
+    }
+    else {
+      self.abbrev = 'no abbrev given';
+    }
+  }
+  
+  
   self.rootNote = spec.rootNote;
 
 

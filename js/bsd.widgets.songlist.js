@@ -236,6 +236,24 @@ BSD.songlist.addSong({
 
 
 
+BSD.songlist.addSong({
+  progression: (
+  
+  'Eb7|Ab7 Ao7|Eb7|Eb7|' +
+  'Ab7|Ao7|Eb7|G-7 C7b9|' +
+  'F-7|Bb7|G-7 C7|F-7 B7'
+  ),
+  title: 'Sandu'
+});
 
+BSD.songlist.addSong({
+  progression: (
+  
+  'F|G-7 C7|F G-7|C-7 F+7|' +
+  'Bb7b9|Bb-7 Eb7|F G-7|A-7 D7|' +
+  'G-7|G-7 C7|F D7b9|G-7 C7'
+  ),
+  title: 'Au Privave'
+});
 
 

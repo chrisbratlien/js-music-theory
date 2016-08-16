@@ -590,7 +590,21 @@ BSD.midiOctave = function(o) {
           var next7 = chord.next.mySeventh();
           
           var target = next3 || next7;
+
           
+          var closestTo = function(other,allowEqual) {
+            var aFunc = function(o) {
+              var dist = o.note.abstractDistanceTo(other);
+              if (dist == 0 && !allowEqual) { return 13; }
+              return dist;
+            };
+            return aFunc;
+          };
+
+          var first = displayNotes.sort(BSD.sorter(closestTo(onTheOne,true)))[0];
+          var last = displayNotes.sort(BSD.sorter(closestTo(target,false)))[0];
+
+          /*
           var placeFirstAndLast = function(nextNote) {
             var aFunc = function(o) {
               if (o.note.equalTo(onTheOne)) {
@@ -610,7 +624,7 @@ BSD.midiOctave = function(o) {
           //console.log('before',displayNotes);
           var sortedNotes = displayNotes.sort(BSD.sorter(placeFirstAndLast(target)));
           //console.log('sorted',sortedNotes);
-
+          ***/
         
           var notesToBePlayed = [];
           
@@ -625,23 +639,24 @@ BSD.midiOctave = function(o) {
             noteCount = 2;
           }
 
-
-
           /////
+          /**
           var first = sortedNotes[0];
           var last = sortedNotes[sortedNotes.length-1];
-
+          ***/
+          
+          
           notesToBePlayed.push(first);
           var prevPad = first;
           while (notesToBePlayed.length < noteCount - 1) {
             var pad = false;
-            pad = sortedNotes.atRandom();
+            pad = displayNotes.atRandom();
             while (prevPad && pad.note.abstractlyEqualTo(prevPad.note)) {
-              pad = sortedNotes.atRandom();
+              pad = displayNotes.atRandom();
             }
             while (notesToBePlayed.length == noteCount - 2 
               && (pad.note.abstractlyEqualTo(last.note) || pad.note.abstractlyEqualTo(prevPad.note))) {
-              pad = sortedNotes.atRandom();
+              pad = displayNotes.atRandom();
             }
             
             notesToBePlayed.push(pad);
