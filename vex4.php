@@ -500,6 +500,8 @@ BSD.midiOctave = function(o) {
   
   campfire.subscribe('do-bars',function(bars){
     console.log('bars',bars);
+    
+    BSD.allTheNotes = [];
 
     saveChord = false;
     firstChord = false;
@@ -604,6 +606,34 @@ BSD.midiOctave = function(o) {
 
           var first = displayNotes.sort(BSD.sorter(closestTo(onTheOne,true)))[0];
           var last = displayNotes.sort(BSD.sorter(closestTo(target,false)))[0];
+          
+          
+          /****
+          var closestLast = [last.note,last.note.plus(12),last.note.plus(-12)].sort(BSD.sorter(function(o){
+            return Math.abs(o.distanceTo(target));
+          })).shift();
+          
+          last.note = closestLast;
+          
+          console.log(last.note.distanceTo(target),'target distance');
+          ****/
+          
+          if (last.note.distanceTo(target) > 6) {
+            var diff;
+            diff = last.note.value() - target.value();
+            console.log('diff',diff,'lastVal',last.note.value(),'targetVal',target.value());
+
+            if (diff > 0) {
+              last.note = last.note.plus(-12);
+            }
+            else {
+              last.note = last.note.plus(12);            
+            }
+            
+            diff = last.note.value() - target.value();
+            console.log('FIXED? diff',diff,'lastVal',last.note.value(),'targetVal',target.value());
+          };
+          
 
           /*
           var placeFirstAndLast = function(nextNote) {
@@ -732,6 +762,8 @@ BSD.midiOctave = function(o) {
   
  
   function hookItUp() {
+
+
       jQuery('g.vf-stavenote').each(function(i,elem) { 
         jQuery(elem).on('mouseover click touchend',function() { 
           campfire.publish('play-note',{ note: BSD.allTheNotes[i], duration: 1000 }); 

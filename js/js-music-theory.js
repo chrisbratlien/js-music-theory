@@ -370,6 +370,10 @@ var Note = function(foo,accidental) {
     return Math.abs(other.abstractValue() - self.abstractValue());
   };
 
+  self.distanceTo = function(other) {
+    return Math.abs(other.value() - self.value());
+  };
+
   
   self.equalTo = function(other) {
     return other.value() == self.value();

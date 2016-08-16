@@ -61,7 +61,7 @@ BSD.StringOscillator = function(spec) {
     
     
     ampAttack = 1 - (semitone / 74);
-    if (ampAttack < 0) { ampAttack = 0.01;}
+    if (ampAttack <= 0) { ampAttack = 0.01;}
     
     
     [
