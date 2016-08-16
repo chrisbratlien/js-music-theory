@@ -138,6 +138,7 @@ add_action('wp_footer',function(){
 
 
       BSD.foo = [];
+      BSD.allTheNotes = [];
 
       BSD.chosenColor = BSD.colorFromHex('#888888');
       BSD.ColorPicker = function(spec) {
@@ -677,7 +678,9 @@ BSD.midiOctave = function(o) {
           
           
         
-        
+          notesToBePlayed.forEach(function(o){
+            BSD.allTheNotes.push(o.note);
+          });
         
           var keys = notesToBePlayed.map(function(o){
             var nn = o.name.replace(/b$/,'@');///Case();
@@ -706,6 +709,13 @@ BSD.midiOctave = function(o) {
     jQuery('.editor').val(msg);
     jQuery('.editor').trigger('change');
   });
+
+
+
+  
+  
+  
+  
   
   
    var songlistWrap = jQuery('#song-list-wrap');
@@ -716,8 +726,30 @@ BSD.midiOctave = function(o) {
   BSD.songlist.subscribe('song-selected',function(song){
     progInput.val(song.progression);
     progInput.trigger('change');
+
   
   });
+  
+ 
+  function hookItUp() {
+      jQuery('g.vf-stavenote').each(function(i,elem) { 
+        jQuery(elem).on('mouseover click touchend',function() { 
+          campfire.publish('play-note',{ note: BSD.allTheNotes[i], duration: 1000 }); 
+        }); 
+      });
+  }
+  
+
+
+
+/***
+jQuery('g.vf-stavenote').each(function(i,elem) { jQuery(elem).on('mouseover',function() { campfire.publish('play-note',{ note: BSD.allTheNotes[i], duration: 1000 }); }); });
+
+
+
+**/
+
+
     
       
     </script>
