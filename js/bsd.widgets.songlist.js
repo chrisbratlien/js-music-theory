@@ -257,3 +257,20 @@ BSD.songlist.addSong({
 });
 
 
+
+BSD.songlist.addSong({
+  progression: (
+  'Bb7|Bb7|Bb7|Bb7|' +
+  'Eb7|Eb7|Bb7|Bb7|' +
+  'F7|Eb7|Ab7|Ab7|' +
+
+  'Bb7|Bb7|Bb7|Bb7|' +
+  'Eb7|Eb7|Bb7|Bb7|' +
+  'F7|Eb7|Bb7|Bb7'
+  ),
+  title: 'Freddie Freeloader'
+});
+
+
+
+
