@@ -306,12 +306,7 @@ add_action('wp_footer',function(){
                 }
                 else {
                   cell.css('background-color','inherit');
-<<<<<<< Updated upstream
                   cell.removeClass('color-white');
-                  ///cell.css('color','inherit');
-=======
-                  cell.removeClass('color-white');                  
->>>>>>> Stashed changes
                 }              
               
               });
