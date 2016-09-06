@@ -104,6 +104,18 @@ get_header(); ?>
 
 </div><!-- color-pickers-wrap -->
 
+      <div class="progression-form">
+        <button id="redo">Redo</button>
+        <label>Progression</label>
+        <input type="text" id="progression" class="form-control" />
+        
+        <label>Active Strings</label>       
+        <input type="text" id="active-strings" class="form-control active-strings" value="6-5-4-3-2-1" />
+      
+      </div>
+
+
+
 <div class="navbar-spacer screen-only noprint">
   <button class="btn btn-info btn-add-fretboard noprint"><i class="fa fa-plus"></i> Add Fretboard</button>
   <button class="btn btn-info btn-toggle-text noprint">Toggle Text</button>
@@ -111,7 +123,6 @@ get_header(); ?>
   <br />
   <br />
 </div>
-<div class="stage"></div>
 
 <?php
 
@@ -129,6 +140,56 @@ add_action('wp_footer',function(){
     <script src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
     
     <script type="text/javascript">
+
+
+
+
+
+
+  BSD.parseProgression = function(progString) {
+    var barStrings = progString.split(/\ +|\|/);
+    
+    barStrings = barStrings.select(function(o){ return o.length > 0; });
+    
+    
+    
+    var barIndex = 0;
+    var chordIndex = 0;
+    var flat = [];
+    
+    barStrings.each(function(barString){
+      var chordNames = barString.split(/,|\ +/);
+      var halfBar = false;
+      if (chordNames.length == 2) {
+        halfBar = true;
+      }
+      
+      
+      
+      chordNames.each(function(o){
+        var origChord = makeChord(o);        
+        var lowerChord = origChord.plus(-12);  
+        
+        flat.push({
+          barIndex: barIndex,
+          chordIndex: chordIndex,
+          chord: lowerChord,
+          halfBar: halfBar
+        });
+        chordIndex += 1;        
+      });
+      barIndex += 1;
+    });
+
+    return flat;
+    ///wait
+    var result = eachify(flat);
+    console.log('result',result);
+    return result;
+  };
+
+
+
 
 
       BSD.foo = [];
@@ -389,7 +450,7 @@ add_action('wp_footer',function(){
       
 
 
-      var stage = jQuery('.stage');
+      ///var stage = jQuery('.stage');
       
       function makeFretboardOn(wrap,opts) {
         var chord = opts.chord;
@@ -463,7 +524,7 @@ add_action('wp_footer',function(){
 
 
     jQuery('.btn-add-fretboard').click(function(){
-      makeFretboardOn(stage,null); 
+      ///makeFretboardOn(stage,null); 
     });
       
 
@@ -585,17 +646,6 @@ add_action('wp_footer',function(){
     BSD.guitarData = o;
 
 
-    'B-7b5 E7b9 A-7'.split(/\ +/).forEach(function(chordName){
-      var chord = makeChord(chordName);
-
-      var activeStrings = [6,4,3,2];
-
-      makeFretboardOn(stage,{
-        chord: chord,
-        activeStrings: activeStrings
-      });
-    });
-
   },
   function(e){
     console.log('e',e);
@@ -611,6 +661,40 @@ add_action('wp_footer',function(){
   });
   
     
+
+var progInput = jQuery('#progression');
+progInput.blur(function() { 
+  campfire.publish('gather-inputs-and-do-it');
+});
+
+
+var activeStringsInput = jQuery('.active-strings');
+activeStringsInput.blur(function(){
+  campfire.publish('gather-inputs-and-do-it');
+});
+
+campfire.subscribe('gather-inputs-and-do-it',function(){
+    if (progInput.val().length == 0) { return false; }
+    var prog = BSD.parseProgression(progInput.val());
+    console.log('prog',prog);
+    var myChords = prog.map(function(o){  return o.chord; });
+    campfire.publish('do-it',myChords);
+});
+
+
+ campfire.subscribe('do-it',function(chords){
+    var activeStrings = activeStringsInput.val().split(/-/).map(function(o) {  return parseInt(o,10); });
+    console.log('chords?',chords,'activeStrings',activeStrings);
+
+    var stage = DOM.div().addClass('stage');
+    jQuery(document.body).append(stage);
+    chords.each(function(chord){
+      makeFretboardOn(stage,{
+        chord: chord,
+        activeStrings: activeStrings
+      });
+    });
+ });
     
       
     </script>
