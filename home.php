@@ -22,6 +22,7 @@
       <li><a href="teacher.html">Teacher</a> Guitar fretboard, shows heat map of recently played notes</li>
       <li><a href="two-five">Two Five</a> Visualize and hover over random II-Vs</li>
       <li><a href="multiple-fretboards">Multiple Fretboards</a> paint and play on fretboards</li>
+      <li><a href="prog-fretboards">Prog Fretboards</a> paint and play on fretboards drawn to match a progression</li>
       <li><a href="hexagon">Hexagon</a> Hexagon inputs</li>
       <li><a href="vex3">Vex3</a> VexFlow progressions sandbox</li>
     </ul>

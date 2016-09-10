@@ -1,7 +1,7 @@
 <?php 
 
 
-add_filter('wp_title',function($o){ return 'Multiple Fretboards'; });
+add_filter('wp_title',function($o){ return 'Prog Fretboards'; });
 add_action('wp_head',function(){
 ?>
 
