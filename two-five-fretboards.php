@@ -12,17 +12,20 @@ add_action('wp_head',function(){
     font-size: 10px;
   }
 
-  .stage { width: 65%; margin: 0; }
+  .stage { 
+    margin: 0; 
+    width: 65%; 
+  }
   
   .inner { 
     font-size: 10px; 
-    width: 50%; 
     margin-left: 2%; 
-    
+    width: 50%; 
   }
 
   .inner table { float: left; }
   .inner .controls { float: left; }
+  .inner .spacer { clear: both; }
 
 
   table { 
@@ -108,13 +111,21 @@ get_header(); ?>
         <button id="redo">Redo</button>
         <label>Progression</label>
         <input type="text" id="progression" class="form-control" />
-        
-        <label>Active Strings</label>       
-        <input type="text" id="active-strings" class="form-control active-strings" value="6-5-4-3-2-1" />
-      
+
+        <label>String sets</label>
+        <label>654321</label>
+        <input type="checkbox" class="stringset-654321" checked="true" />
+        <label>6432</label>
+        <input type="checkbox" class="stringset-6432" checked="true" />
+        <label>4321</label>
+        <input type="checkbox" class="stringset-4321" checked="true" />
+        <label>5432</label>
+        <input type="checkbox" class="stringset-5432" checked="true" />
+        <label>5321</label>
+        <input type="checkbox" class="stringset-5321" checked="true" />
+        <label>6543</label>
+        <input type="checkbox" class="stringset-6543" checked="true" />
       </div>
-
-
 
 <div class="navbar-spacer screen-only noprint">
   <button class="btn btn-info btn-add-fretboard noprint"><i class="fa fa-plus"></i> Add Fretboard</button>
@@ -142,11 +153,7 @@ add_action('wp_footer',function(){
     <script type="text/javascript">
 
 
-
-
-
-
-  BSD.parseProgression = function(progString) {
+BSD.parseProgression = function(progString) {
     var barStrings = progString.split(/\ +|\|/);
     
     barStrings = barStrings.select(function(o){ return o.length > 0; });
@@ -302,6 +309,8 @@ add_action('wp_footer',function(){
 
 
         self.styleCell = function(cell,fretData) {
+          cell.addClass('color-white');
+
                 if (fretData.selected) {
                   var hex = BSD.chosenColor.toHex();
                   var sum = BSD.chosenColor.r + BSD.chosenColor.g + BSD.chosenColor.b;
@@ -316,18 +325,17 @@ add_action('wp_footer',function(){
 
                   cell.css('background-color','#' + hex);
                   //cell.css('color','white');
-
-                  cell.removeClass('color-white');
+                  //cell.removeClass('color-white');
                   cell.removeClass('color-grey');
 
                   
-                  (sum > 500) ? cell.addClass('color-grey') : cell.addClass('color-white');
+                  (sum > 500) ? cell.addClass('color-black') : cell.addClass('color-white');
 
 
                 }
                 else {
                   cell.css('background-color','inherit');
-                  cell.removeClass('color-white');
+                  //cell.removeClass('color-white');
                 }              
 
 
@@ -407,6 +415,10 @@ add_action('wp_footer',function(){
             });
             table.append(row);
           });
+
+
+          inner.append(DOM.h3(spec.chord.fullAbbrev()));
+
           inner.append(table);
           var controls = DOM.div().addClass('controls noprint');
           
@@ -431,6 +443,7 @@ add_action('wp_footer',function(){
           
 
           inner.append(controls);
+          inner.append(DOM.div('&nbsp;').addClass('spacer'));
           
           var close = DOM.div('<i class="fa fa-3x fa-close"></i> ').addClass('noprint');
 
@@ -450,9 +463,17 @@ add_action('wp_footer',function(){
       
 
 
+        var colorHash = {};
+
+
+
+
       ///var stage = jQuery('.stage');
       
       function makeFretboardOn(wrap,opts) {
+
+
+
         var chord = opts.chord;
         var activeStrings = opts.activeStrings || [1,2,3,4,5,6];
 
@@ -461,15 +482,6 @@ add_action('wp_footer',function(){
 
         abstractNoteValues = chord.abstractNoteValues();
 
-
-        var colorHash = {};
-
-        var palette = BSD.randomPalette2(10,170);
-
-        abstractNoteValues.forEach(function(av) {
-          var color = palette.shift();
-          colorHash[av] = color;
-        });
 
 
 
@@ -481,15 +493,30 @@ add_action('wp_footer',function(){
                 return false;
               }
 
+              var interval = o.chromaticValue - chord.rootNote.abstractValue();
+              while (interval < 0) { interval += 12; }
+              while (interval > 11) { interval -= 12; }
+              //console.log('interval',interval);
+              o.interval = interval;
 
               return true;
           });
           if (typeof hit == "number") { o.selected = true; }
 
-          if (colorHash[o.chromaticValue]) {
-            o.color = colorHash[o.chromaticValue];
+
+
+
+          if (colorHash[o.interval]) {
+            o.color = colorHash[o.interval];
             o.colorHex = '#' + o.color.toHex();
           }
+          /**
+          if (o.interval == 1 && o.chord.fullAbbrev().match(/b9/)) {
+            o.color = BSD.colorFromHex('#E6DF52');
+            o.colorHex = '#' + o.color.toHex();
+          }
+          **/
+
           return o;
         });
 
@@ -505,6 +532,7 @@ add_action('wp_footer',function(){
         var board = BSD.Widgets.Fretboard({
           data: newData,//defaultData,
           activeStrings: activeStrings,
+          chord: chord
         });
         board.renderOn(wrap);
         
@@ -681,20 +709,40 @@ campfire.subscribe('gather-inputs-and-do-it',function(){
     campfire.publish('do-it',myChords);
 });
 
+campfire.subscribe('do-it',function(chords){
+  var pa = '#FF0000-#E6DF52-#FFDD17-#4699D4-#4699D4-#000000-#000000-#000000-#bbbbbb-#67AFAD-#8C64AB-#8C64AB'.split(/-/);
 
- campfire.subscribe('do-it',function(chords){
-    var activeStrings = activeStringsInput.val().split(/-/).map(function(o) {  return parseInt(o,10); });
-    console.log('chords?',chords,'activeStrings',activeStrings);
 
+  var palette = pa.map(function(o) {
+    return BSD.colorFromHex(o);
+  });
+  ///palette = BSD.randomPalette2(12,200);
+  palette.forEach(function(color,i) {
+    ///var color = palette.shift();
+    colorHash[i] = color;
+  });
+
+  ['654321','6432','4321','5432','5321','6543'].forEach(function(stringSet){
+    var cb = jQuery('.stringset-' + stringSet);
+    if (!cb.attr('checked')) { return false; }
+    var activeStrings = stringSet.split('');
     var stage = DOM.div().addClass('stage');
+
     jQuery(document.body).append(stage);
     chords.each(function(chord){
+
+
+
+
       makeFretboardOn(stage,{
         chord: chord,
         activeStrings: activeStrings
       });
+      //console.log('chords?',chords,'activeStrings',activeStrings);
     });
- });
+  });
+
+});
     
       
     </script>
