@@ -1,9 +1,10 @@
 <?php
+
+add_filter('wp_title',function($o){ return 'Song'; });
+  
+
 add_action('wp_head',function(){
 ?>
-  <title>Song</title>
-
-
 
 <!-- may try out some variations on eachify -->
 
@@ -649,20 +650,27 @@ $( "#speed-input" ).slider({
   }
 });
 
-BSD.tempo = 100;
+BSD.tempo = 0;
+storage.getItem('tempo',function(o){
+    BSD.tempo = parseInt(o,0);
+    ////sequencer.setTempo(BSD.tempo);//////BSD.Widgets.Sequencer({ tempo: BSD.tempo }); 
+    ////waiter.beg(progressionClock,'set-tempo',n);        
+    jQuery( "#tempo-amount" ).text( o );
+});
+
+
+
 $( "#tempo-input" ).slider({
   orientation: "vertical",
   range: "min",
-  min: 30,
-  max: 140,
+  min: 50,
+  max: 150,
   step: 1,
   value: BSD.tempo,
   slide: function( event, ui ) {
     var n = ui.value;
     BSD.tempo = n;
-    sequencer.setTempo(BSD.tempo);//////BSD.Widgets.Sequencer({ tempo: BSD.tempo }); 
-
-    ////waiter.beg(progressionClock,'set-tempo',n);        
+    storage.setItem('tempo',BSD.tempo);
     jQuery( "#tempo-amount" ).text( n );
   }
 });

@@ -35,7 +35,7 @@
   
    <header class="navbar navbar-fixed-top navbar-inverse navbar-music-player noprint" id="top" role="banner">
       <div class="container">
-        <div class="navbar-header">
+        <div class="was-navbar-header">
           <div class="current-song-info header-column">
             <div class="title"></div>
             <div class="artist"></div>
