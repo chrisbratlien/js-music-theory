@@ -334,6 +334,8 @@ add_action('wp_footer',function() {
 
   function tick(cursor) {
 
+    if (cursor.name) { console.log('TICK',cursor.name); }
+
     var beatMS = tempoToMillis(BSD.tempo);
     var halfBarMS = beatMS * 2;
     var fullBarMS = beatMS * 4;
@@ -346,19 +348,24 @@ add_action('wp_footer',function() {
 
     cursor = cursor.next;
 
-    clearTimeout(BSD.timeout);
-    BSD.timeout = setTimeout(function() {
-      tick(cursor); 
-    },ms);
+      clearTimeout(BSD.timeout);
+      BSD.timeout = setTimeout(function() {
+        tick(cursor); 
+      },ms);
   }
 
   
   campfire.subscribe('lets-do-this',function(progString) {
+    var progName = Math.round(Math.random() * 22);
+    if (BSD.timeout) {
+      clearTimeout(BSD.timeout);
+    }
 
     var events = BSD.parseProgression(progString);
     var prev = false;
     events.forEach(function(o) {
       if (prev) { 
+          prev.name = progName;
           prev.next = o; 
           prev.current = prev;
       }
@@ -366,6 +373,7 @@ add_action('wp_footer',function() {
     });
     prev.next = events[0];
     prev.current = prev;
+    prev.name = progName;
 
     console.log('prog',progString,'events',events);
 
@@ -471,7 +479,7 @@ add_action('wp_footer',function() {
       BSD.chunker = BSD.Widgets.GuitarPlayer({
       gossip: campfire,
       context: context,
-      polyphonyCount: 16,//polyphonyCount,
+      polyphonyCount: 32,//polyphonyCount,
       range: [-300,80]
     });
 
