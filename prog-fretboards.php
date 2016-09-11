@@ -31,10 +31,12 @@ add_action('wp_head',function(){
   table { 
     border-bottom: 1px solid rgba(0,0,0,0.1); 
     border-right: 1px solid  rgba(0,0,0,0.1); 
+    width: 75%;
   }
   table td { 
     padding: 0.2em; text-align: center; 
-    width: 1.7em;
+    min-width: 23px;
+    width: 23px;
     height: 1.5em;    
     text.align: center;
     border-radius: 1rem;
@@ -349,6 +351,7 @@ BSD.parseProgression = function(progString) {
           table.attr('cellspacing',0);
           table.attr('cellpadding',0);
           
+          var intervalMap = '1,b9,9,b3,3,4,b5,5,#5,6,b7,7'.split(/,/);
           
           
           table.empty();
@@ -389,6 +392,20 @@ BSD.parseProgression = function(progString) {
               
               if (true || noteNames.indexOf(noteName) > -1) {
                 
+                var showInterval = false;
+
+                cell.text(noteName);
+
+                self.subscribe('show-interval',function(wish){
+                  if (wish) {
+                    cell.text(intervalMap[fretData.interval]);
+                  }
+                  else {
+                    cell.text(noteName);
+                  }
+                });
+
+
                 cell.html(noteName);
                 
               }

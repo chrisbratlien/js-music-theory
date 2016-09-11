@@ -219,7 +219,7 @@ BSD.Widgets.FretboardViz = function(spec) {
       scale = compatibleScales.atRandom();
 
 
-      console.log('compatScal',compatibleScales);
+      //console.log('compatScal',compatibleScales);
 
       /**
       preferredGuesses.push('lydian');

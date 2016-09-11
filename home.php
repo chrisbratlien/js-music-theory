@@ -15,7 +15,7 @@
       <li><a href="mandolin.html">Mandolin (may be broken)</a> has mandolin tuning on its fretboard</li>
       <li><a href="palette.html">Palette</a> scratch page for various junk</li>
       <li><a href="rulers.html">Rulers (formerly jazz.html)</a> Toggle notes on vertical swatches and then hit the green button to play all of the toggled notes in that swatch</li>
-      <li><a href="song.html">Song</a> plays chord progressions and gives an interactive fretboard and other viewers to play along with</li>
+      <li><a href="song">Song</a> plays chord progressions and gives an interactive fretboard and other viewers to play along with</li>
       <li><a href="spatial.html">Spatial Note Fretboard</a> This progression player will arpeggiate the chords in its progression, but only after first inverting the chords as much as necessary so the chord changes begin with the most "nearby" note of the new chord to the last played note of the old chord. The arpeggios rise and then fall, with an overall falling trend. 
   
   Spatially, the midpoint of the last few displayed notes on the guitar fretboard will help determine which fret, x, and which string, y, is chosen for the next note to be displayed on the fretboard. The theory is that this moving midpoint can find efficient trails on the fretboard which match the incoming sequence of notes from the arpeggiator, yet minimize fretting-hand movement for the human guitarist playing along.</li>

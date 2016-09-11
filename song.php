@@ -1,53 +1,13 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" nomanifest="js-music-theory.manifest">
-<head>
-
+<?php
+add_action('wp_head',function(){
+?>
   <title>Song</title>
-  <!-- jquery && jQuery UI -->
-  <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-  <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
-  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
 
-
-<script src="http://cdn.dev.bratliensoftware.com/javascript/array.js"></script>
-<script src="http://cdn.dev.bratliensoftware.com/javascript/color.js"></script>
-
-<script src="http://cdn.dev.bratliensoftware.com/javascript/bsd.pubsub.js"></script>
 
 
 <!-- may try out some variations on eachify -->
-<script src="javascript/eachify.js"></script>
-
-<script src="http://cdn.dev.bratliensoftware.com/javascript/dom.js"></script>
-<script src="http://cdn.dev.bratliensoftware.com/javascript/draggy.js"></script>
-<script src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
-
-<script type="text/javascript" src="javascript/bsd.widgets.procrastinator.js"></script>
 
 
-<script src="javascript/js-music-theory.js"></script>
-<!-- <script src="javascript/bsd.widgets.spinner.js"></script> -->
-<script src="javascript/bsd.widgets.riffer.js"></script>
-<script src="javascript/bsd.widgets.faker.js"></script>
-<script src="javascript/bsd.widgets.progressionclock.js"></script>
-<script src="javascript/bsd.widgets.fretboardviz.js"></script>
-<script src="javascript/bsd.widgets.roll.js"></script>
-
-
-<script src="javascript/bsd.widgets.baseplayer.js"></script>
-<script src="javascript/bsd.widgets.stringoscillator.js"></script>
-<script src="javascript/bsd.widgets.tonalityguru.js"></script>
-<script src="javascript/bsd.widgets.guitarplayer.js"></script>
-<script src="javascript/bsd.widgets.sequencer.js"></script>
-
-<script src="javascript/bsd.mandolin.js"></script>
-
-<script src="javascript/bsd.widgets.songlist.js"></script>
-  
-  
-
-<script src="javascript/prob.js"></script>
 <style type="text/css">
 
 
@@ -170,24 +130,14 @@
   #faker-wrap .near-next-third { background: #afa; }
   #faker-wrap .next-third { background: #5f5; color: white; }
   
-
-
-    .slider-wrap { 
-      display:inline; 
-      float: left; 
-      margin: 15px; 
-      height: 220px;
-    }
     
-    .slider-wrap .slider {
-      height: 100%;
     
-    }
-
-
-
     ul.song-list { list-style-type: none; width: 140px; }
-    ul.song-list li { padding: 3px; font-size: 1.2em; cursor: pointer; }
+    ul.song-list li { 
+      cursor: pointer; 
+      font-size: 1.2em; 
+      padding: 3px; 
+    }
     ul.song-list li.selected{ background: #409; color: white; }
 
 
@@ -199,34 +149,25 @@
       -ms-user-select: none;
       user-select: none;
   }
-
-  
 </style>
-
 <style type="text/css" media="print">
   body { font-size: 0.5em; }
-
 </style>
+<?php 
+});
 
-</head>
-<body>
+get_header(); 
+
+
+?>
 <div id="song-list-wrap"></div>
 <button id="sticky-note-button">Sticky Note</button>
 <div id="stage"></div>
 <br />
-
-
-
-
-  <div class="slider-wrap">
-  Volume: <br /><span id="volume-amount">0</span>
-  <div class="slider" id="volume-input"></div>
-  </div>
   <div class="slider-wrap">
       Detune:<br /> <span id="detune-amount">0</span>
     <div class="slider" id="detune-input"></div>
   </div>
-
 
   <div class="slider-wrap">
       Speed (delay):<br /> <span id="speed-amount">1000</span>
@@ -244,18 +185,10 @@
       Repeats:<br /> <span id="repeats-amount">1</span>
     <div class="slider" id="repeats-input"></div>
   </div>
-
-
-  
   
   <div style="clear: both;">&nbsp;</div>        
-
-
 <br />
 <button id="pause">Pause</button>
-
-
-
 
 <div id="progression-clock-wrap"></div>
 <div id="fretboard-viz-wrap" class="noselect"></div>
@@ -269,8 +202,26 @@
 <div id="table1-wrap"></div>
 <div id="table2-wrap"></div>
 
+<?php
+
+add_action('wp_footer',function() {
+?>
+<script src="javascript/bsd.widgets.riffer.js"></script>
+<script src="javascript/bsd.widgets.faker.js"></script>
+<script src="javascript/bsd.widgets.progressionclock.js"></script>
+<script src="javascript/bsd.widgets.fretboardviz.js"></script>
+<script src="javascript/bsd.widgets.roll.js"></script>
 
 
+<script src="javascript/bsd.widgets.baseplayer.js"></script>
+<script src="javascript/bsd.widgets.stringoscillator.js"></script>
+<script src="javascript/bsd.widgets.tonalityguru.js"></script>
+<script src="javascript/bsd.widgets.guitarplayer.js"></script>
+<script src="javascript/bsd.widgets.sequencer.js"></script>
+
+<script src="javascript/bsd.mandolin.js"></script>
+<script src="javascript/bsd.widgets.songlist.js"></script>
+<script src="javascript/prob.js"></script>
 <script type="text/javascript">
 
   function getChordImages(cb) {
@@ -382,10 +333,12 @@
 
     if (BSD.repeats > 0) {
       var delim = '';
+      var accum = prog;
       if (prog.match(/\|/)) { delim = '|'; }
       for (var i = 0; i < BSD.repeats; i += 1) {
-        prog += delim + prog;
-      }     
+         accum += delim + prog;
+      }
+      prog = accum;     
     }
 
 
@@ -671,17 +624,27 @@
 var waiter = BSD.Widgets.Procrastinator({ timeout: 250 });
 var waiter2 = BSD.Widgets.Procrastinator({ timeout: 250 });
 
+BSD.volume = 0;
+storage.getItem('volume',function(o){
+    BSD.volume = parseFloat(o);
+    ////waiter.beg(BSD.audioPlayer,'set-master-volume',BSD.volume);
+    waiter.beg(BSD.leader,'set-master-volume',BSD.volume);
+    waiter2.beg(BSD.chunker,'set-master-volume',BSD.volume);
+    jQuery( "#volume-amount" ).text( BSD.volume );
+});
+
 $( "#volume-input" ).slider({
-  orientation: "vertical",
+  orientation: "horizontal",
   range: "min",
   min: 0,
-  max: 0.1,
+  max: 1,
   step: 0.01,
-  value: 0.01,
+  value: BSD.volume,
   slide: function( event, ui ) {
     var newVolume = ui.value;
     waiter.beg(BSD.leader,'set-master-volume',ui.value);
     waiter2.beg(BSD.chunker,'set-master-volume',ui.value);
+    storage.setItem('volume',newVolume);     
     jQuery( "#volume-amount" ).text( newVolume );
   }
 });
@@ -768,6 +731,8 @@ $( "#repeats-input" ).slider({
   BSD.chunker.publish('set-master-volume',0.01);
   
 </script>
-<!--<div class="surface">SURFACE</div>-->
-</body>
-</html>
+
+<?php
+});
+
+get_footer();
