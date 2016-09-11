@@ -322,108 +322,63 @@ add_action('wp_footer',function() {
   var progressionClock;
   var sequencer = BSD.Widgets.Sequencer({ tempo: BSD.tempo }); 
   
-  
-  
-  campfire.subscribe('lets-do-this',function(prog) {
 
+  function tempoToMillis(bpm) {
+    var minutesPerBeat = 1 / bpm;
+    var secs = minutesPerBeat * 60;
+    var millis = secs * 1000;
+    return millis;
+  }
 
-    sequencer.setTempo(BSD.tempo);//////BSD.Widgets.Sequencer({ tempo: BSD.tempo }); 
+  BSD.timeout = false;
 
+  function tick(cursor) {
 
-
-    if (BSD.repeats > 0) {
-      var delim = '';
-      var accum = prog;
-      if (prog.match(/\|/)) { delim = '|'; }
-      for (var i = 0; i < BSD.repeats; i += 1) {
-         accum += delim + prog;
-      }
-      prog = accum;     
-    }
-
-
-    //console.log('prog',prog);
-    ///return false;
-
-    var items = BSD.parseProgression(prog);
-    
-    sequencer.flush();
-    var baseTime = (new Date()).getTime()+5000; //five secs in future;
-    var dt = 0;
-    
-    
-    var beatMS = 60000 / BSD.tempo; //////// * (1000 / 60); //convert bpm to ms.
-    
+    var beatMS = tempoToMillis(BSD.tempo);
     var halfBarMS = beatMS * 2;
     var fullBarMS = beatMS * 4;
-    
-    eachify(items).eachPCN(function(o) {
-      
-      if (o.current.halfBar) { 
-        dt += halfBarMS; 
-      }
-      else {
-        dt += fullBarMS;
-      }
-      
-      
-      o.current.next = o.next;
-      o.current.current = o;
-      o.current.prev = o.prev;
-      
-      console.log('o is ',o);
-      /////return false;
-      
-      
-      sequencer.enqueue({ 
-        when: baseTime + dt,
-        callback: function() {
-          campfire.publish('chord-change',o);
-        }
-      });
-    });
-    sequencer.tick();
-    sequencer.start();
+    var ms = (cursor.halfBar) ? halfBarMS : fullBarMS;
+
+
+    if (!BSD.paused) {
+      campfire.publish('chord-change',cursor);
+    }
+
+    cursor = cursor.next;
+
+    clearTimeout(BSD.timeout);
+    BSD.timeout = setTimeout(function() {
+      tick(cursor); 
+    },ms);
+  }
+
   
+  campfire.subscribe('lets-do-this',function(progString) {
 
-
-    /***
-    BSD.riffer = BSD.Widgets.Riffer({
-      progression: items,
-      gossip: campfire
+    var events = BSD.parseProgression(progString);
+    var prev = false;
+    events.forEach(function(o) {
+      if (prev) { 
+          prev.next = o; 
+          prev.current = prev;
+      }
+      prev = o; 
     });
-    BSD.riffer.renderOn(jQuery('#riffer-wrap'));
-    ***/
+    prev.next = events[0];
+    prev.current = prev;
 
-    //////BSD.riffer.go(items);
+    console.log('prog',progString,'events',events);
 
-
-    /****
-    BSD.faker = BSD.Widgets.Faker({
-      progression: items,
-    });
-    BSD.faker.go();
-    
-    BSD.faker.publish('new-progression',items);
-    BSD.faker.subscribe('play-chord',function(chord){
-      campfire.publish('play-chord',{ chord: chord, duration: 1000 });
-    });
-    BSD.faker.subscribe('play-note',function(note){    
-      campfire.publish('playNote',{ note: note, duration: 1000 });
-    });
-    
-    BSD.faker.subscribe('div-hover',function(div){
-      BSD.currentFretDiv = div;  
-    });
-    
-    *********/
+    var cursor = events[0];
+    tick(cursor);
 
 
+    ///return false;
 
 
     fretboardViz = BSD.Widgets.FretboardViz({ 
       gossip: campfire,
-      progression: prog, 
+      progression: progString, 
       guid: 'CHORXDY'
       ////audioPlayer: BSD.audioPlayer 
     });
@@ -537,11 +492,11 @@ add_action('wp_footer',function() {
     **/
     
 
-
-    var playing = false;
+    BSD.paused = false;
     var pauseButton = jQuery('#pause');
     pauseButton.click(function(){
-      campfire.publish('pause',null);
+      BSD.paused = ! BSD.paused;
+      campfire.publish('pause',BSD.paused);
     });
     
     
