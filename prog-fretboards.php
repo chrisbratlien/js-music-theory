@@ -782,11 +782,11 @@ campfire.subscribe('do-it',function(chords){
   var direction = 'up';
   var nextDirection = { 'up': 'down', 'down': 'up'};
   var lastAbstractValue = 0;
-  var lastValue = 60;
-  var lastString = 5;
-  var lastStrings = [5];
-  var lastFret = 3;
-  var lastFrets = [3];
+  var lastValue = 72; //60
+  var lastString = 2; //5
+  var lastStrings = [2];///[5];
+  var lastFret = 13;//3;
+  var lastFrets = [13];////////[3];
   var bunches = chords.map(function(o){ return o.abstractNoteValues(); });
   var sequence = [];
 
@@ -826,6 +826,17 @@ campfire.subscribe('do-it',function(chords){
     var candidates = BSD.guitarData;
 
 
+    var scale = 12; //rightmost fret to idealize.
+    var tot = range.length;
+    var progress = i; //step
+    var loopsPerTotal = 4;
+
+    var idealFret = Math.round(scale * (Math.cos ((2 * Math.PI) / tot * progress * loopsPerTotal ) + 1) / 2);
+
+    console.log('i/idealFret',i,idealFret);
+
+
+
     var criteria = function(o) {  
       var diff = o.noteValue - lastValue;
       ///console.log('diff',diff);
@@ -833,7 +844,7 @@ campfire.subscribe('do-it',function(chords){
       if (diff < 0 && direction == 'up') { return false; }
       if (diff == 0) { return false; }
       if (Math.abs(diff) > 6) { return false; }
-      if (o.fret > 15) { return false; }
+      if (o.fret > 18) { return false; }
 
       if (abstractNoteValues.indexOf(o.chromaticValue) < 0) { return false; }
       var avgString = Math.round(lastStrings.sum() / lastStrings.length);
@@ -847,10 +858,13 @@ campfire.subscribe('do-it',function(chords){
       //now for the avg
       var avgFretDiff = Math.abs(o.fret - avgFret);
       var avgStringDiff = Math.abs(o.string - avgString);
-      if (avgFretDiff > 3) { return false; }
+      if (avgFretDiff > 4) { return false; }
       if (avgStringDiff > 2) { return false; }
 
 
+      var idealFretDiff = Math.abs(o.fret - idealFret);
+      console.log('o.fret',o.fret,'idealFret',idealFret,'idealFretDiff',idealFretDiff);
+      if (idealFretDiff > 5) { return false; }
 
       /**
       console.log(
@@ -875,6 +889,12 @@ campfire.subscribe('do-it',function(chords){
       console.log('uh oh #2');
       candidates = BSD.guitarData.select(criteria);
     }
+    if (candidates.length == 0) {
+        console.log('look again');
+      candidates = BSD.guitarData.select(criteria);
+    }
+
+
 
     var result;
     if (chordNoteIdx == 0) { //first note in new chord change... try to get nearest pitch to last note played.
@@ -895,6 +915,7 @@ campfire.subscribe('do-it',function(chords){
     result = JSON.parse(JSON.stringify(result));
 
     result.chord = myChord;
+    result.idealFret = idealFret;
     ///result.idx = i;
     sequence.push(result);
     ///sequence[i] = result;
@@ -924,7 +945,7 @@ campfire.subscribe('do-it',function(chords){
   BSD.timeout = false;
   BSD.tempo = 100;
   function tick(cursor) {
-    console.log('tick',cursor.idx,cursor.chord.fullAbbrev(),Note(cursor.noteValue).name());
+    console.log('tick',cursor.idx,cursor.chord.fullAbbrev(),Note(cursor.noteValue).name(),'i/a',cursor.idealFret,cursor.fret);
       BSD.boards.forEach(function(board){
         board.publish('feature-fret',cursor);
       });
