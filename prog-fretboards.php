@@ -76,6 +76,11 @@ add_action('wp_head',function(){
   .color-white  { color: white; }
 
 
+  .featured { 
+    color: black !important; 
+    background: yellow !important; 
+  }
+
   /**
   .control.play-all { background: green; height: 50px; max-height: 50px; line-height: 50px; } 
   .control.play-all:active { background: #0f0; }
@@ -422,6 +427,14 @@ BSD.parseProgression = function(progString) {
               });
 
               self.styleCell(cell,fretData);      
+
+              self.subscribe('feature-fret',function(o){
+                var hit = (o.string == stringIdx + 1) && o.fret == fret;
+                if (hit) { 
+                  //console.log('yay'); 
+                }
+                (hit) ?  cell.addClass('featured') : cell.removeClass('featured');
+              });
               
               cell.hover(function(){
                 self.publish('note-hover',note);
@@ -767,7 +780,9 @@ campfire.subscribe('do-it',function(chords){
   var lastAbstractValue = 0;
   var lastValue = 60;
   var lastString = 5;
+  var lastStrings = [5];
   var lastFret = 3;
+  var lastFrets = [3];
   var bunches = chords.map(function(o){ return o.abstractNoteValues(); });
   var sequence = [];
 
@@ -776,10 +791,13 @@ campfire.subscribe('do-it',function(chords){
   var lastNote = Note(60);
   var myNote = false;
 
-  ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".split(/,/).forEach(function(o,i) {
+  ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".split(/,/).forEach(function(o,i) {
     var chordIdx = Math.floor(i / 4);
     chordIdx = chordIdx % 4;
     var myChord = chords[chordIdx];
+
+
+    var chordNoteIdx = i % 4; //FIXME: assuming everything is 4 note chords.
 
     //myNote = myChord.notes().atRandom();
     //while (lastNote && myNote.abstractValue() == lastNote.abstractValue()) {
@@ -787,43 +805,127 @@ campfire.subscribe('do-it',function(chords){
     ///}
     var abstractNoteValues = myChord.abstractNoteValues();
 
-    direction = (Math.random() > 0.75) ? direction : nextDirection[direction];
+
+    if (Math.random() > 0.85) {
+      console.log('random flip!');
+      direction = nextDirection[direction];
+    }
+
     var candidates = BSD.guitarData;
-    candidates = candidates.select(function(o) {  
+
+
+    var criteria = function(o) {  
       var diff = o.noteValue - lastValue;
       ///console.log('diff',diff);
       if (diff > 0 && direction == 'down') { return false; }
       if (diff < 0 && direction == 'up') { return false; }
       if (diff == 0) { return false; }
       if (Math.abs(diff) > 6) { return false; }
-
-
       if (o.fret > 15) { return false; }
 
       if (abstractNoteValues.indexOf(o.chromaticValue) < 0) { return false; }
-      var stringDiff = Math.abs(o.string - lastString);
-      if (stringDiff > 2) { return false; }
+      var avgString = Math.round(lastStrings.sum() / lastStrings.length);
+      var avgFret = Math.round(lastFrets.sum() / lastFrets.length);
+
       var fretDiff = Math.abs(o.fret - lastFret);
+      var stringDiff = Math.abs(o.string - lastString);
       if (fretDiff > 3) { return false; }
+      if (stringDiff > 2) { return false; }
+
+      //now for the avg
+      var avgFretDiff = Math.abs(o.fret - avgFret);
+      var avgStringDiff = Math.abs(o.string - avgString);
+      if (avgFretDiff > 3) { return false; }
+      if (avgStringDiff > 2) { return false; }
 
 
+
+      /**
+      console.log(
+        'o.string',o.string,'o.fret',o.fret,
+        'avgString',avgString,'avgFret',avgFret,
+        'stringDiff',stringDiff,'fretDiff',fretDiff,
+        'avgStringDiff',avgStringDiff,'avgFretDiff',avgFretDiff
+      );
+      ***/
       return true;
-    });
-    var result = candidates.atRandom();
+    };
 
+    candidates = candidates.select(criteria);
+    if (candidates.length == 0) {
+      console.log('uh oh');
+      direction = nextDirection[direction];
+      console.log('flip! (necessity)');
+      candidates = BSD.guitarData.select(criteria);
+    }
+
+    if (candidates.length == 0) {
+      console.log('uh oh #2');
+      candidates = BSD.guitarData.select(criteria);
+    }
+
+    var result;
+    if (chordNoteIdx == 0) { //first note in new chord change... try to get nearest pitch to last note played.
+
+      var distScore = function(o){  return Math.abs(o.chromaticValue - lastAbstractValue); };
+      var sorted = candidates.sort(BSD.sorter(distScore));
+      ////console.log('sorted Scores',sorted.map(function(o){ return [o,distScore(o)]; }));
+      result = sorted[0];
+      console.log('*FN* i',i,'chose',Note(result.noteValue).name(),'result.chromaticValue',result.chromaticValue,'lastAbstractValue',lastAbstractValue);
+    }
+    else {
+      result = candidates.atRandom();
+      //console.log('i',i,'chose',Note(result.noteValue).name(),'result.chromaticValue',result.chromaticValue,'lastAbstractValue',lastAbstractValue);
+    }
+
+    result.direction = direction;
+
+    result = JSON.parse(JSON.stringify(result));
+
+    result.chord = myChord;
+    ///result.idx = i;
     sequence.push(result);
+    ///sequence[i] = result;
     lastValue = result.noteValue;
     lastNote = Note(lastValue);
+    lastAbstractValue = lastNote.abstractValue();
     lastString = result.string;
     lastFret = result.fret;
+    
+    if (lastFrets.length > 3) { lastFrets.shift(); } //having a average of 5 was too limiting in candidates.
+    lastFrets.push(lastFret);
+
+    if (lastStrings.length > 3) { lastStrings.shift(); } //having a average of 5 was too limiting in candidates.
+    lastStrings.push(lastString);
+
+  });
+  
+  sequence.forEach(function(o,idx) {
+    o.idx = idx;
+    var ndx = idx+1;
+    ndx = ndx % sequence.length;
+    o.next = sequence[ndx];
   });
   console.log('sequence',sequence);
-  console.log('bunches',bunches);
-
+  BSD.sequence = sequence;
+  //////sequence.forEach(function(o){})
+  BSD.timeout = false;
+  function tick(cursor) {
+    var ms = 2000;
+    console.log('tick',cursor.idx,cursor.chord.fullAbbrev(),Note(cursor.noteValue).name());
+      BSD.boards.forEach(function(board){
+        board.publish('feature-fret',cursor);
+      });
+      campfire.publish('play-note', { note: Note(cursor.noteValue), duration: 1000 });
+      cursor = cursor.next;
+      clearTimeout(BSD.timeout);
+      BSD.timeout = setTimeout(function() {
+        tick(cursor); 
+      },ms);
+  }
+  tick(sequence[0]);
+  ///console.log('bunches',bunches);
 });
-  
-
-
       
     </script>
 <?php

@@ -361,6 +361,7 @@ var Note = function(foo,accidental) {
   self.abstractValue = function() {
     return self.value() % 12;
   };
+  self.chromaticValue = self.abstractValue;
   
   self.abstractlyEqualTo = function(otherNote) {
     return otherNote.abstractValue() == self.abstractValue();
