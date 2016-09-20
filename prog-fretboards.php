@@ -726,6 +726,9 @@ campfire.subscribe('gather-inputs-and-do-it',function(){
     campfire.publish('do-it',myChords);
 });
 
+
+
+
 campfire.subscribe('do-it',function(chords){
   var pa = '#FF0000-#E6DF52-#FFDD17-#4699D4-#4699D4-#000000-#000000-#000000-#bbbbbb-#67AFAD-#8C64AB-#8C64AB'.split(/-/);
 
@@ -759,8 +762,68 @@ campfire.subscribe('do-it',function(chords){
     });
   });
 
+  var direction = 'up';
+  var nextDirection = { 'up': 'down', 'down': 'up'};
+  var lastAbstractValue = 0;
+  var lastValue = 60;
+  var lastString = 5;
+  var lastFret = 3;
+  var bunches = chords.map(function(o){ return o.abstractNoteValues(); });
+  var sequence = [];
+
+  var chordIdx = 0;
+
+  var lastNote = Note(60);
+  var myNote = false;
+
+  ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".split(/,/).forEach(function(o,i) {
+    var chordIdx = Math.floor(i / 4);
+    chordIdx = chordIdx % 4;
+    var myChord = chords[chordIdx];
+
+    //myNote = myChord.notes().atRandom();
+    //while (lastNote && myNote.abstractValue() == lastNote.abstractValue()) {
+    //  myNote = myChord.notes().atRandom();
+    ///}
+    var abstractNoteValues = myChord.abstractNoteValues();
+
+    direction = (Math.random() > 0.75) ? direction : nextDirection[direction];
+    var candidates = BSD.guitarData;
+    candidates = candidates.select(function(o) {  
+      var diff = o.noteValue - lastValue;
+      ///console.log('diff',diff);
+      if (diff > 0 && direction == 'down') { return false; }
+      if (diff < 0 && direction == 'up') { return false; }
+      if (diff == 0) { return false; }
+      if (Math.abs(diff) > 6) { return false; }
+
+
+      if (o.fret > 15) { return false; }
+
+      if (abstractNoteValues.indexOf(o.chromaticValue) < 0) { return false; }
+      var stringDiff = Math.abs(o.string - lastString);
+      if (stringDiff > 2) { return false; }
+      var fretDiff = Math.abs(o.fret - lastFret);
+      if (fretDiff > 3) { return false; }
+
+
+      return true;
+    });
+    var result = candidates.atRandom();
+
+    sequence.push(result);
+    lastValue = result.noteValue;
+    lastNote = Note(lastValue);
+    lastString = result.string;
+    lastFret = result.fret;
+  });
+  console.log('sequence',sequence);
+  console.log('bunches',bunches);
+
 });
-    
+  
+
+
       
     </script>
 <?php

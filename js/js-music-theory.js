@@ -365,6 +365,8 @@ var Note = function(foo,accidental) {
   self.abstractlyEqualTo = function(otherNote) {
     return otherNote.abstractValue() == self.abstractValue();
   };
+  self.chromaticallyEqualTo = self.abstractlyEqualTo;
+
 
   self.abstractDistanceTo = function(other) {
     return Math.abs(other.abstractValue() - self.abstractValue());
