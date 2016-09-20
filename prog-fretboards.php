@@ -160,6 +160,8 @@ add_action('wp_footer',function(){
     <script type="text/javascript">
 
 
+BSD.timeout = false;
+
 BSD.parseProgression = function(progString) {
     var barStrings = progString.split(/\ +|\|/);
     
@@ -743,6 +745,8 @@ campfire.subscribe('gather-inputs-and-do-it',function(){
 
 
 campfire.subscribe('do-it',function(chords){
+
+  clearTimeout(BSD.timeout);  
   var pa = '#FF0000-#E6DF52-#FFDD17-#4699D4-#4699D4-#000000-#000000-#000000-#bbbbbb-#67AFAD-#8C64AB-#8C64AB'.split(/-/);
 
 
@@ -791,7 +795,15 @@ campfire.subscribe('do-it',function(chords){
   var lastNote = Note(60);
   var myNote = false;
 
-  ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,".split(/,/).forEach(function(o,i) {
+
+  var sqeuenceLength = 16*64;
+
+  var range = [];
+
+  for (var i = 0; i < sqeuenceLength; i += 1) {
+    range.push(i);
+  }
+  range.forEach(function(o,i) {
     var chordIdx = Math.floor(i / 4);
     chordIdx = chordIdx % 4;
     var myChord = chords[chordIdx];
