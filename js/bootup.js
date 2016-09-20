@@ -87,6 +87,13 @@ function loadImpulseResponse(url, convolver) {
 
 
 
+BSD.tempoToMillis = function(bpm) {
+    var minutesPerBeat = 1 / bpm;
+    var secs = minutesPerBeat * 60;
+    var millis = secs * 1000;
+    return millis;
+};
+
 
 
 var context;

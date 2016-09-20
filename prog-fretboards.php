@@ -910,8 +910,8 @@ campfire.subscribe('do-it',function(chords){
   BSD.sequence = sequence;
   //////sequence.forEach(function(o){})
   BSD.timeout = false;
+  BSD.tempo = 100;
   function tick(cursor) {
-    var ms = 2000;
     console.log('tick',cursor.idx,cursor.chord.fullAbbrev(),Note(cursor.noteValue).name());
       BSD.boards.forEach(function(board){
         board.publish('feature-fret',cursor);
@@ -921,7 +921,7 @@ campfire.subscribe('do-it',function(chords){
       clearTimeout(BSD.timeout);
       BSD.timeout = setTimeout(function() {
         tick(cursor); 
-      },ms);
+      },BSD.tempoToMillis(BSD.tempo));
   }
   tick(sequence[0]);
   ///console.log('bunches',bunches);
