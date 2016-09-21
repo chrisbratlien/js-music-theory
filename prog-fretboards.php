@@ -432,7 +432,7 @@ BSD.parseProgression = function(progString) {
               self.subscribe('feature-fret',function(o){
                 var hit = (o.string == stringIdx + 1) && o.fret == fret;
                 if (hit) { 
-                  console.log('yay'); 
+                  ///console.log('yay'); 
                 }
                 (hit) ?  cell.addClass('featured') : cell.removeClass('featured');
               });
@@ -807,6 +807,7 @@ campfire.subscribe('do-it',function(chords){
 
     console.log('i/idealFret',i,idealFret);
 
+    var avgFret = Math.round(lastFrets.sum() / lastFrets.length);
 
 
     var criteria = function(o) {  
@@ -820,7 +821,6 @@ campfire.subscribe('do-it',function(chords){
 
       if (abstractNoteValues.indexOf(o.chromaticValue) < 0) { return false; }
       var avgString = Math.round(lastStrings.sum() / lastStrings.length);
-      var avgFret = Math.round(lastFrets.sum() / lastFrets.length);
 
       var fretDiff = Math.abs(o.fret - lastFret);
       var stringDiff = Math.abs(o.string - lastString);
@@ -889,6 +889,7 @@ campfire.subscribe('do-it',function(chords){
     result.board = BSD.boards[chordIdx];
     result.chord = myChord;
     result.idealFret = idealFret;
+    result.avgFret = avgFret;
     ///result.idx = i;
     
     console.log('result',result);
@@ -900,7 +901,7 @@ campfire.subscribe('do-it',function(chords){
     lastString = result.string;
     lastFret = result.fret;
     
-    if (lastFrets.length > 3) { lastFrets.shift(); } //having a average of 5 was too limiting in candidates.
+    if (lastFrets.length > 4) { lastFrets.shift(); } //having a average of 5 was too limiting in candidates.
     lastFrets.push(lastFret);
 
     if (lastStrings.length > 3) { lastStrings.shift(); } //having a average of 5 was too limiting in candidates.
@@ -920,7 +921,15 @@ campfire.subscribe('do-it',function(chords){
   BSD.timeout = false;
   BSD.tempo = 100;
   function tick(cursor) {
-    console.log('tick',cursor.idx,cursor.chord.fullAbbrev(),Note(cursor.noteValue).name(),'i/a',cursor.idealFret,cursor.fret);
+    console.log('tick',
+      cursor.idx,
+      cursor.chord.fullAbbrev(),
+      Note(cursor.noteValue).name(),
+      'ideal/actual/avg',
+      cursor.idealFret,
+      cursor.fret,
+      cursor.avgFret
+    );
       BSD.boards.forEach(function(board){
         board.publish('unfeature-frets');
       });
