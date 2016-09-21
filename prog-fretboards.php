@@ -448,7 +448,9 @@ BSD.parseProgression = function(progString) {
           });
 
 
-          inner.append(DOM.h3(spec.chord.fullAbbrev()));
+          if (spec.chord) {
+            inner.append(DOM.h3(spec.chord.fullAbbrev()));
+          }
 
           inner.append(table);
           var controls = DOM.div().addClass('controls noprint');
@@ -506,11 +508,14 @@ BSD.parseProgression = function(progString) {
         var activeStrings = opts.activeStrings || [1,2,3,4,5,6];
         var defaultData = JSON.parse(JSON.stringify(BSD.guitarData));
         ///console.log('defaultData',defaultData);
-        abstractNoteValues = chord.abstractNoteValues();
+        
+
+
+        abstractNoteValues = chord && chord.abstractNoteValues() || [];
         var newData = defaultData.map(function(o){
           var hit = abstractNoteValues.detect(function(av) { 
               if (o.chromaticValue !== av) { return false };
-
+              if (!chord) { return false; } //chord not mandatory
               if (!activeStrings.detect(function(s) { return o.string == s; })) {
                 return false;
               }
@@ -701,7 +706,7 @@ campfire.subscribe('gather-inputs-and-do-it',function(){
 });
 
 
-
+var extraBoard;
 
 campfire.subscribe('do-it',function(chords){
 
@@ -719,6 +724,14 @@ campfire.subscribe('do-it',function(chords){
     colorHash[i] = color;
   });
 
+    var stage = DOM.div().addClass('stage');
+    jQuery(document.body).append(stage);
+    extraBoard = makeFretboardOn(stage,{
+        //chord: chord,
+        activeStrings: '654321'.split('')
+    });
+    ////BSD.boards.push(extraBoard);
+
   ['654321','6432','4321','5432','5321','6543'].forEach(function(stringSet){
     var cb = jQuery('.stringset-' + stringSet);
     if (!cb.attr('checked')) { return false; }
@@ -734,6 +747,8 @@ campfire.subscribe('do-it',function(chords){
       });
       BSD.boards.push(board);
     });
+
+
   });
 
   var direction = 'up';
@@ -910,6 +925,7 @@ campfire.subscribe('do-it',function(chords){
         board.publish('unfeature-frets');
       });
       cursor.board.publish('feature-fret',cursor);
+      extraBoard.publish('feature-fret',cursor);
 
 
       campfire.publish('play-note', { note: Note(cursor.noteValue), duration: 1000 });
