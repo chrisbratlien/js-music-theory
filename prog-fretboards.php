@@ -429,11 +429,10 @@ BSD.parseProgression = function(progString) {
               });
 
               self.styleCell(cell,fretData);      
-
               self.subscribe('feature-fret',function(o){
                 var hit = (o.string == stringIdx + 1) && o.fret == fret;
                 if (hit) { 
-                  //console.log('yay'); 
+                  console.log('yay'); 
                 }
                 (hit) ?  cell.addClass('featured') : cell.removeClass('featured');
               });
@@ -485,38 +484,29 @@ BSD.parseProgression = function(progString) {
           controls.append(close);
           
           wrap.append(inner);
+
+          self.subscribe('unfeature-frets',function(){
+            wrap.find('.featured').removeClass('featured');
+
+          });
+
         };
+
+
         
         return self;
       };
 
       BSD.boards = [];
-      
-      
-
-
-        var colorHash = {};
-
-
-
-
+      var colorHash = {};
       ///var stage = jQuery('.stage');
       
       function makeFretboardOn(wrap,opts) {
-
-
-
         var chord = opts.chord;
         var activeStrings = opts.activeStrings || [1,2,3,4,5,6];
-
         var defaultData = JSON.parse(JSON.stringify(BSD.guitarData));
         ///console.log('defaultData',defaultData);
-
         abstractNoteValues = chord.abstractNoteValues();
-
-
-
-
         var newData = defaultData.map(function(o){
           var hit = abstractNoteValues.detect(function(av) { 
               if (o.chromaticValue !== av) { return false };
@@ -524,41 +514,20 @@ BSD.parseProgression = function(progString) {
               if (!activeStrings.detect(function(s) { return o.string == s; })) {
                 return false;
               }
-
               var interval = o.chromaticValue - chord.rootNote.abstractValue();
               while (interval < 0) { interval += 12; }
               while (interval > 11) { interval -= 12; }
               //console.log('interval',interval);
               o.interval = interval;
-
               return true;
           });
           if (typeof hit == "number") { o.selected = true; }
-
-
-
-
           if (colorHash[o.interval]) {
             o.color = colorHash[o.interval];
             o.colorHex = '#' + o.color.toHex();
           }
-          /**
-          if (o.interval == 1 && o.chord.fullAbbrev().match(/b9/)) {
-            o.color = BSD.colorFromHex('#E6DF52');
-            o.colorHex = '#' + o.color.toHex();
-          }
-          **/
-
           return o;
         });
-
-
-
-        ///var cdata = defaultData.
-        ////console.log('newData',newData);
-
-
-
 
 
         var board = BSD.Widgets.Fretboard({
@@ -575,18 +544,8 @@ BSD.parseProgression = function(progString) {
           campfire.publish('note-hover',o);
         });
         
-        BSD.boards.push(board);
-      
+        return board;      
       }
-      
-      
-
-
-
-    jQuery('.btn-add-fretboard').click(function(){
-      ///makeFretboardOn(stage,null); 
-    });
-      
 
 
 
@@ -746,6 +705,7 @@ campfire.subscribe('gather-inputs-and-do-it',function(){
 
 campfire.subscribe('do-it',function(chords){
 
+  BSD.boards = [];
   clearTimeout(BSD.timeout);  
   var pa = '#FF0000-#E6DF52-#FFDD17-#4699D4-#4699D4-#000000-#000000-#000000-#bbbbbb-#67AFAD-#8C64AB-#8C64AB'.split(/-/);
 
@@ -766,16 +726,13 @@ campfire.subscribe('do-it',function(chords){
     var stage = DOM.div().addClass('stage');
 
     jQuery(document.body).append(stage);
-    chords.each(function(chord){
 
-
-
-
-      makeFretboardOn(stage,{
+    chords.forEach(function(chord){
+      var board = makeFretboardOn(stage,{
         chord: chord,
         activeStrings: activeStrings
       });
-      //console.log('chords?',chords,'activeStrings',activeStrings);
+      BSD.boards.push(board);
     });
   });
 
@@ -914,9 +871,12 @@ campfire.subscribe('do-it',function(chords){
 
     result = JSON.parse(JSON.stringify(result));
 
+    result.board = BSD.boards[chordIdx];
     result.chord = myChord;
     result.idealFret = idealFret;
     ///result.idx = i;
+    
+    console.log('result',result);
     sequence.push(result);
     ///sequence[i] = result;
     lastValue = result.noteValue;
@@ -947,8 +907,11 @@ campfire.subscribe('do-it',function(chords){
   function tick(cursor) {
     console.log('tick',cursor.idx,cursor.chord.fullAbbrev(),Note(cursor.noteValue).name(),'i/a',cursor.idealFret,cursor.fret);
       BSD.boards.forEach(function(board){
-        board.publish('feature-fret',cursor);
+        board.publish('unfeature-frets');
       });
+      cursor.board.publish('feature-fret',cursor);
+
+
       campfire.publish('play-note', { note: Note(cursor.noteValue), duration: 1000 });
       cursor = cursor.next;
       clearTimeout(BSD.timeout);
