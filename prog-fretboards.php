@@ -79,13 +79,13 @@ add_action('wp_head',function(){
 
 
   .extra .was-once-featured {
-    background: #ccc !important;
+    background: #ccc;
     color: white;
   }
 
   .extra .featured { 
-    color: black !important; 
-    background: yellow !important; 
+    color: black;
+    background: yellow;
   }
 
 
@@ -357,7 +357,9 @@ BSD.parseProgression = function(progString) {
 
                 }
                 else {
-                  cell.css('background-color','inherit');
+                  ///cell.css('background-color','inherit');
+                  cell.css('background-color',null);
+                  cell.attr('style',null);
                   //cell.removeClass('color-white');
                 }              
 
