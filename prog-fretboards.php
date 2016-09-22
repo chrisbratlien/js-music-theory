@@ -759,8 +759,12 @@ campfire.subscribe('do-it',function(chords){
   var lastStrings = [2];///[5];
   var lastFret = 13;//3;
   var lastFrets = [13];////////[3];
+  var lastFretDiff = 0;
+
+
   var bunches = chords.map(function(o){ return o.abstractNoteValues(); });
   var sequence = [];
+
 
   var chordIdx = 0;
 
@@ -794,6 +798,9 @@ campfire.subscribe('do-it',function(chords){
       console.log('random flip!');
       direction = nextDirection[direction];
     }
+    if (lastValue <= 44) {//low E
+      direction = 'up';
+    }
 
     var candidates = BSD.guitarData;
 
@@ -801,7 +808,7 @@ campfire.subscribe('do-it',function(chords){
     var scale = 12; //rightmost fret to idealize.
     var tot = range.length;
     var progress = i; //step
-    var loopsPerTotal = 4;
+    var loopsPerTotal = 1;
 
     var idealFret = Math.round(scale * (Math.cos ((2 * Math.PI) / tot * progress * loopsPerTotal ) + 1) / 2);
 
@@ -810,33 +817,39 @@ campfire.subscribe('do-it',function(chords){
     var avgFret = Math.round(lastFrets.sum() / lastFrets.length);
 
 
-    var criteria = function(o) {  
+    var judge = function(o) {  
       var diff = o.noteValue - lastValue;
       ///console.log('diff',diff);
-      if (diff > 0 && direction == 'down') { return false; }
-      if (diff < 0 && direction == 'up') { return false; }
-      if (diff == 0) { return false; }
-      if (Math.abs(diff) > 6) { return false; }
-      if (o.fret > 18) { return false; }
+      if (diff > 0 && direction == 'down') { return 'wrong dir'; }
+      if (diff < 0 && direction == 'up') { return 'wrong dir'; }
+      if (diff == 0) { return 'no diff'; }
+      if (Math.abs(diff) > 6) { return '>6'; }
+      if (o.fret > 18) { return '>18 fret'; }
 
-      if (abstractNoteValues.indexOf(o.chromaticValue) < 0) { return false; }
+      if (abstractNoteValues.indexOf(o.chromaticValue) < 0) { return 'outside'; }
+
       var avgString = Math.round(lastStrings.sum() / lastStrings.length);
 
-      var fretDiff = Math.abs(o.fret - lastFret);
+      var fretDiff = o.fret - lastFret; 
+      var fretDistance = Math.abs(fretDiff);
+      if (fretDistance > 3) { return 'fretDistance > 3'; }
+      if (Math.abs(lastFretDiff + fretDiff) > 4) { return 'lastFretDiff+fretDiff >4'; } ///if they don't cancel each other out and their total is too big
+
       var stringDiff = Math.abs(o.string - lastString);
-      if (fretDiff > 3) { return false; }
-      if (stringDiff > 2) { return false; }
+      if (stringDiff > 2) { return 'stringDiff>2'; }
 
       //now for the avg
-      var avgFretDiff = Math.abs(o.fret - avgFret);
+      var avgFretDistance = Math.abs(o.fret - avgFret);
       var avgStringDiff = Math.abs(o.string - avgString);
-      if (avgFretDiff > 4) { return false; }
-      if (avgStringDiff > 2) { return false; }
+      if (avgFretDistance > 4) { return 'avgFretDistance>4'; }
+      ///if (avgStringDiff > 2) { return 'avgStringDiff>2'; }
 
 
       var idealFretDiff = Math.abs(o.fret - idealFret);
-      console.log('o.fret',o.fret,'idealFret',idealFret,'idealFretDiff',idealFretDiff);
-      if (idealFretDiff > 5) { return false; }
+      /////console.log('o.fret',o.fret,'idealFret',idealFret,'idealFretDiff',idealFretDiff);
+      if (idealFretDiff > 6) { return 'idealFretDiff>6'; }
+
+
 
       /**
       console.log(
@@ -846,10 +859,18 @@ campfire.subscribe('do-it',function(chords){
         'avgStringDiff',avgStringDiff,'avgFretDiff',avgFretDiff
       );
       ***/
-      return true;
+      return 'OK';
+    };
+
+
+    var criteria = function(o){
+      var decision = judge(o);
+      console.log('decision',decision);
+      return  decision == 'OK';
     };
 
     candidates = candidates.select(criteria);
+
     if (candidates.length == 0) {
       console.log('uh oh');
       direction = nextDirection[direction];
@@ -882,10 +903,9 @@ campfire.subscribe('do-it',function(chords){
       //console.log('i',i,'chose',Note(result.noteValue).name(),'result.chromaticValue',result.chromaticValue,'lastAbstractValue',lastAbstractValue);
     }
 
-    result.direction = direction;
 
     result = JSON.parse(JSON.stringify(result));
-
+    result.direction = direction;
     result.board = BSD.boards[chordIdx];
     result.chord = myChord;
     result.idealFret = idealFret;
@@ -899,8 +919,10 @@ campfire.subscribe('do-it',function(chords){
     lastNote = Note(lastValue);
     lastAbstractValue = lastNote.abstractValue();
     lastString = result.string;
+    lastFretDiff = result.fret - lastFret;
     lastFret = result.fret;
-    
+
+
     if (lastFrets.length > 4) { lastFrets.shift(); } //having a average of 5 was too limiting in candidates.
     lastFrets.push(lastFret);
 
