@@ -76,6 +76,20 @@ add_action('wp_head',function(){
   .color-white  { color: white; }
 
 
+
+
+  .extra .was-once-featured {
+    background: #ccc !important;
+    color: white;
+  }
+
+  .extra .featured { 
+    color: black !important; 
+    background: yellow !important; 
+  }
+
+
+
   .featured { 
     color: black !important; 
     background: yellow !important; 
@@ -434,7 +448,7 @@ BSD.parseProgression = function(progString) {
                 if (hit) { 
                   ///console.log('yay'); 
                 }
-                (hit) ?  cell.addClass('featured') : cell.removeClass('featured');
+                (hit) ?  cell.addClass('featured was-once-featured') : cell.removeClass('featured');
               });
               
               cell.hover(function(){
@@ -708,6 +722,9 @@ campfire.subscribe('gather-inputs-and-do-it',function(){
 
 var extraBoard;
 
+BSD.tempo = 50;
+
+
 campfire.subscribe('do-it',function(chords){
 
   BSD.boards = [];
@@ -724,7 +741,7 @@ campfire.subscribe('do-it',function(chords){
     colorHash[i] = color;
   });
 
-    var stage = DOM.div().addClass('stage');
+    var stage = DOM.div().addClass('stage extra');
     jQuery(document.body).append(stage);
     extraBoard = makeFretboardOn(stage,{
         //chord: chord,
@@ -761,6 +778,7 @@ campfire.subscribe('do-it',function(chords){
   var lastFrets = [13];////////[3];
   var lastFretDiff = 0;
 
+  var lastFretDiffs = [0];
 
   var bunches = chords.map(function(o){ return o.abstractNoteValues(); });
   var sequence = [];
@@ -833,6 +851,11 @@ campfire.subscribe('do-it',function(chords){
       var avgString = Math.round(lastStrings.sum() / lastStrings.length);
 
       var fretDiff = o.fret - lastFret; 
+
+      var drift3 = lastFretDiffs.slice(-3).sum(); //sum the latest 3
+       if (Math.abs(drift3 + fretDiff) > 4) { return 'drifting too much in one direction'; }
+
+
       var fretDistance = Math.abs(fretDiff);
       if (fretDistance > 3) { return 'fretDistance > 3'; }
       if (Math.abs(lastFretDiff + fretDiff) > 4) { return 'lastFretDiff+fretDiff >4'; } ///if they don't cancel each other out and their total is too big
@@ -922,6 +945,9 @@ campfire.subscribe('do-it',function(chords){
     lastAbstractValue = lastNote.abstractValue();
     lastString = result.string;
     lastFretDiff = result.fret - lastFret;
+    lastFretDiffs.push(lastFretDiff);
+
+
     lastFret = result.fret;
 
 
@@ -943,7 +969,6 @@ campfire.subscribe('do-it',function(chords){
   BSD.sequence = sequence;
   //////sequence.forEach(function(o){})
   BSD.timeout = false;
-  BSD.tempo = 100;
   function tick(cursor) {
     console.log('tick',
       cursor.idx,
