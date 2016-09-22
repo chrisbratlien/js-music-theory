@@ -137,15 +137,15 @@ get_header(); ?>
         <label>654321</label>
         <input type="checkbox" class="stringset-654321" checked="true" />
         <label>6432</label>
-        <input type="checkbox" class="stringset-6432" checked="true" />
+        <input type="checkbox" class="stringset-6432" />
         <label>4321</label>
-        <input type="checkbox" class="stringset-4321" checked="true" />
+        <input type="checkbox" class="stringset-4321" />
         <label>5432</label>
-        <input type="checkbox" class="stringset-5432" checked="true" />
+        <input type="checkbox" class="stringset-5432" />
         <label>5321</label>
-        <input type="checkbox" class="stringset-5321" checked="true" />
+        <input type="checkbox" class="stringset-5321" />
         <label>6543</label>
-        <input type="checkbox" class="stringset-6543" checked="true" />
+        <input type="checkbox" class="stringset-6543" />
       </div>
 
 <div class="navbar-spacer screen-only noprint">
