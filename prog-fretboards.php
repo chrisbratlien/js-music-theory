@@ -708,7 +708,9 @@ BSD.parseProgression = function(progString) {
       campfire.publish('stop-it');
     }
     else {
-      tick(BSD.sequence[0]);
+      if (BSD.sequence.length > 0) {
+        tick(BSD.sequence[0]);
+      }
     }
   });
     
