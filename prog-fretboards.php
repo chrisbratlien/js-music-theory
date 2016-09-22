@@ -702,6 +702,7 @@ BSD.parseProgression = function(progString) {
   
   var btnPause = jQuery('.btn-pause');
   btnPause.click(function(){
+    campfire.publish('first-click');
     BSD.pause = ! BSD.pause;
     if (BSD.pause) { 
       campfire.publish('stop-it');
@@ -1018,6 +1019,42 @@ campfire.subscribe('do-it',function(chords){
   tick(sequence[0]);
   ///console.log('bunches',bunches);
 });
+
+
+
+
+
+BSD.firstClick = true;
+campfire.subscribe('first-click',function(cb){
+  if (!BSD.firstClick) { 
+    if (cb) { cb(false); }
+    return false;
+  }
+  
+  if (!BSD.iOS) {
+    if (cb) { cb(false); }
+    return false;
+  }
+  var o = context.createOscillator();
+  o.frequency = 220;
+  o.connect(context.destination);
+  o.start(0);  
+
+  if (cb) { cb(true); }
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
       
     </script>
 <?php
