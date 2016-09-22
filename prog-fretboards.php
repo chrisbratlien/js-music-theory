@@ -772,7 +772,7 @@ campfire.subscribe('do-it',function(chords){
   var myNote = false;
 
 
-  var sqeuenceLength = 16*64;
+  var sqeuenceLength = chords.length * 4 * [1,2,4].atRandom();
 
   var range = [];
 
@@ -806,7 +806,7 @@ campfire.subscribe('do-it',function(chords){
 
 
     var scale = 12; //rightmost fret to idealize.
-    var tot = range.length;
+    var tot = 256; //range.length;
     var progress = i; //step
     var loopsPerTotal = 1;
 
@@ -820,6 +820,8 @@ campfire.subscribe('do-it',function(chords){
     var judge = function(o) {  
       var diff = o.noteValue - lastValue;
       ///console.log('diff',diff);
+
+      if (o.fret > 17) { return 'too high'; }
       if (diff > 0 && direction == 'down') { return 'wrong dir'; }
       if (diff < 0 && direction == 'up') { return 'wrong dir'; }
       if (diff == 0) { return 'no diff'; }
@@ -865,7 +867,7 @@ campfire.subscribe('do-it',function(chords){
 
     var criteria = function(o){
       var decision = judge(o);
-      console.log('decision',decision);
+      //console.log('decision',decision);
       return  decision == 'OK';
     };
 
