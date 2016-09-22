@@ -699,9 +699,14 @@ BSD.parseProgression = function(progString) {
     hideText = ! hideText;
     hideText ? jQuery('html').addClass('hide-text') : jQuery('html').removeClass('hide-text');
   });
+
+
+
   
   var btnPause = jQuery('.btn-pause');
   btnPause.click(function(){
+
+
     campfire.publish('first-click');
     BSD.pause = ! BSD.pause;
     if (BSD.pause) { 
@@ -719,6 +724,12 @@ var progInput = jQuery('#progression');
 progInput.blur(function() { 
   campfire.publish('gather-inputs-and-do-it');
 });
+progInput.on('touchend',function(){ //for iOS bug
+	///alert('hey');
+	BSD.handleFirstClick();
+});
+
+
 
 
 var activeStringsInput = jQuery('.active-strings');
@@ -1024,37 +1035,16 @@ campfire.subscribe('do-it',function(chords){
 
 
 
-
-
 BSD.firstClick = true;
-campfire.subscribe('first-click',function(cb){
-  if (!BSD.firstClick) { 
-    if (cb) { cb(false); }
-    return false;
-  }
-  
-  if (!BSD.iOS) {
-    if (cb) { cb(false); }
-    return false;
-  }
-  var o = context.createOscillator();
-  o.frequency = 220;
-  o.connect(context.destination);
-  o.start(0);  
-
-  if (cb) { cb(true); }
-
-});
-
-
-
-
-
-
-
-
-
-
+BSD.handleFirstClick = function () {
+  if (!BSD.firstClick) { return false;}
+  BSD.firstClick = false;
+	var buffer = context.createBuffer(1, 1, 22050);
+	var source = context.createBufferSource();
+	source.buffer = buffer;
+	source.connect(context.destination);
+	if(source.play){    source.play(0);} else if(source.noteOn){    source.noteOn(0);}
+};
 
 
       
