@@ -14,13 +14,13 @@ add_action('wp_head',function(){
 
   .stage { 
     margin: 0; 
-    width: 65%; 
+    width: 100%; 
   }
   
   .inner { 
     font-size: 10px; 
     margin-left: 2%; 
-    width: 50%; 
+    width: 40%; 
   }
 
   .inner table { float: left; }
@@ -464,9 +464,9 @@ BSD.parseProgression = function(progString) {
           });
 
 
-          if (spec.chord) {
-            inner.append(DOM.h3(spec.chord.fullAbbrev()));
-          }
+          
+          inner.append(DOM.h3(spec.chord && spec.chord.fullAbbrev() || 'no chord'));
+          
 
           inner.append(table);
           var controls = DOM.div().addClass('controls noprint');
