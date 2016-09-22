@@ -149,7 +149,7 @@ get_header(); ?>
       </div>
 
 <div class="navbar-spacer screen-only noprint">
-  <button class="btn btn-info btn-add-fretboard noprint"><i class="fa fa-plus"></i> Add Fretboard</button>
+  <button class="btn btn-info btn-pause"><i class="fa fa-pause"></i> Pause</button>
   <button class="btn btn-info btn-toggle-text noprint">Toggle Text</button>
 
   <br />
@@ -700,6 +700,16 @@ BSD.parseProgression = function(progString) {
     hideText ? jQuery('html').addClass('hide-text') : jQuery('html').removeClass('hide-text');
   });
   
+  var btnPause = jQuery('.btn-pause');
+  btnPause.click(function(){
+    BSD.pause = ! BSD.pause;
+    if (BSD.pause) { 
+      campfire.publish('stop-it');
+    }
+    else {
+      tick(BSD.sequence[0]);
+    }
+  });
     
 
 var progInput = jQuery('#progression');
@@ -713,8 +723,15 @@ activeStringsInput.blur(function(){
   campfire.publish('gather-inputs-and-do-it');
 });
 
+campfire.subscribe('stop-it',function(){
+  clearTimeout(BSD.timeout);
+});
+
 campfire.subscribe('gather-inputs-and-do-it',function(){
-    if (progInput.val().length == 0) { return false; }
+    if (progInput.val().length == 0) { 
+        campfire.publish('stop-it'); 
+        return false; 
+    }
     var prog = BSD.parseProgression(progInput.val());
     console.log('prog',prog);
     var myChords = prog.map(function(o){  return o.chord; });
@@ -725,6 +742,32 @@ campfire.subscribe('gather-inputs-and-do-it',function(){
 var extraBoard;
 
 BSD.tempo = 50;
+
+
+function tick(cursor) {
+    console.log('tick',
+      cursor.idx,
+      cursor.chord.fullAbbrev(),
+      Note(cursor.noteValue).name(),
+      'ideal/actual/avg',
+      cursor.idealFret,
+      cursor.fret,
+      cursor.avgFret
+    );
+      BSD.boards.forEach(function(board){
+        board.publish('unfeature-frets');
+      });
+      cursor.board.publish('feature-fret',cursor);
+      extraBoard.publish('feature-fret',cursor);
+
+
+      campfire.publish('play-note', { note: Note(cursor.noteValue), duration: 1000 });
+      cursor = cursor.next;
+      clearTimeout(BSD.timeout);
+      BSD.timeout = setTimeout(function() {
+        tick(cursor); 
+      },BSD.tempoToMillis(BSD.tempo));
+  }
 
 
 campfire.subscribe('do-it',function(chords){
@@ -971,30 +1014,7 @@ campfire.subscribe('do-it',function(chords){
   BSD.sequence = sequence;
   //////sequence.forEach(function(o){})
   BSD.timeout = false;
-  function tick(cursor) {
-    console.log('tick',
-      cursor.idx,
-      cursor.chord.fullAbbrev(),
-      Note(cursor.noteValue).name(),
-      'ideal/actual/avg',
-      cursor.idealFret,
-      cursor.fret,
-      cursor.avgFret
-    );
-      BSD.boards.forEach(function(board){
-        board.publish('unfeature-frets');
-      });
-      cursor.board.publish('feature-fret',cursor);
-      extraBoard.publish('feature-fret',cursor);
-
-
-      campfire.publish('play-note', { note: Note(cursor.noteValue), duration: 1000 });
-      cursor = cursor.next;
-      clearTimeout(BSD.timeout);
-      BSD.timeout = setTimeout(function() {
-        tick(cursor); 
-      },BSD.tempoToMillis(BSD.tempo));
-  }
+  
   tick(sequence[0]);
   ///console.log('bunches',bunches);
 });
