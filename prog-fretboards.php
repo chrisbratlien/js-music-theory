@@ -151,8 +151,15 @@ get_header(); ?>
 <div class="navbar-spacer screen-only noprint">
   <button class="btn btn-info btn-pause"><i class="fa fa-pause"></i> Pause</button>
   <button class="btn btn-info btn-toggle-text noprint">Toggle Text</button>
-
   <br />
+
+
+  <div class="slider-wrap">
+      <strong>Tempo</strong>
+      <span id="tempo-amount">0</span> bpm
+    <div class="slider" id="tempo-input"></div>
+  </div>
+
   <br />
 </div>
 
@@ -609,6 +616,36 @@ BSD.parseProgression = function(progString) {
         jQuery( "#volume-amount" ).text( newVolume );
       }
     });
+
+
+    BSD.tempo = 0;
+storage.getItem('tempo',function(o){
+    BSD.tempo = parseInt(o,0);
+    ////sequencer.setTempo(BSD.tempo);//////BSD.Widgets.Sequencer({ tempo: BSD.tempo }); 
+    ////waiter.beg(progressionClock,'set-tempo',n);        
+    jQuery( "#tempo-amount" ).text( o );
+});
+
+
+
+$( "#tempo-input" ).slider({
+  orientation: "horizontal",
+  range: "min",
+  min: 30,
+  max: 250,
+  step: 1,
+  value: BSD.tempo,
+  slide: function( event, ui ) {
+    var n = ui.value;
+    BSD.tempo = n;
+    storage.setItem('tempo',BSD.tempo);
+    jQuery( "#tempo-amount" ).text( n );
+  }
+});
+$('#tempo-input').trigger('slide');
+
+
+
 
 
   campfire.subscribe('play-note',function(payload) {
