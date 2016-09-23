@@ -472,7 +472,7 @@ BSD.parseProgression = function(progString) {
 
 
           
-          inner.append(DOM.h3(spec.chord && spec.chord.fullAbbrev() || 'no chord'));
+          inner.append(DOM.h3(spec.chord && spec.chord.fullAbbrev() || 'no chord').addClass('chord-name'));
           
 
           inner.append(table);
@@ -1094,6 +1094,10 @@ campfire.subscribe('do-it',function(chords){
   ///console.log('bunches',bunches);
 });
 
+
+campfire.subscribe('play-chord',function(o){
+  jQuery('.extra .chord-name').html(o.chord.fullAbbrev());
+});
 
 
 BSD.firstClick = true;
