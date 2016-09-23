@@ -38,7 +38,7 @@ add_action('wp_head',function(){
     min-width: 23px;
     width: 23px;
     height: 1.5em;    
-    text.align: center;
+    text-align: center;
     border-radius: 1rem;
     border-top: 1px solid  rgba(0,0,0,0.1); 
     border-left: 1px solid  rgba(0,0,0,0.1); 
@@ -606,7 +606,7 @@ BSD.parseProgression = function(progString) {
       range: "min",
       min: 0,
       max: 0.1,
-      step: 0.01,
+      step: 0.001,
       value: BSD.volume,
       slide: function( event, ui ) {
         var newVolume = ui.value;
@@ -624,25 +624,30 @@ storage.getItem('tempo',function(o){
     ////sequencer.setTempo(BSD.tempo);//////BSD.Widgets.Sequencer({ tempo: BSD.tempo }); 
     ////waiter.beg(progressionClock,'set-tempo',n);        
     jQuery( "#tempo-amount" ).text( o );
+    jQuery( "#tempo-input" ).slider({
+      orientation: "horizontal",
+      range: "min",
+      min: 30,
+      max: 250,
+      step: 1,
+      value: BSD.tempo,
+      slide: function( event, ui ) {
+        var n = ui.value;
+        BSD.tempo = n;
+        storage.setItem('tempo',BSD.tempo);
+        jQuery( "#tempo-amount" ).text( n );
+      }
+    });
+    ///$('#tempo-input').trigger('slide');
+
+
+
+
+
 });
 
 
 
-$( "#tempo-input" ).slider({
-  orientation: "horizontal",
-  range: "min",
-  min: 30,
-  max: 250,
-  step: 1,
-  value: BSD.tempo,
-  slide: function( event, ui ) {
-    var n = ui.value;
-    BSD.tempo = n;
-    storage.setItem('tempo',BSD.tempo);
-    jQuery( "#tempo-amount" ).text( n );
-  }
-});
-$('#tempo-input').trigger('slide');
 
 
 
@@ -792,8 +797,6 @@ campfire.subscribe('gather-inputs-and-do-it',function(){
 
 var extraBoard;
 
-BSD.tempo = 50;
-
 
 function tick(cursor) {
     console.log('tick',
@@ -804,6 +807,7 @@ function tick(cursor) {
       cursor.idealFret,
       cursor.fret,
       cursor.avgFret
+      //cursor      
     );
       BSD.boards.forEach(function(board){
         board.publish('unfeature-frets');
@@ -813,11 +817,21 @@ function tick(cursor) {
 
 
       campfire.publish('play-note', { note: Note(cursor.noteValue), duration: 1000 });
+
+
+      var nextNoteDelayMS = BSD.tempoToMillis(BSD.tempo);
+
+      if (cursor.chordNoteIdx == 3) { //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
+        setTimeout(function(){
+          campfire.publish('play-chord', { chord: cursor.next.chord, duration: 1500 });
+        },nextNoteDelayMS*2/3);
+      }
+
       cursor = cursor.next;
       clearTimeout(BSD.timeout);
       BSD.timeout = setTimeout(function() {
         tick(cursor); 
-      },BSD.tempoToMillis(BSD.tempo));
+      },nextNoteDelayMS);
   }
 
 
@@ -886,7 +900,7 @@ campfire.subscribe('do-it',function(chords){
   var myNote = false;
 
 
-  var sqeuenceLength = chords.length * 4 * [1,2,4].atRandom();
+  var sqeuenceLength = chords.length * 4 * [1,2,4,8].atRandom();
 
   var range = [];
 
@@ -919,12 +933,21 @@ campfire.subscribe('do-it',function(chords){
     var candidates = BSD.guitarData;
 
 
-    var scale = 12; //rightmost fret to idealize.
+    var scale = 10;//12; //rightmost fret to idealize.
     var tot = 256; //range.length;
     var progress = i; //step
     var loopsPerTotal = 1;
 
-    var idealFret = Math.round(scale * (Math.cos ((2 * Math.PI) / tot * progress * loopsPerTotal ) + 1) / 2);
+
+    var idealFret = 9;
+    if (BSD.idealFret) {
+      idealFret = BSD.idealFret;
+    }
+    else {
+      //TODO: really undestand scaling trig unit radius circle and scaling better.
+      idealFret = Math.round(scale * (Math.cos ((2 * Math.PI) / tot * progress * loopsPerTotal ) + 1) / 2);
+    }
+
 
     console.log('i/idealFret',i,idealFret);
 
@@ -1029,6 +1052,7 @@ campfire.subscribe('do-it',function(chords){
     result.direction = direction;
     result.board = BSD.boards[chordIdx];
     result.chord = myChord;
+    result.chordNoteIdx = chordNoteIdx;
     result.idealFret = idealFret;
     result.avgFret = avgFret;
     ///result.idx = i;
