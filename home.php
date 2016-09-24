@@ -34,7 +34,7 @@
       <li><a href="multiple-fretboards">Multiple Fretboards</a> paint and play on fretboards</li>
       <li><a href="prog-fretboards">Prog Fretboards</a> paint and play on fretboards drawn to match a progression</li>
       <li><a href="hexagon">Hexagon</a> Hexagon inputs</li>
-      <li><a href="vex3">Vex3</a> VexFlow progressions sandbox</li>
+      <li><a href="vex4">Vex4</a> VexFlow progressions sandbox</li>
     </ul>
 <?php 
 
