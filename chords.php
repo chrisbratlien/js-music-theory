@@ -1,32 +1,23 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" nomanifest="js-music-theory.manifest">
-<head>
-  <title>Chords</title>
-<script src="http://cdn.dev.bratliensoftware.com/javascript/array.js"></script>
-<script src="http://cdn.dev.bratliensoftware.com/javascript/color.js"></script>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+<?php 
 
-<script src="http://cdn.dev.bratliensoftware.com/javascript/dom.js"></script>
-<script src="http://cdn.dev.bratliensoftware.com/javascript/draggy.js"></script>
-<script src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
-<script src="javascript/js-music-theory.js"></script>
-
-
+add_action('wp_head',function(){
+?>
 <style type="text/css">
 
   .foo img { width: 100%; }
   input { width: 100%; }
 
 </style>
-</head>
-<body>
+<?php
+});
+
+get_header(); 
+
+add_action('wp_footer',function() {
+?>
 <script type="text/javascript">
-
-
-
   function getChordImages(cb) {
-    jQuery.ajax({ type: 'POST', url: 'ws.php', data: { action: 'chord_images' }, 
+    jQuery.ajax({ type: 'POST', url: 'ws', data: { action: 'chord_images' }, 
       success: function(r) { cb( eval( '(' + r + ')' )) } });
   }
 
@@ -130,16 +121,11 @@
       });
     });
   });
-
-
-  
   
   jQuery('body').append(stage);
 
-
-
-  
-
 </script>
-</body>
-</html>
+<?php 
+});
+
+get_footer(); 

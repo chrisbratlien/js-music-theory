@@ -1,48 +1,8 @@
-<!DOCTYPE html>
-<html>
-<head>
+<?php
+
+add_action('wp_head',function() {
+?>
 <title>Guitar</title>
-  <!-- jquery && jQuery UI -->
-  <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-  <script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
-  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
-<meta charset=utf-8 />
-<script>
-  if (typeof BSD == "undefined") {  var BSD = {};  }
-  if (typeof BSD.Widgets == "undefined") {  BSD.Widgets = {};  }
-</script>
-
-  <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/array.js"></script>
-  <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/dom.js"></script>
-  <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/bsd.pubsub.js"></script>
-  <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
-  <script src="http://cdn.dev.bratliensoftware.com/javascript/eachify.js"></script>
-  <script src="http://cdn.dev.bratliensoftware.com/javascript/color.js"></script>
-  <script src="javascript/bsd.storage.js"></script>
-
-  <script src="javascript/base64.js"></script>
-  <script src="javascript/bootup.js"></script>
-  <script src="javascript/js-music-theory.js"></script>
-
-  <script src="javascript/bsd.widgets.baseplayer.js"></script>
-  <script src="javascript/bsd.widgets.guitarplayer.js"></script>
-  <script src="javascript/bsd.widgets.stringoscillator.js"></script>
-  <script src="javascript/bsd.widgets.tonalityguru.js"></script>
-  <script src="javascript/bsd.guitar.js"></script>
-
-
-  <script type="text/javascript" src="javascript/bsd.widgets.procrastinator.js"></script>
-  <script type="text/javascript" src="javascript/bsd.widgets.lightbox.js"></script>
-
-
-  <script src="javascript/bsd.widgets.songlist.js"></script>
-  
-  
-  <link href='http://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>  
-
-
-  <link href="css/guitar-screen.css" rel="stylesheet" type="text/css" media="screen">  
-
   <style type="text/css" media="print,screen">
     body { font-size: 12px; }
 
@@ -58,12 +18,6 @@
     .cell { cursor: pointer; }
 
 
-    .slider-wrap { 
-      display:inline; 
-      float: left; 
-      margin: 15px; 
-      height: 220px;
-    }
     
     .slider-wrap.horizontal { 
       width: 220px;
@@ -78,24 +32,20 @@
     }
     
     #output { width: 100%; position: relative; }
-    
-    
 
     ul.song-list { list-style-type: none; width: 140px; }
     ul.song-list li { padding: 3px; font-size: 1.2em; cursor: pointer; }
     ul.song-list li.selected{ background: #409; color: white; }
-    
-    
-    
   </style>
-  </head>
-<body>
+
+<?php  
+});
+
+get_header(); 
+?>
+
 
   <div id="pickers">   </div><!-- pickers -->
-  
-  
-  
-  
   <div class="slider-wrap">
   Volume: <br /><span id="volume-amount"></span>
   <div class="slider" id="volume-input"></div>
@@ -142,6 +92,36 @@
   </label>
   <div id="output"></div>
 
+
+<?php
+
+
+
+add_action('wp_footer',function(){
+?>  
+  <script src="javascript/bsd.storage.js"></script>
+  <script src="javascript/base64.js"></script>
+  <script src="javascript/bootup.js"></script>
+  <script src="javascript/js-music-theory.js"></script>
+
+  <script src="javascript/bsd.widgets.baseplayer.js"></script>
+  <script src="javascript/bsd.widgets.guitarplayer.js"></script>
+  <script src="javascript/bsd.widgets.stringoscillator.js"></script>
+  <script src="javascript/bsd.widgets.tonalityguru.js"></script>
+  <script src="javascript/bsd.guitar.js"></script>
+
+
+  <script type="text/javascript" src="javascript/bsd.widgets.procrastinator.js"></script>
+  <script type="text/javascript" src="javascript/bsd.widgets.lightbox.js"></script>
+
+
+  <script src="javascript/bsd.widgets.songlist.js"></script>
+  
+  
+  <link href='http://fonts.googleapis.com/css?family=Inconsolata' rel='stylesheet' type='text/css'>  
+
+
+  <link href="css/guitar-screen.css" rel="stylesheet" type="text/css" media="screen">  
 <script type="text/javascript">
   context = new webkitAudioContext();
   BSD.audioContext = context;
@@ -240,7 +220,7 @@ BSD.leader = BSD.Widgets.GuitarPlayer({
 var waiter = BSD.Widgets.Procrastinator({ timeout: 250 });
 
 $( "#volume-input" ).slider({
-  orientation: "vertical",
+  orientation: "horizontal",
   range: "min",
   min: 0,
   max: 0.1,
@@ -516,7 +496,8 @@ jQuery('#to-fret-amount').text(BSD.toFret);
     
   });
   
-    
 </script>
-</body>
-</html>
+<?php
+});
+
+get_footer();

@@ -20,8 +20,8 @@
 
     <ul>
       <li><a href="http://github.com/chrisbratlien/js-music-theory">js-music-theory on Github</a> Fork and download the code here</li>
-      <li><a href="chords.html">Chords</a> some fretbaord "flashcards" over various jazz chord names</li>
-      <li><a href="guitar.html">Guitar</a> Maps fretboard for each chord change in progression. Has song list for preset progressions</li>
+      <li><a href="chords">Chords</a> some fretbaord flashcards over various jazz chord names (circa 2012)</li>
+      <li><a href="guitar">Guitar</a> Maps fretboard for each chord change in progression. Has song list for preset progressions</li>
       <li><a href="mandolin.html">Mandolin (may be broken)</a> has mandolin tuning on its fretboard</li>
       <li><a href="palette.html">Palette</a> scratch page for various junk</li>
       <li><a href="rulers">Rulers (formerly jazz.html)</a> Toggle notes on vertical swatches and then hit the green button to play all of the toggled notes in that swatch</li>
