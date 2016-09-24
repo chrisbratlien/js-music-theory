@@ -175,8 +175,8 @@ add_action('wp_footer',function(){
     <script src="http://lucid.bratliensoftware.com/js-music-theory/javascript/js-music-theory.js"></script>
     -->
     
-    <script src="http://cdn.dev.bratliensoftware.com/javascript/draggy.js"></script>
-    <script src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
+    <script src="js/draggy.js"></script>
+    <script src="js/sticky-note.js"></script>
     
     <script type="text/javascript">
 
@@ -1113,16 +1113,34 @@ BSD.handleFirstClick = function () {
 
 
 
-function periodic(current,total,shift,scale) {
-  return (Math.cos(Math.PI*2 * current/total) + shift) * scale;
+function periodicA(current,total,shift,scale,func) {
+  return (func(Math.PI*2 * current/total) + shift) * scale;
+}
+function periodicB(current,total,shift,scale,func) {
+  return (func(Math.PI*2 * current/total) * scale) + shift;
 }
 
 
 campfire.subscribe('test-periodic',function(o){
   for (var i = 0; i < o.total; i += 1) {
-    var res = periodic(i,o.total,o.shift,o.scale)
-    console.log('i',i,'result',res);
+    var resA = periodicA(i,o.total,o.shift,o.scale,Math.cos);
+    console.log('A (cos) i',i,'result',resA);
   }
+  for (var i = 0; i < o.total; i += 1) {
+    var resA = periodicA(i,o.total,o.shift,o.scale,Math.sin);
+    console.log('A (sin) i',i,'result',resA);
+  }
+
+  for (var i = 0; i < o.total; i += 1) {
+    var resB = periodicB(i,o.total,o.shift,o.scale,Math.cos);
+    console.log('B (cos) i',i,'result',resB);
+  }
+
+  for (var i = 0; i < o.total; i += 1) {
+    var resB = periodicB(i,o.total,o.shift,o.scale,Math.sin);
+    console.log('B (sin) i',i,'result',resB);
+  }
+
 });
       
     </script>
