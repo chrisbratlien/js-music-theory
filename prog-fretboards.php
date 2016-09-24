@@ -1112,6 +1112,18 @@ BSD.handleFirstClick = function () {
 };
 
 
+
+function periodic(current,total,shift,scale) {
+  return (Math.cos(Math.PI*2 * current/total) + shift) * scale;
+}
+
+
+campfire.subscribe('test-periodic',function(o){
+  for (var i = 0; i < o.total; i += 1) {
+    var res = periodic(i,o.total,o.shift,o.scale)
+    console.log('i',i,'result',res);
+  }
+});
       
     </script>
 <?php
