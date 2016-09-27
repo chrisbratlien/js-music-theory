@@ -494,21 +494,21 @@ BSD.parseProgression = function(progString) {
           });
           controls.append(stickyNoteButton);
 
-
-
-          
-
           inner.append(controls);
           inner.append(DOM.div('&nbsp;').addClass('spacer'));
           
           var close = DOM.div('<i class="fa fa-3x fa-close"></i> ').addClass('noprint');
-
           close.click(function(){
-            inner.remove();
+            self.close();
           });
           controls.append(close);
           
           wrap.append(inner);
+
+
+          self.close = function() {
+            inner.remove();
+          }
 
           self.subscribe('unfeature-frets',function(){
             wrap.find('.featured').removeClass('featured');
@@ -829,7 +829,15 @@ function tick(cursor) {
 
 campfire.subscribe('do-it',function(chords){
 
+  if (extraBoard) {
+    extraBoard.close();
+    extraBoard = null;
+  }
+  BSD.boards.forEach(function(board){
+    board.close();
+  });
   BSD.boards = [];
+
   clearTimeout(BSD.timeout);  
   var pa = '#FF0000-#E6DF52-#FFDD17-#4699D4-#4699D4-#000000-#000000-#000000-#bbbbbb-#67AFAD-#8C64AB-#8C64AB'.split(/-/);
 
