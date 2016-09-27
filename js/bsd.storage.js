@@ -7,9 +7,13 @@ BSD.Storage = function(prefix) {
   self.setItem = function(k,v) {
     return localStorage.setItem(prefix + k,v);
   };
-  self.getItem = function(k,cb) {
+  self.getItem = function(k,success,error) {
     var result = localStorage.getItem(prefix + k);
-    if (cb && result) { cb(result); }
+    if (success && result) { 
+      success(result); 
+      return result;
+    }
+    error(result);
     return result;
   };
   

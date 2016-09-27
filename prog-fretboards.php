@@ -618,40 +618,32 @@ BSD.parseProgression = function(progString) {
     });
 
 
-    BSD.tempo = 0;
-storage.getItem('tempo',function(o){
-    BSD.tempo = parseInt(o,0);
-    ////sequencer.setTempo(BSD.tempo);//////BSD.Widgets.Sequencer({ tempo: BSD.tempo }); 
-    ////waiter.beg(progressionClock,'set-tempo',n);        
-    jQuery( "#tempo-amount" ).text( o );
-    jQuery( "#tempo-input" ).slider({
-      orientation: "horizontal",
-      range: "min",
-      min: 30,
-      max: 250,
-      step: 1,
-      value: BSD.tempo,
-      slide: function( event, ui ) {
-        var n = ui.value;
-        BSD.tempo = n;
-        storage.setItem('tempo',BSD.tempo);
-        jQuery( "#tempo-amount" ).text( n );
-      }
+    campfire.subscribe('render-tempo-control',function(){
+      jQuery( "#tempo-amount" ).text( BSD.tempo );
+      jQuery( "#tempo-input" ).slider({
+        orientation: "horizontal",
+        range: "min",
+        min: 30,
+        max: 250,
+        step: 1,
+        value: BSD.tempo,
+        slide: function( event, ui ) {
+          var n = ui.value;
+          BSD.tempo = n;
+          storage.setItem('tempo',BSD.tempo);
+          jQuery( "#tempo-amount" ).text( n );
+        }
+      });
     });
-    ///$('#tempo-input').trigger('slide');
 
-
-
-
-
-});
-
-
-
-
-
-
-
+    BSD.tempo = 100;
+    storage.getItem('tempo',function(o){
+      BSD.tempo = parseInt(o,0);
+      campfire.publish('render-tempo-control');
+    },
+    function(o){
+      campfire.publish('render-tempo-control');      
+    });
 
   campfire.subscribe('play-note',function(payload) {
     BSD.audioPlayer.playNote(payload.note,payload.duration);    
