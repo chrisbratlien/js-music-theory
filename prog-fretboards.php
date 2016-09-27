@@ -811,21 +811,70 @@ function tick(cursor) {
       campfire.publish('play-note', { note: Note(cursor.noteValue), duration: 1000 });
 
 
-      var nextNoteDelayMS = BSD.tempoToMillis(BSD.tempo);
+      var even4DelayMS = BSD.tempoToMillis(BSD.tempo);
+      var even8DelayMS = even4DelayMS /2;
 
-      if (cursor.chordNoteIdx == 3) { //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
+      var swung81 = even4DelayMS * 2/3;
+      var swung82 = even4DelayMS * 1/3;
+
+
+      var midSwung81 = [swung81,even8DelayMS,even8DelayMS].sum() /3;
+      var midSwung82 = [swung82,even8DelayMS,even8DelayMS].sum() /3;
+
+
+
+
+
+      if (BSD.noteResolution == 4 && cursor.chordNoteIdx == 3) { 
+        //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
         setTimeout(function(){
           campfire.publish('play-chord', { chord: cursor.next.chord, duration: 1500 });
-        },nextNoteDelayMS*2/3);
+        },swung81);
       }
 
-      cursor = cursor.next;
+      if (BSD.noteResolution == 8 && cursor.chordNoteIdx == 6) { 
+        //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
+        setTimeout(function(){
+          campfire.publish('play-chord', { chord: cursor.next.chord, duration: 1500 });
+        },midSwung81);
+      }
+
       clearTimeout(BSD.timeout);
+      
+      var nextDelayMS = false; 
+      if (BSD.noteResolution == 4) {
+        nextDelayMS = even4DelayMS; 
+      }
+      else {
+        if (cursor.idx % 2 == 0) {
+          nextDelayMS = midSwung81;
+        }
+        else {
+          nextDelayMS = midSwung82;
+        }
+      }
+      cursor = cursor.next;
+
+      /**
+      else if (BSD.noteResolution == 8) {
+        if (cursor.idx % 2 == 0) { 
+          nextDelayMS == swungEighth1; 
+        }
+        else {
+          nextDelayMS == swungEighth2; 
+        }
+      }
+      **/
+
+
       BSD.timeout = setTimeout(function() {
         tick(cursor); 
-      },nextNoteDelayMS);
+      },nextDelayMS);
   }
 
+
+
+BSD.noteResolution = 4;
 
 campfire.subscribe('do-it',function(chords){
 
@@ -878,6 +927,8 @@ campfire.subscribe('do-it',function(chords){
 
   });
 
+  BSD.tickResolution =  BSD.noteResolution;
+
   var direction = 'up';
   var nextDirection = { 'up': 'down', 'down': 'up'};
   var lastAbstractValue = 0;
@@ -900,7 +951,7 @@ campfire.subscribe('do-it',function(chords){
   var myNote = false;
 
 
-  var sqeuenceLength = chords.length * 4 * [1,2,4,8].atRandom();
+  var sqeuenceLength = chords.length * BSD.noteResolution * [1,2,4,8].atRandom();
 
   var range = [];
 
@@ -908,12 +959,16 @@ campfire.subscribe('do-it',function(chords){
     range.push(i);
   }
   range.forEach(function(o,i) {
-    var chordIdx = Math.floor(i / 4);
-    chordIdx = chordIdx % 4;
+
+
+    var chordIdx = Math.floor(i / BSD.noteResolution);
+
+
+    chordIdx = chordIdx % BSD.noteResolution;
     var myChord = chords[chordIdx];
 
 
-    var chordNoteIdx = i % 4; //FIXME: assuming everything is 4 note chords.
+    var chordNoteIdx = i % BSD.noteResolution; //FIXME: assuming everything is 4 note chords.
 
     //myNote = myChord.notes().atRandom();
     //while (lastNote && myNote.abstractValue() == lastNote.abstractValue()) {
@@ -1078,7 +1133,8 @@ campfire.subscribe('do-it',function(chords){
     lastStrings.push(lastString);
 
   });
-  
+  console.log('sequence',sequence);
+
   sequence.forEach(function(o,idx) {
     o.idx = idx;
     var ndx = idx+1;
