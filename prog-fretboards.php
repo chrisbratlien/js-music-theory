@@ -958,8 +958,11 @@ campfire.subscribe('do-it',function(chords){
   for (var i = 0; i < sqeuenceLength; i += 1) {
     range.push(i);
   }
-  range.forEach(function(o,i) {
 
+  var errors = 0;
+
+  range.forEach(function(o,i) {
+    if (errors) { return false; }
 
     var chordIdx = Math.floor(i / BSD.noteResolution);
 
@@ -967,8 +970,14 @@ campfire.subscribe('do-it',function(chords){
     chordIdx = chordIdx % BSD.noteResolution;
     var myChord = chords[chordIdx];
 
+    if (!myChord) {
+      errors += 1;
+      return false;
+    }
 
     var chordNoteIdx = i % BSD.noteResolution; //FIXME: assuming everything is 4 note chords.
+
+
 
     //myNote = myChord.notes().atRandom();
     //while (lastNote && myNote.abstractValue() == lastNote.abstractValue()) {
@@ -1047,6 +1056,7 @@ campfire.subscribe('do-it',function(chords){
       var idealFretDiff = Math.abs(o.fret - idealFret);
       /////console.log('o.fret',o.fret,'idealFret',idealFret,'idealFretDiff',idealFretDiff);
       if (idealFretDiff > 6) { return 'idealFretDiff>6'; }
+      if (idealFretDiff > 3) { return 'idealFretDiff>3'; }      
 
 
 
@@ -1086,6 +1096,10 @@ campfire.subscribe('do-it',function(chords){
       candidates = BSD.guitarData.select(criteria);
     }
 
+    if (candidates.length == 0) {
+      errors += 1;
+    }
+
 
 
     var result;
@@ -1113,6 +1127,12 @@ campfire.subscribe('do-it',function(chords){
     ///result.idx = i;
     
     console.log('result',result);
+
+
+    if (!result) {
+      errors += 1;
+    }
+
     sequence.push(result);
     ///sequence[i] = result;
     lastValue = result.noteValue;
@@ -1134,6 +1154,12 @@ campfire.subscribe('do-it',function(chords){
 
   });
   console.log('sequence',sequence);
+
+
+  if (errors) {
+    alert('Oops, I had an error. Try a few more times (5x max) before you give up on me.');
+    return false;
+  }
 
   sequence.forEach(function(o,idx) {
     o.idx = idx;
