@@ -91,8 +91,8 @@ add_action('wp_head',function(){
 
 
   .featured { 
-    color: black !important; 
     background: yellow !important; 
+    color: black !important; 
   }
 
   /**
@@ -128,6 +128,13 @@ get_header(); ?>
 
 </div><!-- color-pickers-wrap -->
 
+      <label>Note Resolution</label>
+      <select class="note-resolution">
+        <option>1</option>
+        <option>2</option>
+        <option>4</option>
+        <option>8</option>
+      </select>
       <div class="progression-form">
         <button id="redo">Redo</button>
         <label>Progression</label>
@@ -636,6 +643,14 @@ BSD.parseProgression = function(progString) {
       });
     });
 
+
+    BSD.noteResolution = 4;
+    var ddNoteResolution = jQuery('.note-resolution');
+    ddNoteResolution.change(function(){
+      BSD.noteResolution = parseInt(this.value,10);
+    });
+
+
     BSD.tempo = 100;
     storage.getItem('tempo',function(o){
       BSD.tempo = parseInt(o,0);
@@ -810,9 +825,9 @@ function tick(cursor) {
 
       campfire.publish('play-note', { note: Note(cursor.noteValue), duration: 1000 });
 
-
       var even4DelayMS = BSD.tempoToMillis(BSD.tempo);
-      var even8DelayMS = even4DelayMS /2;
+      var even2DelayMS = even4DelayMS * 2; //half notes
+      var even8DelayMS = even4DelayMS /2; //eighth notes
 
       var swung81 = even4DelayMS * 2/3;
       var swung82 = even4DelayMS * 1/3;
@@ -822,6 +837,12 @@ function tick(cursor) {
       var midSwung82 = [swung82,even8DelayMS,even8DelayMS].sum() /3;
 
 
+      if (BSD.noteResolution == 2 && cursor.chordNoteIdx == 1) { 
+        //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
+        setTimeout(function(){
+          campfire.publish('play-chord', { chord: cursor.next.chord, duration: 1500 });
+        },even4DelayMS + swung81);
+      }
 
 
 
@@ -842,7 +863,10 @@ function tick(cursor) {
       clearTimeout(BSD.timeout);
       
       var nextDelayMS = false; 
-      if (BSD.noteResolution == 4) {
+      if (BSD.noteResolution == 2) {
+        nextDelayMS = even2DelayMS; 
+      }
+      else if (BSD.noteResolution == 4) {
         nextDelayMS = even4DelayMS; 
       }
       else {
@@ -967,7 +991,7 @@ campfire.subscribe('do-it',function(chords){
     var chordIdx = Math.floor(i / BSD.noteResolution);
 
 
-    chordIdx = chordIdx % BSD.noteResolution;
+    chordIdx = chordIdx % chords.length;
     var myChord = chords[chordIdx];
 
     if (!myChord) {
