@@ -588,12 +588,100 @@ BSD.parseProgression = function(progString) {
   var context = (window.AudioContext) ? new AudioContext : new webkitAudioContext;
   BSD.audioContext = context;
 
+
+    BSD.Widgets.SimplePlayer = function(spec) {
+
+      function impulseResponse( duration, decay, reverse ) {
+          var sampleRate =spec.context.sampleRate;
+          var length = sampleRate * duration;
+          var impulse = spec.context.createBuffer(2, length, sampleRate);
+          var impulseL = impulse.getChannelData(0);
+          var impulseR = impulse.getChannelData(1);
+
+          if (!decay)
+              decay = 2.0;
+          for (var i = 0; i < length; i++){
+            var n = reverse ? length - i : i;
+            impulseL[i] = (Math.random() * 2 - 1) * Math.pow(1 - n / length, decay);
+            impulseR[i] = (Math.random() * 2 - 1) * Math.pow(1 - n / length, decay);
+          }
+          return impulse;
+      }
+
+
+      var tooDamnHigh = (typeof spec.range == "undefined") ? 70 : spec.range[1];
+      var tooDamnLow = (typeof spec.range == "undefined") ? -300 : spec.range[0];
+
+
+      //var impulseBuffer = impulseResponse(4,4,false);
+      var impulseBuffer = impulseResponse(1,1,false);
+
+      var dry = context.createGain();
+      var wet = context.createGain();
+
+
+
+      var convolver = spec.context.createConvolver();
+      convolver.buffer = impulseBuffer;
+
+      // Connect the graph.
+      //source.connect(convolver);
+      dry.connect(spec.context.destination);
+      convolver.connect(spec.context.destination);
+      wet.connect(convolver);
+
+      wet.gain.value = 0.2;
+      dry.gain.value = 0.2;///1 - wet.gain.value;
+
+
+
+      var self = BSD.PubSub({});
+
+      self.playNote = function(note,duration) {
+
+        var v = note.value();
+        while (v > spec.range[1]) {
+          v -= 12;
+        }
+        while (v < spec.range[0]) {
+          v += 12;
+        }
+
+        console.log('v?',v);
+
+        var freq = midi2Hertz(v);
+        var osc = context.createOscillator();/////BufferSource();
+        osc.frequency.value = freq;
+        osc.type = 'sine';
+        osc.start(0);      
+        osc.connect(wet);
+        osc.connect(dry);
+        setTimeout(function() {
+          osc.disconnect();
+        },duration);
+      };
+      self.playChord = function(chord,duration) {
+        chord.notes().forEach(function(note){
+          self.playNote(note,duration);
+        });
+      };
+
+      self.spec = spec;
+      return self;
+    };
+
+
+
+
+
+
+
+
     BSD.audioPlayer = BSD.Widgets.GuitarPlayer({
-      ////gossip: campfire,
+      ///BSD.Widgets.SimplePlayer({
       context: context,
-      ////name: 'Piano',//chosen, //'Piano',
       polyphonyCount: 48,//polyphonyCount,
-      range: [-300,128]
+      range: [20,128]
     });
 
    

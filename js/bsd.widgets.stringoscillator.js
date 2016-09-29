@@ -95,7 +95,7 @@ BSD.StringOscillator = function(spec) {
         osc.stop();   
         osc.disconnect();
         self.playing = false;
-      },duration*5);
+      },duration);
     });
   };
   
