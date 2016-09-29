@@ -589,12 +589,10 @@ BSD.parseProgression = function(progString) {
   BSD.audioContext = context;
 
 
-    BSD.Widgets.SimplePlayer = function(spec) {
-
       function impulseResponse( duration, decay, reverse ) {
-          var sampleRate =spec.context.sampleRate;
+          var sampleRate = context.sampleRate;
           var length = sampleRate * duration;
-          var impulse = spec.context.createBuffer(2, length, sampleRate);
+          var impulse = context.createBuffer(2, length, sampleRate);
           var impulseL = impulse.getChannelData(0);
           var impulseR = impulse.getChannelData(1);
 
@@ -609,29 +607,9 @@ BSD.parseProgression = function(progString) {
       }
 
 
-      var tooDamnHigh = (typeof spec.range == "undefined") ? 70 : spec.range[1];
-      var tooDamnLow = (typeof spec.range == "undefined") ? -300 : spec.range[0];
 
 
-      //var impulseBuffer = impulseResponse(4,4,false);
-      var impulseBuffer = impulseResponse(1,1,false);
-
-      var dry = context.createGain();
-      var wet = context.createGain();
-
-
-
-      var convolver = spec.context.createConvolver();
-      convolver.buffer = impulseBuffer;
-
-      // Connect the graph.
-      //source.connect(convolver);
-      dry.connect(spec.context.destination);
-      convolver.connect(spec.context.destination);
-      wet.connect(convolver);
-
-      wet.gain.value = 0.2;
-      dry.gain.value = 0.2;///1 - wet.gain.value;
+    BSD.Widgets.SimplePlayer = function(spec) {
 
 
 
@@ -647,15 +625,14 @@ BSD.parseProgression = function(progString) {
           v += 12;
         }
 
-        console.log('v?',v);
+        ///console.log('v?',v);
 
         var freq = midi2Hertz(v);
         var osc = context.createOscillator();/////BufferSource();
         osc.frequency.value = freq;
         osc.type = 'sine';
         osc.start(0);      
-        osc.connect(wet);
-        osc.connect(dry);
+        osc.connect(spec.destination);
         setTimeout(function() {
           osc.disconnect();
         },duration);
@@ -671,17 +648,34 @@ BSD.parseProgression = function(progString) {
     };
 
 
+    var common = context.createGain();
+    common.gain = 1.0;
+
+    var wet = context.createGain();
+    var dry = context.createGain();
 
 
+    var convolver = context.createConvolver();
+    convolver.buffer = impulseResponse(1.5,1.5,false);
+
+    wet.gain.value = 0.22;
+    wet.connect(convolver);
+    convolver.connect(context.destination);
+
+    dry.gain.value = 0.15;
+    dry.connect(context.destination);
+
+    common.connect(wet);
+    common.connect(dry);
 
 
-
-
-    BSD.audioPlayer = BSD.Widgets.GuitarPlayer({
-      ///BSD.Widgets.SimplePlayer({
+    BSD.audioPlayer = 
+    BSD.Widgets.GuitarPlayer({
+    //BSD.Widgets.SimplePlayer({
       context: context,
+      destination: common,
       polyphonyCount: 48,//polyphonyCount,
-      range: [20,128]
+      range: [40,128]
     });
 
    

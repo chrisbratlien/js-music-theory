@@ -13,7 +13,7 @@ BSD.Widgets.GuitarPlayer = function(spec) {
     var string1 = BSD.StringOscillator({ 
       id: id, 
       context: context, 
-      destination: context.destination,
+      destination: spec.destination,
       volume: 0
     });
     self.oscillators.push(string1);

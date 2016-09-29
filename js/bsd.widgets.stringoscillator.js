@@ -43,7 +43,7 @@ BSD.StringOscillator = function(spec) {
   self.play = function(semitone,duration)  {
 
 
-    ////console.log('play',semitone,duration);
+    ///console.log('play>>>',semitone,duration);
 
     var detune1 = 4.5;    
     var time = context.currentTime;
