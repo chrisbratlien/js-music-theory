@@ -658,11 +658,11 @@ BSD.parseProgression = function(progString) {
     var convolver = context.createConvolver();
     convolver.buffer = impulseResponse(1.5,1.5,false);
 
-    wet.gain.value = 0.22;
+    wet.gain.value = 0.5;
     wet.connect(convolver);
     convolver.connect(context.destination);
 
-    dry.gain.value = 0.15;
+    dry.gain.value = 0.5;
     dry.connect(context.destination);
 
     common.connect(wet);
