@@ -130,10 +130,11 @@ get_header(); ?>
 
       <label>Note Resolution</label>
       <select class="note-resolution">
-        <option>1</option>
-        <option>2</option>
-        <option>4</option>
-        <option>8</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="4">4</option>
+        <option value="8">8</option>
+        <option value="16">16</option>
       </select>
       <div class="progression-form">
         <button id="redo">Redo</button>
@@ -649,6 +650,7 @@ BSD.parseProgression = function(progString) {
     ddNoteResolution.change(function(){
       BSD.noteResolution = parseInt(this.value,10);
     });
+    ddNoteResolution.find('option[value="' + BSD.noteResolution + '"]').attr('selected',true);
 
 
     BSD.tempo = 100;
@@ -826,8 +828,10 @@ function tick(cursor) {
       campfire.publish('play-note', { note: Note(cursor.noteValue), duration: 1000 });
 
       var even4DelayMS = BSD.tempoToMillis(BSD.tempo);
+      var even1DelayMS = even4DelayMS * 4; //whole notes
       var even2DelayMS = even4DelayMS * 2; //half notes
       var even8DelayMS = even4DelayMS /2; //eighth notes
+      var even16DelayMS = even4DelayMS /4; //eighth notes
 
       var swung81 = even4DelayMS * 2/3;
       var swung82 = even4DelayMS * 1/3;
@@ -836,11 +840,23 @@ function tick(cursor) {
       var midSwung81 = [swung81,even8DelayMS,even8DelayMS].sum() /3;
       var midSwung82 = [swung82,even8DelayMS,even8DelayMS].sum() /3;
 
+      var thisIdx = cursor.chordIdx;
+      var node = cursor;
+      while (node.chordIdx == thisIdx) {
+        node = node.next;
+      }
+      var nextChord = node.chord;
+
+      if (BSD.noteResolution == 1 && cursor.chordNoteIdx == 0) { 
+        setTimeout(function(){
+          campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
+        },even1DelayMS - swung82);
+      }
+
 
       if (BSD.noteResolution == 2 && cursor.chordNoteIdx == 1) { 
-        //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
         setTimeout(function(){
-          campfire.publish('play-chord', { chord: cursor.next.chord, duration: 1500 });
+          campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
         },even4DelayMS + swung81);
       }
 
@@ -849,33 +865,46 @@ function tick(cursor) {
       if (BSD.noteResolution == 4 && cursor.chordNoteIdx == 3) { 
         //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
         setTimeout(function(){
-          campfire.publish('play-chord', { chord: cursor.next.chord, duration: 1500 });
+          campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
         },swung81);
       }
 
       if (BSD.noteResolution == 8 && cursor.chordNoteIdx == 6) { 
         //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
         setTimeout(function(){
-          campfire.publish('play-chord', { chord: cursor.next.chord, duration: 1500 });
-        },midSwung81);
+          campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
+        },swung81);
+      }
+
+      if (BSD.noteResolution == 16 && cursor.chordNoteIdx == 12) { 
+        //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
+        setTimeout(function(){
+          campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
+        },swung81);
       }
 
       clearTimeout(BSD.timeout);
       
       var nextDelayMS = false; 
-      if (BSD.noteResolution == 2) {
+      if (BSD.noteResolution == 1) {
+        nextDelayMS = even1DelayMS; 
+      }
+      else if (BSD.noteResolution == 2) {
         nextDelayMS = even2DelayMS; 
       }
       else if (BSD.noteResolution == 4) {
         nextDelayMS = even4DelayMS; 
       }
-      else {
+      else if (BSD.noteResolution == 8) {
         if (cursor.idx % 2 == 0) {
           nextDelayMS = midSwung81;
         }
         else {
           nextDelayMS = midSwung82;
         }
+      }
+      else { //16
+          nextDelayMS = even16DelayMS;
       }
       cursor = cursor.next;
 
@@ -1143,6 +1172,7 @@ campfire.subscribe('do-it',function(chords){
 
     result = JSON.parse(JSON.stringify(result));
     result.direction = direction;
+    result.chordIdx = chordIdx;
     result.board = BSD.boards[chordIdx];
     result.chord = myChord;
     result.chordNoteIdx = chordNoteIdx;
