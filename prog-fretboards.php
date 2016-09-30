@@ -1070,8 +1070,8 @@ campfire.subscribe('do-it',function(chords){
   var lastValue = 72; //60
   var lastString = 2; //5
   var lastStrings = [2];///[5];
-  var lastFret = 13;//3;
-  var lastFrets = [13];////////[3];
+  var lastFret = BSD.idealFret || 13;//3;
+  var lastFrets = [lastFret];////////[3];
   var lastFretDiff = 0;
 
   var lastFretDiffs = [0];
@@ -1233,6 +1233,7 @@ campfire.subscribe('do-it',function(chords){
 
     if (candidates.length == 0) {
       errors += 1;
+      return false;      
     }
 
 
