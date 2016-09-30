@@ -1190,8 +1190,8 @@ campfire.subscribe('do-it',function(chords){
 
       var idealFretDiff = Math.abs(o.fret - idealFret);
       /////console.log('o.fret',o.fret,'idealFret',idealFret,'idealFretDiff',idealFretDiff);
-      if (idealFretDiff > 6) { return 'idealFretDiff>6'; }
-      if (idealFretDiff > 3) { return 'idealFretDiff>3'; }      
+      //if (idealFretDiff > 6) { return 'idealFretDiff>6'; }
+      if (idealFretDiff > 4) { return 'idealFretDiff>4'; }      
 
 
 
