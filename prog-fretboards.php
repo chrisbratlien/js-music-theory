@@ -1154,6 +1154,10 @@ campfire.subscribe('do-it',function(chords){
 
 
     var judge = function(o) {  
+
+
+      if (abstractNoteValues.indexOf(o.chromaticValue) < 0) { return 'outside'; }
+
       var diff = o.noteValue - lastValue;
       ///console.log('diff',diff);
 
@@ -1164,7 +1168,6 @@ campfire.subscribe('do-it',function(chords){
       if (Math.abs(diff) > 6) { return '>6'; }
       if (o.fret > 18) { return '>18 fret'; }
 
-      if (abstractNoteValues.indexOf(o.chromaticValue) < 0) { return 'outside'; }
 
       var avgString = Math.round(lastStrings.sum() / lastStrings.length);
 
@@ -1241,9 +1244,15 @@ campfire.subscribe('do-it',function(chords){
     var result;
     if (chordNoteIdx == 0) { //first note in new chord change... try to get nearest pitch to last note played.
 
-      var distScore = function(o){  return Math.abs(o.chromaticValue - lastAbstractValue); };
+      var distScore = function(o){  
+          var min = Math.min(o.chromaticValue,lastAbstractValue);
+          var max = Math.max(o.chromaticValue,lastAbstractValue);
+          var diff = max - min;
+          var dist = Math.min(diff,12-diff);
+          return dist;
+      };
       var sorted = candidates.sort(BSD.sorter(distScore));
-      ////console.log('sorted Scores',sorted.map(function(o){ return [o,distScore(o)]; }));
+      console.log('sorted Scores',sorted.map(function(o){ return [o,distScore(o)]; }));
       result = sorted[0];
       console.log('*FN* i',i,'chose',Note(result.noteValue).name(),'result.chromaticValue',result.chromaticValue,'lastAbstractValue',lastAbstractValue);
     }
