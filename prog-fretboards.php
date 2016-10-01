@@ -1089,12 +1089,12 @@ campfire.subscribe('do-it',function(chords){
   var myNote = false;
 
 
-  ///var sqeuenceLength = chords.length * BSD.noteResolution * [1,2,4,8].atRandom();
-  var sqeuenceLength = chords.length * BSD.noteResolution * [8].atRandom(); //debug
+  var sequenceLength = chords.length * BSD.noteResolution * [1,2,4,8].atRandom();
+  ///var sequenceLength = chords.length * BSD.noteResolution * [8].atRandom(); //debug
 
   var range = [];
 
-  for (var i = 0; i < sqeuenceLength; i += 1) {
+  for (var i = 0; i < sequenceLength; i += 1) {
     range.push(i);
   }
 
