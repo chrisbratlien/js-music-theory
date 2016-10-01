@@ -190,6 +190,10 @@ get_header(); ?>
     <label>Scroll to Fretboard</label>
     <input class="scroll-to-board" type="checkbox">
   </div>
+  <div class="bsd-control">
+    <label>Play Chords Only</label>
+    <input class="play-chords-only" type="checkbox">
+  </div>
 
   <br />
 </div>
@@ -811,11 +815,15 @@ BSD.parseProgression = function(progString) {
     });
 
 
-    var cbScrollToBoard = jQuery('.scroll-to-board');
-    cbScrollToBoard.attr('checked',BSD.scrollToBoard);
-    cbScrollToBoard.change(function(){
-      BSD.scrollToBoard = this.checked;
-      storage.setItem('scrollToBoard',BSD.scrollToBoard);
+    BSD.playChordsOnly = false;
+    storage.getItem('playChordsOnly',function(o){
+      BSD.playChordsOnly = JSON.parse(o);
+    });
+    var cbPlayChordsOnly = jQuery('.play-chords-only');
+    cbPlayChordsOnly.attr('checked',BSD.playChordsOnly);
+    cbPlayChordsOnly.change(function(){
+      BSD.playChordsOnly = this.checked;
+      storage.setItem('playChordsOnly',BSD.playChordsOnly);
     });
 
 
@@ -995,7 +1003,11 @@ function tick(cursor) {
       extraBoard.publish('feature-fret',cursor);
 
 
-      campfire.publish('play-note', { note: Note(cursor.noteValue), duration: 1000 });
+      if (!BSD.playChordsOnly) {
+        campfire.publish('play-note', { note: Note(cursor.noteValue), duration: 1000 });
+      }
+
+
 
       var even4DelayMS = BSD.tempoToMillis(BSD.tempo);
       var even1DelayMS = even4DelayMS * 4; //whole notes
