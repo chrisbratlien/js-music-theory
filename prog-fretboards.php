@@ -20,18 +20,19 @@ add_action('wp_head',function(){
   .inner { 
     font-size: 10px; 
     margin-left: 2%; 
-    width: 40%; 
+    width: 50%; 
   }
 
   .inner table { float: left; }
   .inner .controls { float: left; }
   .inner .spacer { clear: both; }
 
+  .bsd-control { margin-top: 1rem; }
 
   table { 
     border-bottom: 1px solid rgba(0,0,0,0.1); 
     border-right: 1px solid  rgba(0,0,0,0.1); 
-    width: 75%;
+    
   }
   table td { 
     padding: 0.2em; text-align: center; 
@@ -64,7 +65,10 @@ add_action('wp_head',function(){
     body { font-size: 7pt; }
     .inner { font-size: 7pt; }
     
-    .stage { color: rgba(0,0,0,0.5); }
+    .stage { 
+      color : #777;
+      color: rgba(0,0,0,0.5); 
+    }
   
   }
   
@@ -84,8 +88,8 @@ add_action('wp_head',function(){
   }
 
   .extra .featured { 
-    color: black;
     background: yellow;
+    color: black;
   }
 
 
@@ -162,10 +166,16 @@ get_header(); ?>
   <br />
 
 
-  <div class="slider-wrap">
-      <strong>Tempo</strong>
+  <div class="slider-wrap bsd-control">
+      <label>Tempo</label>
       <span id="tempo-amount">0</span> bpm
-    <div class="slider" id="tempo-input"></div>
+      <div class="slider" id="tempo-input"></div>
+      <div style="clear: both;">&nbsp;</div>
+  </div>
+
+  <div class="bsd-control">
+    <label>Scroll to Fretboard</label>
+    <input class="scroll-to-board" type="checkbox">
   </div>
 
   <br />
@@ -520,7 +530,9 @@ BSD.parseProgression = function(progString) {
 
           self.subscribe('unfeature-frets',function(){
             wrap.find('.featured').removeClass('featured');
-
+          });
+          self.subscribe('get-wrap',function(callback){
+            callback(wrap);
           });
 
         };
@@ -744,6 +756,22 @@ BSD.parseProgression = function(progString) {
       campfire.publish('render-tempo-control');      
     });
 
+    BSD.scrollToBoard = false;
+    storage.getItem('scrollToBoard',function(o){
+      BSD.scrollToBoard = o;
+    });
+    var cbScrollToBoard = jQuery('.scroll-to-board');
+    cbScrollToBoard.attr('checked',BSD.scrollToBoard);
+    cbScrollToBoard.change(function(){
+      BSD.scrollToBoard = this.checked;
+      storage.setItem('scrollToBoard',BSD.scrollToBoard);
+    });
+
+
+
+
+
+
   campfire.subscribe('play-note',function(payload) {
     BSD.audioPlayer.playNote(payload.note,payload.duration);    
   });    
@@ -904,6 +932,14 @@ function tick(cursor) {
         board.publish('unfeature-frets');
       });
       cursor.board.publish('feature-fret',cursor);
+
+      if (BSD.scrollToBoard && cursor.chordNoteIdx == 0) {
+        cursor.board.publish('get-wrap',function(wrap){
+          jQuery('html, body').animate({ scrollTop: wrap.offset().top - 20 });
+        });
+      }
+
+
       extraBoard.publish('feature-fret',cursor);
 
 
@@ -1050,11 +1086,14 @@ campfire.subscribe('do-it',function(chords){
     var cb = jQuery('.stringset-' + stringSet);
     if (!cb.attr('checked')) { return false; }
     var activeStrings = stringSet.split('');
-    var stage = DOM.div().addClass('stage');
 
-    jQuery(document.body).append(stage);
 
     chords.forEach(function(chord){
+
+      var stage = DOM.div().addClass('stage');
+      jQuery(document.body).append(stage);
+
+
       var board = makeFretboardOn(stage,{
         chord: chord,
         activeStrings: activeStrings
