@@ -919,8 +919,11 @@ function tick(cursor) {
       var swung82 = even4DelayMS * 1/3;
 
 
-      var midSwung81 = [swung81,even8DelayMS,even8DelayMS].sum() /3;
-      var midSwung82 = [swung82,even8DelayMS,even8DelayMS].sum() /3;
+      ///var midSwung81 = (swung81;////////+even8DelayMS) / 2;/////].sum() /2;
+      var midSwung81 = swung81;
+      //var midSwung81 = (swung81+even8DelayMS) / 2;/////].sum() /2;
+      var midSwung82 = swung82;
+      //var midSwung82 = (swung82+even8DelayMS) / 2;/////].sum() /2;
 
       var thisIdx = cursor.chordIdx;
       var node = cursor;
@@ -1086,7 +1089,8 @@ campfire.subscribe('do-it',function(chords){
   var myNote = false;
 
 
-  var sqeuenceLength = chords.length * BSD.noteResolution * [1,2,4,8].atRandom();
+  ///var sqeuenceLength = chords.length * BSD.noteResolution * [1,2,4,8].atRandom();
+  var sqeuenceLength = chords.length * BSD.noteResolution * [8].atRandom(); //debug
 
   var range = [];
 
@@ -1099,11 +1103,14 @@ campfire.subscribe('do-it',function(chords){
   range.forEach(function(o,i) {
     if (errors) { return false; }
 
-    var chordIdx = Math.floor(i / BSD.noteResolution);
-
-
-    chordIdx = chordIdx % chords.length;
+    var barIdx = Math.floor(i / BSD.noteResolution);
+    var chordIdx = barIdx % chords.length;
     var myChord = chords[chordIdx];
+
+   var cycleIdx = Math.floor(barIdx / chords.length);
+   ///cycleIdx = Math.floor(cycleIdx / chords.length);
+   console.log('barIdx',barIdx,'chordIdx',chordIdx,'cycleIdx',cycleIdx);
+
 
     if (!myChord) {
       errors += 1;
@@ -1138,13 +1145,21 @@ campfire.subscribe('do-it',function(chords){
     var loopsPerTotal = 1;
 
 
-    var idealFret = 9;
+    var idealFret = 9; //starter...will get overriden
     if (BSD.idealFret) {
       idealFret = BSD.idealFret;
     }
     else {
       //TODO: really undestand scaling trig unit radius circle and scaling better.
+      /**
       idealFret = Math.round(scale * (Math.cos ((2 * Math.PI) / tot * progress * loopsPerTotal ) + 1) / 2);
+      **/
+      idealFret = 7 + cycleIdx;
+      var idealFretMax = 9;
+      var maxDiff = idealFret - idealFretMax;
+      if (maxDiff > 0) {
+        idealFret = idealFretMax - maxDiff;
+      }
     }
 
 
