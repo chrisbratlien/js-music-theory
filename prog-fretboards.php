@@ -104,7 +104,9 @@ add_action('wp_head',function(){
   .control.play-all:active { background: #0f0; }
   **/ 
      
-  
+  .venue-footer { 
+    height: 400px; 
+  }
   
 
 </style>
@@ -161,6 +163,9 @@ get_header(); ?>
       </div>
 
 <div class="navbar-spacer screen-only noprint">
+</div>
+
+<div class="controls">
   <button class="btn btn-info btn-pause"><i class="fa fa-pause"></i> Pause</button>
   <button class="btn btn-info btn-toggle-text noprint">Toggle Text</button>
   <br />
@@ -173,6 +178,14 @@ get_header(); ?>
       <div style="clear: both;">&nbsp;</div>
   </div>
 
+  <div class="slider-wrap bsd-control">
+      <label>Progression Cycles (before repeating)</label>
+      <span class="prog-cycles-amount">0</span> x
+      <div class="slider prog-cycles-input"></div>
+      <div style="clear: both;">&nbsp;</div>
+  </div>
+
+
   <div class="bsd-control">
     <label>Scroll to Fretboard</label>
     <input class="scroll-to-board" type="checkbox">
@@ -180,6 +193,11 @@ get_header(); ?>
 
   <br />
 </div>
+<div class="venue">
+</div>
+<div class="venue-footer">
+</div>
+
 
 <?php
 
@@ -738,6 +756,23 @@ BSD.parseProgression = function(progString) {
       });
     });
 
+    campfire.subscribe('render-prog-cycles-control',function(){
+      jQuery('.prog-cycles-amount').text( BSD.progCycles );
+      jQuery('.prog-cycles-input').slider({
+        orientation: 'horizontal',
+        range: 'min',
+        min: 1,
+        max: 8,
+        step: 1,
+        value: BSD.progCycles,
+        slide: function( event, ui ) {
+          var n = ui.value;
+          BSD.progCycles = parseInt(n,10);
+          storage.setItem('prog-cycles',BSD.progCycles);
+          jQuery( '.prog-cycles-amount' ).text( n );
+        }
+      });
+    });
 
     BSD.noteResolution = 4;
     var ddNoteResolution = jQuery('.note-resolution');
@@ -758,7 +793,7 @@ BSD.parseProgression = function(progString) {
 
     BSD.scrollToBoard = false;
     storage.getItem('scrollToBoard',function(o){
-      BSD.scrollToBoard = o;
+      BSD.scrollToBoard = JSON.parse(o);
     });
     var cbScrollToBoard = jQuery('.scroll-to-board');
     cbScrollToBoard.attr('checked',BSD.scrollToBoard);
@@ -767,6 +802,21 @@ BSD.parseProgression = function(progString) {
       storage.setItem('scrollToBoard',BSD.scrollToBoard);
     });
 
+    BSD.progCycles = 1;
+    storage.getItem('prog-cycles',function(o){
+      BSD.progCycles = parseInt(o,10);
+      campfire.publish('render-prog-cycles-control');
+    },function(){
+      campfire.publish('render-prog-cycles-control');      
+    });
+
+
+    var cbScrollToBoard = jQuery('.scroll-to-board');
+    cbScrollToBoard.attr('checked',BSD.scrollToBoard);
+    cbScrollToBoard.change(function(){
+      BSD.scrollToBoard = this.checked;
+      storage.setItem('scrollToBoard',BSD.scrollToBoard);
+    });
 
 
 
@@ -915,7 +965,7 @@ campfire.subscribe('gather-inputs-and-do-it',function(){
 
 
 var extraBoard;
-
+var headerHeight = jQuery('header').height();
 
 function tick(cursor) {
     console.log('tick',
@@ -935,7 +985,9 @@ function tick(cursor) {
 
       if (BSD.scrollToBoard && cursor.chordNoteIdx == 0) {
         cursor.board.publish('get-wrap',function(wrap){
-          jQuery('html, body').animate({ scrollTop: wrap.offset().top - 20 });
+          jQuery('html, body').animate({ 
+            scrollTop: wrap.find('.chord-name').offset().top - headerHeight 
+          },200);
         });
       }
 
@@ -1074,8 +1126,11 @@ campfire.subscribe('do-it',function(chords){
     colorHash[i] = color;
   });
 
+
+  var venue = jQuery('.venue');
+
     var stage = DOM.div().addClass('stage extra');
-    jQuery(document.body).append(stage);
+    venue.append(stage);
     extraBoard = makeFretboardOn(stage,{
         //chord: chord,
         activeStrings: '654321'.split('')
@@ -1091,7 +1146,7 @@ campfire.subscribe('do-it',function(chords){
     chords.forEach(function(chord){
 
       var stage = DOM.div().addClass('stage');
-      jQuery(document.body).append(stage);
+      venue.append(stage);
 
 
       var board = makeFretboardOn(stage,{
@@ -1106,17 +1161,16 @@ campfire.subscribe('do-it',function(chords){
 
   BSD.tickResolution =  BSD.noteResolution;
 
-  var direction = 'up';
+  var direction = (Math.random() > 0.5) ? 'up' : 'down';
   var nextDirection = { 'up': 'down', 'down': 'up'};
-  var lastAbstractValue = 0;
-  var lastValue = 72; //60
-  var lastString = 2; //5
-  var lastStrings = [2];///[5];
-  var lastFret = BSD.idealFret || 13;//3;
-  var lastFrets = [lastFret];////////[3];
+  var lastAbstractValue = false;
+  var lastValue = false; //60
+  var lastString = false;/////2; //5
+  var lastStrings = [];///[5];
+  var lastFret = false;////BSD.idealFret || 7;//3;
+  var lastFrets = [];////////[3];
   var lastFretDiff = 0;
-
-  var lastFretDiffs = [0];
+  var lastFretDiffs = [];
 
   var bunches = chords.map(function(o){ return o.abstractNoteValues(); });
   var sequence = [];
@@ -1128,7 +1182,7 @@ campfire.subscribe('do-it',function(chords){
   var myNote = false;
 
 
-  var sequenceLength = chords.length * BSD.noteResolution * [1,2,4,8].atRandom();
+  var sequenceLength = chords.length * BSD.noteResolution * BSD.progCycles;///[1,2,4,8].atRandom();
   ///var sequenceLength = chords.length * BSD.noteResolution * [8].atRandom(); //debug
 
   var range = [];
@@ -1148,7 +1202,7 @@ campfire.subscribe('do-it',function(chords){
 
    var cycleIdx = Math.floor(barIdx / chords.length);
    ///cycleIdx = Math.floor(cycleIdx / chords.length);
-   console.log('barIdx',barIdx,'chordIdx',chordIdx,'cycleIdx',cycleIdx);
+   ////console.log('barIdx',barIdx,'chordIdx',chordIdx,'cycleIdx',cycleIdx);
 
 
     if (!myChord) {
@@ -1168,7 +1222,7 @@ campfire.subscribe('do-it',function(chords){
 
 
     if (Math.random() > 0.85) {
-      console.log('random flip!');
+      ///console.log('random flip!');
       direction = nextDirection[direction];
     }
     if (lastValue <= 44) {//low E
@@ -1202,47 +1256,36 @@ campfire.subscribe('do-it',function(chords){
     }
 
 
-    console.log('i/idealFret',i,idealFret);
+    ///console.log('i/idealFret',i,idealFret);
 
-    var avgFret = Math.round(lastFrets.sum() / lastFrets.length);
+    var avgFret;
+    if (lastFrets.length >0) {
+      avgFret = Math.round(lastFrets.sum() / lastFrets.length);
+    }
 
+    var avgString;
+    if (lastStrings.length >0) {
+      avgString = Math.round(lastStrings.sum() / lastStrings.length);
+    }
+
+    var drift3;
+    if (lastFretDiffs.length >0) {
+      drift3 = lastFretDiffs.slice(-3).sum(); //sum the latest 3
+    }
 
     var judge = function(o) {  
 
 
       if (abstractNoteValues.indexOf(o.chromaticValue) < 0) { return 'outside'; }
+      if (o.fret > 13) { return 'too high'; }
 
-      var diff = o.noteValue - lastValue;
+      var diff = lastValue ? o.noteValue - lastValue : 0;
       ///console.log('diff',diff);
 
-      if (o.fret > 17) { return 'too high'; }
       if (diff > 0 && direction == 'down') { return 'wrong dir'; }
       if (diff < 0 && direction == 'up') { return 'wrong dir'; }
-      if (diff == 0) { return 'no diff'; }
+      if (lastValue && diff == 0) { return 'no diff'; }
       if (Math.abs(diff) > 6) { return '>6'; }
-      if (o.fret > 18) { return '>18 fret'; }
-
-
-      var avgString = Math.round(lastStrings.sum() / lastStrings.length);
-
-      var fretDiff = o.fret - lastFret; 
-
-      var drift3 = lastFretDiffs.slice(-3).sum(); //sum the latest 3
-       if (Math.abs(drift3 + fretDiff) > 4) { return 'drifting too much in one direction'; }
-
-
-      var fretDistance = Math.abs(fretDiff);
-      if (fretDistance > 3) { return 'fretDistance > 3'; }
-      if (Math.abs(lastFretDiff + fretDiff) > 4) { return 'lastFretDiff+fretDiff >4'; } ///if they don't cancel each other out and their total is too big
-
-      var stringDiff = Math.abs(o.string - lastString);
-      if (stringDiff > 2) { return 'stringDiff>2'; }
-
-      //now for the avg
-      var avgFretDistance = Math.abs(o.fret - avgFret);
-      var avgStringDiff = Math.abs(o.string - avgString);
-      if (avgFretDistance > 4) { return 'avgFretDistance>4'; }
-      ///if (avgStringDiff > 2) { return 'avgStringDiff>2'; }
 
 
       var idealFretDiff = Math.abs(o.fret - idealFret);
@@ -1250,6 +1293,28 @@ campfire.subscribe('do-it',function(chords){
       //if (idealFretDiff > 6) { return 'idealFretDiff>6'; }
       if (idealFretDiff > 4) { return 'idealFretDiff>4'; }      
 
+
+
+
+      var fretDiff = lastFret ? o.fret - lastFret : 0; 
+
+       if (drift3 && Math.abs(drift3 + fretDiff) > 3) { return 'drifting too much in one direction'; }
+       if (lastFretDiff && Math.abs(lastFretDiff + fretDiff) > 3) { return 'drifting too much in one direction'; }
+
+
+
+      var fretDistance = Math.abs(fretDiff);
+      if (fretDistance > 3) { return 'fretDistance > 3'; }
+      if (lastFretDiff && Math.abs(lastFretDiff + fretDiff) > 4) { return 'lastFretDiff+fretDiff >4'; } ///if they don't cancel each other out and their total is too big
+
+      var stringDiff = lastString? Math.abs(o.string - lastString) : 0;
+      if (stringDiff > 2) { return 'stringDiff>2'; }
+
+      //now for the avg
+      var avgFretDistance = avgFret ? Math.abs(o.fret - avgFret) : 0;
+      var avgStringDiff = avgString ? Math.abs(o.string - avgString): 0;
+      if (avgFretDistance > 4) { return 'avgFretDistance>4'; }
+      ///if (avgStringDiff > 2) { return 'avgStringDiff>2'; }
 
 
       /**
@@ -1275,7 +1340,7 @@ campfire.subscribe('do-it',function(chords){
     if (candidates.length == 0) {
       console.log('uh oh');
       direction = nextDirection[direction];
-      console.log('flip! (necessity)');
+      ///console.log('flip! (necessity)');
       candidates = BSD.guitarData.select(criteria);
     }
 
@@ -1299,20 +1364,20 @@ campfire.subscribe('do-it',function(chords){
     if (chordNoteIdx == 0) { //first note in new chord change... try to get nearest pitch to last note played.
 
       var distScore = function(o){  
-          var min = Math.min(o.chromaticValue,lastAbstractValue);
-          var max = Math.max(o.chromaticValue,lastAbstractValue);
+          var min = lastAbstractValue ? Math.min(o.chromaticValue,lastAbstractValue): o.chromaticValue;
+          var max = lastAbstractValue ? Math.max(o.chromaticValue,lastAbstractValue): o.chromaticValue;
           var diff = max - min;
           var dist = Math.min(diff,12-diff);
           return dist;
       };
       var sorted = candidates.sort(BSD.sorter(distScore));
-      console.log('sorted Scores',sorted.map(function(o){ return [o,distScore(o)]; }));
+      ///console.log('sorted Scores',sorted.map(function(o){ return [o,distScore(o)]; }));
       result = sorted[0];
-      console.log('*FN* i',i,'chose',Note(result.noteValue).name(),'result.chromaticValue',result.chromaticValue,'lastAbstractValue',lastAbstractValue);
+      //console.log('*FN* i',i,'chose',Note(result.noteValue).name(),'result.chromaticValue',result.chromaticValue,'lastAbstractValue',lastAbstractValue);
     }
     else {
       result = candidates.atRandom();
-      //console.log('i',i,'chose',Note(result.noteValue).name(),'result.chromaticValue',result.chromaticValue,'lastAbstractValue',lastAbstractValue);
+      console.log('i',i,'chose',Note(result.noteValue).name(),'result.chromaticValue',result.chromaticValue,'lastAbstractValue',lastAbstractValue);
     }
 
 
@@ -1339,7 +1404,7 @@ campfire.subscribe('do-it',function(chords){
     lastNote = Note(lastValue);
     lastAbstractValue = lastNote.abstractValue();
     lastString = result.string;
-    lastFretDiff = result.fret - lastFret;
+    lastFretDiff = lastFret ? result.fret - lastFret : 0;
     lastFretDiffs.push(lastFretDiff);
 
 
@@ -1353,7 +1418,7 @@ campfire.subscribe('do-it',function(chords){
     lastStrings.push(lastString);
 
   });
-  console.log('sequence',sequence);
+  ///console.log('sequence',sequence);
 
 
   if (errors) {
@@ -1367,7 +1432,7 @@ campfire.subscribe('do-it',function(chords){
     ndx = ndx % sequence.length;
     o.next = sequence[ndx];
   });
-  console.log('sequence',sequence);
+  //console.log('sequence',sequence);
   BSD.sequence = sequence;
   //////sequence.forEach(function(o){})
   BSD.timeout = false;
