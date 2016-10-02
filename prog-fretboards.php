@@ -206,6 +206,12 @@ get_header(); ?>
     <label>See Current Chord's Fretboard Only</label>
   </div>
 
+  <div class="slider-wrap bsd-control">
+      <label>Min/Max Frets</label>
+      <span class="fret-range-amount">0-15</span> x
+      <div class="slider fret-range-input"></div>
+      <div style="clear: both;">&nbsp;</div>
+  </div>
 
 
   <br />
@@ -235,6 +241,15 @@ add_action('wp_footer',function(){
 
 
 BSD.timeout = false;
+
+BSD.options = {};
+storage.getItem('options',function(o){
+  BSD.options = JSON.parse(o);
+  campfire.publish('options-loaded',BSD.options);
+});
+
+
+
 
 BSD.parseProgression = function(progString) {
     var barStrings = progString.split(/\ +|\|/);
@@ -791,6 +806,27 @@ BSD.parseProgression = function(progString) {
       });
     });
 
+
+    campfire.subscribe('render-fret-range-control',function(){
+      jQuery('.fret-range-amount').text( BSD.options.fretRange );
+      jQuery('.fret-range-input').slider({
+        orientation: 'horizontal',
+        range: 'min',
+        min: 0,
+        max: 15,
+        step: 1,
+        values: BSD.options.fretRange,
+        slide: function( event, ui ) {
+          var n = ui.values;
+          BSD.options.fretRange = n;
+          storage.setItem('options',JSON.stringify(BSD.options));
+          jQuery( '.fret-range-amount' ).text( n );
+        }
+      });
+    });
+
+
+
     BSD.noteResolution = 4;
     var ddNoteResolution = jQuery('.note-resolution');
     ddNoteResolution.change(function(){
@@ -840,10 +876,14 @@ BSD.parseProgression = function(progString) {
     });
 
 
-    BSD.options = {};
-    storage.getItem('options',function(o){
-      BSD.options = JSON.parse(o);
-    });
+
+    if (!BSD.options.fretRange) {
+      BSD.options.fretRange = [0,15];
+    }
+    campfire.publish('render-fret-range-control');
+
+
+
 
     var cbShowCurrentChordFretboadOnly = jQuery('.show-current-chord-fretboard-only');
     cbShowCurrentChordFretboadOnly.attr('checked',BSD.options.showCurrentChordFretboadOnly);
@@ -968,11 +1008,19 @@ BSD.parseProgression = function(progString) {
 var progInput = jQuery('#progression');
 progInput.blur(function() { 
   campfire.publish('gather-inputs-and-do-it');
+  BSD.options.progression = progInput.val();
+  storage.setItem('options',JSON.stringify(BSD.options));
 });
 progInput.on('touchend',function(){ //for iOS bug
 	///alert('hey');
 	BSD.handleFirstClick();
 });
+
+//campfire.subscribe('options-loaded',function(){
+  if (BSD.options.progression) {
+    progInput.val(BSD.options.progression);
+  }
+//});
 
 
 
@@ -1304,7 +1352,7 @@ campfire.subscribe('do-it',function(chords){
       /**
       idealFret = Math.round(scale * (Math.cos ((2 * Math.PI) / tot * progress * loopsPerTotal ) + 1) / 2);
       **/
-      idealFret = 7 + cycleIdx;
+      idealFret = 7 + cycleIdx; //FIXME
       var idealFretMax = 9;
       var maxDiff = idealFret - idealFretMax;
       if (maxDiff > 0) {
@@ -1373,6 +1421,13 @@ campfire.subscribe('do-it',function(chords){
       if (avgFretDistance > 4) { return 'avgFretDistance>4'; }
       ///if (avgStringDiff > 2) { return 'avgStringDiff>2'; }
 
+
+      if (BSD.options.fretRange && o.fret > BSD.options.fretRange[1]) {
+        return 'fret > maxFret';
+      }
+      if (BSD.options.fretRange && o.fret < BSD.options.fretRange[0]) {
+        return 'fret < minFret';
+      }
 
       /**
       console.log(
