@@ -207,8 +207,8 @@ get_header(); ?>
   </div>
 
   <div class="slider-wrap bsd-control">
-      <label>Min/Max Frets</label>
-      <span class="fret-range-amount">0-15</span> x
+      <label>Min-Max Frets</label>
+      <span class="fret-range-amount">0-15</span>
       <div class="slider fret-range-input"></div>
       <div style="clear: both;">&nbsp;</div>
   </div>
@@ -808,7 +808,9 @@ BSD.parseProgression = function(progString) {
 
 
     campfire.subscribe('render-fret-range-control',function(){
-      jQuery('.fret-range-amount').text( BSD.options.fretRange );
+      jQuery('.fret-range-amount').text( 
+        BSD.options.fretRange.toString().replace(/,/,'-')
+      );
       jQuery('.fret-range-input').slider({
         orientation: 'horizontal',
         range: 'min',
@@ -820,7 +822,10 @@ BSD.parseProgression = function(progString) {
           var n = ui.values;
           BSD.options.fretRange = n;
           storage.setItem('options',JSON.stringify(BSD.options));
-          jQuery( '.fret-range-amount' ).text( n );
+          console.log('n',n);
+          jQuery( '.fret-range-amount' ).text( 
+            n.toString().replace(/,/,'-')
+          );
         }
       });
     });
@@ -1352,8 +1357,13 @@ campfire.subscribe('do-it',function(chords){
       /**
       idealFret = Math.round(scale * (Math.cos ((2 * Math.PI) / tot * progress * loopsPerTotal ) + 1) / 2);
       **/
-      idealFret = 7 + cycleIdx; //FIXME
-      var idealFretMax = 9;
+      var start = 7; //gets blown away..
+      if (BSD.options.fretRange) {
+        start = Math.round(BSD.options.fretRange.average());
+      }
+
+      idealFret = start + cycleIdx; //FIXME
+      var idealFretMax = BSD.options.fretRange[1];
       var maxDiff = idealFret - idealFretMax;
       if (maxDiff > 0) {
         idealFret = idealFretMax - maxDiff;

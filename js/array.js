@@ -64,40 +64,18 @@ Array.prototype.shuffle = function(){
 	return result;
 };
 
-
-
-
 Array.prototype.integrate = function (fn) {
-return this.inject(0, function (acc, i) { return acc + fn(i); });
+	return this.inject(0, function (acc, i) { return acc + fn(i); });
+};
+Array.prototype.sum = function () {
+	return this.integrate(function (x) { return x; });
+}; 
+
+Array.prototype.average = function() {
+	return this.sum() / this.length;
 };
 
-/* Array.prototype.sum = function () {
-return this.integrate(function (x) { return x; });
-}; */
-Array.prototype.sum = function(){
-	
-	if ($.isNumeric(this[0])){
-		return this.inject(0,function(a,b){return a+b;});
-	}
-	if ($.isPlainObject(this[0])){
-		var result = {};
-		var keys = Object.keys(this[0]);
-		keys.each(function(k){result[k]=0;});
-		return this.inject(result,function(a,b){
-			keys.each(function(k){
-			//console.log('k:',k,'a[k]:',a[k],'b[k]:',b[k]);
-				a[k]=a[k]+b[k];
-				});
-			return a;
-		});		
-	}
-	if ($.isPlainObject(this)){
-			var keys = Object.keys(o);			
-			return keys.inject(0,function(res,i){return res+o[i];});
-	}
-	console.log('Error: The input is not valid!(Array.prototype.sum())');
-	
-}
+
 /* IE doesn't support Array.indexOf, so here, hold my hand while we cross the street */
 if (!Array.indexOf) {
 Array.prototype.indexOf = function (obj) {
