@@ -28,6 +28,7 @@ add_action('wp_head',function(){
   .inner .spacer { clear: both; }
 
   .bsd-control { margin-top: 1rem; }
+  .hidden { display: none; }
 
   table { 
     border-bottom: 1px solid rgba(0,0,0,0.1); 
@@ -148,18 +149,24 @@ get_header(); ?>
         <input type="text" id="progression" class="form-control" />
 
         <label>String sets</label>
-        <label>654321</label>
+
         <input type="checkbox" class="stringset-654321" checked="true" />
-        <label>6432</label>
+        <label>654321</label>
+
         <input type="checkbox" class="stringset-6432" />
-        <label>4321</label>
+        <label>6432</label>
+
         <input type="checkbox" class="stringset-4321" />
-        <label>5432</label>
+        <label>4321</label>
+
         <input type="checkbox" class="stringset-5432" />
-        <label>5321</label>
+        <label>5432</label>
+
         <input type="checkbox" class="stringset-5321" />
-        <label>6543</label>
+        <label>5321</label>
+
         <input type="checkbox" class="stringset-6543" />
+        <label>6543</label>
       </div>
 
 <div class="navbar-spacer screen-only noprint">
@@ -179,7 +186,7 @@ get_header(); ?>
   </div>
 
   <div class="slider-wrap bsd-control">
-      <label>Progression Cycles (before repeating)</label>
+      <label>How many cycles through the progression to hear before repeating</label>
       <span class="prog-cycles-amount">0</span> x
       <div class="slider prog-cycles-input"></div>
       <div style="clear: both;">&nbsp;</div>
@@ -187,13 +194,19 @@ get_header(); ?>
 
 
   <div class="bsd-control">
-    <label>Scroll to Fretboard</label>
     <input class="scroll-to-board" type="checkbox">
+    <label>Scroll to Current Chord's Fretboard</label>
   </div>
   <div class="bsd-control">
-    <label>Play Chords Only</label>
     <input class="play-chords-only" type="checkbox">
+    <label>Hear Chords Only</label>
   </div>
+  <div class="bsd-control">
+    <input class="show-current-chord-fretboard-only" type="checkbox">
+    <label>See Current Chord's Fretboard Only</label>
+  </div>
+
+
 
   <br />
 </div>
@@ -827,6 +840,19 @@ BSD.parseProgression = function(progString) {
     });
 
 
+    BSD.options = {};
+    storage.getItem('options',function(o){
+      BSD.options = JSON.parse(o);
+    });
+
+    var cbShowCurrentChordFretboadOnly = jQuery('.show-current-chord-fretboard-only');
+    cbShowCurrentChordFretboadOnly.attr('checked',BSD.options.showCurrentChordFretboadOnly);
+    cbShowCurrentChordFretboadOnly.change(function(){
+      BSD.options.showCurrentChordFretboadOnly = this.checked;
+      storage.setItem('options',JSON.stringify(BSD.options));
+    });
+
+
 
 
 
@@ -990,6 +1016,25 @@ function tick(cursor) {
         board.publish('unfeature-frets');
       });
       cursor.board.publish('feature-fret',cursor);
+
+      if (cursor.chordNoteIdx == 0) {
+
+
+        BSD.boards.forEach(function(board){
+          board.publish('get-wrap',function(wrap){
+            BSD.options.showCurrentChordFretboadOnly ? wrap.addClass('hidden') : wrap.removeClass('hidden');
+          });
+        });
+
+
+
+        cursor.board.publish('get-wrap',function(wrap){ //just in case they were hidden...
+            wrap.removeClass('hidden');  
+        });
+      }
+
+
+
 
       if (BSD.scrollToBoard && cursor.chordNoteIdx == 0) {
         cursor.board.publish('get-wrap',function(wrap){
@@ -1157,7 +1202,7 @@ campfire.subscribe('do-it',function(chords){
 
     chords.forEach(function(chord){
 
-      var stage = DOM.div().addClass('stage');
+      var stage = DOM.div().addClass('stage hidden');
       venue.append(stage);
 
 
