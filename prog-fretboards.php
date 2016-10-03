@@ -1390,12 +1390,16 @@ campfire.subscribe('do-it',function(chords){
       drift3 = lastFretDiffs.slice(-3).sum(); //sum the latest 3
     }
 
-    function distScore(o){  
-          var min = lastAbstractValue ? Math.min(o.chromaticValue,lastAbstractValue): o.chromaticValue;
-          var max = lastAbstractValue ? Math.max(o.chromaticValue,lastAbstractValue): o.chromaticValue;
-          var diff = max - min;
-          var dist = Math.min(diff,12-diff);
-          return dist;
+    function distScore(a,b) {
+      var min, max, diff;
+      if (!a) { min = b; max = b; diff = 0; }
+      if (!b) { min = a; max = a; diff = 0; }
+      if (!a && !b) { return 0; }
+      min = Math.min(a,b);
+      max = Math.max(a,b);
+      var diff = max - min;
+      var dist = Math.min(diff,12-diff);
+      return dist;
     };
 
 
@@ -1405,7 +1409,7 @@ campfire.subscribe('do-it',function(chords){
       if (abstractNoteValues.indexOf(o.chromaticValue) < 0) { return 'outside'; }
       if (o.fret > 13) { return 'too high'; }
       if (BSD.activeStrings && !BSD.activeStrings.detect(function(as) { 
-        console.log('as',as,'o.string',o.string);
+        ///console.log('as',as,'o.string',o.string);
         return as == o.string; 
       })) {
         return "not active string: " + o.string;
@@ -1503,10 +1507,21 @@ campfire.subscribe('do-it',function(chords){
     if (chordNoteIdx == 0) { //first note in new chord change... try to get nearest pitch to last note played.
 
   
-      var sorted = candidates.sort(BSD.sorter(distScore));
-      ///console.log('sorted Scores',sorted.map(function(o){ return [o,distScore(o)]; }));
+      var sorted = candidates.sort(BSD.sorter(function(o) {
+        return distScore(o.chromaticValue,lastAbstractValue);
+      }));
+
+      console.log('sorted Scores',sorted.map(function(o){ 
+        return [o,distScore(o.chromaticValue,lastAbstractValue)]; }));
+
       result = sorted[0];
-      //console.log('*FN* i',i,'chose',Note(result.noteValue).name(),'result.chromaticValue',result.chromaticValue,'lastAbstractValue',lastAbstractValue);
+      console.log('*FN* i',i,myChord.fullAbbrev(),
+        'chose',Note(result.noteValue).name(),
+        'lastNote',lastNote.name(),
+        'result.chromaticValue',result.chromaticValue,
+        'lastAbstractValue',lastAbstractValue,
+        'distScore(result)',distScore(result.chromaticValue,lastAbstractValue)
+      );
     }
     else {
       result = candidates.atRandom();
