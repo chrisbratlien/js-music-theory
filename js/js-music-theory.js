@@ -335,7 +335,7 @@ JSMT.chordTypes.push({ id: 1, intervals: [0,4,7] });
 
 
 var Note = function(foo,accidental) {
-  if (!foo) {
+  if (foo !== 0 && !foo) {
     return "constructor?";
   }
   ////var self = spec;/////NotePrimitive(spec);

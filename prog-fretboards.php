@@ -167,6 +167,18 @@ get_header(); ?>
 
         <input type="checkbox" class="stringset-6543" />
         <label>6543</label>
+        <br />
+        <input type="checkbox" class="stringset-321" />
+        <label>321</label>
+        <input type="checkbox" class="stringset-432" />
+        <label>432</label>
+        <input type="checkbox" class="stringset-543" />
+        <label>543</label>
+        <input type="checkbox" class="stringset-654" />
+        <label>654</label>
+
+
+
       </div>
 
 <div class="navbar-spacer screen-only noprint">
@@ -194,16 +206,22 @@ get_header(); ?>
 
 
   <div class="bsd-control">
-    <input class="scroll-to-board" type="checkbox">
-    <label>Scroll to Current Chord's Fretboard</label>
+    <label>
+      <input class="scroll-to-board" type="checkbox">      
+      Scroll to Current Chord's Fretboard
+    </label>
   </div>
   <div class="bsd-control">
-    <input class="play-chords-only" type="checkbox">
-    <label>Hear Chords Only</label>
+    <label>
+      <input class="play-chords-only" type="checkbox">
+      Hear Chords Only
+    </label>
   </div>
   <div class="bsd-control">
-    <input class="show-current-chord-fretboard-only" type="checkbox">
-    <label>See Current Chord's Fretboard Only</label>
+    <label>
+      <input class="show-current-chord-fretboard-only" type="checkbox">
+      See Current Chord's Fretboard Only
+    </label>
   </div>
 
   <div class="slider-wrap bsd-control">
@@ -1247,7 +1265,7 @@ campfire.subscribe('do-it',function(chords){
     });
     ////BSD.boards.push(extraBoard);
 
-  ['654321','6432','4321','5432','5321','6543'].forEach(function(stringSet){
+  ['654321','6432','4321','5432','5321','6543','321','432','543','654'].forEach(function(stringSet){
     var cb = jQuery('.stringset-' + stringSet);
     if (!cb.attr('checked')) { return false; }
     var activeStrings = stringSet.split('');
@@ -1286,7 +1304,7 @@ campfire.subscribe('do-it',function(chords){
 
   var bunches = chords.map(function(o){ return o.abstractNoteValues(); });
   var sequence = [];
-
+  var rejections = [];
 
   var chordIdx = 0;
 
@@ -1475,6 +1493,10 @@ campfire.subscribe('do-it',function(chords){
     var criteria = function(o){
       var decision = judge(o);
       //console.log('decision',decision);
+
+      if (chordNoteIdx == 0 && decision != 'OK') {
+        rejections.push([o,decision]);
+      }
       return  decision == 'OK';
     };
 
@@ -1511,22 +1533,40 @@ campfire.subscribe('do-it',function(chords){
         return distScore(o.chromaticValue,lastAbstractValue);
       }));
 
+      console.log('remaining choices',sorted.map(function(o){ return Note(o.chromaticValue).name(); }).join(','));
+
       console.log('sorted Scores',sorted.map(function(o){ 
-        return [o,distScore(o.chromaticValue,lastAbstractValue)]; }));
+        return [Note(o.chromaticValue).name(),distScore(o.chromaticValue,lastAbstractValue)]; 
+      }));
 
       result = sorted[0];
-      console.log('*FN* i',i,myChord.fullAbbrev(),
+      console.log('*FN* i',i,
+        myChord.fullAbbrev(),
         'chose',Note(result.noteValue).name(),
         'lastNote',lastNote.name(),
-        'result.chromaticValue',result.chromaticValue,
-        'lastAbstractValue',lastAbstractValue,
-        'distScore(result)',distScore(result.chromaticValue,lastAbstractValue)
+        'distScore()',distScore(result.chromaticValue,lastAbstractValue)
       );
+
+      rejections = rejections.select(function(rej){ //I only care about the rejections which were close..
+        if (rej[1] == "outside") { return false; }
+        var score = distScore(rej[0].chromaticValue,lastAbstractValue);
+        return score <= 2;
+      });
+
+      console.log('rejections',rejections);
+      rejections = [];
     }
     else {
       result = candidates.atRandom();
-      console.log('i',i,'chose',Note(result.noteValue).name(),'result.chromaticValue',result.chromaticValue,'lastAbstractValue',lastAbstractValue);
+      console.log('i',i,
+        myChord.fullAbbrev(),
+        'chose',Note(result.noteValue).name(),
+        'lastNote',lastNote.name(),
+        'distScore()',distScore(result.chromaticValue,lastAbstractValue)
+      );
     }
+
+
 
 
     result = JSON.parse(JSON.stringify(result));
