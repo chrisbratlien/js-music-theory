@@ -1252,6 +1252,8 @@ campfire.subscribe('do-it',function(chords){
     if (!cb.attr('checked')) { return false; }
     var activeStrings = stringSet.split('');
 
+    BSD.activeStrings = activeStrings; //FIXME, this won't work in the long run
+
 
     chords.forEach(function(chord){
 
@@ -1388,17 +1390,32 @@ campfire.subscribe('do-it',function(chords){
       drift3 = lastFretDiffs.slice(-3).sum(); //sum the latest 3
     }
 
+    function distScore(o){  
+          var min = lastAbstractValue ? Math.min(o.chromaticValue,lastAbstractValue): o.chromaticValue;
+          var max = lastAbstractValue ? Math.max(o.chromaticValue,lastAbstractValue): o.chromaticValue;
+          var diff = max - min;
+          var dist = Math.min(diff,12-diff);
+          return dist;
+    };
+
+
     var judge = function(o) {  
 
 
       if (abstractNoteValues.indexOf(o.chromaticValue) < 0) { return 'outside'; }
       if (o.fret > 13) { return 'too high'; }
+      if (BSD.activeStrings && !BSD.activeStrings.detect(function(as) { 
+        console.log('as',as,'o.string',o.string);
+        return as == o.string; 
+      })) {
+        return "not active string: " + o.string;
+      }
 
       var diff = lastValue ? o.noteValue - lastValue : 0;
       ///console.log('diff',diff);
 
-      if (diff > 0 && direction == 'down') { return 'wrong dir'; }
-      if (diff < 0 && direction == 'up') { return 'wrong dir'; }
+      if (chordNoteIdx > 0 && diff > 0 && direction == 'down') { return 'wrong dir'; }
+      if (chordNoteIdx > 0 && diff < 0 && direction == 'up') { return 'wrong dir'; }
       if (lastValue && diff == 0) { return 'no diff'; }
       if (Math.abs(diff) > 6) { return '>6'; }
 
@@ -1485,13 +1502,7 @@ campfire.subscribe('do-it',function(chords){
     var result;
     if (chordNoteIdx == 0) { //first note in new chord change... try to get nearest pitch to last note played.
 
-      var distScore = function(o){  
-          var min = lastAbstractValue ? Math.min(o.chromaticValue,lastAbstractValue): o.chromaticValue;
-          var max = lastAbstractValue ? Math.max(o.chromaticValue,lastAbstractValue): o.chromaticValue;
-          var diff = max - min;
-          var dist = Math.min(diff,12-diff);
-          return dist;
-      };
+  
       var sorted = candidates.sort(BSD.sorter(distScore));
       ///console.log('sorted Scores',sorted.map(function(o){ return [o,distScore(o)]; }));
       result = sorted[0];
