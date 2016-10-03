@@ -263,53 +263,16 @@ BSD.timeout = false;
 BSD.options = {};
 storage.getItem('options',function(o){
   BSD.options = JSON.parse(o);
-  campfire.publish('options-loaded',BSD.options);
+  campfire.publish('options-loaded',BSD.options);  //needed?
 });
 
 
+BSD.progressions = [];
+storage.getItem('progressions',function(o){
+  BSD.progressions = JSON.parse(o);
+  campfire.publish('progressions-loaded',BSD.progressions); //needed?
+});
 
-
-BSD.parseProgression = function(progString) {
-    var barStrings = progString.split(/\ +|\|/);
-    
-    barStrings = barStrings.select(function(o){ return o.length > 0; });
-    
-    
-    
-    var barIndex = 0;
-    var chordIndex = 0;
-    var flat = [];
-    
-    barStrings.each(function(barString){
-      var chordNames = barString.split(/,|\ +/);
-      var halfBar = false;
-      if (chordNames.length == 2) {
-        halfBar = true;
-      }
-      
-      
-      
-      chordNames.each(function(o){
-        var origChord = makeChord(o);        
-        var lowerChord = origChord.plus(-12);  
-        
-        flat.push({
-          barIndex: barIndex,
-          chordIndex: chordIndex,
-          chord: lowerChord,
-          halfBar: halfBar
-        });
-        chordIndex += 1;        
-      });
-      barIndex += 1;
-    });
-
-    return flat;
-    ///wait
-    var result = eachify(flat);
-    console.log('result',result);
-    return result;
-  };
 
 
 
@@ -1063,8 +1026,10 @@ campfire.subscribe('gather-inputs-and-do-it',function(){
         return false; 
     }
     var prog = BSD.parseProgression(progInput.val());
-    console.log('prog',prog);
-    var myChords = prog.map(function(o){  return o.chord; });
+    campfire.publish('do-it-prog',prog);
+    var myChords = prog.map(function(o){  
+      return o.chord; 
+    });
     campfire.publish('do-it',myChords);
 });
 
@@ -1229,6 +1194,11 @@ function tick(cursor) {
 
 
 BSD.noteResolution = 4;
+
+campfire.subscribe('do-it-prog',function(prog){
+    console.log('DO IT prog',prog);
+});
+
 
 campfire.subscribe('do-it',function(chords){
 

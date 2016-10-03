@@ -30,6 +30,97 @@ function midi2Hertz(x,detuneSemitoneOffset) {
 
 
 
+BSD.parseProgression = function(progString) {
+    var barStrings = progString.split(/\|/);
+    barStrings = barStrings.select(function(o){ return o.length > 0; });
+    
+    ///
+
+    if (barStrings.length == 1) {
+      barStrings = barStrings[0].split(/\ +/);      
+      barStrings = barStrings.select(function(o){ return o.length > 0; });
+    }
+    console.log('barStrings',barStrings);
+
+    
+    var barIndex = 0;
+    var chordIndex = 0;
+    var flat = [];
+    
+    barStrings.each(function(barString){
+      var chordNames = barString.split(/,|\ +/);
+      var halfBar = false;
+      if (chordNames.length == 2) {
+        halfBar = true;
+      }
+      
+      
+      
+      chordNames.each(function(o){
+        var origChord = makeChord(o);        
+        var lowerChord = origChord.plus(-12);  
+        
+        flat.push({
+          barIndex: barIndex,
+          chordIndex: chordIndex,
+          chord: lowerChord,
+          halfBar: halfBar
+        });
+        chordIndex += 1;        
+      });
+      barIndex += 1;
+    });
+
+    return flat;
+    ///wait
+    var result = eachify(flat);
+    console.log('result',result);
+    return result;
+  };
+
+
+
+
+
+
+  BSD.parseProgressionIntoBars = function(progString) {
+    var barStrings = progString.split('|');
+    
+    
+    barStrings = barStrings.select(function(o){ return o.trim().length > 0; });
+    ///console.log('barStrings',barStrings);
+    
+    var bars = barStrings.map(function(barString){
+      var chordNames = barString.split(/,|\ +/);
+      chordNames = chordNames.select(function(o){ return o.trim().length > 0; });
+      
+      ///console.log('chordNames',chordNames);
+      
+      var chords = chordNames.map(function(o){
+        var origChord = makeChord(o);
+        return origChord;/////.plus(-12);
+      });
+      return chords;
+    });
+    
+    ////console.log('bars???',bars);
+    
+    return bars;
+  };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 BSD.importJSON = function(url,callback,error) {
     jQuery.ajax({
       type: 'GET',
