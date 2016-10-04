@@ -187,6 +187,7 @@ get_header(); ?>
 <div class="controls">
   <button class="btn btn-info btn-pause"><i class="fa fa-pause"></i> Pause</button>
   <button class="btn btn-info btn-toggle-text noprint">Toggle Text</button>
+  <button class="btn btn-info btn-save-prog"><i class="fa fa-save"></i> Save Prog</button>
   <br />
 
 
@@ -274,7 +275,24 @@ storage.getItem('progressions',function(o){
 });
 
 campfire.subscribe('save-progressions',function(){
-  storage.setItem('progressions',JSON.stringify(BSD.progressions));
+  BSD.progressions = BSD.progressions.sort(BSD.sorter(function(o){ return o.title; }));
+  var data = JSON.stringify(BSD.progressions);
+  var backupDate = (new Date).toISOString().replace(/T.*$/,'');
+  storage.setItem('progressions',data);
+  storage.setItem('progressions-' + backupDate,data);
+});
+
+var btnSaveProg = jQuery('.btn-save-prog');
+btnSaveProg.click(function(){
+  var title = prompt('Title');
+  if (title) {
+    var spec = {
+      title: title,
+      prog: progInput.val()
+    };
+    BSD.progressions.push(spec);
+    campfire.publish('save-progressions');
+  }
 });
 
 /**
