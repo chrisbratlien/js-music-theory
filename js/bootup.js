@@ -32,12 +32,14 @@ function midi2Hertz(x,detuneSemitoneOffset) {
 
 BSD.parseProgression = function(progString) {
     var barStrings = progString.split(/\|/);
+    barStrings = barStrings.map(function(o){  return o.trim(); });
     barStrings = barStrings.select(function(o){ return o.length > 0; });
     
     ///
 
     if (barStrings.length == 1) {
       barStrings = barStrings[0].split(/\ +/);      
+      barStrings = barStrings.map(function(o){  return o.trim(); });
       barStrings = barStrings.select(function(o){ return o.length > 0; });
     }
     console.log('barStrings',barStrings);
