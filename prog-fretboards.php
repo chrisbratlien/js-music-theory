@@ -300,7 +300,7 @@ storage.getItem('progressions',function(o){
 campfire.subscribe('progressions-loaded',function(){
   BSD.songlist.clear();
   BSD.progressions.forEach(function(progression){
-    console.log('whoah',progression);
+    ///console.log('whoah',progression);
     BSD.songlist.addSong({
       title: progression.title,
       progression: progression.prog || progression.progression
@@ -358,7 +358,7 @@ campfire.subscribe('save-progressions',function(){
 
   var data = JSON.stringify(uniqueSpecs);
 
-  console.log('data!!!!!',data);
+  ////////console.log('data!!!!!',data);
   /////return false;
 
   var backupDate = (new Date).toISOString().replace(/T.*$/,'');
