@@ -317,12 +317,37 @@ campfire.subscribe('save-progressions',function(){
     return o;
   });
 
+
+  var unique = {};
+
+  function slugger(o) {
+    return btoa(JSON.stringify(o));
+  }
+  var uniqueSpecs = [];
+  BSD.progressions.forEach(function(o){
+    var hit = unique[slugger(o)];
+    if (!hit) {
+      unique[slugger(o)] = o;
+      uniqueSpecs.push(o);
+    }
+  });
+
+
+
   if (BSD.progressions.length == 0) {
     alert('something messed up');
     return false;
   }
+  if (uniqueSpecs.length == 0) {
+    alert('something messed up');
+    return false;
+  }
 
-  var data = JSON.stringify(BSD.progressions);
+  var data = JSON.stringify(uniqueSpecs);
+
+  ///console.log('data!!!!!',data);
+  ////return false;
+
   var backupDate = (new Date).toISOString().replace(/T.*$/,'');
   
 
