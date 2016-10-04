@@ -296,6 +296,18 @@ storage.getItem('progressions',function(o){
 });
 ***/
 
+
+campfire.subscribe('progressions-loaded',function(){
+  BSD.progressions.forEach(function(progression){
+    console.log('whoah',progression);
+    BSD.songlist.addSong({
+      title: progression.title,
+      progression: progression.prog || progression.progression
+    });
+  });
+});
+
+
 BSD.remoteStorage.getItem('progressions',function(o){
   var them = JSON.parse(o);
   them.forEach(function(o){
@@ -303,6 +315,7 @@ BSD.remoteStorage.getItem('progressions',function(o){
   });
   campfire.publish('progressions-loaded',BSD.progressions); //needed?
 });
+
 
 
 
@@ -840,13 +853,6 @@ btnSaveProg.click(function(){
     campfire.publish('do-it',prog);
   });
 
-  BSD.progressions.forEach(function(progression){
-    console.log('whoah',progression);
-    BSD.songlist.addSong({
-      title: progression.title,
-      progression: progression.prog || progression.progression
-    });
-  });
 
 
 
