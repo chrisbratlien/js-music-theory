@@ -862,7 +862,7 @@ btnSaveProg.click(function(){
 
     if (!BSD.options.tempo) { BSD.options.tempo = 100; }
     campfire.publish('render-tempo-control');
-  
+
 
     var cbPlayChordsOnly = jQuery('.play-chords-only');
     cbPlayChordsOnly.attr('checked',BSD.options.playChordsOnly);
@@ -1123,8 +1123,10 @@ function tick(cursor) {
 
       var thisIdx = cursor.chordIdx;
       var node = cursor;
-      while (node.chordIdx == thisIdx) {
-        node = node.next;
+      if (BSD.sequenceLength > 0) { //don't bother looking for next chord if we're just a one-chord sequence... this would cause ininite loop
+          while (node.chordIdx == thisIdx) {
+            node = node.next;
+          }
       }
       var nextChord = node.chord;
 
@@ -1431,6 +1433,18 @@ campfire.subscribe('do-it',function(prog){
         return "not active string: " + o.string;
       }
 
+
+      if (BSD.options.fretRange && o.fret > BSD.options.fretRange[1]) {
+        return 'fret > maxFret';
+      }
+      if (BSD.options.fretRange && o.fret < BSD.options.fretRange[0]) {
+        return 'fret < minFret';
+      }
+
+
+
+
+
       var diff = lastValue ? o.noteValue - lastValue : 0;
       ///console.log('diff',diff);
 
@@ -1469,12 +1483,6 @@ campfire.subscribe('do-it',function(prog){
       ///if (avgStringDiff > 2) { return 'avgStringDiff>2'; }
 
 
-      if (BSD.options.fretRange && o.fret > BSD.options.fretRange[1]) {
-        return 'fret > maxFret';
-      }
-      if (BSD.options.fretRange && o.fret < BSD.options.fretRange[0]) {
-        return 'fret < minFret';
-      }
 
       /**
       console.log(
@@ -1513,7 +1521,7 @@ campfire.subscribe('do-it',function(prog){
     }
     if (candidates.length == 0) {
         console.log('look again');
-      candidates = BSD.guitarData.select(criteria);
+        candidates = BSD.guitarData.select(criteria);
     }
 
     if (candidates.length == 0) {
