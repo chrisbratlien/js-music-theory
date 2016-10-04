@@ -334,7 +334,7 @@ campfire.subscribe('save-progressions',function(){
   var unique = {};
 
   function slugger(o) {
-    return btoa(JSON.stringify(o));
+    return btoa(JSON.stringify(o.progression + o.title));
   }
   var uniqueSpecs = [];
   BSD.progressions.forEach(function(o){
