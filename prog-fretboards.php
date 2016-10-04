@@ -298,6 +298,7 @@ storage.getItem('progressions',function(o){
 
 
 campfire.subscribe('progressions-loaded',function(){
+  songlist.clear();
   BSD.progressions.forEach(function(progression){
     console.log('whoah',progression);
     BSD.songlist.addSong({

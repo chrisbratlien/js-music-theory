@@ -6,6 +6,12 @@ BSD.Widgets.SongList = function(spec) {
   songs = [];
   self.songs = songs;
   
+  self.clear = function() {
+    songs = [];
+    self.songs = songs;
+    self.refresh();
+  };
+
   self.addSong = function(o) {
     songs.push(o);
     self.refresh();
