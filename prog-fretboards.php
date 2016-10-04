@@ -273,7 +273,15 @@ storage.getItem('progressions',function(o){
   campfire.publish('progressions-loaded',BSD.progressions); //needed?
 });
 
+campfire.subscribe('save-progressions',function(){
+  storage.setItem('progressions',JSON.stringify(BSD.progressions));
+});
 
+/**
+
+"[{"title":"Blue Bossa","prog":"C-7 C-7 F-7 F-7 D-7b5 G7 C-7 C-7 Eb-7 Ab7 DbM7 DbM7 D-7b5 G7 C-7 G7"},{"prog":"C-7|C-7|F-7|F-7|D-7b5| G7 |C-7 |C-7 |Eb-7 |Ab7 |DbM7 |DbM7 |D-7b5 |G7 |C-7| D-7b5 G7","title":"Blue Bossa (again)"},{"prog":"F7|Bb7|F7|F7|Bb7|Bb7|F7|F7|G-7|C7|F7|C7","title":"F blues #1"}]"
+
+**/
 
 
 
