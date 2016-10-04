@@ -345,7 +345,7 @@ campfire.subscribe('save-progressions',function(){
   var data = JSON.stringify(uniqueSpecs);
 
   console.log('data!!!!!',data);
-  return false;
+  /////return false;
 
   var backupDate = (new Date).toISOString().replace(/T.*$/,'');
   
