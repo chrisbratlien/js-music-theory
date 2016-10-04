@@ -268,6 +268,9 @@ storage.getItem('options',function(o){
 });
 
 
+
+
+
 BSD.progressions = [];
 storage.getItem('progressions',function(o){
   BSD.progressions = JSON.parse(o);
@@ -778,18 +781,18 @@ btnSaveProg.click(function(){
 
 
     campfire.subscribe('render-tempo-control',function(){
-      jQuery( "#tempo-amount" ).text( BSD.tempo );
+      jQuery( "#tempo-amount" ).text( BSD.options.tempo );
       jQuery( "#tempo-input" ).slider({
         orientation: "horizontal",
         range: "min",
         min: 30,
         max: 250,
         step: 1,
-        value: BSD.tempo,
+        value: BSD.options.tempo,
         slide: function( event, ui ) {
           var n = ui.value;
-          BSD.tempo = n;
-          storage.setItem('tempo',BSD.tempo);
+          BSD.options.tempo = n;
+          storage.setItem('options',JSON.stringify(BSD.options));
           jQuery( "#tempo-amount" ).text( n );
         }
       });
@@ -847,15 +850,6 @@ btnSaveProg.click(function(){
     ddNoteResolution.find('option[value="' + BSD.noteResolution + '"]').attr('selected',true);
 
 
-    BSD.tempo = 100;
-    storage.getItem('tempo',function(o){
-      BSD.tempo = parseInt(o,0);
-      campfire.publish('render-tempo-control');
-    },
-    function(o){
-      campfire.publish('render-tempo-control');      
-    });
-
 
     BSD.progCycles = 1;
     storage.getItem('prog-cycles',function(o){
@@ -866,15 +860,15 @@ btnSaveProg.click(function(){
     });
 
 
-    BSD.playChordsOnly = false;
-    storage.getItem('playChordsOnly',function(o){
-      BSD.playChordsOnly = JSON.parse(o);
-    });
+    if (!BSD.options.tempo) { BSD.options.tempo = 100; }
+    campfire.publish('render-tempo-control');
+  
+
     var cbPlayChordsOnly = jQuery('.play-chords-only');
-    cbPlayChordsOnly.attr('checked',BSD.playChordsOnly);
+    cbPlayChordsOnly.attr('checked',BSD.options.playChordsOnly);
     cbPlayChordsOnly.change(function(){
-      BSD.playChordsOnly = this.checked;
-      storage.setItem('playChordsOnly',BSD.playChordsOnly);
+      BSD.options.playChordsOnly = this.checked;
+      storage.setItem('options',JSON.stringify(BSD.options));
     });
 
 
@@ -1105,13 +1099,13 @@ function tick(cursor) {
       extraBoard.publish('feature-fret',cursor);
 
 
-      if (!BSD.playChordsOnly) {
+      if (!BSD.options.playChordsOnly) {
         campfire.publish('play-note', { note: Note(cursor.noteValue), duration: 1000 });
       }
 
 
 
-      var even4DelayMS = BSD.tempoToMillis(BSD.tempo);
+      var even4DelayMS = BSD.tempoToMillis(BSD.options.tempo);
       var even1DelayMS = even4DelayMS * 4; //whole notes
       var even2DelayMS = even4DelayMS * 2; //half notes
       var even8DelayMS = even4DelayMS /2; //eighth notes

@@ -31,11 +31,10 @@ function midi2Hertz(x,detuneSemitoneOffset) {
 
 
 BSD.parseProgression = function(progString) {
+    var lastChordName = false;
     var barStrings = progString.split(/\|/);
     barStrings = barStrings.map(function(o){  return o.trim(); });
     barStrings = barStrings.select(function(o){ return o.length > 0; });
-    
-    ///
 
     if (barStrings.length == 1) {
       barStrings = barStrings[0].split(/\ +/);      
@@ -43,7 +42,6 @@ BSD.parseProgression = function(progString) {
       barStrings = barStrings.select(function(o){ return o.length > 0; });
     }
     console.log('barStrings',barStrings);
-
     
     var barIndex = 0;
     var chordIndex = 0;
@@ -57,9 +55,11 @@ BSD.parseProgression = function(progString) {
       }
       
       
-      
-      chordNames.each(function(o){
-        var origChord = makeChord(o);        
+      chordNames.each(function(chordName){
+        if (chordName == '%') {
+          chordName = lastChordName;
+        }
+        var origChord = makeChord(chordName);        
         var lowerChord = origChord.plus(-12);  
         
         flat.push({
@@ -69,15 +69,12 @@ BSD.parseProgression = function(progString) {
           halfBar: halfBar
         });
         chordIndex += 1;        
+        lastChordName = chordName;
       });
       barIndex += 1;
     });
 
     return flat;
-    ///wait
-    var result = eachify(flat);
-    console.log('result',result);
-    return result;
   };
 
 

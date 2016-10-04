@@ -235,8 +235,10 @@ JSMT.chordMap = {
 
 
     'M7': { name: 'major7', intervals: [0,4,7,11] }, //verified
-    'maj7': { name: 'major7', intervals: [0,4,7,11] }, //verified
+    'Major7': { name: 'major7', intervals: [0,4,7,11] }, //verified
     'Maj7': { name: 'major7', intervals: [0,4,7,11] }, //verified
+    'major7': { name: 'major7', intervals: [0,4,7,11] }, //verified
+    'maj7': { name: 'major7', intervals: [0,4,7,11] }, //verified
 
 
 
@@ -252,6 +254,8 @@ JSMT.chordMap = {
     'dom7':   { name: 'dominant7', intervals: [0,4,7,10] }, //verified
 
 
+    '7#11':   { name: 'dominant7Sharp11', intervals: [0,4,7,10,18] },
+
     '7b5':   { name: 'dominant7Flat5', intervals: [0,4,6,10] }, //verified
     '7-5':   { name: 'dominant7Flat5', intervals: [0,4,6,10] }, //verified
 
@@ -263,10 +267,16 @@ JSMT.chordMap = {
 
     'm7': { name: 'minor7', intervals: [0,3,7,10] }, //verified
     '-7': { name: 'minor7', intervals: [0,3,7,10] }, //verified
+    'min7': { name: 'minor7', intervals: [0,3,7,10] }, //verified
+    'minor7': { name: 'minor7', intervals: [0,3,7,10] }, //verified
 
     'm7b5':  { name: 'minor7Flat5', intervals: [0,3,6,10] }, //verified
+    'min7b5':  { name: 'minor7Flat5', intervals: [0,3,6,10] }, //verified
     '-7b5':  { name: 'minor7Flat5', intervals: [0,3,6,10] }, //verified
     '-7-5':  { name: 'minor7Flat5', intervals: [0,3,6,10] }, //verified
+    'ø':  { name: 'minor7Flat5', intervals: [0,3,6,10] }, //verified
+    'Ø':  { name: 'minor7Flat5', intervals: [0,3,6,10] }, //verified
+
 
 
     '-7+5':  { name: 'minor7Sharp5', intervals: [0,3,8,10] }, //verified
