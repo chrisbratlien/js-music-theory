@@ -285,6 +285,7 @@ storage.getItem('options',function(o){
 
 BSD.progressions = [];
 
+/**
 storage.getItem('progressions',function(o){
   ////BSD.progressions = JSON.parse(o);
   var them = JSON.parse(o);
@@ -293,6 +294,7 @@ storage.getItem('progressions',function(o){
   });
   campfire.publish('progressions-loaded',BSD.progressions); //needed?
 });
+***/
 
 BSD.remoteStorage.getItem('progressions',function(o){
   var them = JSON.parse(o);
@@ -301,9 +303,6 @@ BSD.remoteStorage.getItem('progressions',function(o){
   });
   campfire.publish('progressions-loaded',BSD.progressions); //needed?
 });
-
-
-
 
 
 
