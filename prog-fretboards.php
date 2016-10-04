@@ -1123,7 +1123,7 @@ function tick(cursor) {
 
       var thisIdx = cursor.chordIdx;
       var node = cursor;
-      if (BSD.sequenceLength > 0) { //don't bother looking for next chord if we're just a one-chord sequence... this would cause ininite loop
+      if (BSD.sequence.length > 0) { //don't bother looking for next chord if we're just a one-chord sequence... this would cause ininite loop
           while (node.chordIdx == thisIdx) {
             node = node.next;
           }
@@ -1294,18 +1294,6 @@ campfire.subscribe('do-it',function(prog){
       BSD.boards.push(board);
     });
   });
-
-
-
-  /***
-  var sequenceLength = chords.length * BSD.noteResolution * BSD.progCycles;///[1,2,4,8].atRandom();
-  ///var sequenceLength = chords.length * BSD.noteResolution * [8].atRandom(); //debug
-
-
-  for (var i = 0; i < sequenceLength; i += 1) {
-    range.push(i);
-  }
-  ****/
 
 
   var errors = 0;
