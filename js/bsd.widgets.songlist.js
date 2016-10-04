@@ -16,7 +16,7 @@ BSD.Widgets.SongList = function(spec) {
 
     var sorted = songs.sort(BSD.sorter(byTitle));
 
-    songs.each(function(song){
+    songs.forEach(function(song,i){
       var li = DOM.li(song.title);
       li.click(function(){
         ul.find('.selected').removeClass('selected');
@@ -33,7 +33,6 @@ BSD.Widgets.SongList = function(spec) {
 
   return self;
 };
-
 
 BSD.songlist = BSD.Widgets.SongList({});
 

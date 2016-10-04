@@ -480,6 +480,7 @@ add_action('wp_footer',function() {
       BSD.chunker = BSD.Widgets.GuitarPlayer({
       gossip: campfire,
       context: context,
+      destination: context.destination,      
       polyphonyCount: 32,//polyphonyCount,
       range: [-300,80]
     });
@@ -487,6 +488,7 @@ add_action('wp_footer',function() {
     BSD.leader = BSD.Widgets.GuitarPlayer({
       gossip: campfire,
       context: context,
+      destination: context.destination,      
       polyphonyCount: 32,//polyphonyCount,
       range: [-300,80]
     });

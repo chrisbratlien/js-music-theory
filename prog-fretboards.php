@@ -110,6 +110,22 @@ add_action('wp_head',function(){
   }
   
 
+  ul.song-list { 
+    list-style-type: none; 
+    width: 50%; 
+  }
+  ul.song-list li { 
+    cursor: pointer; 
+    font-size: 1.2rem; 
+    padding: 3px; 
+  }
+  ul.song-list li.selected{ 
+    background: #409; color: white; 
+  }
+
+
+
+
 </style>
 
 <?php
@@ -239,22 +255,18 @@ get_header(); ?>
 </div>
 <div class="venue-footer">
 </div>
-
+<h3>Songs</h3>
+<ul class="song-list-wrap">
+</ul>
 
 <?php
 
 add_action('wp_footer',function(){
 ?>
-    <!--
-    <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/array.js"></script>
-    <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/dom.js"></script>
-    <script src="http://cdn.dev.bratliensoftware.com/javascript/color.js"></script>
-    
-    <script src="http://lucid.bratliensoftware.com/js-music-theory/javascript/js-music-theory.js"></script>
-    -->
     
     <script src="js/draggy.js"></script>
     <script src="js/sticky-note.js"></script>
+    <script src="js/bsd.widgets.songlist.js"></script>
     
     <script type="text/javascript">
 
@@ -754,6 +766,29 @@ btnSaveProg.click(function(){
     var waiter = BSD.Widgets.Procrastinator({ timeout: 250 });
 
 
+  var songlistWrap = jQuery('.song-list-wrap');
+  BSD.songlist.renderOn(songlistWrap);
+  BSD.songlist.subscribe('song-selected',function(song) {
+    BSD.currentSong = song;
+    console.log('Z>>EEEEE>>>song',song);
+    /////campfire.publish('lets-do-this',song.progression);
+    progInput.val(song.progression);
+    BSD.options.progression = song.progression;
+    storage.setItem('options',JSON.stringify(BSD.options));
+    var prog = BSD.parseProgression(song.progression);
+    campfire.publish('do-it',prog);
+  });
+
+  BSD.progressions.forEach(function(progression){
+    console.log('whoah',progression);
+    BSD.songlist.addSong({
+      title: progression.title,
+      progression: progression.prog
+    });
+  });
+
+
+
     BSD.volume = 0;
     storage.getItem('volume',function(o){
         BSD.volume = parseFloat(o);
@@ -1044,7 +1079,7 @@ campfire.subscribe('gather-inputs-and-do-it',function(){
         return false; 
     }
     var prog = BSD.parseProgression(progInput.val());
-    campfire.publish('do-it-prog',prog);
+    ///////campfire.publish('do-it-prog',prog);
     campfire.publish('do-it',prog);    
 });
 
@@ -1235,12 +1270,6 @@ BSD.noteResolution = 4;
   var lastNote = Note(60);
   var myNote = false;
 
-
-campfire.subscribe('do-it-prog',function(prog){
-    console.log('DO IT prog',prog);
-
-
-});
 
 
 campfire.subscribe('do-it',function(prog){
