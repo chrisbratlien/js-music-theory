@@ -856,16 +856,6 @@ btnSaveProg.click(function(){
       campfire.publish('render-tempo-control');      
     });
 
-    BSD.scrollToBoard = false;
-    storage.getItem('scrollToBoard',function(o){
-      BSD.scrollToBoard = JSON.parse(o);
-    });
-    var cbScrollToBoard = jQuery('.scroll-to-board');
-    cbScrollToBoard.attr('checked',BSD.scrollToBoard);
-    cbScrollToBoard.change(function(){
-      BSD.scrollToBoard = this.checked;
-      storage.setItem('scrollToBoard',BSD.scrollToBoard);
-    });
 
     BSD.progCycles = 1;
     storage.getItem('prog-cycles',function(o){
@@ -901,6 +891,14 @@ btnSaveProg.click(function(){
     cbShowCurrentChordFretboadOnly.attr('checked',BSD.options.showCurrentChordFretboadOnly);
     cbShowCurrentChordFretboadOnly.change(function(){
       BSD.options.showCurrentChordFretboadOnly = this.checked;
+      storage.setItem('options',JSON.stringify(BSD.options));
+    });
+
+
+    var cbScrollToBoard = jQuery('.scroll-to-board');
+    cbScrollToBoard.attr('checked',BSD.options.scrollToBoard);
+    cbScrollToBoard.change(function(){
+      BSD.options.scrollToBoard = this.checked;
       storage.setItem('options',JSON.stringify(BSD.options));
     });
 
@@ -1095,7 +1093,7 @@ function tick(cursor) {
 
 
 
-      if (BSD.scrollToBoard && cursor.chordNoteIdx == 0) {
+      if (BSD.options.scrollToBoard && cursor.chordNoteIdx == 0) {
         cursor.board.publish('get-wrap',function(wrap){
           jQuery('html, body').animate({ 
             scrollTop: wrap.find('.chord-name').offset().top - headerHeight 
