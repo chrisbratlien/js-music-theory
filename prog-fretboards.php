@@ -279,22 +279,59 @@ storage.getItem('options',function(o){
   campfire.publish('options-loaded',BSD.options);  //needed?
 });
 
-
+///BSD.remoteStorage.getItem('foo',function(){ alert('foo'); });
 
 
 
 BSD.progressions = [];
+
 storage.getItem('progressions',function(o){
-  BSD.progressions = JSON.parse(o);
+  ////BSD.progressions = JSON.parse(o);
+  var them = JSON.parse(o);
+  them.forEach(function(o){
+    BSD.progressions.push(o);
+  });
   campfire.publish('progressions-loaded',BSD.progressions); //needed?
 });
 
+BSD.remoteStorage.getItem('progressions',function(o){
+  var them = JSON.parse(o);
+  them.forEach(function(o){
+    BSD.progressions.push(o);
+  });
+  campfire.publish('progressions-loaded',BSD.progressions); //needed?
+});
+
+
+
+
+
+
 campfire.subscribe('save-progressions',function(){
   BSD.progressions = BSD.progressions.sort(BSD.sorter(function(o){ return o.title; }));
+  BSD.progressions = BSD.progressions.map(function(o){
+    if (!o.progression && o.prog) {
+      o.progression = o.prog;
+      delete o.prog;
+    }
+    return o;
+  });
+
+  if (BSD.progressions.length == 0) {
+    alert('something messed up');
+    return false;
+  }
+
   var data = JSON.stringify(BSD.progressions);
   var backupDate = (new Date).toISOString().replace(/T.*$/,'');
+  
+
   storage.setItem('progressions',data);
   storage.setItem('progressions-' + backupDate,data);
+
+  BSD.remoteStorage.setItem('progressions',data);
+  BSD.remoteStorage.setItem('progressions-' + backupDate,data);
+
 });
 
 var btnSaveProg = jQuery('.btn-save-prog');
@@ -303,7 +340,7 @@ btnSaveProg.click(function(){
   if (title) {
     var spec = {
       title: title,
-      prog: progInput.val()
+      progression: progInput.val()
     };
     BSD.progressions.push(spec);
     campfire.publish('save-progressions');
@@ -783,7 +820,7 @@ btnSaveProg.click(function(){
     console.log('whoah',progression);
     BSD.songlist.addSong({
       title: progression.title,
-      progression: progression.prog
+      progression: progression.prog || progression.progression
     });
   });
 

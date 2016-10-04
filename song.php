@@ -225,10 +225,7 @@ add_action('wp_footer',function() {
 <script src="javascript/prob.js"></script>
 <script type="text/javascript">
 
-  function getChordImages(cb) {
-    jQuery.ajax({ type: 'POST', url: 'ws.php', data: { action: 'chord_images' }, 
-      success: function(r) { cb( eval( '(' + r + ')' )) } });
-  }
+
   function midi2Hertz(x) {
     return Math.pow(2,(x-69)/12)*440;
   }

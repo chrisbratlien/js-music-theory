@@ -37,6 +37,7 @@
   <!-- <script src="lib/Kali/build/kali.js"></script>-->
   
   <script src="js/bsd.storage.js"></script>
+  <script src="js/bsd.remotestorage.js"></script>
   <script src="js/bsd.widgets.procrastinator.js"></script>
   <script src="js/bootup.js?v=22"></script>
 

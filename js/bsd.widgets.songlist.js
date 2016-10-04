@@ -4,6 +4,7 @@ BSD.Widgets.SongList = function(spec) {
   var ul = DOM.ul().addClass('song-list');
 
   songs = [];
+  self.songs = songs;
   
   self.addSong = function(o) {
     songs.push(o);
