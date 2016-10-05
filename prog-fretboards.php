@@ -871,14 +871,24 @@ btnSaveProg.click(function(){
     common.connect(dry);
 
 
-    BSD.audioPlayer = 
-    BSD.Widgets.GuitarPlayer({
+    BSD.audioPlayer = BSD.Widgets.GuitarPlayer({
     //BSD.Widgets.SimplePlayer({
       context: context,
       destination: common,
       polyphonyCount: 48,//polyphonyCount,
       range: [40,128]
     });
+
+
+    var bassist = BSD.Widgets.GuitarPlayer({
+    //BSD.Widgets.SimplePlayer({
+      context: context,
+      destination: common,
+      polyphonyCount: 48,//polyphonyCount,
+      range: [28,100]
+    });
+
+
 
    
     var waiter = BSD.Widgets.Procrastinator({ timeout: 250 });
@@ -903,7 +913,10 @@ btnSaveProg.click(function(){
     BSD.volume = 0;
     storage.getItem('volume',function(o){
         BSD.volume = parseFloat(o);
-        waiter.beg(BSD.audioPlayer,'set-master-volume',BSD.volume);
+        ///waiter.beg(BSD.audioPlayer,'set-master-volume',BSD.volume);
+        ////waiter.beg(bassist,'set-master-volume',BSD.volume);
+        waiter.beg(campfire,'set-master-volume',BSD.volume);
+
         jQuery( "#volume-amount" ).text( BSD.volume );
     });
 
@@ -918,7 +931,8 @@ btnSaveProg.click(function(){
       value: BSD.volume,
       slide: function( event, ui ) {
         var newVolume = ui.value;
-        waiter.beg(BSD.audioPlayer,'set-master-volume',newVolume);
+        BSD.volume = newVolume;
+        waiter.beg(campfire,'set-master-volume',BSD.volume);
         storage.setItem('volume',newVolume);  
         ////waiter.beg(BSD.chunker,'set-master-volume',ui.value);
         jQuery( "#volume-amount" ).text( newVolume );
@@ -1051,6 +1065,15 @@ btnSaveProg.click(function(){
       });
     });
 
+
+    campfire.subscribe('set-master-volume',function(o){
+      BSD.audioPlayer.publish('set-master-volume',BSD.volume);
+      bassist.publish('set-master-volume',BSD.volume);
+    });
+
+
+
+
   campfire.subscribe('play-note',function(payload) {
     BSD.audioPlayer.playNote(payload.note,payload.duration);    
   });    
@@ -1063,8 +1086,13 @@ btnSaveProg.click(function(){
     
     campfire.publish('play-chord',{ chord: chord, duration: 1000 });
   });    
+
+
+
   campfire.subscribe('play-chord',function(o) {
-    BSD.audioPlayer.playChord(o.chord,o.duration);    
+    var rootlessIntervals = o.chord.spec.intervals.select(function(n){ return n >0; });
+    var rootless = Chord({ rootNote: o.chord.rootNote, intervals: rootlessIntervals });
+    BSD.audioPlayer.playChord(rootless,o.duration);    
   });
     
     
@@ -1214,6 +1242,7 @@ function tick(cursor) {
 
       if (cursor.chordNoteIdx == 0) {
 
+        bassist.playNote(cursor.chord.rootNote.plus(-12),1000);
 
         BSD.boards.forEach(function(board){
           board.publish('get-wrap',function(wrap){
