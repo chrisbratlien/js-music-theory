@@ -143,6 +143,14 @@ add_action('wp_head',function(){
     margin-top: 10px;
   }
 
+  .bar-32, .bar-33, .bar-34, .bar-35 {
+    margin-top: 10px;
+  }
+
+  .bar-48, .bar-49, .bar-50, .bar-51 {
+    margin-top: 10px;
+  }
+
   .song-form-position .active {
     background: yellow;
     color: black;
