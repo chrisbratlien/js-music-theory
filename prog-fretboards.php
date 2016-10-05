@@ -111,19 +111,42 @@ add_action('wp_head',function(){
   }
   
 
-  ul.song-list { 
+  .song-list { 
     list-style-type: none; 
     width: 50%; 
   }
-  ul.song-list li { 
+  .song-list li { 
     cursor: pointer; 
     font-size: 1.2rem; 
     padding: 3px; 
   }
-  ul.song-list li.selected{ 
-    background: #409; color: white; 
+  .song-list .selected{ 
+    background: #409; 
+    color: white; 
   }
 
+
+  .song-form-position-wrap { width: 10%; }
+  .song-form-position {
+    width: 100%;
+  }
+  .song-form-position .bar { 
+    background: #d5cbe2;
+    color: white;
+    float: left;
+    padding: 2px;
+    text-align: center;
+    width: 25%; 
+  }
+
+  .bar-16, .bar-17, .bar-18, .bar-19 {
+    margin-top: 10px;
+  }
+
+  .song-form-position .active {
+    background: yellow;
+    color: black;
+  }
 
 
 
@@ -253,6 +276,10 @@ get_header(); ?>
   <br />
 </div>
 <div class="venue">
+</div>
+<div class="song-form-position-wrap">
+  <ul class="song-form-position">
+  </ul>
 </div>
 <div class="venue-footer">
 </div>
@@ -1169,16 +1196,9 @@ var extraBoard;
 var headerHeight = jQuery('header').height();
 
 function tick(cursor) {
-    console.log('tick',
-      cursor.idx,
-      cursor.chord.fullAbbrev(),
-      Note(cursor.noteValue).name(),
-      'ideal/actual/avg',
-      cursor.idealFret,
-      cursor.fret,
-      cursor.avgFret
-      //cursor      
-    );
+
+    campfire.publish('tick',cursor);
+
       BSD.boards.forEach(function(board){
         board.publish('unfeature-frets');
       });
@@ -1350,6 +1370,7 @@ BSD.noteResolution = 4;
 
   var lastNote = Note(60);
   var myNote = false;
+  var songFormPosition = jQuery('.song-form-position');
 
 
 
@@ -1412,6 +1433,7 @@ campfire.subscribe('do-it',function(prog){
 
   var errors = 0;
   var sequence = [];
+
 
   prog.forEach(function(chordItem,chordItemIdx) {
     if (errors) { return false; }
@@ -1680,6 +1702,7 @@ campfire.subscribe('do-it',function(prog){
 
 
     result = JSON.parse(JSON.stringify(result));
+    result.barIdx = barIdx;
     result.totQuarterNoteBeats = totQuarterNoteBeats;
     result.totNoteEvents = totNoteEvents;
 
@@ -1740,6 +1763,15 @@ campfire.subscribe('do-it',function(prog){
   //////sequence.forEach(function(o){})
   BSD.timeout = false;
   
+  BSD.totalBars = BSD.sequence[BSD.sequence.length-1].barIdx + 1;
+  
+  songFormPosition.empty();
+  for (var i = 0; i < BSD.totalBars; i += 1) {
+    var div = DOM.div(i+1).addClass('bar bar-' + i);
+    songFormPosition.append(div);
+  }
+
+
   tick(sequence[0]);
   ///console.log('bunches',bunches);
 });
@@ -1792,6 +1824,35 @@ campfire.subscribe('test-periodic',function(o){
   }
 
 });
+
+
+  campfire.subscribe('song-form-position',function(barIdx){
+    songFormPosition.find('.active').removeClass('active');
+    songFormPosition.find('.bar-' + barIdx).addClass('active');
+  });
+
+  var saveBarIdx = false;
+  campfire.subscribe('tick',function(cursor){
+    if (cursor.barIdx != saveBarIdx) {
+      saveBarIdx = cursor.barIdx;
+      campfire.publish('song-form-position',cursor.barIdx);
+    }
+
+    /**
+    console.log('SUB tick',
+      cursor.idx,
+      cursor.chord.fullAbbrev(),
+      Note(cursor.noteValue).name(),
+      'ideal/actual/avg',
+      cursor.idealFret,
+      cursor.fret,
+      cursor.avgFret,
+      cursor      
+    );
+    **/
+  });
+
+
       
     </script>
 <?php
