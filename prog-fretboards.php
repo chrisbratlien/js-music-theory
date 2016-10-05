@@ -28,7 +28,8 @@ add_action('wp_head',function(){
   .inner .spacer { clear: both; }
 
   .bsd-control { margin-top: 1rem; }
-  .hidden { display: none; }
+  .hidden { display: none; } /* consider refactoring this name */
+  .invisible { visibility: hidden; }
 
   table { 
     border-bottom: 1px solid rgba(0,0,0,0.1); 
@@ -482,6 +483,8 @@ btnSaveProg.click(function(){
 
       BSD.Widgets.Fretboard = function(spec) {
 
+        var cells = [];
+
         var self = BSD.PubSub({});
         self.spec = spec;
         
@@ -533,8 +536,7 @@ btnSaveProg.click(function(){
                   cell.css('background-color',null);
                   cell.attr('style',null);
                   //cell.removeClass('color-white');
-                }              
-
+                }
 
 
         };
@@ -624,12 +626,18 @@ btnSaveProg.click(function(){
                 }
                 (hit) ?  cell.addClass('featured was-once-featured') : cell.removeClass('featured');
               });
+
+              self.subscribe('visible-fret-range',function(fretRange) {
+                var visible = (fretData.fret >= fretRange[0] && fretData.fret <= fretRange[1]);
+                visible ? cell.removeClass('invisible') : cell.addClass('invisible');
+              });
               
               cell.hover(function(){
                 self.publish('note-hover',note);
               });
           
               row.append(cell);
+              cells.push(cell);
               //console.log(note.name());
             });
             table.append(row);
@@ -939,6 +947,7 @@ btnSaveProg.click(function(){
           jQuery( '.fret-range-amount' ).text( 
             n.toString().replace(/,/,'-')
           );
+          campfire.publish('fret-range-updated',BSD.options.fretRange);
         }
       });
     });
@@ -1001,7 +1010,11 @@ btnSaveProg.click(function(){
 
 
 
-
+    campfire.subscribe('fret-range-updated',function(o) {
+      BSD.boards.forEach(function(board){
+        board.publish('visible-fret-range',o);
+      });
+    });
 
   campfire.subscribe('play-note',function(payload) {
     BSD.audioPlayer.playNote(payload.note,payload.duration);    
@@ -1342,6 +1355,7 @@ BSD.noteResolution = 4;
 
 campfire.subscribe('do-it',function(prog){
 
+
   if (extraBoard) {
     extraBoard.close();
     extraBoard = null;
@@ -1391,6 +1405,9 @@ campfire.subscribe('do-it',function(prog){
       BSD.boards.push(board);
     });
   });
+
+  campfire.publish('fret-range-updated',BSD.options.fretRange); //this affects boards..
+
 
 
   var errors = 0;
