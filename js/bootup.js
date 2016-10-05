@@ -41,7 +41,7 @@ BSD.parseProgression = function(progString) {
       barStrings = barStrings.map(function(o){  return o.trim(); });
       barStrings = barStrings.select(function(o){ return o.length > 0; });
     }
-    console.log('barStrings',barStrings);
+    //console.log('barStrings',barStrings);
     
     var barIndex = 0;
     var chordIndex = 0;

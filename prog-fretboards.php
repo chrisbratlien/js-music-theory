@@ -1553,9 +1553,7 @@ campfire.subscribe('do-it',function(prog){
     };
 
 
-    var judge = function(o) {  
-
-
+    var outsideJudge = function(o) {
       if (abstractNoteValues.indexOf(o.chromaticValue) < 0) { return 'outside'; }
       if (o.fret > 13) { return 'too high'; }
       if (BSD.activeStrings && !BSD.activeStrings.detect(function(as) { 
@@ -1572,24 +1570,47 @@ campfire.subscribe('do-it',function(prog){
       if (BSD.options.fretRange && o.fret < BSD.options.fretRange[0]) {
         return 'fret < minFret';
       }
+      return 'OK';
+    };
 
+    var judge = function(o) {  
+
+      /*******
+      if (abstractNoteValues.indexOf(o.chromaticValue) < 0) { return 'outside'; }
+      if (o.fret > 13) { return 'too high'; }
+      if (BSD.activeStrings && !BSD.activeStrings.detect(function(as) { 
+        ///console.log('as',as,'o.string',o.string);
+        return as == o.string; 
+      })) {
+        return "not active string: " + o.string;
+      }
+
+
+      if (BSD.options.fretRange && o.fret > BSD.options.fretRange[1]) {
+        return 'fret > maxFret';
+      }
+      if (BSD.options.fretRange && o.fret < BSD.options.fretRange[0]) {
+        return 'fret < minFret';
+      }
+      *****/
 
 
 
 
       var diff = lastValue ? o.noteValue - lastValue : 0;
-      ///console.log('diff',diff);
+      if (Math.abs(diff) > 6) { return 'diff>6:' + diff; }
+
+      var idealFretDiff = Math.abs(o.fret - idealFret);
+      if (idealFretDiff > 4) { return 'idealFretDiff>4'; }      
+
+
+
 
       if (chordNoteIdx > 0 && diff > 0 && direction == 'down') { return 'wrong dir'; }
       if (chordNoteIdx > 0 && diff < 0 && direction == 'up') { return 'wrong dir'; }
       if (lastValue && diff == 0) { return 'no diff'; }
-      if (Math.abs(diff) > 6) { return '>6'; }
 
 
-      var idealFretDiff = Math.abs(o.fret - idealFret);
-      /////console.log('o.fret',o.fret,'idealFret',idealFret,'idealFretDiff',idealFretDiff);
-      //if (idealFretDiff > 6) { return 'idealFretDiff>6'; }
-      if (idealFretDiff > 4) { return 'idealFretDiff>4'; }      
 
 
 
@@ -1629,13 +1650,16 @@ campfire.subscribe('do-it',function(prog){
 
 
     var criteria = function(o){
-      var decision = judge(o);
-      //console.log('decision',decision);
+      var outsideDecision = outsideJudge(o);
+      if (outsideDecision !== 'OK') { return false; }
 
-      if (chordNoteIdx == 0 && decision != 'OK') {
+      //console.log('decision',decision);
+      var decision = judge(o);
+
+      if (decision != 'OK') { //chordNoteIdx == 0 && 
         rejections.push([o,decision]);
       }
-      return  decision == 'OK';
+      return  outsideDecision == 'OK' && decision == 'OK';
     };
 
     candidates = candidates.select(criteria);
