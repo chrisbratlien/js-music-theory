@@ -242,6 +242,13 @@ JSMT.chordMap = {
 
 
 
+    'M7#5': { name: 'major7Sharp5', intervals: [0,4,8,11] }, //verified
+    'Major7#5': { name: 'major7Sharp5', intervals: [0,4,8,11] }, //verified
+    'Maj7#5': { name: 'major7Sharp5', intervals: [0,4,8,11] }, //verified
+    'major7#5': { name: 'major7Sharp5', intervals: [0,4,8,11] }, //verified
+    'maj7#5': { name: 'major7Sharp5', intervals: [0,4,8,11] }, //verified
+
+
 
 
     'mM7': { name: 'minorMajor7', intervals: [0,3,7,11] }, //verified
