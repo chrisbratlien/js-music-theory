@@ -400,6 +400,7 @@ add_action('wp_footer',function(){
     BSD.audioPlayer = BSD.Widgets.GuitarPlayer({
       ////gossip: campfire,
       context: context,
+      destination: context.destination,
       ////name: 'Piano',//chosen, //'Piano',
       polyphonyCount: 48,//polyphonyCount,
       range: [-300,128]

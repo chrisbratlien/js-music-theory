@@ -840,17 +840,17 @@ var RootNoteWithIntervals = function(spec) {
   
   self.hasDominantSeventhInterval = function() {
     var hit = self.intervals().detect(function(i) { return i == 10; });  
-    return (hit != false);
+    return hit !== false;
   };
 
   self.hasMinorThirdInterval = function() {
     var hit = self.intervals().detect(function(i) { return i == 3; });  
-    return (hit != false);
+    return hit !== false;
   };
 
   self.hasMajorThirdInterval = function() {
     var hit = self.intervals().detect(function(i) { return i == 4; });  
-    return (hit != false);
+    return hit !== false;
   };
 
 
@@ -858,13 +858,28 @@ var RootNoteWithIntervals = function(spec) {
     var hit = self.intervals().detect(function(i) { return (i == 3 || i == 4); });
     if (!hit) { return false; }
     return self.noteFromInterval(hit);  
-  }
+  };
 
   self.mySeventh = function() {
     var hit = self.intervals().detect(function(i) { return (i == 11 || i == 10 || i == 9); });
     if (!hit) { return false; }
     return self.noteFromInterval(hit);  
-  }
+  };
+
+  self.myFifth = function() {
+    var hit7 = self.intervals().detect(function(i) { return i == 7; });
+    if (hit7) { return self.noteFromInterval(hit7); }
+
+    var hit6 = self.intervals().detect(function(i) { return i == 6; });
+    if (hit6) { return self.noteFromInterval(hit6); }
+
+    var hit8 = self.intervals().detect(function(i) { return i == 8; });
+    if (hit8) { return self.noteFromInterval(hit8); }
+
+    return false;
+  };
+
+
 
 
   self.compatibleScaleNames = function() {

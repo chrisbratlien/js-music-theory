@@ -1231,7 +1231,7 @@ campfire.subscribe('gather-inputs-and-do-it',function(){
 var extraBoard;
 var headerHeight = jQuery('header').height();
 
-function tick(cursor) {
+function tick(cursor) { //consider re-implementing with multiple single-purpose subscribers to 'tick'
 
     campfire.publish('tick',cursor);
 
@@ -1250,11 +1250,13 @@ function tick(cursor) {
           });
         });
 
-
-
         cursor.board.publish('get-wrap',function(wrap){ //just in case they were hidden...
             wrap.removeClass('hidden');  
         });
+      }
+
+      if (cursor.totQuarterNoteBeats == 4 && BSD.noteResolution == 4 && cursor.chordNoteIdx == 2) { //3rd beat in [0,1,2,3]
+        bassist.playNote(cursor.chord.myFifth().plus(-12),1000);
       }
 
 
