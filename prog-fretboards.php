@@ -1233,7 +1233,7 @@ var extraBoard;
 var headerHeight = jQuery('header').height();
 
 function tick(cursor) { //consider re-implementing with multiple single-purpose subscribers to 'tick'
-
+  if (!cursor) { return false;
     campfire.publish('tick',cursor);
 
       BSD.boards.forEach(function(board){
@@ -1388,6 +1388,7 @@ function tick(cursor) { //consider re-implementing with multiple single-purpose 
       BSD.timeout = setTimeout(function() {
         tick(cursor); 
       },nextDelayMS);
+  }
   }
 
   BSD.noteResolution = 4;
