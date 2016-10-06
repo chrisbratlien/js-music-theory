@@ -133,6 +133,7 @@ add_action('wp_head',function(){
   .song-form-position .bar { 
     background: #d5cbe2;
     color: white;
+    cursor: pointer;
     float: left;
     padding: 2px;
     text-align: center;
@@ -1807,10 +1808,24 @@ campfire.subscribe('do-it',function(prog){
   BSD.totalBars = BSD.sequence[BSD.sequence.length-1].barIdx + 1;
   
   songFormPosition.empty();
+
+
+  var range = [];
   for (var i = 0; i < BSD.totalBars; i += 1) {
+    range.push(i);
+  }
+  range.forEach(function(i) {
     var div = DOM.div(i+1).addClass('bar bar-' + i);
     songFormPosition.append(div);
-  }
+
+    div.click(function(){
+      var event = BSD.sequence.detect(function(o) {
+        return o.barIdx == i;
+      });
+      console.log('event',event);
+      tick(event);
+    });
+  });
 
 
   tick(BSD.sequence[0]);
