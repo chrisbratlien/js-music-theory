@@ -945,7 +945,7 @@ btnSaveProg.click(function(){
       jQuery( "#tempo-input" ).slider({
         orientation: "horizontal",
         range: "min",
-        min: 30,
+        min: 0,
         max: 250,
         step: 1,
         value: BSD.options.tempo,
@@ -1387,31 +1387,51 @@ function tick(cursor) {
       },nextDelayMS);
   }
 
-BSD.noteResolution = 4;
+  BSD.noteResolution = 4;
 
   var direction = (Math.random() > 0.5) ? 'up' : 'down';
   var nextDirection = { 'up': 'down', 'down': 'up'};
-  var lastAbstractValue = false;
-  var lastValue = false; //60
-  var lastString = false;/////2; //5
-  var lastStrings = [];///[5];
-  var lastFret = false;////BSD.idealFret || 7;//3;
-  var lastFrets = [];////////[3];
-  var lastFretDiff = 0;
-  var lastFretDiffs = [];
+  
+  var lastAbstractValue,
+  lastValue,
+  lastString,
+  lastStrings,
+  lastFret,
+  lastFrets,
+  lastFretDiff,
+  lastFretDiffs,
+  lastNote;
+
 
   ////var bunches = chords.map(function(o){ return o.abstractNoteValues(); });
   var rejections = [];
 
   var chordIdx = 0;
 
-  var lastNote = Note(60);
   var myNote = false;
+
   var songFormPosition = jQuery('.song-form-position');
 
 
 
+function initLast() {
+
+  lastAbstractValue = false;
+  lastValue = false; //60
+  lastString = false;/////2; //5
+  lastStrings = [];///[5];
+  lastFret = false;////BSD.idealFret || 7;//3;
+  lastFrets = [];////////[3];
+  lastFretDiff = 0;
+  lastFretDiffs = [];
+  lastNote = Note(60);
+
+  BSD.sequence = [];
+}
+
+
 campfire.subscribe('do-it',function(prog){
+  initLast();
 
 
   if (extraBoard) {
@@ -1469,8 +1489,7 @@ campfire.subscribe('do-it',function(prog){
 
 
   var errors = 0;
-  var sequence = [];
-
+  
 
   prog.forEach(function(chordItem,chordItemIdx) {
     if (errors) { return false; }
@@ -1489,6 +1508,7 @@ campfire.subscribe('do-it',function(prog){
       errors += 1;
       return false;
     }
+    var abstractNoteValues = myChord.abstractNoteValues();
 
     var totQuarterNoteBeats = (chordItem.halfBar) ? 2 : 4;
 
@@ -1499,17 +1519,7 @@ campfire.subscribe('do-it',function(prog){
     }
 
     range.forEach(function(o,chordNoteIdx) {
-
-    ///var chordNoteIdx = i % BSD.noteResolution; //FIXME: assuming everything is 4 note chords.
-
-
-
-
-    //myNote = myChord.notes().atRandom();
-    //while (lastNote && myNote.abstractValue() == lastNote.abstractValue()) {
-    //  myNote = myChord.notes().atRandom();
-    ///}
-    var abstractNoteValues = myChord.abstractNoteValues();
+      if (errors) { return false; }
 
 
     if (Math.random() > 0.85) {
@@ -1604,44 +1614,15 @@ campfire.subscribe('do-it',function(prog){
 
     var judge = function(o) {  
 
-      /*******
-      if (abstractNoteValues.indexOf(o.chromaticValue) < 0) { return 'outside'; }
-      if (o.fret > 13) { return 'too high'; }
-      if (BSD.activeStrings && !BSD.activeStrings.detect(function(as) { 
-        ///console.log('as',as,'o.string',o.string);
-        return as == o.string; 
-      })) {
-        return "not active string: " + o.string;
-      }
-
-
-      if (BSD.options.fretRange && o.fret > BSD.options.fretRange[1]) {
-        return 'fret > maxFret';
-      }
-      if (BSD.options.fretRange && o.fret < BSD.options.fretRange[0]) {
-        return 'fret < minFret';
-      }
-      *****/
-
-
-
-
       var diff = lastValue ? o.noteValue - lastValue : 0;
       if (Math.abs(diff) > 6) { return 'diff>6:' + diff; }
 
       var idealFretDiff = Math.abs(o.fret - idealFret);
       if (idealFretDiff > 4) { return 'idealFretDiff>4'; }      
 
-
-
-
       if (chordNoteIdx > 0 && diff > 0 && direction == 'down') { return 'wrong dir'; }
       if (chordNoteIdx > 0 && diff < 0 && direction == 'up') { return 'wrong dir'; }
       if (lastValue && diff == 0) { return 'no diff'; }
-
-
-
-
 
 
       var fretDiff = lastFret ? o.fret - lastFret : 0; 
@@ -1664,16 +1645,6 @@ campfire.subscribe('do-it',function(prog){
       if (avgFretDistance > 4) { return 'avgFretDistance>4'; }
       ///if (avgStringDiff > 2) { return 'avgStringDiff>2'; }
 
-
-
-      /**
-      console.log(
-        'o.string',o.string,'o.fret',o.fret,
-        'avgString',avgString,'avgFret',avgFret,
-        'stringDiff',stringDiff,'fretDiff',fretDiff,
-        'avgStringDiff',avgStringDiff,'avgFretDiff',avgFretDiff
-      );
-      ***/
       return 'OK';
     };
 
@@ -1695,6 +1666,8 @@ campfire.subscribe('do-it',function(prog){
 
     if (candidates.length == 0) {
       console.log('uh oh');
+      console.log('barIdx',BSD.sequence[BSD.sequence.length-1].barIdx);
+
       direction = nextDirection[direction];
       ///console.log('flip! (necessity)');
       candidates = BSD.guitarData.select(criteria);
@@ -1702,11 +1675,16 @@ campfire.subscribe('do-it',function(prog){
 
     if (candidates.length == 0) {
       console.log('uh oh #2');
+
+      console.log('barIdx',BSD.sequence[BSD.sequence.length-1].barIdx);
       candidates = BSD.guitarData.select(criteria);
     }
     if (candidates.length == 0) {
-        console.log('look again');
-        candidates = BSD.guitarData.select(criteria);
+        errors += 1;
+        return false;
+        
+        //console.log('look again');
+        ////candidates = BSD.guitarData.select(criteria);
     }
 
     if (candidates.length == 0) {
@@ -1783,7 +1761,7 @@ campfire.subscribe('do-it',function(prog){
       errors += 1;
     }
 
-    sequence.push(result);
+    BSD.sequence.push(result);
     ///sequence[i] = result;
     lastValue = result.noteValue;
     lastNote = Note(lastValue);
@@ -1813,14 +1791,14 @@ campfire.subscribe('do-it',function(prog){
     return false;
   }
 
-  sequence.forEach(function(o,idx) {
+  BSD.sequence.forEach(function(o,idx) {
     o.idx = idx;
     var ndx = idx+1;
-    ndx = ndx % sequence.length;
-    o.next = sequence[ndx];
+    ndx = ndx % BSD.sequence.length;
+    o.next = BSD.sequence[ndx];
   });
   //console.log('sequence',sequence);
-  BSD.sequence = sequence;
+  ///BSD.sequence = sequence;
   //////sequence.forEach(function(o){})
   BSD.timeout = false;
   
@@ -1833,7 +1811,7 @@ campfire.subscribe('do-it',function(prog){
   }
 
 
-  tick(sequence[0]);
+  tick(BSD.sequence[0]);
   ///console.log('bunches',bunches);
 });
 
