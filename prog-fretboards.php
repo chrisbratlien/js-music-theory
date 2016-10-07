@@ -192,6 +192,12 @@ get_header(); ?>
 
 </div><!-- color-pickers-wrap -->
 
+      <label>Beats per Measure</label>
+      <select class="beats-per-measure">
+        <option value="3">3</option>
+        <option value="4">4</option>
+      </select>
+
       <label>Note Resolution</label>
       <select class="note-resolution">
         <option value="1">1</option>
@@ -1015,6 +1021,12 @@ btnSaveProg.click(function(){
     });
 
 
+    BSD.beatsPerMeasure = 4;
+    var ddBeatsPerMeasure = jQuery('.beats-per-measure');
+    ddBeatsPerMeasure.change(function(){
+      BSD.beatsPerMeasure = parseInt(this.value,10);
+    });
+    ddBeatsPerMeasure.find('option[value="' + BSD.beatsPerMeasure + '"]').attr('selected',true);
 
     BSD.noteResolution = 4;
     var ddNoteResolution = jQuery('.note-resolution');
@@ -1261,7 +1273,11 @@ function tick(cursor) { //consider re-implementing with multiple single-purpose 
       BSD.boards.forEach(function(board){
         board.publish('unfeature-frets');
       });
-      cursor.board.publish('feature-fret',cursor);
+
+      if (!BSD.options.playChordsOnly) {
+        cursor.board.publish('feature-fret',cursor);
+        extraBoard.publish('feature-fret',cursor);
+      }
 
       if (cursor.chordNoteIdx == 0) {
 
@@ -1294,7 +1310,6 @@ function tick(cursor) { //consider re-implementing with multiple single-purpose 
       }
 
 
-      extraBoard.publish('feature-fret',cursor);
 
 
       if (!BSD.options.playChordsOnly) {
@@ -1304,8 +1319,14 @@ function tick(cursor) { //consider re-implementing with multiple single-purpose 
 
 
       var even4DelayMS = BSD.tempoToMillis(BSD.options.tempo);
-      var even1DelayMS = even4DelayMS * 4; //whole notes
+
+
+
+      var even1DelayMS = even4DelayMS * BSD.beatsPerMeasure; //whole notes
+
       var even2DelayMS = even4DelayMS * 2; //half notes
+
+
       var even8DelayMS = even4DelayMS /2; //eighth notes
       var even16DelayMS = even4DelayMS /4; //eighth notes
 
@@ -1417,7 +1438,9 @@ function tick(cursor) { //consider re-implementing with multiple single-purpose 
   var direction = (Math.random() > 0.5) ? 'up' : 'down';
   var nextDirection = { 'up': 'down', 'down': 'up'};
   
-  var lastAbstractValue,
+  var result,
+  lastResult,
+  lastAbstractValue,
   lastValue,
   lastString,
   lastStrings,
@@ -1450,7 +1473,8 @@ function initLast() {
   lastFretDiff = 0;
   lastFretDiffs = [];
   lastNote = Note(60);
-
+  result = false;
+  lastResult = false;
   BSD.sequence = [];
 }
 
@@ -1518,6 +1542,9 @@ campfire.subscribe('do-it',function(prog){
 
   prog.forEach(function(chordItem,chordItemIdx) {
     if (errors) { return false; }
+
+
+    rejections = [];
     ///var barIdx = Math.floor(i / BSD.noteResolution);
     var barIdx = chordItem.barIndex;
     //var chordIdx = barIdx % chords.length;
@@ -1535,9 +1562,22 @@ campfire.subscribe('do-it',function(prog){
     }
     var abstractNoteValues = myChord.abstractNoteValues();
 
-    var totQuarterNoteBeats = (chordItem.halfBar) ? 2 : 4;
+    var totQuarterNoteBeats = 4; //for this chord.
+    if (chordItem.halfBar) {
+      if (BSD.beatsPerMeasure == 3) {
+        if (chordItem.barChordIdx == 0) {
+          totQuarterNoteBeats = 2;
+        }
+        else {
+          totQuarterNoteBeats = 1;
+        }
+      }
+      else {
+        totQuarterNoteBeats = 2;
+      }
+    }
 
-    var totNoteEvents = totQuarterNoteBeats * 4 / BSD.noteResolution; 
+    var totNoteEvents = totQuarterNoteBeats * BSD.beatsPerMeasure / BSD.noteResolution; 
     var range = [];
     for (var i = 0; i < totNoteEvents; i += 1) {
       range.push(i);
@@ -1604,6 +1644,13 @@ campfire.subscribe('do-it',function(prog){
       drift3 = lastFretDiffs.slice(-3).sum(); //sum the latest 3
     }
 
+    var drift2;
+    if (lastFretDiffs.length >0) {
+      drift2 = lastFretDiffs.slice(-2).sum(); //sum the latest 3
+    }
+
+
+
     function distScore(a,b) {
       var min, max, diff;
       if (!a) { min = b; max = b; diff = 0; }
@@ -1651,9 +1698,21 @@ campfire.subscribe('do-it',function(prog){
 
 
       var fretDiff = lastFret ? o.fret - lastFret : 0; 
+      console.log('fretDiff',fretDiff,'lastFretDiff',lastFretDiff);
 
-       if (drift3 && Math.abs(drift3 + fretDiff) > 3) { return 'drifting too much in one direction'; }
-       if (lastFretDiff && Math.abs(lastFretDiff + fretDiff) > 3) { return 'drifting too much in one direction'; }
+      //FIXME: can probably simplify this once my goals are better understood
+      if (drift3 && Math.abs(drift3 + fretDiff) > 4) { 
+        return 'drift3: drifting too much in one direction, drift3: ' + drift3 + ' fretDiff: ' + fretDiff; 
+      }
+
+      if (drift2 && Math.abs(drift2 + fretDiff) > 4) { 
+        return 'drift2: drifting too much in one direction, drift2: ' + drift2 + ' fretDiff: ' + fretDiff; 
+      }
+
+      if (lastFretDiff && Math.abs(lastFretDiff + fretDiff) > 4) { 
+        return 'lastFretDiff: drifting too much in one direction, lastFretDiff: ' + lastFretDiff + ' fretDiff: ' + fretDiff; 
+      }
+
 
 
 
@@ -1682,11 +1741,17 @@ campfire.subscribe('do-it',function(prog){
       var decision = judge(o);
 
       if (decision != 'OK') { //chordNoteIdx == 0 && 
-        rejections.push([o,decision]);
+        rejections.push({
+            candidate: o,
+            decision:decision,
+            lastResult: lastResult
+        });
       }
       return  outsideDecision == 'OK' && decision == 'OK';
     };
 
+
+    rejections = [];
     candidates = candidates.select(criteria);
 
     if (candidates.length == 0) {
@@ -1695,6 +1760,7 @@ campfire.subscribe('do-it',function(prog){
 
       direction = nextDirection[direction];
       ///console.log('flip! (necessity)');
+      rejections = [];
       candidates = BSD.guitarData.select(criteria);
     }
 
@@ -1702,24 +1768,14 @@ campfire.subscribe('do-it',function(prog){
       console.log('uh oh #2');
 
       console.log('barIdx',BSD.sequence[BSD.sequence.length-1].barIdx);
+      rejections = [];
       candidates = BSD.guitarData.select(criteria);
     }
     if (candidates.length == 0) {
         errors += 1;
         return false;
-        
-        //console.log('look again');
-        ////candidates = BSD.guitarData.select(criteria);
     }
 
-    if (candidates.length == 0) {
-      errors += 1;
-      return false;      
-    }
-
-
-
-    var result;
     if (chordNoteIdx == 0) { //first note in new chord change... try to get nearest pitch to last note played.
 
   
@@ -1741,14 +1797,17 @@ campfire.subscribe('do-it',function(prog){
         'distScore()',distScore(result.chromaticValue,lastAbstractValue)
       );
 
+      /***
       rejections = rejections.select(function(rej){ //I only care about the rejections which were close..
-        if (rej[1] == "outside") { return false; }
-        var score = distScore(rej[0].chromaticValue,lastAbstractValue);
-        return score <= 2;
-      });
 
-      console.log('rejections',rejections);
-      rejections = [];
+        if (rej.decision == "outside") { return false; }
+        var score = distScore(rej.candidate.chromaticValue,lastAbstractValue);
+        return score <= 2;
+
+      });
+      *****/
+      //console.log('rejections',rejections);
+      ///rejections = [];
     }
     else {
       result = candidates.atRandom();
@@ -1787,6 +1846,8 @@ campfire.subscribe('do-it',function(prog){
     }
 
     BSD.sequence.push(result);
+
+    lastResult = result;
     ///sequence[i] = result;
     lastValue = result.noteValue;
     lastNote = Note(lastValue);
