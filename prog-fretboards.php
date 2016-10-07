@@ -157,7 +157,15 @@ add_action('wp_head',function(){
     color: black;
   }
 
-
+  .form-progression .form-group {
+    width: 100%;
+  }
+  .form-progression .progression {
+    width: 90%;
+  }
+  .form-progression .btn-start {
+    width: 8%;
+  }
 
 </style>
 
@@ -192,11 +200,15 @@ get_header(); ?>
         <option value="8">8</option>
         <option value="16">16</option>
       </select>
-      <div class="progression-form">
-        <button id="redo">Redo</button>
-        <label>Progression</label>
-        <input type="text" id="progression" class="form-control" />
 
+
+        <div class="form-inline form-progression">
+          <label>Progression</label>
+          <div class="form-group">
+            <input type="text" id="progression" class="form-control progression" />
+            <button class="btn btn-info btn-start">Start</button>          
+          </div>
+        </div>
         <label>String sets</label>
 
         <input type="checkbox" class="stringset-654321" checked="true" />
@@ -1192,8 +1204,6 @@ btnSaveProg.click(function(){
 var progInput = jQuery('#progression');
 progInput.blur(function() { 
   campfire.publish('gather-inputs-and-do-it');
-  BSD.options.progression = progInput.val();
-  storage.setItem('options',JSON.stringify(BSD.options));
 });
 progInput.on('touchend',function(){ //for iOS bug
 	///alert('hey');
@@ -1207,6 +1217,13 @@ progInput.on('touchend',function(){ //for iOS bug
 //});
 
 
+var btnStart = jQuery('.btn-start');
+btnStart.click(function(){
+  campfire.publish('gather-inputs-and-do-it');
+});
+btnStart.on('touchend',function(){
+  BSD.handleFirstClick();
+});
 
 
 var activeStringsInput = jQuery('.active-strings');
@@ -1219,13 +1236,18 @@ campfire.subscribe('stop-it',function(){
 });
 
 campfire.subscribe('gather-inputs-and-do-it',function(){
-    if (progInput.val().length == 0) { 
-        campfire.publish('stop-it'); 
-        return false; 
-    }
-    var prog = BSD.parseProgression(progInput.val());
-    ///////campfire.publish('do-it-prog',prog);
-    campfire.publish('do-it',prog);    
+  if (progInput.val().length === 0) { 
+      campfire.publish('stop-it'); 
+      return false; 
+  }
+
+  BSD.options.progression = progInput.val(); //just the text
+  storage.setItem('options',JSON.stringify(BSD.options));
+
+
+  var prog = BSD.parseProgression(progInput.val());
+  ///////campfire.publish('do-it-prog',prog);
+  campfire.publish('do-it',prog);    
 });
 
 
@@ -1233,7 +1255,7 @@ var extraBoard;
 var headerHeight = jQuery('header').height();
 
 function tick(cursor) { //consider re-implementing with multiple single-purpose subscribers to 'tick'
-  if (!cursor) { return false;
+  if (!cursor) { return false; }
     campfire.publish('tick',cursor);
 
       BSD.boards.forEach(function(board){
@@ -1388,7 +1410,6 @@ function tick(cursor) { //consider re-implementing with multiple single-purpose 
       BSD.timeout = setTimeout(function() {
         tick(cursor); 
       },nextDelayMS);
-  }
   }
 
   BSD.noteResolution = 4;
