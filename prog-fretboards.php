@@ -1359,22 +1359,24 @@ function tick(cursor) { //consider re-implementing with multiple single-purpose 
       }
 
 
+      //LAST QUARTER NOTE OF MEASURE
+      if (BSD.noteResolution == 4 && cursor.chordNoteIdx + 1 == cursor.totQuarterNoteBeats) {
+        setTimeout(function(){
+          campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
+        },swung81);
+      }
+
+      if (BSD.noteResolution == 2 && cursor.chordNoteIdx == 1) { 
+        setTimeout(function(){
+          campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
+        },even4DelayMS + swung81);
+      }
+
       if (cursor.totQuarterNoteBeats == 4) {
-        if (BSD.noteResolution == 1 && cursor.chordNoteIdx == 0) { 
+        if (BSD.noteResolution == 1 && cursor.chordNoteIdx === 0) { 
           setTimeout(function(){
             campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
           },even1DelayMS - swung82);
-        }
-        if (BSD.noteResolution == 2 && cursor.chordNoteIdx == 1) { 
-          setTimeout(function(){
-            campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
-          },even4DelayMS + swung81);
-        }
-        if (BSD.noteResolution == 4 && cursor.chordNoteIdx == 3) { 
-          //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
-          setTimeout(function(){
-            campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
-          },swung81);
         }
         if (BSD.noteResolution == 8 && cursor.chordNoteIdx == 6) { 
           //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
@@ -1549,6 +1551,7 @@ campfire.subscribe('do-it',function(prog){
     var barIdx = chordItem.barIndex;
     //var chordIdx = barIdx % chords.length;
     var chordIdx = chordItemIdx;
+    var barChordIdx = chordItem.barChordIndex;
     //var myChord = chords[chordIdx];
     var myChord = chordItem.chord;
     var cycleIdx = Math.floor(barIdx / prog.length);
@@ -1562,10 +1565,10 @@ campfire.subscribe('do-it',function(prog){
     }
     var abstractNoteValues = myChord.abstractNoteValues();
 
-    var totQuarterNoteBeats = 4; //for this chord.
+    var totQuarterNoteBeats = BSD.beatsPerMeasure; //for this chord.
     if (chordItem.halfBar) {
       if (BSD.beatsPerMeasure == 3) {
-        if (chordItem.barChordIdx == 0) {
+        if (barChordIdx == 0) {
           totQuarterNoteBeats = 2;
         }
         else {
@@ -1577,7 +1580,7 @@ campfire.subscribe('do-it',function(prog){
       }
     }
 
-    var totNoteEvents = totQuarterNoteBeats * BSD.beatsPerMeasure / BSD.noteResolution; 
+    var totNoteEvents = Math.ceil(totQuarterNoteBeats * BSD.beatsPerMeasure / BSD.noteResolution); 
     var range = [];
     for (var i = 0; i < totNoteEvents; i += 1) {
       range.push(i);

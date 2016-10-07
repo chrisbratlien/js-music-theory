@@ -33,13 +33,6 @@ Array.prototype.contains = function (x) { //does the array contain x?
 };
 
 
-//each runs a block of code on each element
-Array.prototype.each = function (fn) {
-	for (var i = 0; i < this.length; i += 1) {
-		fn(this[i]);
-	}
-};
-
 Array.prototype.inject = function (acc, fn) {
 	var result = acc;
 	this.each(function (e) {

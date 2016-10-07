@@ -45,6 +45,8 @@ BSD.parseProgression = function(progString) {
     
     var barIndex = 0;
     var chordIndex = 0;
+    var barChordIndex = 0;
+
     var flat = [];
     
     barStrings.each(function(barString){
@@ -55,7 +57,7 @@ BSD.parseProgression = function(progString) {
       }
       
       
-      chordNames.each(function(chordName){
+      chordNames.forEach(function(chordName,barChordIndex){
         if (chordName == '%') {
           chordName = lastChordName;
         }
@@ -64,6 +66,7 @@ BSD.parseProgression = function(progString) {
         
         flat.push({
           barIndex: barIndex,
+          barChordIndex: barChordIndex,
           chordIndex: chordIndex,
           chord: lowerChord,
           halfBar: halfBar
