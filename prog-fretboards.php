@@ -13,8 +13,9 @@ add_action('wp_head',function(){
   }
 
   .stage { 
+    float: left;
     margin: 0; 
-    width: 100%; 
+    width: 70%; 
   }
   
   .inner { 
@@ -37,21 +38,22 @@ add_action('wp_head',function(){
     
   }
   table td { 
-    padding: 0.2em; text-align: center; 
-    min-width: 23px;
-    width: 23px;
-    height: 1.5em;    
-    text-align: center;
     border-radius: 1rem;
     border-top: 1px solid  rgba(0,0,0,0.1); 
     border-left: 1px solid  rgba(0,0,0,0.1); 
+
+    height: 1.5em;    
+    min-width: 23px;
+    padding: 0.2em; text-align: center; 
   
   
     -webkit-user-select: none;   /* Chrome/Safari/Opera */
     -khtml-user-select: none;    /* Konqueror */
     -moz-user-select: none;      /* Firefox */
     -ms-user-select: none;       /* Internet Explorer/Edge */
+    text-align: center;
     user-select: none;      
+    width: 23px;
   
   }
   .fretboard-table { margin-bottom: 1.75em; }    
@@ -97,8 +99,8 @@ add_action('wp_head',function(){
 
 
   .featured { 
-    background: yellow !important; 
     color: black !important; 
+    background: yellow !important; 
   }
 
   /**
@@ -126,7 +128,10 @@ add_action('wp_head',function(){
   }
 
 
-  .song-form-position-wrap { width: 10%; }
+  .song-form-position-wrap { 
+    float: right;
+    width: 30%; 
+  }
   .song-form-position {
     width: 100%;
   }
@@ -135,7 +140,9 @@ add_action('wp_head',function(){
     color: white;
     cursor: pointer;
     float: left;
-    padding: 2px;
+    font-size: 1.2rem;
+    height: 45px;
+    line-height: 45px;
     text-align: center;
     width: 25%; 
   }
@@ -303,11 +310,11 @@ get_header(); ?>
   <br />
 </div>
 <div class="venue">
-</div>
-<div class="song-form-position-wrap">
-  <ul class="song-form-position">
-  </ul>
-</div>
+  <div class="song-form-position-wrap">
+    <ul class="song-form-position">
+    </ul>
+  </div>
+</div><!-- venue -->
 <div class="venue-footer">
 </div>
 <h3>Songs</h3>
@@ -1265,182 +1272,45 @@ campfire.subscribe('gather-inputs-and-do-it',function(){
 
 var extraBoard;
 var headerHeight = jQuery('header').height();
+var delayMS = {
+
+};
+
+
 
 function tick(cursor) { //consider re-implementing with multiple single-purpose subscribers to 'tick'
   if (!cursor) { return false; }
-    campfire.publish('tick',cursor);
+  delayMS.even4 = BSD.tempoToMillis(BSD.options.tempo);
+  delayMS.even1 = delayMS.even4 * BSD.beatsPerMeasure; //whole notes
+  delayMS.even2 = delayMS.even4 * 2; //half notes
+  delayMS.even8 = delayMS.even4 /2; //eighth notes
+  delayMS.even16 = delayMS.even4 /4; //eighth notes
+  delayMS.swung81 = delayMS.even4 * 2/3;
+  delayMS.swung82 = delayMS.even4 * 1/3;
+  ///var midSwung81 = (swung81;////////+even8DelayMS) / 2;/////].sum() /2;
+  delayMS.midSwung81 = delayMS.swung81;
+  //var midSwung81 = (swung81+even8DelayMS) / 2;/////].sum() /2;
+  delayMS.midSwung82 = delayMS.swung82;
+  campfire.publish('tick',cursor);
 
-      BSD.boards.forEach(function(board){
-        board.publish('unfeature-frets');
-      });
-
-      if (!BSD.options.playChordsOnly) {
-        cursor.board.publish('feature-fret',cursor);
-        extraBoard.publish('feature-fret',cursor);
-      }
-
-      if (cursor.chordNoteIdx == 0) {
-
-        bassist.playNote(cursor.chord.rootNote.plus(-12),1000);
-
-        BSD.boards.forEach(function(board){
-          board.publish('get-wrap',function(wrap){
-            BSD.options.showCurrentChordFretboadOnly ? wrap.addClass('hidden') : wrap.removeClass('hidden');
-          });
-        });
-
-        cursor.board.publish('get-wrap',function(wrap){ //just in case they were hidden...
-            wrap.removeClass('hidden');  
-        });
-      }
-
-      if (cursor.totQuarterNoteBeats == 4 && BSD.noteResolution == 4 && cursor.chordNoteIdx == 2) { //3rd beat in [0,1,2,3]
-        bassist.playNote(cursor.chord.myFifth().plus(-12),1000);
-      }
-
-
-
-
-      if (BSD.options.scrollToBoard && cursor.chordNoteIdx == 0) {
-        cursor.board.publish('get-wrap',function(wrap){
-          jQuery('html, body').animate({ 
-            scrollTop: wrap.find('.chord-name').offset().top - headerHeight 
-          },200);
-        });
-      }
-
-
-
-
-      if (!BSD.options.playChordsOnly) {
-        campfire.publish('play-note', { note: Note(cursor.noteValue), duration: 1000 });
-      }
-
-
-
-      var even4DelayMS = BSD.tempoToMillis(BSD.options.tempo);
-
-
-
-      var even1DelayMS = even4DelayMS * BSD.beatsPerMeasure; //whole notes
-
-      var even2DelayMS = even4DelayMS * 2; //half notes
-
-
-      var even8DelayMS = even4DelayMS /2; //eighth notes
-      var even16DelayMS = even4DelayMS /4; //eighth notes
-
-      var swung81 = even4DelayMS * 2/3;
-      var swung82 = even4DelayMS * 1/3;
-
-
-      ///var midSwung81 = (swung81;////////+even8DelayMS) / 2;/////].sum() /2;
-      var midSwung81 = swung81;
-      //var midSwung81 = (swung81+even8DelayMS) / 2;/////].sum() /2;
-      var midSwung82 = swung82;
-      //var midSwung82 = (swung82+even8DelayMS) / 2;/////].sum() /2;
-
-      var thisIdx = cursor.chordIdx;
-      var node = cursor;
-      if (BSD.sequence.length > 0) { //don't bother looking for next chord if we're just a one-chord sequence... this would cause ininite loop
-          while (node.chordIdx == thisIdx) {
-            node = node.next;
-          }
-      }
-      var nextChord = node.chord;
-
-      if (cursor.totQuarterNoteBeats == 2) { //for the chord
-        if (BSD.noteResolution == 4 && cursor.chordNoteIdx == 1) { 
-          //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
-          setTimeout(function(){
-            campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
-          },swung81);
-        }
-      }
-
-
-      //LAST QUARTER NOTE OF MEASURE
-      if (BSD.noteResolution == 4 && cursor.chordNoteIdx + 1 == cursor.totQuarterNoteBeats) {
-        setTimeout(function(){
-          campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
-        },swung81);
-      }
-
-      if (BSD.noteResolution == 2 && cursor.chordNoteIdx == 1) { 
-        setTimeout(function(){
-          campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
-        },even4DelayMS + swung81);
-      }
-
-      if (cursor.totQuarterNoteBeats == 4) {
-        if (BSD.noteResolution == 1 && cursor.chordNoteIdx === 0) { 
-          setTimeout(function(){
-            campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
-          },even1DelayMS - swung82);
-        }
-        if (BSD.noteResolution == 8 && cursor.chordNoteIdx == 6) { 
-          //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
-          setTimeout(function(){
-            campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
-          },swung81);
-        }
-
-        if (BSD.noteResolution == 16 && cursor.chordNoteIdx == 12) { 
-          //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
-          setTimeout(function(){
-            campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
-          },swung81);
-        }
-      }
-
-      clearTimeout(BSD.timeout);
-      
-      var nextDelayMS = false; 
-      if (BSD.noteResolution == 1) {
-        nextDelayMS = even1DelayMS; 
-      }
-      else if (BSD.noteResolution == 2) {
-        nextDelayMS = even2DelayMS; 
-      }
-      else if (BSD.noteResolution == 4) {
-        nextDelayMS = even4DelayMS; 
-      }
-      else if (BSD.noteResolution == 8) {
-        if (cursor.idx % 2 == 0) {
-          nextDelayMS = midSwung81;
-        }
-        else {
-          nextDelayMS = midSwung82;
-        }
-      }
-      else { //16
-          nextDelayMS = even16DelayMS;
-      }
-      cursor = cursor.next;
-
-      /**
-      else if (BSD.noteResolution == 8) {
-        if (cursor.idx % 2 == 0) { 
-          nextDelayMS == swungEighth1; 
-        }
-        else {
-          nextDelayMS == swungEighth2; 
-        }
-      }
-      **/
-
-
-      BSD.timeout = setTimeout(function() {
-        tick(cursor); 
-      },nextDelayMS);
+  clearTimeout(BSD.timeout);
+  delayMS.next = delayMS['even' + BSD.noteResolution];
+  if (!delayMS.next) {
+    console.log('invalid delayMS.next for resolution' + BSD.noteResolution);
   }
+  cursor = cursor.next;
+  BSD.timeout = setTimeout(function() {
+    tick(cursor); 
+  },delayMS.next);
+}
 
   BSD.noteResolution = 4;
 
   var direction = (Math.random() > 0.5) ? 'up' : 'down';
   var nextDirection = { 'up': 'down', 'down': 'up'};
   
-  var result,
+  var candidates,
+  result,
   lastResult,
   lastAbstractValue,
   lastValue,
@@ -1466,6 +1336,7 @@ function tick(cursor) { //consider re-implementing with multiple single-purpose 
 
 function initLast() {
 
+  candidates = [];
   lastAbstractValue = false;
   lastValue = false; //60
   lastString = false;/////2; //5
@@ -1598,7 +1469,7 @@ campfire.subscribe('do-it',function(prog){
       direction = 'up';
     }
 
-    var candidates = BSD.guitarData;
+    candidates = BSD.guitarData;
 
 
     var scale = 10;//12; //rightmost fret to idealize.
@@ -1967,7 +1838,6 @@ campfire.subscribe('test-periodic',function(o){
 
 });
 
-
   campfire.subscribe('song-form-position',function(barIdx){
     songFormPosition.find('.active').removeClass('active');
     songFormPosition.find('.bar-' + barIdx).addClass('active');
@@ -1979,20 +1849,116 @@ campfire.subscribe('test-periodic',function(o){
       saveBarIdx = cursor.barIdx;
       campfire.publish('song-form-position',cursor.barIdx);
     }
-
-    /**
-    console.log('SUB tick',
-      cursor.idx,
-      cursor.chord.fullAbbrev(),
-      Note(cursor.noteValue).name(),
-      'ideal/actual/avg',
-      cursor.idealFret,
-      cursor.fret,
-      cursor.avgFret,
-      cursor      
-    );
-    **/
   });
+
+campfire.subscribe('tick',function(cursor){
+  BSD.boards.forEach(function(board){
+    board.publish('unfeature-frets');
+  });
+
+  if (!BSD.options.playChordsOnly) {
+    cursor.board.publish('feature-fret',cursor);
+    extraBoard.publish('feature-fret',cursor);
+  }
+});
+
+campfire.subscribe('tick',function(cursor){
+  if (cursor.chordNoteIdx == 0) {
+    bassist.playNote(cursor.chord.rootNote.plus(-12),1000);
+  }
+  if (cursor.totQuarterNoteBeats == 4 && BSD.noteResolution == 4 && cursor.chordNoteIdx == 2) { //3rd beat in [0,1,2,3]
+    bassist.playNote(cursor.chord.myFifth().plus(-12),1000);
+  }
+});
+
+campfire.subscribe('tick',function(cursor){
+  if (cursor.chordNoteIdx == 0) {
+    BSD.boards.forEach(function(board){
+      board.publish('get-wrap',function(wrap){
+        BSD.options.showCurrentChordFretboadOnly ? wrap.addClass('hidden') : wrap.removeClass('hidden');
+      });
+    });
+    cursor.board.publish('get-wrap',function(wrap){ //just in case they were hidden...
+        wrap.removeClass('hidden');  
+    });
+    if (BSD.options.scrollToBoard) {
+      cursor.board.publish('get-wrap',function(wrap){
+        jQuery('html, body').animate({ 
+          scrollTop: wrap.find('.chord-name').offset().top - headerHeight 
+        },200);
+      });
+    }
+  }
+});
+
+campfire.subscribe('tick',function(cursor){
+  if (!BSD.options.playChordsOnly) {
+    campfire.publish('play-note', { note: Note(cursor.noteValue), duration: 1000 });
+  }
+});
+
+campfire.subscribe('tick',function(cursor){
+      //var midSwung82 = (swung82+even8DelayMS) / 2;/////].sum() /2;
+      var thisIdx = cursor.chordIdx;
+      var node = cursor;
+      if (BSD.sequence.length > 0) { //don't bother looking for next chord if we're just a one-chord sequence... this would cause ininite loop
+          while (node.chordIdx == thisIdx) {
+            node = node.next;
+          }
+      }
+      var nextChord = node.chord;
+  
+      //LAST QUARTER NOTE OF MEASURE
+      if (BSD.noteResolution == 4 && cursor.chordNoteIdx + 1 == cursor.totQuarterNoteBeats) {
+        setTimeout(function(){
+          campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
+        },delayMS.swung81);
+      }
+
+      if (BSD.noteResolution == 2 && cursor.chordNoteIdx == 1) { 
+        setTimeout(function(){
+          campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
+        },delayMS.even4DelayMS + swung81);
+      }
+
+      if (cursor.totQuarterNoteBeats == 4) {
+        if (BSD.noteResolution == 1 && cursor.chordNoteIdx === 0) { 
+          setTimeout(function(){
+            campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
+          },delayMS.even1 - delayMS.swung82);
+        }
+        if (BSD.noteResolution == 8 && cursor.chordNoteIdx == 6) { 
+          //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
+          setTimeout(function(){
+            campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
+          },delayMS.swung81);
+        }
+
+        if (BSD.noteResolution == 16 && cursor.chordNoteIdx == 12) { 
+          //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
+          setTimeout(function(){
+            campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
+          },delayMS.swung81);
+        }
+      }
+
+});
+
+/**
+campfire.subscribe('tick',function(cursor){
+
+
+
+});
+
+campfire.subscribe('tick',function(cursor){
+
+});
+
+campfire.subscribe('tick',function(cursor){
+
+});
+**/
 
 
       
