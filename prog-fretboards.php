@@ -311,6 +311,8 @@ get_header(); ?>
 </div>
 <div class="venue">
   <div class="song-form-position-wrap">
+    <div class="btn btn-loop-start">A</div>
+    <div class="btn btn-loop-end">B</div>
     <ul class="song-form-position">
     </ul>
   </div>
@@ -1776,6 +1778,7 @@ campfire.subscribe('do-it',function(prog){
     songFormPosition.append(div);
 
     div.click(function(){
+      BSD.clickedBar = i;
       var event = BSD.sequence.detect(function(o) {
         return o.barIdx == i;
       });
@@ -1954,11 +1957,59 @@ campfire.subscribe('tick',function(cursor){
 campfire.subscribe('tick',function(cursor){
 
 });
+**/
+
+campfire.subscribe('reset-sequence-next',function(){
+
+  var last = false;
+  BSD.sequence.forEach(function(s){
+    if (last) {
+      last.next = s;
+    }
+    last = s;
+  });
+  last.next = BSD.sequence[0];
+});
 
 campfire.subscribe('tick',function(cursor){
-
+  BSD.barIdx = cursor.barIdx;
 });
-**/
+
+
+  var btnLoopStart = jQuery('.btn-loop-start');
+  btnLoopStart.click(function(){
+
+    if (BSD.loopEnd !== 0 && !BSD.loopEnd) {
+      BSD.loopEnd = BSD.sequence.length - 1;
+    }
+    BSD.loopStart = BSD.barIdx;
+    btnLoopStart.html(BSD.loopStart+1);
+
+
+    campfire.publish('reset-sequence-next');
+    BSD.loop = BSD.sequence.select(function(o){
+      return o.barIdx >= BSD.loopStart && o.barIdx <= BSD.loopEnd;
+    });
+
+    BSD.loop[BSD.loop.length-1].next = BSD.loop[0];
+    tick(BSD.loop[0]);
+  });
+  var btnLoopEnd = jQuery('.btn-loop-end');
+  btnLoopEnd.click(function(){
+    if (BSD.loopStart !== 0 && !BSD.loopStart) {
+      BSD.loopStart = 0;
+    }
+    BSD.loopEnd = BSD.barIdx;
+    btnLoopEnd.html(BSD.loopEnd+1);
+
+    campfire.publish('reset-sequence-next');
+    BSD.loop = BSD.sequence.select(function(o){
+      return o.barIdx >= BSD.loopStart && o.barIdx <= BSD.loopEnd;
+    });
+
+    BSD.loop[BSD.loop.length-1].next = BSD.loop[0];
+    tick(BSD.loop[0]);
+  });
 
 
       
