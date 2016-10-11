@@ -1904,11 +1904,12 @@ campfire.subscribe('tick',function(cursor){
       //var midSwung82 = (swung82+even8DelayMS) / 2;/////].sum() /2;
       var thisIdx = cursor.chordIdx;
       var node = cursor;
-      if (BSD.sequence.length > 0) { //don't bother looking for next chord if we're just a one-chord sequence... this would cause ininite loop
-          while (node.chordIdx == thisIdx) {
-            node = node.next;
-          }
+
+
+      for (var i = 0; i < 16 && node.chordIdx == thisIdx; i += 1) { //at most, make 16 attempts.
+          node = node.next;    
       }
+      
       var nextChord = node.chord;
   
       //LAST QUARTER NOTE OF MEASURE
