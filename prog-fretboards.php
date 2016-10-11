@@ -1983,7 +1983,7 @@ campfire.subscribe('tick',function(cursor){
       BSD.loopEnd = BSD.sequence.length - 1;
     }
     BSD.loopStart = BSD.barIdx;
-    btnLoopStart.html(BSD.loopStart+1);
+    btnLoopStart.html('A: ' + BSD.loopStart+1);
 
 
     campfire.publish('reset-sequence-next');
@@ -2000,7 +2000,7 @@ campfire.subscribe('tick',function(cursor){
       BSD.loopStart = 0;
     }
     BSD.loopEnd = BSD.barIdx;
-    btnLoopEnd.html(BSD.loopEnd+1);
+    btnLoopEnd.html('B: ' + BSD.loopEnd+1);
 
     campfire.publish('reset-sequence-next');
     BSD.loop = BSD.sequence.select(function(o){
