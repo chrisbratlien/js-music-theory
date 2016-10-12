@@ -174,6 +174,37 @@ add_action('wp_head',function(){
     width: 8%;
   }
 
+
+
+
+.tiny td {
+  min-width: 15px;
+  /* font-size: 1rem; */
+  height: 15px;
+  width: 15px;
+  height: 10px;
+  min-height: 10px;
+  font-size: 10px;
+  line-height: 10px;
+}
+
+.tiny .spacer {
+  display: none;
+}
+
+.tiny .chord-name {
+  font-size: 10px;
+  margin: 0;
+}
+
+
+
+
+
+
+
+
+
 </style>
 
 <?php
