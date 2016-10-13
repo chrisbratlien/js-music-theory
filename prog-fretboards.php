@@ -1254,9 +1254,6 @@ btnSaveProg.click(function(){
     
 
 var progInput = jQuery('#progression');
-progInput.blur(function() { 
-  campfire.publish('gather-inputs-and-do-it');
-});
 progInput.on('touchend',function(){ //for iOS bug
 	///alert('hey');
 	BSD.handleFirstClick();
