@@ -1308,6 +1308,42 @@ var delayMS = {
 
 
 
+function distScore(a,b) {
+  var min, max, diff, dist;
+  if (!a) { min = b; max = b; diff = 0; }
+  if (!b) { min = a; max = a; diff = 0; }
+  if (!a && !b) { return 0; }
+  min = Math.min(a,b);
+  max = Math.max(a,b);
+  diff = max - min;
+  dist = Math.min(diff,12-diff);
+  return dist;
+}
+
+
+function outsideJudge(o,env) {
+  if (abstractNoteValues.indexOf(o.chromaticValue) < 0) { return 'outside'; }
+  if (o.fret > 13) { return 'too high'; }
+  if (BSD.activeStrings && !BSD.activeStrings.detect(function(as) { 
+    ///console.log('as',as,'o.string',o.string);
+    return as == o.string; 
+  })) {
+    return "not active string: " + o.string;
+  }
+
+
+  if (BSD.options.fretRange && o.fret > BSD.options.fretRange[1]) {
+    return 'fret > maxFret';
+  }
+  if (BSD.options.fretRange && o.fret < BSD.options.fretRange[0]) {
+    return 'fret < minFret';
+  }
+  return 'OK';
+}
+
+
+
+
 function tick(cursor) { //consider re-implementing with multiple single-purpose subscribers to 'tick'
   if (!cursor) { return false; }
   delayMS.even4 = BSD.tempoToMillis(BSD.options.tempo);
@@ -1339,8 +1375,14 @@ function tick(cursor) { //consider re-implementing with multiple single-purpose 
   var direction = (Math.random() > 0.5) ? 'up' : 'down';
   var nextDirection = { 'up': 'down', 'down': 'up'};
   
-  var candidates,
+  var avgFret,
+  avgString,
+  drift3,
+  drift2,
+  candidates,
+  abstractNoteValues,
   result,
+  idealFret,
   lastResult,
   lastAbstractValue,
   lastValue,
@@ -1365,7 +1407,13 @@ function tick(cursor) { //consider re-implementing with multiple single-purpose 
 
 
 function initLast() {
+  avgFret = false;
+  avgString = false;
+  drift2 = false;
+  drift3 = false;
 
+  idealFret = 9; //starter...will get overriden
+  abstractNoteValues = [];
   candidates = [];
   lastAbstractValue = false;
   lastValue = false; //60
@@ -1380,6 +1428,74 @@ function initLast() {
   lastResult = false;
   BSD.sequence = [];
 }
+
+
+
+
+
+
+    var judge = function(o,env) {  
+
+      var diff = lastValue ? o.noteValue - lastValue : 0;
+      if (Math.abs(diff) > 6) { return 'diff>6:' + diff; }
+
+      var idealFretDiff = Math.abs(o.fret - idealFret);
+      if (idealFretDiff > 4) { return 'idealFretDiff>4'; }      
+
+      if (env.chordNoteIdx > 0 && diff > 0 && direction == 'down') { return 'wrong dir'; }
+      if (env.chordNoteIdx > 0 && diff < 0 && direction == 'up') { return 'wrong dir'; }
+      if (lastValue && diff == 0) { return 'no diff'; }
+
+
+      var fretDiff = lastFret ? o.fret - lastFret : 0; 
+      console.log('fretDiff',fretDiff,'lastFretDiff',lastFretDiff);
+
+      //FIXME: can probably simplify this once my goals are better understood
+      if (drift3 && Math.abs(drift3 + fretDiff) > 4) { 
+        return 'drift3: drifting too much in one direction, drift3: ' + drift3 + ' fretDiff: ' + fretDiff; 
+      }
+
+      if (drift2 && Math.abs(drift2 + fretDiff) > 4) { 
+        return 'drift2: drifting too much in one direction, drift2: ' + drift2 + ' fretDiff: ' + fretDiff; 
+      }
+
+      if (lastFretDiff && Math.abs(lastFretDiff + fretDiff) > 4) { 
+        return 'lastFretDiff: drifting too much in one direction, lastFretDiff: ' + lastFretDiff + ' fretDiff: ' + fretDiff; 
+      }
+
+      var fretDistance = Math.abs(fretDiff);
+      if (fretDistance > 3) { return 'fretDistance > 3'; }
+      if (lastFretDiff && Math.abs(lastFretDiff + fretDiff) > 4) { return 'lastFretDiff+fretDiff >4'; } ///if they don't cancel each other out and their total is too big
+
+      var stringDiff = lastString? Math.abs(o.string - lastString) : 0;
+      if (stringDiff > 2) { return 'stringDiff>2'; }
+
+      //now for the avg
+      var avgFretDistance = avgFret ? Math.abs(o.fret - avgFret) : 0;
+      var avgStringDiff = avgString ? Math.abs(o.string - avgString): 0;
+      if (avgFretDistance > 4) { return 'avgFretDistance>4'; }
+      ///if (avgStringDiff > 2) { return 'avgStringDiff>2'; }
+
+      return 'OK';
+    };
+
+    var criteria = function(o,env){
+      var outsideDecision = outsideJudge(o,env);
+      if (outsideDecision !== 'OK') { return false; }
+      //console.log('decision',decision);
+      var decision = judge(o,env);
+
+      if (decision != 'OK') { //chordNoteIdx == 0 && 
+        rejections.push({
+            candidate: o,
+            decision:decision,
+            lastResult: lastResult
+        });
+      }
+      return  outsideDecision == 'OK' && decision == 'OK';
+    };
+
+
 
 
 campfire.subscribe('do-it',function(prog){
@@ -1464,7 +1580,7 @@ campfire.subscribe('do-it',function(prog){
       errors += 1;
       return false;
     }
-    var abstractNoteValues = myChord.abstractNoteValues();
+    abstractNoteValues = myChord.abstractNoteValues();
 
     var totQuarterNoteBeats = BSD.beatsPerMeasure; //for this chord.
     if (chordItem.halfBar) {
@@ -1491,6 +1607,12 @@ campfire.subscribe('do-it',function(prog){
       if (errors) { return false; }
 
 
+      var env = { 
+        chordNoteIdx: chordNoteIdx 
+      };
+
+
+
     if (Math.random() > 0.85) {
       ///console.log('random flip!');
       direction = nextDirection[direction];
@@ -1508,7 +1630,6 @@ campfire.subscribe('do-it',function(prog){
     var loopsPerTotal = 1;
 
 
-    var idealFret = 9; //starter...will get overriden
     if (BSD.idealFret) {
       idealFret = BSD.idealFret;
     }
@@ -1533,130 +1654,27 @@ campfire.subscribe('do-it',function(prog){
 
     ///console.log('i/idealFret',i,idealFret);
 
-    var avgFret;
     if (lastFrets.length >0) {
       avgFret = Math.round(lastFrets.sum() / lastFrets.length);
     }
 
-    var avgString;
+
     if (lastStrings.length >0) {
       avgString = Math.round(lastStrings.sum() / lastStrings.length);
     }
 
-    var drift3;
     if (lastFretDiffs.length >0) {
       drift3 = lastFretDiffs.slice(-3).sum(); //sum the latest 3
     }
 
-    var drift2;
     if (lastFretDiffs.length >0) {
       drift2 = lastFretDiffs.slice(-2).sum(); //sum the latest 3
     }
 
-
-
-    function distScore(a,b) {
-      var min, max, diff;
-      if (!a) { min = b; max = b; diff = 0; }
-      if (!b) { min = a; max = a; diff = 0; }
-      if (!a && !b) { return 0; }
-      min = Math.min(a,b);
-      max = Math.max(a,b);
-      var diff = max - min;
-      var dist = Math.min(diff,12-diff);
-      return dist;
-    };
-
-
-    var outsideJudge = function(o) {
-      if (abstractNoteValues.indexOf(o.chromaticValue) < 0) { return 'outside'; }
-      if (o.fret > 13) { return 'too high'; }
-      if (BSD.activeStrings && !BSD.activeStrings.detect(function(as) { 
-        ///console.log('as',as,'o.string',o.string);
-        return as == o.string; 
-      })) {
-        return "not active string: " + o.string;
-      }
-
-
-      if (BSD.options.fretRange && o.fret > BSD.options.fretRange[1]) {
-        return 'fret > maxFret';
-      }
-      if (BSD.options.fretRange && o.fret < BSD.options.fretRange[0]) {
-        return 'fret < minFret';
-      }
-      return 'OK';
-    };
-
-    var judge = function(o) {  
-
-      var diff = lastValue ? o.noteValue - lastValue : 0;
-      if (Math.abs(diff) > 6) { return 'diff>6:' + diff; }
-
-      var idealFretDiff = Math.abs(o.fret - idealFret);
-      if (idealFretDiff > 4) { return 'idealFretDiff>4'; }      
-
-      if (chordNoteIdx > 0 && diff > 0 && direction == 'down') { return 'wrong dir'; }
-      if (chordNoteIdx > 0 && diff < 0 && direction == 'up') { return 'wrong dir'; }
-      if (lastValue && diff == 0) { return 'no diff'; }
-
-
-      var fretDiff = lastFret ? o.fret - lastFret : 0; 
-      console.log('fretDiff',fretDiff,'lastFretDiff',lastFretDiff);
-
-      //FIXME: can probably simplify this once my goals are better understood
-      if (drift3 && Math.abs(drift3 + fretDiff) > 4) { 
-        return 'drift3: drifting too much in one direction, drift3: ' + drift3 + ' fretDiff: ' + fretDiff; 
-      }
-
-      if (drift2 && Math.abs(drift2 + fretDiff) > 4) { 
-        return 'drift2: drifting too much in one direction, drift2: ' + drift2 + ' fretDiff: ' + fretDiff; 
-      }
-
-      if (lastFretDiff && Math.abs(lastFretDiff + fretDiff) > 4) { 
-        return 'lastFretDiff: drifting too much in one direction, lastFretDiff: ' + lastFretDiff + ' fretDiff: ' + fretDiff; 
-      }
-
-
-
-
-      var fretDistance = Math.abs(fretDiff);
-      if (fretDistance > 3) { return 'fretDistance > 3'; }
-      if (lastFretDiff && Math.abs(lastFretDiff + fretDiff) > 4) { return 'lastFretDiff+fretDiff >4'; } ///if they don't cancel each other out and their total is too big
-
-      var stringDiff = lastString? Math.abs(o.string - lastString) : 0;
-      if (stringDiff > 2) { return 'stringDiff>2'; }
-
-      //now for the avg
-      var avgFretDistance = avgFret ? Math.abs(o.fret - avgFret) : 0;
-      var avgStringDiff = avgString ? Math.abs(o.string - avgString): 0;
-      if (avgFretDistance > 4) { return 'avgFretDistance>4'; }
-      ///if (avgStringDiff > 2) { return 'avgStringDiff>2'; }
-
-      return 'OK';
-    };
-
-
-    var criteria = function(o){
-      var outsideDecision = outsideJudge(o);
-      if (outsideDecision !== 'OK') { return false; }
-
-      //console.log('decision',decision);
-      var decision = judge(o);
-
-      if (decision != 'OK') { //chordNoteIdx == 0 && 
-        rejections.push({
-            candidate: o,
-            decision:decision,
-            lastResult: lastResult
-        });
-      }
-      return  outsideDecision == 'OK' && decision == 'OK';
-    };
-
-
     rejections = [];
-    candidates = candidates.select(criteria);
+    candidates = candidates.select(function(o) {
+      return criteria(o,env);
+    });
 
     if (candidates.length == 0) {
       console.log('uh oh');
@@ -1665,7 +1683,9 @@ campfire.subscribe('do-it',function(prog){
       direction = nextDirection[direction];
       ///console.log('flip! (necessity)');
       rejections = [];
-      candidates = BSD.guitarData.select(criteria);
+      candidates = BSD.guitarData.select(function(o) {
+        return criteria(o,env);
+      });
     }
 
     if (candidates.length == 0) {
@@ -1673,7 +1693,9 @@ campfire.subscribe('do-it',function(prog){
 
       console.log('barIdx',BSD.sequence[BSD.sequence.length-1].barIdx);
       rejections = [];
-      candidates = BSD.guitarData.select(criteria);
+      candidates = BSD.guitarData.select(function(o) {
+        return criteria(o,env);
+      });
     }
     if (candidates.length == 0) {
         errors += 1;
@@ -1689,9 +1711,11 @@ campfire.subscribe('do-it',function(prog){
 
       console.log('remaining choices',sorted.map(function(o){ return Note(o.chromaticValue).name(); }).join(','));
 
-      console.log('sorted Scores',sorted.map(function(o){ 
+
+      var sortedScores = sorted.map(function(o){ 
         return [Note(o.chromaticValue).name(),distScore(o.chromaticValue,lastAbstractValue)]; 
-      }));
+      });
+      console.log('sorted Scores',sortedScores);
 
       result = sorted[0];
       console.log('*FN* i',i,
@@ -1700,18 +1724,6 @@ campfire.subscribe('do-it',function(prog){
         'lastNote',lastNote.name(),
         'distScore()',distScore(result.chromaticValue,lastAbstractValue)
       );
-
-      /***
-      rejections = rejections.select(function(rej){ //I only care about the rejections which were close..
-
-        if (rej.decision == "outside") { return false; }
-        var score = distScore(rej.candidate.chromaticValue,lastAbstractValue);
-        return score <= 2;
-
-      });
-      *****/
-      //console.log('rejections',rejections);
-      ///rejections = [];
     }
     else {
       result = candidates.atRandom();
@@ -1722,11 +1734,6 @@ campfire.subscribe('do-it',function(prog){
         'distScore()',distScore(result.chromaticValue,lastAbstractValue)
       );
     }
-
-
-
-
-
 
     result = JSON.parse(JSON.stringify(result));
     result.barIdx = barIdx;
