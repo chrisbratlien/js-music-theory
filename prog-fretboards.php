@@ -1557,229 +1557,234 @@ campfire.subscribe('do-it',function(prog){
 
 
   var errors = 0;
-  
-
-  prog.forEach(function(chordItem,chordItemIdx) {
-    if (errors) { return false; }
-
-
-    rejections = [];
-    ///var barIdx = Math.floor(i / BSD.noteResolution);
-    var barIdx = chordItem.barIndex;
-    //var chordIdx = barIdx % chords.length;
-    var chordIdx = chordItemIdx;
-    var barChordIdx = chordItem.barChordIndex;
-    //var myChord = chords[chordIdx];
-    var myChord = chordItem.chord;
-    var cycleIdx = Math.floor(barIdx / prog.length);
-    //var cycleIdx = Math.floor(barIdx / chords.length);
-    ///cycleIdx = Math.floor(cycleIdx / chords.length);
-    ////console.log('barIdx',barIdx,'chordIdx',chordIdx,'cycleIdx',cycleIdx);
-
-    if (!myChord) {
-      errors += 1;
-      return false;
-    }
-    abstractNoteValues = myChord.abstractNoteValues();
-
-    var totQuarterNoteBeats = BSD.beatsPerMeasure; //for this chord.
-    if (chordItem.halfBar) {
-      if (BSD.beatsPerMeasure == 3) {
-        if (barChordIdx == 0) {
-          totQuarterNoteBeats = 2;
-        }
-        else {
-          totQuarterNoteBeats = 1;
-        }
-      }
-      else {
-        totQuarterNoteBeats = 2;
-      }
-    }
-
-    var totNoteEvents = Math.ceil(totQuarterNoteBeats * BSD.beatsPerMeasure / BSD.noteResolution); 
-    var range = [];
-    for (var i = 0; i < totNoteEvents; i += 1) {
-      range.push(i);
-    }
-
-    range.forEach(function(o,chordNoteIdx) {
+  var cycleRange = [];
+  for(var i = 0; i < BSD.progCycles; i += 1) {
+    cycleRange.push(i); 
+  }
+  cycleRange.forEach(function(cycleIdx){
+    prog.forEach(function(chordItem,chordItemIdx) {
       if (errors) { return false; }
 
 
-      var env = { 
-        chordNoteIdx: chordNoteIdx 
-      };
-
-
-
-    if (Math.random() > 0.85) {
-      ///console.log('random flip!');
-      direction = nextDirection[direction];
-    }
-    if (lastValue <= 44) {//low E
-      direction = 'up';
-    }
-
-    candidates = BSD.guitarData;
-
-
-    var scale = 10;//12; //rightmost fret to idealize.
-    var tot = 256; //range.length;
-    var progress = i; //step
-    var loopsPerTotal = 1;
-
-
-    if (BSD.idealFret) {
-      idealFret = BSD.idealFret;
-    }
-    else {
-      //TODO: really undestand scaling trig unit radius circle and scaling better.
-      /**
-      idealFret = Math.round(scale * (Math.cos ((2 * Math.PI) / tot * progress * loopsPerTotal ) + 1) / 2);
-      **/
-      var start = 7; //gets blown away..
-      if (BSD.options.fretRange) {
-        start = Math.round(BSD.options.fretRange.average());
-      }
-
-      idealFret = start + cycleIdx; //FIXME
-      var idealFretMax = BSD.options.fretRange[1];
-      var maxDiff = idealFret - idealFretMax;
-      if (maxDiff > 0) {
-        idealFret = idealFretMax - maxDiff;
-      }
-    }
-
-
-    ///console.log('i/idealFret',i,idealFret);
-
-    if (lastFrets.length >0) {
-      avgFret = Math.round(lastFrets.sum() / lastFrets.length);
-    }
-
-
-    if (lastStrings.length >0) {
-      avgString = Math.round(lastStrings.sum() / lastStrings.length);
-    }
-
-    if (lastFretDiffs.length >0) {
-      drift3 = lastFretDiffs.slice(-3).sum(); //sum the latest 3
-    }
-
-    if (lastFretDiffs.length >0) {
-      drift2 = lastFretDiffs.slice(-2).sum(); //sum the latest 3
-    }
-
-    rejections = [];
-    candidates = candidates.select(function(o) {
-      return criteria(o,env);
-    });
-
-    if (candidates.length == 0) {
-      console.log('uh oh');
-      console.log('barIdx',BSD.sequence[BSD.sequence.length-1].barIdx);
-
-      direction = nextDirection[direction];
-      ///console.log('flip! (necessity)');
       rejections = [];
-      candidates = BSD.guitarData.select(function(o) {
-        return criteria(o,env);
-      });
-    }
+      ///var barIdx = Math.floor(i / BSD.noteResolution);
+      var barIdx = chordItem.barIndex;
+      //var chordIdx = barIdx % chords.length;
+      var chordIdx = chordItemIdx;
+      var barChordIdx = chordItem.barChordIndex;
+      //var myChord = chords[chordIdx];
+      var myChord = chordItem.chord;
+      ///var cycleIdx = Math.floor(barIdx / prog.length);
+      //var cycleIdx = Math.floor(barIdx / chords.length);
+      ///cycleIdx = Math.floor(cycleIdx / chords.length);
+      ////console.log('barIdx',barIdx,'chordIdx',chordIdx,'cycleIdx',cycleIdx);
 
-    if (candidates.length == 0) {
-      console.log('uh oh #2');
-
-      console.log('barIdx',BSD.sequence[BSD.sequence.length-1].barIdx);
-      rejections = [];
-      candidates = BSD.guitarData.select(function(o) {
-        return criteria(o,env);
-      });
-    }
-    if (candidates.length == 0) {
+      if (!myChord) {
         errors += 1;
         return false;
-    }
+      }
+      abstractNoteValues = myChord.abstractNoteValues();
 
-    if (chordNoteIdx == 0) { //first note in new chord change... try to get nearest pitch to last note played.
+      var totQuarterNoteBeats = BSD.beatsPerMeasure; //for this chord.
+      if (chordItem.halfBar) {
+        if (BSD.beatsPerMeasure == 3) {
+          if (barChordIdx == 0) {
+            totQuarterNoteBeats = 2;
+          }
+          else {
+            totQuarterNoteBeats = 1;
+          }
+        }
+        else {
+          totQuarterNoteBeats = 2;
+        }
+      }
 
-  
-      var sorted = candidates.sort(BSD.sorter(function(o) {
-        return distScore(o.chromaticValue,lastAbstractValue);
-      }));
+      var totNoteEvents = Math.ceil(totQuarterNoteBeats * BSD.beatsPerMeasure / BSD.noteResolution); 
+      var eventRange = [];
+      for (var i = 0; i < totNoteEvents; i += 1) {
+        eventRange.push(i);
+      }
 
-      console.log('remaining choices',sorted.map(function(o){ return Note(o.chromaticValue).name(); }).join(','));
+      eventRange.forEach(function(o,chordNoteIdx) {
+        if (errors) { return false; }
 
 
-      var sortedScores = sorted.map(function(o){ 
-        return [Note(o.chromaticValue).name(),distScore(o.chromaticValue,lastAbstractValue)]; 
+        var env = { 
+          chordNoteIdx: chordNoteIdx 
+        };
+
+
+
+      if (Math.random() > 0.85) {
+        ///console.log('random flip!');
+        direction = nextDirection[direction];
+      }
+      if (lastValue <= 44) {//low E
+        direction = 'up';
+      }
+
+      candidates = BSD.guitarData;
+
+
+      var scale = 10;//12; //rightmost fret to idealize.
+      var tot = 256; //range.length;
+      var progress = i; //step
+      var loopsPerTotal = 1;
+
+
+      if (BSD.idealFret) {
+        idealFret = BSD.idealFret;
+      }
+      else {
+        //TODO: really undestand scaling trig unit radius circle and scaling better.
+        /**
+        idealFret = Math.round(scale * (Math.cos ((2 * Math.PI) / tot * progress * loopsPerTotal ) + 1) / 2);
+        **/
+        var start = 7; //gets blown away..
+        if (BSD.options.fretRange) {
+          start = Math.round(BSD.options.fretRange.average());
+        }
+
+        idealFret = start + cycleIdx; //FIXME
+        var idealFretMax = BSD.options.fretRange[1];
+        var maxDiff = idealFret - idealFretMax;
+        if (maxDiff > 0) {
+          idealFret = idealFretMax - maxDiff;
+        }
+      }
+
+
+      ///console.log('i/idealFret',i,idealFret);
+
+      if (lastFrets.length >0) {
+        avgFret = Math.round(lastFrets.sum() / lastFrets.length);
+      }
+
+
+      if (lastStrings.length >0) {
+        avgString = Math.round(lastStrings.sum() / lastStrings.length);
+      }
+
+      if (lastFretDiffs.length >0) {
+        drift3 = lastFretDiffs.slice(-3).sum(); //sum the latest 3
+      }
+
+      if (lastFretDiffs.length >0) {
+        drift2 = lastFretDiffs.slice(-2).sum(); //sum the latest 3
+      }
+
+      rejections = [];
+      candidates = candidates.select(function(o) {
+        return criteria(o,env);
       });
-      console.log('sorted Scores',sortedScores);
 
-      result = sorted[0];
-      console.log('*FN* i',i,
-        myChord.fullAbbrev(),
-        'chose',Note(result.noteValue).name(),
-        'lastNote',lastNote.name(),
-        'distScore()',distScore(result.chromaticValue,lastAbstractValue)
-      );
-    }
-    else {
-      result = candidates.atRandom();
-      console.log('i',i,
-        myChord.fullAbbrev(),
-        'chose',Note(result.noteValue).name(),
-        'lastNote',lastNote.name(),
-        'distScore()',distScore(result.chromaticValue,lastAbstractValue)
-      );
-    }
+      if (candidates.length == 0) {
+        console.log('uh oh');
+        console.log('barIdx',BSD.sequence[BSD.sequence.length-1].barIdx);
 
-    result = JSON.parse(JSON.stringify(result));
-    result.barIdx = barIdx;
-    result.totQuarterNoteBeats = totQuarterNoteBeats;
-    result.totNoteEvents = totNoteEvents;
+        direction = nextDirection[direction];
+        ///console.log('flip! (necessity)');
+        rejections = [];
+        candidates = BSD.guitarData.select(function(o) {
+          return criteria(o,env);
+        });
+      }
 
-    result.direction = direction;
-    result.chordIdx = chordIdx;
-    result.board = BSD.boards[chordIdx];
-    result.chord = myChord;
-    result.chordNoteIdx = chordNoteIdx;
-    result.idealFret = idealFret;
-    result.avgFret = avgFret;
-    ///result.idx = i;
+      if (candidates.length == 0) {
+        console.log('uh oh #2');
+
+        console.log('barIdx',BSD.sequence[BSD.sequence.length-1].barIdx);
+        rejections = [];
+        candidates = BSD.guitarData.select(function(o) {
+          return criteria(o,env);
+        });
+      }
+      if (candidates.length == 0) {
+          errors += 1;
+          return false;
+      }
+
+      if (chordNoteIdx == 0) { //first note in new chord change... try to get nearest pitch to last note played.
+
     
-    console.log('result',result);
+        var sorted = candidates.sort(BSD.sorter(function(o) {
+          return distScore(o.chromaticValue,lastAbstractValue);
+        }));
+
+        console.log('remaining choices',sorted.map(function(o){ return Note(o.chromaticValue).name(); }).join(','));
 
 
-    if (!result) {
-      errors += 1;
-    }
+        var sortedScores = sorted.map(function(o){ 
+          return [Note(o.chromaticValue).name(),distScore(o.chromaticValue,lastAbstractValue)]; 
+        });
+        console.log('sorted Scores',sortedScores);
 
-    BSD.sequence.push(result);
+        result = sorted[0];
+        console.log('*FN* i',i,
+          myChord.fullAbbrev(),
+          'chose',Note(result.noteValue).name(),
+          'lastNote',lastNote.name(),
+          'distScore()',distScore(result.chromaticValue,lastAbstractValue)
+        );
+      }
+      else {
+        result = candidates.atRandom();
+        console.log('i',i,
+          myChord.fullAbbrev(),
+          'chose',Note(result.noteValue).name(),
+          'lastNote',lastNote.name(),
+          'distScore()',distScore(result.chromaticValue,lastAbstractValue)
+        );
+      }
 
-    lastResult = result;
-    ///sequence[i] = result;
-    lastValue = result.noteValue;
-    lastNote = Note(lastValue);
-    lastAbstractValue = lastNote.abstractValue();
-    lastString = result.string;
-    lastFretDiff = lastFret ? result.fret - lastFret : 0;
-    lastFretDiffs.push(lastFretDiff);
+      result = JSON.parse(JSON.stringify(result));
+      result.barIdx = barIdx;
+      result.totQuarterNoteBeats = totQuarterNoteBeats;
+      result.totNoteEvents = totNoteEvents;
+
+      result.direction = direction;
+      result.chordIdx = chordIdx;
+      result.board = BSD.boards[chordIdx];
+      result.chord = myChord;
+      result.chordNoteIdx = chordNoteIdx;
+      result.idealFret = idealFret;
+      result.avgFret = avgFret;
+      ///result.idx = i;
+      
+      console.log('result',result);
 
 
-    lastFret = result.fret;
+      if (!result) {
+        errors += 1;
+      }
+
+      BSD.sequence.push(result);
+
+      lastResult = result;
+      ///sequence[i] = result;
+      lastValue = result.noteValue;
+      lastNote = Note(lastValue);
+      lastAbstractValue = lastNote.abstractValue();
+      lastString = result.string;
+      lastFretDiff = lastFret ? result.fret - lastFret : 0;
+      lastFretDiffs.push(lastFretDiff);
 
 
-    if (lastFrets.length > 4) { lastFrets.shift(); } //having a average of 5 was too limiting in candidates.
-    lastFrets.push(lastFret);
+      lastFret = result.fret;
 
-    if (lastStrings.length > 3) { lastStrings.shift(); } //having a average of 5 was too limiting in candidates.
-    lastStrings.push(lastString);
 
-    });
+      if (lastFrets.length > 4) { lastFrets.shift(); } //having a average of 5 was too limiting in candidates.
+      lastFrets.push(lastFret);
 
-  });
+      if (lastStrings.length > 3) { lastStrings.shift(); } //having a average of 5 was too limiting in candidates.
+      lastStrings.push(lastString);
+
+      }); //eventRange
+
+    }); //prog
+
+  }); //BSD.progCycles
   ///console.log('sequence',sequence);
 
 
