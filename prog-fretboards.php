@@ -1748,6 +1748,8 @@ campfire.subscribe('do-it',function(prog){
       result.board = BSD.boards[chordIdx];
       result.chord = myChord;
       result.chordNoteIdx = chordNoteIdx;
+      result.cycleIdx = cycleIdx;
+
       result.idealFret = idealFret;
       result.avgFret = avgFret;
       ///result.idx = i;
@@ -2029,7 +2031,8 @@ campfire.subscribe('tick',function(cursor){
 
     campfire.publish('reset-sequence-next');
     BSD.loop = BSD.sequence.select(function(o){
-      return o.barIdx >= BSD.loopStart && o.barIdx <= BSD.loopEnd;
+      //FIXME: insisting on cycleIdx == 0 for now... is there a better way?      
+      return o.cycleIdx == 0 && o.barIdx >= BSD.loopStart && o.barIdx <= BSD.loopEnd;
     });
 
     BSD.loop[BSD.loop.length-1].next = BSD.loop[0];
@@ -2045,7 +2048,8 @@ campfire.subscribe('tick',function(cursor){
 
     campfire.publish('reset-sequence-next');
     BSD.loop = BSD.sequence.select(function(o){
-      return o.barIdx >= BSD.loopStart && o.barIdx <= BSD.loopEnd;
+      //FIXME: insisting on cycleIdx == 0 for now... is there a better way?
+      return o.cycleIdx == 0 && o.barIdx >= BSD.loopStart && o.barIdx <= BSD.loopEnd;
     });
 
     BSD.loop[BSD.loop.length-1].next = BSD.loop[0];
