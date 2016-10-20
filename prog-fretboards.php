@@ -1311,7 +1311,7 @@ var delayMS = {
 function distScore(a,b) {
   var min, max, diff, dist;
 
-  if (typeof a == "number" || typeof b == "number") { return 0; }
+  if (typeof a != "number" || typeof b != "number") { return 15; }
   /***
   if (a !== 0 && !a) { min = b; max = b; diff = 0; }
   if (b !== 0 && !b) { min = a; max = a; diff = 0; }
@@ -1730,7 +1730,9 @@ campfire.subscribe('do-it',function(prog){
           myChord.fullAbbrev(),
           'chose',Note(result.noteValue).name(),
           'lastNote',lastNote.name(),
-          'distScore()',distScore(result.chromaticValue,lastAbstractValue)
+          'distScore()',distScore(result.chromaticValue,lastAbstractValue),
+          'result.chromaticValue',result.chromaticValue,
+          'lastAbstractValue',lastAbstractValue
         );
       }
       else {
@@ -1739,7 +1741,9 @@ campfire.subscribe('do-it',function(prog){
           myChord.fullAbbrev(),
           'chose',Note(result.noteValue).name(),
           'lastNote',lastNote.name(),
-          'distScore()',distScore(result.chromaticValue,lastAbstractValue)
+          'distScore()',distScore(result.chromaticValue,lastAbstractValue),
+          'result.chromaticValue',result.chromaticValue,
+          'lastAbstractValue',lastAbstractValue
         );
       }
 
