@@ -1310,13 +1310,18 @@ var delayMS = {
 
 function distScore(a,b) {
   var min, max, diff, dist;
-  if (!a) { min = b; max = b; diff = 0; }
-  if (!b) { min = a; max = a; diff = 0; }
-  if (!a && !b) { return 0; }
+
+  if (typeof a == "number" || typeof b == "number") { return 0; }
+  /***
+  if (a !== 0 && !a) { min = b; max = b; diff = 0; }
+  if (b !== 0 && !b) { min = a; max = a; diff = 0; }
+  if (a !== 0 && b !== 0 && !a && !b) { return 0; }
+  ***/
   min = Math.min(a,b);
   max = Math.max(a,b);
   diff = max - min;
   dist = Math.min(diff,12-diff);
+  dist = Math.abs(dist);
   return dist;
 }
 
