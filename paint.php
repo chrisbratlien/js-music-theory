@@ -67,7 +67,7 @@ add_action('wp_footer',function(){
 		//mode:        'pencil',  // set mode
 		mode:        'text',  // set mode
 		lineWidth:   '1',       // starting line width
-		fillStyle:   '#BB0088', // starting fill style
+		fillStyle:   '#3399FF',//'#BB0088', // starting fill style
 		strokeStyle: '#AA0055',  // start stroke style  
 
 
@@ -75,7 +75,16 @@ add_action('wp_footer',function(){
 	  fontFamily: 'Arial', // active font family for text input
 	  fontBold: false,   // text input bold enable/disable
 	  fontItalic: false,   // text input italic enable/disable
-	  fontUnderline: false    // text input italic enable/disable
+	  fontUnderline: false,    // text input italic enable/disable
+
+	  saveImg: function(o) {
+	  	console.log('o',o);
+	  	window.open(o);
+	  	campfire.publish('save-image',o);
+
+	  }
+
+
 	});
 
 	var btnUndo = jQuery('.btn-undo');
