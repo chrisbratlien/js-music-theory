@@ -71,15 +71,14 @@ add_action('wp_footer',function(){
 		strokeStyle: '#AA0055',  // start stroke style  
 
 
-		fontSize: '30',    // current font size for text input
+		fontSize: '20',    // current font size for text input
 	  fontFamily: 'Arial', // active font family for text input
 	  fontBold: false,   // text input bold enable/disable
 	  fontItalic: false,   // text input italic enable/disable
 	  fontUnderline: false,    // text input italic enable/disable
 
 	  saveImg: function(o) {
-	  	console.log('o',o);
-	  	window.open(o);
+	  	////console.log('o',o);
 	  	campfire.publish('save-image',o);
 
 	  }
@@ -98,6 +97,15 @@ add_action('wp_footer',function(){
 	btnRedo.click(function(){
 		$('#wPaint').wPaint('redo');
 	});
+
+	campfire.subscribe('save-image',function(imageData){
+			window.open(imageData);
+	});
+	jQuery(window).resize(function(){
+		//alert('resize');
+		//$("#wPaint").wPaint('resize');		
+	});
+
 
 </script>
 <?php
