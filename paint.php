@@ -7,7 +7,7 @@ add_action('wp_head',function(){
 
 .paint-wrap { 
 	position: absolute;
-	top: 0;
+	top: 80px;
 	bottom: 0;
 	right: 0;	
 	bottom: 0;
@@ -24,6 +24,16 @@ get_header();
 
 
 ?>
+<div class="navbar-spacer screen-only noprint">
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+  <br>
+</div>
+<button class="btn btn-info btn-undo">Undo</button>
+<button class="btn btn-info btn-redo">Redo</button>
 <div class="paint-wrap" id="wPaint">
 	
 </div>
@@ -47,19 +57,38 @@ add_action('wp_footer',function(){
 <script type="text/javascript" src="lib/wPaint/plugins/file/wPaint.menu.main.file.min.js"></script>
 <script>
 
-$('#wPaint').wPaint({
-  path: 'lib/wPaint/',
-  image: 'data/all-of-me.png',
-  imageStretch: true, //not sure this did anything...
-  theme:           'standard classic', // set theme //unsure also...
+	$('#wPaint').wPaint({
+	  path: 'lib/wPaint/',
+	  //image: 'images/all-of-me.png',
+	  image: 'images/beautiful-love.png',
+	  imageStretch: true, //not sure this did anything...
+	  theme:           'standard classic', // set theme //unsure also...
 
-	mode:        'pencil',  // set mode
-	lineWidth:   '1',       // starting line width
-	fillStyle:   '#FFFFFF', // starting fill style
-	strokeStyle: '#AA0055'  // start stroke style  
+		//mode:        'pencil',  // set mode
+		mode:        'text',  // set mode
+		lineWidth:   '1',       // starting line width
+		fillStyle:   '#BB0088', // starting fill style
+		strokeStyle: '#AA0055',  // start stroke style  
 
-});
 
+		fontSize: '30',    // current font size for text input
+	  fontFamily: 'Arial', // active font family for text input
+	  fontBold: false,   // text input bold enable/disable
+	  fontItalic: false,   // text input italic enable/disable
+	  fontUnderline: false    // text input italic enable/disable
+	});
+
+	var btnUndo = jQuery('.btn-undo');
+	var btnRedo = jQuery('.btn-undo');
+
+
+	btnUndo.click(function(){
+		$('#wPaint').wPaint('undo');
+	});
+
+	btnRedo.click(function(){
+		$('#wPaint').wPaint('redo');
+	});
 
 </script>
 <?php
