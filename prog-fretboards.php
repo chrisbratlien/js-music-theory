@@ -487,7 +487,7 @@ var venue = jQuery('.venue');
 var btnToggleTiny = jQuery('.btn-toggle-tiny');
 btnToggleTiny.click(function(){
   BSD.options.tiny = !BSD.options.tiny;
-
+  storage.setItem('options',JSON.stringify(BSD.options));
   BSD.options.tiny ? venue.addClass('tiny') : venue.removeClass('tiny');
   BSD.options.tiny ? btnToggleTiny.html('Big') : btnToggleTiny.html('Tiny');
 });
