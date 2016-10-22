@@ -60,7 +60,8 @@ add_action('wp_footer',function(){
 	$('#wPaint').wPaint({
 	  path: 'lib/wPaint/',
 	  //image: 'images/all-of-me.png',
-	  image: 'images/beautiful-love.png',
+	  image: 'images/alice-in-wonderland.png',
+	  //image: 'images/beautiful-love.png',
 	  imageStretch: true, //not sure this did anything...
 	  theme:           'standard classic', // set theme //unsure also...
 
@@ -71,7 +72,7 @@ add_action('wp_footer',function(){
 		strokeStyle: '#AA0055',  // start stroke style  
 
 
-		fontSize: '20',    // current font size for text input
+		fontSize: '14',    // current font size for text input
 	  fontFamily: 'Arial', // active font family for text input
 	  fontBold: false,   // text input bold enable/disable
 	  fontItalic: false,   // text input italic enable/disable

@@ -293,6 +293,7 @@ get_header(); ?>
   <button class="btn btn-info btn-pause"><i class="fa fa-pause"></i> Pause</button>
   <button class="btn btn-info btn-toggle-text noprint">Toggle Text</button>
   <button class="btn btn-info btn-save-prog"><i class="fa fa-save"></i> Save Prog</button>
+  <button class="btn btn-info btn-toggle-tiny">Tiny</button>
   <br />
 
 
@@ -478,6 +479,17 @@ btnSaveProg.click(function(){
     BSD.progressions.push(spec);
     campfire.publish('save-progressions');
   }
+});
+
+
+
+var venue = jQuery('.venue');
+var btnToggleTiny = jQuery('.btn-toggle-tiny');
+btnToggleTiny.click(function(){
+  BSD.options.tiny = !BSD.options.tiny;
+
+  BSD.options.tiny ? venue.addClass('tiny') : venue.removeClass('tiny');
+  BSD.options.tiny ? btnToggleTiny.html('Big') : btnToggleTiny.html('Tiny');
 });
 
 /**
