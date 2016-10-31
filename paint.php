@@ -6,13 +6,17 @@ add_action('wp_head',function(){
 	
 
 .paint-wrap { 
+
+	/**
 	position: absolute;
 	top: 80px;
 	bottom: 0;
 	right: 0;	
 	bottom: 0;
+	**/
+
 	width: 100%;
-	height: 100%;
+	height: auto;
 }
 
 </style>

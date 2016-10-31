@@ -199,7 +199,18 @@ add_action('wp_head',function(){
 
 
 
+.stringset-4321 .string-4 { border-bottom: 1px solid rgba(0,0,0,0.1); }
+.stringset-4321 .string-5 { display: none; }
+.stringset-4321 .string-6 { display: none; }
 
+
+.stringset-5432 .string-5 { border-bottom: 1px solid rgba(0,0,0,0.1); }
+.stringset-5432 .string-1 { display: none; }
+.stringset-5432 .string-6 { display: none; }
+
+
+.stringset-6543 .string-2 { display: none; }
+.stringset-6543 .string-1 { display: none; }
 
 
 
@@ -255,31 +266,31 @@ get_header(); ?>
         </div>
         <label>String sets</label>
 
-        <input type="checkbox" class="stringset-654321" checked="true" />
+        <input type="checkbox" class="cb-stringset-654321" checked="true" />
         <label>654321</label>
 
-        <input type="checkbox" class="stringset-6432" />
+        <input type="checkbox" class="cb-stringset-6432" />
         <label>6432</label>
 
-        <input type="checkbox" class="stringset-4321" />
+        <input type="checkbox" class="cb-stringset-4321" />
         <label>4321</label>
 
-        <input type="checkbox" class="stringset-5432" />
+        <input type="checkbox" class="cb-stringset-5432" />
         <label>5432</label>
 
-        <input type="checkbox" class="stringset-5321" />
+        <input type="checkbox" class="cb-stringset-5321" />
         <label>5321</label>
 
-        <input type="checkbox" class="stringset-6543" />
+        <input type="checkbox" class="cb-stringset-6543" />
         <label>6543</label>
         <br />
-        <input type="checkbox" class="stringset-321" />
+        <input type="checkbox" class="cb-stringset-321" />
         <label>321</label>
-        <input type="checkbox" class="stringset-432" />
+        <input type="checkbox" class="cb-stringset-432" />
         <label>432</label>
-        <input type="checkbox" class="stringset-543" />
+        <input type="checkbox" class="cb-stringset-543" />
         <label>543</label>
-        <input type="checkbox" class="stringset-654" />
+        <input type="checkbox" class="cb-stringset-654" />
         <label>654</label>
 
 
@@ -1553,13 +1564,16 @@ campfire.subscribe('do-it',function(prog){
     ////BSD.boards.push(extraBoard);
 
   ['654321','6432','4321','5432','5321','6543','321','432','543','654'].forEach(function(stringSet){
-    var cb = jQuery('.stringset-' + stringSet);
+    var cb = jQuery('.cb-stringset-' + stringSet);
     if (!cb.attr('checked')) { return false; }
+
+
     var activeStrings = stringSet.split('');
     BSD.activeStrings = activeStrings; //FIXME, this won't work in the long run
     prog.forEach(function(chordItem,chordItemIdx){
       var chord = chordItem.chord;
-      var stage = DOM.div().addClass('stage hidden');
+      var stage = DOM.div().addClass('stage hidden stringset-' + stringSet);
+
       venue.append(stage);
       var board = makeFretboardOn(stage,{
         chord: chord,
