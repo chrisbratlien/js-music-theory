@@ -197,6 +197,13 @@ add_action('wp_head',function(){
   margin: 0;
 }
 
+.tiny .inner .controls {
+  display: none;
+}
+
+.tiny .fretboard-table {
+  margin-bottom: 2px;
+}
 
 
 .stringset-4321 .string-4 { border-bottom: 1px solid rgba(0,0,0,0.1); }
@@ -1372,7 +1379,7 @@ function outsideJudge(o,env) {
 
 
 
-function tick(cursor) { //consider re-implementing with multiple single-purpose subscribers to 'tick'
+function tick(cursor) { 
   if (!cursor) { return false; }
   delayMS.even4 = BSD.tempoToMillis(BSD.options.tempo);
   delayMS.even1 = delayMS.even4 * BSD.beatsPerMeasure; //whole notes
@@ -1385,7 +1392,7 @@ function tick(cursor) { //consider re-implementing with multiple single-purpose 
   delayMS.midSwung81 = delayMS.swung81;
   //var midSwung81 = (swung81+even8DelayMS) / 2;/////].sum() /2;
   delayMS.midSwung82 = delayMS.swung82;
-  campfire.publish('tick',cursor);
+  campfire.publish('tick',cursor); //that a tick happened, 
 
   clearTimeout(BSD.timeout);
   delayMS.next = delayMS['even' + BSD.noteResolution];
