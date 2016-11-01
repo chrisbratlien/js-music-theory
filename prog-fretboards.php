@@ -206,6 +206,7 @@ add_action('wp_head',function(){
 }
 
 
+/* drop 2 string sets */
 .stringset-4321 .string-4 { border-bottom: 1px solid rgba(0,0,0,0.1); }
 .stringset-4321 .string-5 { display: none; }
 .stringset-4321 .string-6 { display: none; }
@@ -220,6 +221,9 @@ add_action('wp_head',function(){
 .stringset-6543 .string-1 { display: none; }
 
 
+/* Drop 3 string sets */
+.stringset-6432 .string-1 { display: none; }
+.stringset-5321 .string-6 { display: none; }
 
 
 
@@ -271,38 +275,42 @@ get_header(); ?>
             <button class="btn btn-info btn-start">Start</button>          
           </div>
         </div>
+        
         <label>String sets</label>
 
-        <input type="checkbox" class="cb-stringset-654321" checked="true" />
-        <label>654321</label>
+        <div class="all">
+          <label>All</label>
+          <input type="checkbox" class="cb-stringset-654321" checked="true" />
+          <label>654321</label>
+        </div>
+        <div class="drop2">
+          <label>Drop 2</label>
+          <input type="checkbox" class="cb-stringset-4321" />
+          <label>4321</label>
 
-        <input type="checkbox" class="cb-stringset-6432" />
-        <label>6432</label>
-
-        <input type="checkbox" class="cb-stringset-4321" />
-        <label>4321</label>
-
-        <input type="checkbox" class="cb-stringset-5432" />
-        <label>5432</label>
-
-        <input type="checkbox" class="cb-stringset-5321" />
-        <label>5321</label>
-
-        <input type="checkbox" class="cb-stringset-6543" />
-        <label>6543</label>
-        <br />
-        <input type="checkbox" class="cb-stringset-321" />
-        <label>321</label>
-        <input type="checkbox" class="cb-stringset-432" />
-        <label>432</label>
-        <input type="checkbox" class="cb-stringset-543" />
-        <label>543</label>
-        <input type="checkbox" class="cb-stringset-654" />
-        <label>654</label>
-
-
-
-      </div>
+          <input type="checkbox" class="cb-stringset-5432" />
+          <label>5432</label>
+          <input type="checkbox" class="cb-stringset-6543" />
+          <label>6543</label>
+        </div>
+        <div class="drop3">
+          <label>Drop 3</label>
+          <input type="checkbox" class="cb-stringset-6432" />
+          <label>6432</label>
+          <input type="checkbox" class="cb-stringset-5321" />
+          <label>5321</label>
+        </div>
+        <div class="other">
+          <label>Other</label>
+          <input type="checkbox" class="cb-stringset-321" />
+          <label>321</label>
+          <input type="checkbox" class="cb-stringset-432" />
+          <label>432</label>
+          <input type="checkbox" class="cb-stringset-543" />
+          <label>543</label>
+          <input type="checkbox" class="cb-stringset-654" />
+          <label>654</label>
+        </div>
 
 <div class="navbar-spacer screen-only noprint">
 </div>
@@ -501,14 +509,19 @@ btnSaveProg.click(function(){
 
 
 
+  function checkTiny() {
+    BSD.options.tiny ? venue.addClass('tiny') : venue.removeClass('tiny');
+    BSD.options.tiny ? btnToggleTiny.html('Big') : btnToggleTiny.html('Tiny');    
+  }
+
 var venue = jQuery('.venue');
 var btnToggleTiny = jQuery('.btn-toggle-tiny');
 btnToggleTiny.click(function(){
   BSD.options.tiny = !BSD.options.tiny;
   storage.setItem('options',JSON.stringify(BSD.options));
-  BSD.options.tiny ? venue.addClass('tiny') : venue.removeClass('tiny');
-  BSD.options.tiny ? btnToggleTiny.html('Big') : btnToggleTiny.html('Tiny');
+  checkTiny();
 });
+checkTiny();
 
 /**
 
