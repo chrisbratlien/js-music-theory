@@ -1370,15 +1370,20 @@ function distScore(a,b) {
 
 
 function outsideJudge(o,env) {
+  var hit6 = env.majorSixthAV == o.chromaticValue; 
+  var hit9 = env.majorNinthAV == o.chromaticValue; 
+  var hit6or9 = hit6 || hit9;
 
-
-  var hit6or9 = [env.majorSixthAV,env.ninthAV].detect(n => n == o.chromaticValue); 
-  if (hit6or9) {
-    console.log('hit6or9 meta',env);
-    return 'OK';
+  if (hit6 && meta.hasMinor7Quality) {
+    console.log('NOPE!!!!',env);
+    return 'minor7 with 6th clashes (7b with 6)';
   }
 
 
+  if (hit6or9 && meta.hasPerfectFifth) {
+    console.log('hit6or9 meta',env);
+    return 'OK';
+  }
 
   if (abstractNoteValues.indexOf(o.chromaticValue) < 0) { return 'outside'; }
   if (o.fret > 13) { return 'too high'; }
@@ -1654,6 +1659,7 @@ campfire.subscribe('do-it',function(prog){
       meta.majorSixthAV = (meta.rootAbstractValue + 9) % 12;
       meta.ninthAV = (meta.rootAbstractValue + 2) % 12;
       meta.hasPerfectFifth = myChord.hasPerfectFifthInterval(); ///move this to o itself?
+      meta.hasMinor7Quality = myChord.hasMinorThirdInterval() && myChord.hasPerfectFifthInterval() && myChord.hasDominantSeventhInterval();
 
 
       var totQuarterNoteBeats = BSD.beatsPerMeasure; //for this chord.
