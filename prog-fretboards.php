@@ -1504,6 +1504,8 @@ function initLast() {
 
       var diff = lastValue ? o.noteValue - lastValue : 0;
       if (Math.abs(diff) > 6) { return 'diff>6:' + diff; }
+      if (Math.abs(diff) > 5) { return 'diff>5:' + diff; }
+      if (Math.abs(diff) > 4) { return 'diff>4:' + diff; }
 
       var idealFretDiff = Math.abs(o.fret - idealFret);
       if (idealFretDiff > 4) { return 'idealFretDiff>4'; }      
