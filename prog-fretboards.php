@@ -1066,7 +1066,7 @@ checkTiny();
         orientation: 'horizontal',
         range: 'min',
         min: 1,
-        max: 8,
+        max: 64,
         step: 1,
         value: BSD.progCycles,
         slide: function( event, ui ) {
@@ -1374,6 +1374,15 @@ function outsideJudge(o,env) {
   var hit9 = env.majorNinthAV == o.chromaticValue; 
   var hit6or9 = hit6 || hit9;
 
+  if (BSD.options.fretRange && o.fret > BSD.options.fretRange[1]) {
+    return 'fret > maxFret';
+  }
+  if (BSD.options.fretRange && o.fret < BSD.options.fretRange[0]) {
+    return 'fret < minFret';
+  }
+
+
+
   if (hit6 && meta.hasMinor7Quality) {
     ///console.log('NOPE!!!!',env);
     return 'minor7 with 6th clashes (7b with 6)';
@@ -1395,12 +1404,6 @@ function outsideJudge(o,env) {
   }
 
 
-  if (BSD.options.fretRange && o.fret > BSD.options.fretRange[1]) {
-    return 'fret > maxFret';
-  }
-  if (BSD.options.fretRange && o.fret < BSD.options.fretRange[0]) {
-    return 'fret < minFret';
-  }
   return 'OK';
 }
 
@@ -1503,12 +1506,17 @@ function initLast() {
     var judge = function(o,env) {  
 
       var diff = lastValue ? o.noteValue - lastValue : 0;
-      if (Math.abs(diff) > 6) { return 'diff>6:' + diff; }
-      if (Math.abs(diff) > 5) { return 'diff>5:' + diff; }
+      //if (Math.abs(diff) > 6) { return 'diff>6:' + diff; }
+      //if (Math.abs(diff) > 5) { return 'diff>5:' + diff; }
       if (Math.abs(diff) > 4) { return 'diff>4:' + diff; }
 
       var idealFretDiff = Math.abs(o.fret - idealFret);
-      if (idealFretDiff > 4) { return 'idealFretDiff>4'; }      
+      if (idealFretDiff > 9) { return 'idealFretDiff>9'; }      
+      ///if (idealFretDiff > 8) { return 'idealFretDiff>8'; }      
+      //if (idealFretDiff > 7) { return 'idealFretDiff>7'; }      
+      //if (idealFretDiff > 6) { return 'idealFretDiff>6'; }      
+      //if (idealFretDiff > 5) { return 'idealFretDiff>5'; }      
+      ///if (idealFretDiff > 4) { return 'idealFretDiff>4'; }      
 
       if (env.chordNoteIdx > 0 && diff > 0 && direction == 'down') { return 'wrong dir'; }
       if (env.chordNoteIdx > 0 && diff < 0 && direction == 'up') { return 'wrong dir'; }
@@ -1516,7 +1524,7 @@ function initLast() {
 
 
       var fretDiff = lastFret ? o.fret - lastFret : 0; 
-      console.log('fretDiff',fretDiff,'lastFretDiff',lastFretDiff);
+      ///console.log('fretDiff',fretDiff,'lastFretDiff',lastFretDiff);
 
       //FIXME: can probably simplify this once my goals are better understood
       if (drift3 && Math.abs(drift3 + fretDiff) > 4) { 
@@ -1632,6 +1640,9 @@ campfire.subscribe('do-it',function(prog){
   for(var i = 0; i < BSD.progCycles; i += 1) {
     cycleRange.push(i); 
   }
+
+
+
   cycleRange.forEach(function(cycleIdx){
     prog.forEach(function(chordItem,chordItemIdx) {
       if (errors) { return false; }
@@ -1720,15 +1731,47 @@ campfire.subscribe('do-it',function(prog){
         **/
         var start = 7; //gets blown away..
         if (BSD.options.fretRange) {
-          start = Math.round(BSD.options.fretRange.average());
+          start = Math.floor(BSD.options.fretRange.average());
         }
 
+
+        /////campfire.publish('test-periodic',{ total: BSD.progCycles, scale: start, shift: start });
+        
+        ////return "ROOOOOOO";;;;
+
+        ////idealFret = scaleThenShift(cycleIdx,BSD.progCycles,start,start,Math.cos);
+        //////console.log('periodic idealFret',idealFret,'cycle',cycleIdx);
+
+
+
+        //var offset = start;
+        /****
+
+        var width = BSD.options.fretRange[1] - BSD.options.fretRange[0];
+        var total = BSD.progCycles;
+        var offset = start;
+        var centerShift = 0;
+        var i = cycleIdx
+        ///for (let i = 0; i < total; i += 1) { console.log(  offset + (Math.cos(  i/total * 2 * Math.PI) * (width/2) + centerShift)  ); }
+
+        ***/
+        var width = BSD.options.fretRange[1] - BSD.options.fretRange[0];
+        var total = BSD.progCycles;
+        var centerShift = 0;
+        var offset = start;
+        idealFret = offset + (Math.cos(cycleIdx/total * 2 * Math.PI) * (width/2) + centerShift);
+
+        /**
         idealFret = start + cycleIdx; //FIXME
         var idealFretMax = BSD.options.fretRange[1];
         var maxDiff = idealFret - idealFretMax;
         if (maxDiff > 0) {
           idealFret = idealFretMax - maxDiff;
         }
+        **/
+
+
+
       }
 
 
@@ -1772,7 +1815,8 @@ campfire.subscribe('do-it',function(prog){
       if (candidates.length == 0) {
         console.log('uh oh #2');
 
-        console.log('barIdx',BSD.sequence[BSD.sequence.length-1].barIdx);
+        //console.log('barIdx',BSD.sequence[BSD.sequence.length-1].barIdx);
+        console.log('last barIdx',last.barIdx,'cycleIdx',last.cycleIdx,'last',last);
         rejections = [];
         candidates = BSD.guitarData.select(function(o) {
           return criteria(o,meta);
@@ -1938,9 +1982,16 @@ BSD.handleFirstClick = function () {
 function periodicA(current,total,shift,scale,func) {
   return (func(Math.PI*2 * current/total) + shift) * scale;
 }
+
+
 function periodicB(current,total,shift,scale,func) {
   return (func(Math.PI*2 * current/total) * scale) + shift;
 }
+
+var shiftThenScale = periodicA;
+var scaleThenShift = periodicB;
+
+
 
 
 campfire.subscribe('test-periodic',function(o){
@@ -1955,12 +2006,12 @@ campfire.subscribe('test-periodic',function(o){
 
   for (var i = 0; i < o.total; i += 1) {
     var resB = periodicB(i,o.total,o.shift,o.scale,Math.cos);
-    console.log('B (cos) i',i,'result',resB);
+    console.log('B scale then shift (cos) i',i,'result',resB);
   }
 
   for (var i = 0; i < o.total; i += 1) {
     var resB = periodicB(i,o.total,o.shift,o.scale,Math.sin);
-    console.log('B (sin) i',i,'result',resB);
+    console.log('B scale then shift (sin) i',i,'result',resB);
   }
 
 });
