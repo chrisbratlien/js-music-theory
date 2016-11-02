@@ -1370,6 +1370,16 @@ function distScore(a,b) {
 
 
 function outsideJudge(o,env) {
+
+
+  var hit6or9 = [env.majorSixthAV,env.ninthAV].detect(n => n == o.chromaticValue); 
+  if (hit6or9) {
+    console.log('hit6or9 meta',env);
+    return 'OK';
+  }
+
+
+
   if (abstractNoteValues.indexOf(o.chromaticValue) < 0) { return 'outside'; }
   if (o.fret > 13) { return 'too high'; }
   if (BSD.activeStrings && !BSD.activeStrings.detect(function(as) { 
@@ -1440,7 +1450,8 @@ function tick(cursor) {
   lastFrets,
   lastFretDiff,
   lastFretDiffs,
-  lastNote;
+  lastNote,
+  meta;
 
 
   ////var bunches = chords.map(function(o){ return o.abstractNoteValues(); });
@@ -1455,6 +1466,8 @@ function tick(cursor) {
 
 
 function initLast() {
+
+  meta = {};
   avgFret = false;
   avgString = false;
   drift2 = false;
@@ -1636,6 +1649,13 @@ campfire.subscribe('do-it',function(prog){
       }
       abstractNoteValues = myChord.abstractNoteValues();
 
+
+      meta.rootAbstractValue = myChord.rootNote.abstractValue();
+      meta.majorSixthAV = (meta.rootAbstractValue + 9) % 12;
+      meta.ninthAV = (meta.rootAbstractValue + 2) % 12;
+      meta.hasPerfectFifth = myChord.hasPerfectFifthInterval(); ///move this to o itself?
+
+
       var totQuarterNoteBeats = BSD.beatsPerMeasure; //for this chord.
       if (chordItem.halfBar) {
         if (BSD.beatsPerMeasure == 3) {
@@ -1660,10 +1680,8 @@ campfire.subscribe('do-it',function(prog){
       eventRange.forEach(function(o,chordNoteIdx) {
         if (errors) { return false; }
 
+        meta.chordNoteIdx = chordNoteIdx;
 
-        var env = { 
-          chordNoteIdx: chordNoteIdx 
-        };
 
 
 
@@ -1727,7 +1745,7 @@ campfire.subscribe('do-it',function(prog){
 
       rejections = [];
       candidates = candidates.select(function(o) {
-        return criteria(o,env);
+        return criteria(o,meta);
       });
 
       if (candidates.length == 0) {
@@ -1738,7 +1756,7 @@ campfire.subscribe('do-it',function(prog){
         ///console.log('flip! (necessity)');
         rejections = [];
         candidates = BSD.guitarData.select(function(o) {
-          return criteria(o,env);
+          return criteria(o,meta);
         });
       }
 
@@ -1748,7 +1766,7 @@ campfire.subscribe('do-it',function(prog){
         console.log('barIdx',BSD.sequence[BSD.sequence.length-1].barIdx);
         rejections = [];
         candidates = BSD.guitarData.select(function(o) {
-          return criteria(o,env);
+          return criteria(o,meta);
         });
       }
       if (candidates.length == 0) {

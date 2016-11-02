@@ -858,6 +858,11 @@ var RootNoteWithIntervals = function(spec) {
     return hit !== false;
   };
 
+  self.hasPerfectFifthInterval = function() {
+    var hit = self.intervals().detect(function(i) { return i == 7; });  
+    return hit !== false;
+  };
+
 
   self.myThird = function() {
     var hit = self.intervals().detect(function(i) { return (i == 3 || i == 4); });
