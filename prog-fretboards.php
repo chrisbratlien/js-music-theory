@@ -1375,13 +1375,13 @@ function outsideJudge(o,env) {
   var hit6or9 = hit6 || hit9;
 
   if (hit6 && meta.hasMinor7Quality) {
-    console.log('NOPE!!!!',env);
+    ///console.log('NOPE!!!!',env);
     return 'minor7 with 6th clashes (7b with 6)';
   }
 
 
   if (hit6or9 && meta.hasPerfectFifth) {
-    console.log('hit6or9 meta',env);
+    //console.log('hit6or9 meta',env);
     return 'OK';
   }
 
@@ -1758,7 +1758,8 @@ campfire.subscribe('do-it',function(prog){
 
       if (candidates.length == 0) {
         console.log('uh oh');
-        console.log('barIdx',BSD.sequence[BSD.sequence.length-1].barIdx);
+        var last = BSD.sequence[BSD.sequence.length-1];
+        console.log('last barIdx',last.barIdx,'cycleIdx',last.cycleIdx,'last',last);
 
         direction = nextDirection[direction];
         ///console.log('flip! (necessity)');
