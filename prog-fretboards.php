@@ -1371,7 +1371,7 @@ function distScore(a,b) {
 
 function outsideJudge(o,env) {
   var hit6 = env.majorSixthAV == o.chromaticValue; 
-  var hit9 = env.majorNinthAV == o.chromaticValue; 
+  var hit9 = env.ninthAV == o.chromaticValue; 
   var hit6or9 = hit6 || hit9;
 
   if (BSD.options.fretRange && o.fret > BSD.options.fretRange[1]) {
@@ -1464,6 +1464,7 @@ function tick(cursor) {
 
   ////var bunches = chords.map(function(o){ return o.abstractNoteValues(); });
   var rejections = [];
+  var outsideRejections = [];
 
   var chordIdx = 0;
 
@@ -1518,8 +1519,8 @@ function initLast() {
       //if (idealFretDiff > 5) { return 'idealFretDiff>5'; }      
       ///if (idealFretDiff > 4) { return 'idealFretDiff>4'; }      
 
-      if (env.chordNoteIdx > 0 && diff > 0 && direction == 'down') { return 'wrong dir'; }
-      if (env.chordNoteIdx > 0 && diff < 0 && direction == 'up') { return 'wrong dir'; }
+      if (env.chordNoteIdx > 0 && diff > 0 && direction == 'down') { return 'wrong dir, direction=' + direction + ', diff=' + diff; }
+      if (env.chordNoteIdx > 0 && diff < 0 && direction == 'up') { return 'wrong dir, direction=' + direction + ', diff=' + diff; }
       if (lastValue && diff == 0) { return 'no diff'; }
 
 
@@ -1557,7 +1558,14 @@ function initLast() {
 
     var criteria = function(o,env){
       var outsideDecision = outsideJudge(o,env);
-      if (outsideDecision !== 'OK') { return false; }
+      if (outsideDecision !== 'OK') { 
+        outsideRejections.push({
+            candidate: o,
+            decision:outsideDecision,
+            lastResult: lastResult
+        });
+        return false; 
+      }
       //console.log('decision',decision);
       var decision = judge(o,env);
 
@@ -1649,6 +1657,7 @@ campfire.subscribe('do-it',function(prog){
 
 
       rejections = [];
+      outsideRejections = [];
       ///var barIdx = Math.floor(i / BSD.noteResolution);
       var barIdx = chordItem.barIndex;
       //var chordIdx = barIdx % chords.length;
@@ -1795,6 +1804,7 @@ campfire.subscribe('do-it',function(prog){
       }
 
       rejections = [];
+      outsideRejections = [];
       candidates = candidates.select(function(o) {
         return criteria(o,meta);
       });
@@ -1807,6 +1817,7 @@ campfire.subscribe('do-it',function(prog){
         direction = nextDirection[direction];
         ///console.log('flip! (necessity)');
         rejections = [];
+        outsideRejections = [];
         candidates = BSD.guitarData.select(function(o) {
           return criteria(o,meta);
         });
@@ -1818,6 +1829,7 @@ campfire.subscribe('do-it',function(prog){
         //console.log('barIdx',BSD.sequence[BSD.sequence.length-1].barIdx);
         console.log('last barIdx',last.barIdx,'cycleIdx',last.cycleIdx,'last',last);
         rejections = [];
+        outsideRejections = [];
         candidates = BSD.guitarData.select(function(o) {
           return criteria(o,meta);
         });
