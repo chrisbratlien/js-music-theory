@@ -1541,7 +1541,8 @@ function initLast() {
       }
 
       var fretDistance = Math.abs(fretDiff);
-      if (fretDistance > 3) { return 'fretDistance > 3'; }
+      if (fretDistance > env.maxFretDistance) { return 'fretDistance > ' + env.maxFretDistance; }
+      ///if (fretDistance > 3) { return 'fretDistance > 3'; }
       if (lastFretDiff && Math.abs(lastFretDiff + fretDiff) > 4) { return 'lastFretDiff+fretDiff >4'; } ///if they don't cancel each other out and their total is too big
 
       var stringDiff = lastString? Math.abs(o.string - lastString) : 0;
@@ -1682,7 +1683,7 @@ campfire.subscribe('do-it',function(prog){
       meta.ninthAV = (meta.rootAbstractValue + 2) % 12;
       meta.hasPerfectFifth = myChord.hasPerfectFifthInterval(); ///move this to o itself?
       meta.hasMinor7Quality = myChord.hasMinorThirdInterval() && myChord.hasPerfectFifthInterval() && myChord.hasDominantSeventhInterval();
-
+      meta.maxFretDistance = 3;
 
       var totQuarterNoteBeats = BSD.beatsPerMeasure; //for this chord.
       if (chordItem.halfBar) {
@@ -1809,6 +1810,26 @@ campfire.subscribe('do-it',function(prog){
         return criteria(o,meta);
       });
 
+
+
+
+      if (candidates.length == 0) {
+        console.log('pre-proto uh oh');
+        var last = BSD.sequence[BSD.sequence.length-1];
+        console.log('last barIdx',last.barIdx,'cycleIdx',last.cycleIdx,'last',last);
+        meta.maxFretDistance = 4;
+        //direction = nextDirection[direction];
+        ///console.log('flip! (necessity)');
+        rejections = [];
+        outsideRejections = [];
+        candidates = BSD.guitarData.select(function(o) {
+          return criteria(o,meta);
+        });
+      }
+
+
+
+
       if (candidates.length == 0) {
         console.log('uh oh');
         var last = BSD.sequence[BSD.sequence.length-1];
@@ -1838,6 +1859,7 @@ campfire.subscribe('do-it',function(prog){
           errors += 1;
           return false;
       }
+      meta.maxFretDistance = 3; //return back to normal.
 
       if (chordNoteIdx == 0) { //first note in new chord change... try to get nearest pitch to last note played.
 
