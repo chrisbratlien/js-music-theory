@@ -1509,7 +1509,10 @@ function initLast() {
       var diff = lastValue ? o.noteValue - lastValue : 0;
       //if (Math.abs(diff) > 6) { return 'diff>6:' + diff; }
       //if (Math.abs(diff) > 5) { return 'diff>5:' + diff; }
-      if (Math.abs(diff) > 4) { return 'diff>4:' + diff; }
+
+
+
+      if (Math.abs(diff) > env.maxDiff) { return 'diff > ' + env.maxDiff + ': ' + diff; }
 
       var idealFretDiff = Math.abs(o.fret - idealFret);
       if (idealFretDiff > 9) { return 'idealFretDiff>9'; }      
@@ -1677,13 +1680,18 @@ campfire.subscribe('do-it',function(prog){
       }
       abstractNoteValues = myChord.abstractNoteValues();
 
+      meta.defaults = {
+        maxDiff: 3, //max chromatic distance between notes....
+        maxFretDistance: 3
+      };
 
       meta.rootAbstractValue = myChord.rootNote.abstractValue();
       meta.majorSixthAV = (meta.rootAbstractValue + 9) % 12;
       meta.ninthAV = (meta.rootAbstractValue + 2) % 12;
       meta.hasPerfectFifth = myChord.hasPerfectFifthInterval(); ///move this to o itself?
       meta.hasMinor7Quality = myChord.hasMinorThirdInterval() && myChord.hasPerfectFifthInterval() && myChord.hasDominantSeventhInterval();
-      meta.maxFretDistance = 3;
+      meta.maxFretDistance = meta.defaults.maxFretDistance;
+      meta.maxDiff = meta.defaults.maxDiff; 
 
       var totQuarterNoteBeats = BSD.beatsPerMeasure; //for this chord.
       if (chordItem.halfBar) {
@@ -1771,16 +1779,6 @@ campfire.subscribe('do-it',function(prog){
         var offset = start;
         idealFret = offset + (Math.cos(cycleIdx/total * 2 * Math.PI) * (width/2) + centerShift);
 
-        /**
-        idealFret = start + cycleIdx; //FIXME
-        var idealFretMax = BSD.options.fretRange[1];
-        var maxDiff = idealFret - idealFretMax;
-        if (maxDiff > 0) {
-          idealFret = idealFretMax - maxDiff;
-        }
-        **/
-
-
 
       }
 
@@ -1811,13 +1809,38 @@ campfire.subscribe('do-it',function(prog){
       });
 
 
+      var solutions = [
+        function() { meta.maxDiff += 1;  console.log("increased meta.maxDiff to " + meta.maxDiff); },
+        function() { meta.maxFretDistance += 1;  console.log("increased meta.maxFretDistance to " + meta.maxFretDistance); },
+        function() { direction = nextDirection[direction]; console.log("changed direction to " + direction);   },
+      ];
 
+      var retries = 0;
+      while (retries < 110 && candidates.length == 0) {
+        console.log('pre-proto uh oh retry#',retries);
+        var last = BSD.sequence[BSD.sequence.length-1];
+        console.log('last barIdx',last.barIdx,'cycleIdx',last.cycleIdx,'last',last);
 
+        var solution = solutions.atRandom();
+
+        solution();
+
+        ///console.log('flip! (necessity)');
+        rejections = [];
+        outsideRejections = [];
+        candidates = BSD.guitarData.select(function(o) {
+          return criteria(o,meta);
+        });
+        retries += 1;
+      }
+
+      /***
+      //try increasing allowed fret distance
       if (candidates.length == 0) {
         console.log('pre-proto uh oh');
         var last = BSD.sequence[BSD.sequence.length-1];
         console.log('last barIdx',last.barIdx,'cycleIdx',last.cycleIdx,'last',last);
-        meta.maxFretDistance = 4;
+        meta.maxFretDistance += 1;
         //direction = nextDirection[direction];
         ///console.log('flip! (necessity)');
         rejections = [];
@@ -1827,9 +1850,7 @@ campfire.subscribe('do-it',function(prog){
         });
       }
 
-
-
-
+      //try flipping direction
       if (candidates.length == 0) {
         console.log('uh oh');
         var last = BSD.sequence[BSD.sequence.length-1];
@@ -1855,11 +1876,20 @@ campfire.subscribe('do-it',function(prog){
           return criteria(o,meta);
         });
       }
+      ********/
+
+
+
       if (candidates.length == 0) {
           errors += 1;
           return false;
       }
-      meta.maxFretDistance = 3; //return back to normal.
+
+
+
+      meta.maxFretDistance = meta.defaults.maxFretDistance;
+      meta.maxDiff = meta.defaults.maxDiff      
+
 
       if (chordNoteIdx == 0) { //first note in new chord change... try to get nearest pitch to last note played.
 
