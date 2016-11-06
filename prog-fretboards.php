@@ -369,6 +369,7 @@ get_header(); ?>
 </div>
 <div class="venue">
   <div class="song-form-position-wrap">
+    <div class="song-cycle-indicator">1</div>
     <div class="btn btn-loop-start">A</div>
     <div class="btn btn-loop-end">B</div>
     <ul class="song-form-position">
@@ -1388,9 +1389,15 @@ function outsideJudge(o,env) {
     return 'minor7 with 6th clashes (7b with 6)';
   }
   ***/
+  if (hit6 && meta.isStrongBeat) {
+    return '6th on strong beat';    
+  }
+
 
 
   if (hit6or9 && meta.hasPerfectFifth) {
+    //if (hit6) { alert('hit6'); }
+    //if (hit6) { console.log('hit6',meta); }
     //console.log('hit6or9 meta',env);
     return 'OK';
   }
@@ -1472,6 +1479,7 @@ function tick(cursor) {
   var myNote = false;
 
   var songFormPosition = jQuery('.song-form-position');
+  var songCycleIndicator = jQuery('.song-cycle-indicator');
 
 
 
@@ -1683,8 +1691,10 @@ campfire.subscribe('do-it',function(prog){
 
       meta.defaults = {
         maxDiff: 3, //max chromatic distance between notes....
-        maxFretDistance: 3
+        maxFretDistance: 3,
       };
+
+
 
       meta.rootAbstractValue = myChord.rootNote.abstractValue();
       meta.majorSixthAV = (meta.rootAbstractValue + 9) % 12;
@@ -1693,6 +1703,9 @@ campfire.subscribe('do-it',function(prog){
       meta.hasMinor7Quality = myChord.hasMinorThirdInterval() && myChord.hasPerfectFifthInterval() && myChord.hasDominantSeventhInterval();
       meta.maxFretDistance = meta.defaults.maxFretDistance;
       meta.maxDiff = meta.defaults.maxDiff; 
+      meta.isStrongBeat = true;
+
+
 
       var totQuarterNoteBeats = BSD.beatsPerMeasure; //for this chord.
       if (chordItem.halfBar) {
@@ -1721,6 +1734,7 @@ campfire.subscribe('do-it',function(prog){
         meta.chordNoteIdx = chordNoteIdx;
 
 
+      meta.isStrongBeat = chordNoteIdx % 2 === 0;
 
 
       if (Math.random() > 0.85) {
@@ -2081,16 +2095,18 @@ campfire.subscribe('test-periodic',function(o){
 
 });
 
-  campfire.subscribe('song-form-position',function(barIdx){
+  campfire.subscribe('song-form-position',function(o){
+
     songFormPosition.find('.active').removeClass('active');
-    songFormPosition.find('.bar-' + barIdx).addClass('active');
+    songFormPosition.find('.bar-' + o.barIdx).addClass('active');
+    songCycleIndicator.html(o.cycleIdx+1);
   });
 
   var saveBarIdx = false;
   campfire.subscribe('tick',function(cursor){
     if (cursor.barIdx != saveBarIdx) {
       saveBarIdx = cursor.barIdx;
-      campfire.publish('song-form-position',cursor.barIdx);
+      campfire.publish('song-form-position',cursor);
     }
   });
 
