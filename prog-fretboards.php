@@ -1382,11 +1382,12 @@ function outsideJudge(o,env) {
   }
 
 
-
+  /** THIS IS OK, NEVERMIND
   if (hit6 && meta.hasMinor7Quality) {
     ///console.log('NOPE!!!!',env);
     return 'minor7 with 6th clashes (7b with 6)';
   }
+  ***/
 
 
   if (hit6or9 && meta.hasPerfectFifth) {
@@ -1509,9 +1510,6 @@ function initLast() {
       var diff = lastValue ? o.noteValue - lastValue : 0;
       //if (Math.abs(diff) > 6) { return 'diff>6:' + diff; }
       //if (Math.abs(diff) > 5) { return 'diff>5:' + diff; }
-
-
-
       if (Math.abs(diff) > env.maxDiff) { return 'diff > ' + env.maxDiff + ': ' + diff; }
 
       var idealFretDiff = Math.abs(o.fret - idealFret);
@@ -1544,6 +1542,9 @@ function initLast() {
       }
 
       var fretDistance = Math.abs(fretDiff);
+
+
+
       if (fretDistance > env.maxFretDistance) { return 'fretDistance > ' + env.maxFretDistance; }
       ///if (fretDistance > 3) { return 'fretDistance > 3'; }
       if (lastFretDiff && Math.abs(lastFretDiff + fretDiff) > 4) { return 'lastFretDiff+fretDiff >4'; } ///if they don't cancel each other out and their total is too big
