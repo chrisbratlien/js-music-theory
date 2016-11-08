@@ -132,10 +132,12 @@ add_action('wp_head',function(){
     float: right;
     width: 30%; 
   }
+
   .song-form-position {
     width: 100%;
   }
-  .song-form-position .bar { 
+
+  .song-form-position .bar,   .song-cycle-position .cycle { 
     background: #d5cbe2;
     color: white;
     cursor: pointer;
@@ -146,6 +148,12 @@ add_action('wp_head',function(){
     text-align: center;
     width: 25%; 
   }
+
+  .song-form-position-wrap .active {
+    background: yellow;
+    color: black;
+  }
+
 
   .bar-16, .bar-17, .bar-18, .bar-19 {
     margin-top: 10px;
@@ -159,10 +167,6 @@ add_action('wp_head',function(){
     margin-top: 10px;
   }
 
-  .song-form-position .active {
-    background: yellow;
-    color: black;
-  }
 
   .form-progression .form-group {
     width: 100%;
@@ -173,6 +177,12 @@ add_action('wp_head',function(){
   .form-progression .btn-start {
     width: 8%;
   }
+
+  .song-cycle-position {
+    width: 100%;
+  }
+
+
 
 
 
@@ -369,7 +379,8 @@ get_header(); ?>
 </div>
 <div class="venue">
   <div class="song-form-position-wrap">
-    <div class="song-cycle-indicator">1</div>
+    <div class="song-cycle-position"></div>
+
     <div class="btn btn-loop-start">A</div>
     <div class="btn btn-loop-end">B</div>
     <ul class="song-form-position">
@@ -1487,7 +1498,8 @@ function tick(cursor) {
   var myNote = false;
 
   var songFormPosition = jQuery('.song-form-position');
-  var songCycleIndicator = jQuery('.song-cycle-indicator');
+  var songCyclePosition = jQuery('.song-cycle-position');
+  ///var songCycleIndicator = jQuery('.song-cycle-indicator');
 
 
 
@@ -2019,12 +2031,23 @@ campfire.subscribe('do-it',function(prog){
   //////sequence.forEach(function(o){})
   BSD.timeout = false;
   
-  BSD.totalBars = BSD.sequence[BSD.sequence.length-1].barIdx + 1;
   
+  campfire.publish('reset-song-form-ui')
+  
+  //initial tick
+  tick(BSD.sequence[0]); 
+});
+
+
+campfire.subscribe('reset-song-form-ui',function(){
+
   songFormPosition.empty();
+  songCyclePosition.empty();
 
-
+  //renders out the songFormPosition div
   var range = [];
+  BSD.totalBars = BSD.sequence[BSD.sequence.length-1].barIdx + 1;
+
   for (var i = 0; i < BSD.totalBars; i += 1) {
     range.push(i);
   }
@@ -2042,9 +2065,24 @@ campfire.subscribe('do-it',function(prog){
     });
   });
 
+  BSD.totalCycles = BSD.sequence[BSD.sequence.length-1].cycleIdx + 1;
+  range = [];
+  for (var i = 0; i < BSD.totalCycles; i += 1) {
+    range.push(i);
+  }
+  range.forEach(function(i) {
+    var div = DOM.div(i+1).addClass('cycle cycle-' + i);
+    songCyclePosition.append(div);
 
-  tick(BSD.sequence[0]);
-  ///console.log('bunches',bunches);
+    div.click(function(){
+      BSD.clickedCycle = i;
+      var event = BSD.sequence.detect(function(o) {
+        return o.cycleIdx == i;
+      });
+      console.log('event',event);
+      tick(event);
+    });
+  });
 });
 
 
@@ -2107,7 +2145,12 @@ campfire.subscribe('test-periodic',function(o){
 
     songFormPosition.find('.active').removeClass('active');
     songFormPosition.find('.bar-' + o.barIdx).addClass('active');
-    songCycleIndicator.html(o.cycleIdx+1);
+    ///songCycleIndicator.html(o.cycleIdx+1);
+
+
+    songCyclePosition.find('.active').removeClass('active');
+    songCyclePosition.find('.cycle-' + o.cycleIdx).addClass('active');
+
   });
 
   var saveBarIdx = false;
@@ -2117,6 +2160,17 @@ campfire.subscribe('test-periodic',function(o){
       campfire.publish('song-form-position',cursor);
     }
   });
+
+/*
+  var saveCycleIdx = false;
+  campfire.subscribe('tick',function(cursor){
+    if (cursor.cycleIdx != saveCycleIdx) {
+      saveCycleIdx = cursor.cycleIdx;
+      ///campfire.publish('song-form-position',cursor);
+    }
+  });
+*/
+
 
 campfire.subscribe('tick',function(cursor){
   BSD.boards.forEach(function(board){
