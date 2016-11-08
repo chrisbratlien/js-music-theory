@@ -408,6 +408,14 @@ storage.getItem('options',function(o){
 
 BSD.progressions = [];
 
+
+BSD.durations = {
+  bass: 1500,
+  chord: 1000,
+  note: 1000
+};
+
+
 /**
 storage.getItem('progressions',function(o){
   ////BSD.progressions = JSON.parse(o);
@@ -1193,14 +1201,14 @@ checkTiny();
     
     ///console.log('chord??',chord);
     
-    campfire.publish('play-chord',{ chord: chord, duration: 1000 });
+    campfire.publish('play-chord',{ chord: chord, duration: BSD.durations.chord });
   });    
 
 
 
   campfire.subscribe('play-chord',function(o) {
-    var rootlessIntervals = o.chord.spec.intervals.select(function(n){ return n >0; });
-    var rootless = Chord({ rootNote: o.chord.rootNote, intervals: rootlessIntervals });
+    var filtered = o.chord.spec.intervals.select(function(n){ return n >0 && n !== 7; }); //no root, no 5
+    var rootless = Chord({ rootNote: o.chord.rootNote, intervals: filtered });
     BSD.audioPlayer.playChord(rootless,o.duration);    
   });
     
@@ -1211,7 +1219,7 @@ checkTiny();
     //console.log('note',note.name());
     BSD.currentNote = note;
       if (BSD.strum) {
-        BSD.audioPlayer.playNote(note,1000);          
+        BSD.audioPlayer.playNote(note,BSD.durations.note);          
       }
 
   });
@@ -1232,18 +1240,18 @@ checkTiny();
 
 
     if (BSD.currentNote && c == BSD.keycodes.f) {
-      BSD.audioPlayer.playNote(BSD.currentNote,1000);    
+      BSD.audioPlayer.playNote(BSD.currentNote,BSD.durations.note);    
     }
 
     if (BSD.currentChord && c == BSD.keycodes.f) {
-      BSD.audioPlayer.playChord(BSD.currentChord,1000);    
+      BSD.audioPlayer.playChord(BSD.currentChord,BSD.durations.chord);    
     }
 
 
 
     if (BSD.currentNote && c == BSD.keycodes.d) {
       BSD.strum = true;
-      ////BSD.audioPlayer.playNote(BSD.currentNote,1000);    
+      ////BSD.audioPlayer.playNote(BSD.currentNote,BSD.durations.note);    
     }
     
     if (e.shiftKey) {
@@ -2123,10 +2131,10 @@ campfire.subscribe('tick',function(cursor){
 
 campfire.subscribe('tick',function(cursor){
   if (cursor.chordNoteIdx == 0) {
-    bassist.playNote(cursor.chord.rootNote.plus(-12),1000);
+    bassist.playNote(cursor.chord.rootNote.plus(-12),BSD.durations.bass);
   }
   if (cursor.totQuarterNoteBeats == 4 && BSD.noteResolution == 4 && cursor.chordNoteIdx == 2) { //3rd beat in [0,1,2,3]
-    bassist.playNote(cursor.chord.myFifth().plus(-12),1000);
+    bassist.playNote(cursor.chord.myFifth().plus(-12),BSD.durations.bass);
   }
 });
 
@@ -2152,7 +2160,7 @@ campfire.subscribe('tick',function(cursor){
 
 campfire.subscribe('tick',function(cursor){
   if (!BSD.options.playChordsOnly) {
-    campfire.publish('play-note', { note: Note(cursor.noteValue), duration: 1000 });
+    campfire.publish('play-note', { note: Note(cursor.noteValue), duration: BSD.durations.note });
   }
 });
 
@@ -2171,33 +2179,33 @@ campfire.subscribe('tick',function(cursor){
       //LAST QUARTER NOTE OF MEASURE
       if (BSD.noteResolution == 4 && cursor.chordNoteIdx + 1 == cursor.totQuarterNoteBeats) {
         setTimeout(function(){
-          campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
+          campfire.publish('play-chord', { chord: nextChord, duration: BSD.durations.chord });
         },delayMS.swung81);
       }
 
       if (BSD.noteResolution == 2 && cursor.chordNoteIdx == 1) { 
         setTimeout(function(){
-          campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
+          campfire.publish('play-chord', { chord: nextChord, duration: BSD.durations.chord });
         },delayMS.even4DelayMS + swung81);
       }
 
       if (cursor.totQuarterNoteBeats == 4) {
         if (BSD.noteResolution == 1 && cursor.chordNoteIdx === 0) { 
           setTimeout(function(){
-            campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
+            campfire.publish('play-chord', { chord: nextChord, duration: BSD.durations.chord });
           },delayMS.even1 - delayMS.swung82);
         }
         if (BSD.noteResolution == 8 && cursor.chordNoteIdx == 6) { 
           //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
           setTimeout(function(){
-            campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
+            campfire.publish('play-chord', { chord: nextChord, duration: BSD.durations.chord });
           },delayMS.swung81);
         }
 
         if (BSD.noteResolution == 16 && cursor.chordNoteIdx == 12) { 
           //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
           setTimeout(function(){
-            campfire.publish('play-chord', { chord: nextChord, duration: 1500 });
+            campfire.publish('play-chord', { chord: nextChord, duration: BSD.durations.chord });
           },delayMS.swung81);
         }
       }

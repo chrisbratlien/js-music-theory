@@ -3,15 +3,18 @@ BSD.StringOscillator = function(spec) {
   var destination = spec.destination;
   var context = spec.context;
 
+
+  var oscillatorBank = {}; //oscillators by semitone map.
+
+  var gainBank = {};
+
+
   self.playing = false;
   self.id = spec.id; ///just in case this is still needed...
 
   var SINE = 0, SQUARE = 1, SAWTOOTH = 2, TRIANGLE = 3, CUSTOM = 4;
 
 
-  var ampEnvelope = context.createGain();
-  ampEnvelope.gain.value = 0.0; // default value
-  ampEnvelope.connect(destination);
 
 
   var volume = 0;
@@ -48,20 +51,47 @@ BSD.StringOscillator = function(spec) {
     var detune1 = 4.5;    
     var time = context.currentTime;
     var ampAttack = Math.random() / 10; //////[0.056,0.099,0.07,0.5].atRandom();
-    var ampDecay = 0.7; 
+    var ampDecay = Math.random() + 0.2; 
 
 
+    //ampAttack = Math.random() * 0.4 + 0.01;
+    ampAttack = Math.random() * 0.2;
 
 
+    ////var 
 
-    ampEnvelope.gain = volume;
-    ampEnvelope.gain.setTargetAtTime(volume, time, ampAttack);
-    //ampEnvelope.gain.exponentialRampToValueAtTime(1,time+duration);
+    var ampEnvelope = gainBank[semitone];
+    if (!ampEnvelope) {
+      gainBank[semitone] = context.createGain();
+      ampEnvelope = gainBank[semitone];
+    }
+
+    ampEnvelope.gain.value = 0.0; // default value
+    ampEnvelope.connect(destination);
+
+
+    ///ampEnvelope.gain.setTargetAtTime(volume, time, ampAttack);
+    ///ampEnvelope.gain.exponentialRampToValueAtTime(volume,time+ampAttack);
+    //ampEnvelope.gain.exponentialRampToValueAtTime(0.1,time+ampAttack+duration);
+    //attack
+    ampEnvelope.gain.linearRampToValueAtTime(volume, time + ampAttack);    
+    //decay
+    ampEnvelope.gain.exponentialRampToValueAtTime(volume * 0.9, time + ampAttack + ampDecay);    
     
+    //release
+    ampEnvelope.gain.linearRampToValueAtTime(0.0, time + ampAttack + duration);    
+
     
-    
+    /*    
     ampAttack = 1 - (semitone / 74);
+
+    ampAttack = Math.random() + 0.2;
+
     if (ampAttack <= 0) { ampAttack = 0.01;}
+      
+    **/
+    ////console.log('ampAttack',ampAttack);
+
     
     
     [
@@ -69,7 +99,10 @@ BSD.StringOscillator = function(spec) {
     { title: 'octave', freq: midi2Hertz(semitone+12,detuneSemis), volumeRange: [0.1,0.2] },
     { title: 'dominant', freq: midi2Hertz(semitone+19,detuneSemis), volumeRange: [0.0,0.15] }
     ].each(function(o){
-      var osc = context.createOscillator();/////BufferSource();
+      
+      oscillatorBank[semitone] = context.createOscillator();/////BufferSource();
+      var osc = oscillatorBank[semitone];
+
       var gain = context.createGain();
       
       var myVolume = randomInRange(o.volumeRange[0],o.volumeRange[1]) * volume;
