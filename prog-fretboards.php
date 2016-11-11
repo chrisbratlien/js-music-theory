@@ -935,12 +935,13 @@ checkTiny();
 
     BSD.Widgets.SimplePlayer = function(spec) {
 
-
+      var bank = {};
 
       var self = BSD.PubSub({});
 
-      self.playNote = function(note,duration) {
 
+      self.playNote = function(note,duration,velocity) {
+        var env = {};
         var v = note.value();
         while (v > spec.range[1]) {
           v -= 12;
@@ -948,18 +949,27 @@ checkTiny();
         while (v < spec.range[0]) {
           v += 12;
         }
-
         ///console.log('v?',v);
-
         var freq = midi2Hertz(v);
         var osc = context.createOscillator();/////BufferSource();
+
         osc.frequency.value = freq;
         osc.type = 'sine';
         osc.start(0);      
         osc.connect(spec.destination);
-        setTimeout(function() {
-          osc.disconnect();
-        },duration);
+
+        env.oscillators = [];
+        env.oscillators.push(osc);
+        env.stop = function() {
+          env.oscillators.forEach(o => {
+            o.disconnect();
+            o.stop();
+          });
+        };
+
+        if (duration) { setTimeout(env.stop,duration); }
+        return env;
+
       };
       self.playChord = function(chord,duration) {
         chord.notes().forEach(function(note){
@@ -994,12 +1004,32 @@ checkTiny();
 
 
     BSD.audioPlayer = BSD.Widgets.GuitarPlayer({
-    //BSD.Widgets.SimplePlayer({
+    /////BSD.Widgets.SimplePlayer({
       context: context,
       destination: common,
       polyphonyCount: 48,//polyphonyCount,
       range: [40,128]
     });
+
+
+    /****
+    var simpleGain = context.createGain();
+    simpleGain.gain.value = 0.04;
+    simpleGain.connect(common);
+
+    BSD.audioPlayer = BSD.Widgets.SimplePlayer({
+      context: context,
+      destination: simpleGain,
+      polyphonyCount: 48,//polyphonyCount,
+      range: [40,128]
+    });
+    ****/
+
+
+
+
+
+
 
 
     var bassist = BSD.Widgets.GuitarPlayer({
@@ -2361,6 +2391,9 @@ if (navigator.requestMIDIAccess) {
 
 // midi functions
 
+
+
+var bank = {};
 function onMIDIMessage(message) {
     data = message.data; // this gives us our [command/channel, note, velocity] data.
     console.log('MIDI data', data); // MIDI data [144, 63, 73]
@@ -2376,21 +2409,14 @@ function onMIDIMessage(message) {
 
     if (velocity > 0) {
       ///campfire.publish('play-note',{ note: Note(note), duration: null, velocity: velocity });
-      keyboardist.playNote(Note(note),null,velocity);    
-
-
-
+      bank[note] = keyboardist.playNote(Note(note),null,velocity);    
     }
     else {
-      keyboardist.stopNote(Note(note));////notepayload.note,payload.duration,payload.velocity);    
-      //////campfire.publish('stop-note',{ note: Note(note) });
+      var env = bank[note];
+      if (env) { env.stop(); }
     }
 
-
-
-
 }
-
 
 function onMIDISuccess(midiAccess) {
     // when we get a succesful response, run this code
