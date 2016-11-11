@@ -6,6 +6,9 @@ BSD.StringOscillator = function(spec) {
 
   var oscillatorBank = {}; //oscillators by semitone map.
 
+  var worlds = {};
+
+
   var gainBank = {};
 
 
@@ -43,8 +46,7 @@ BSD.StringOscillator = function(spec) {
   }  
   
 
-  self.play = function(semitone,duration)  {
-
+  self.play = function(semitone,duration,velocity)  {
 
     ///console.log('play>>>',semitone,duration);
 
@@ -66,57 +68,62 @@ BSD.StringOscillator = function(spec) {
       ampEnvelope = gainBank[semitone];
     }
 
-    ampEnvelope.gain.value = 0.0; // default value
+    ampEnvelope.gain.value = volume;////0.0; // default value
     ampEnvelope.connect(destination);
 
 
-    ///ampEnvelope.gain.setTargetAtTime(volume, time, ampAttack);
-    ///ampEnvelope.gain.exponentialRampToValueAtTime(volume,time+ampAttack);
-    //ampEnvelope.gain.exponentialRampToValueAtTime(0.1,time+ampAttack+duration);
+
+    var myGain = volume;
+    if (velocity) {
+      myGain *= (velocity / 128);
+    }
+
+
+/***
     //attack
-    ampEnvelope.gain.linearRampToValueAtTime(volume, time + ampAttack);    
+    ampEnvelope.gain.linearRampToValueAtTime(myGain, time + ampAttack);    
     //decay
-    ampEnvelope.gain.exponentialRampToValueAtTime(volume * 0.9, time + ampAttack + ampDecay);    
+    ampEnvelope.gain.exponentialRampToValueAtTime(myGain * 0.9, time + ampAttack + ampDecay);    
     
-    //release
-    ampEnvelope.gain.linearRampToValueAtTime(0.0, time + ampAttack + duration);    
 
-    
-    /*    
-    ampAttack = 1 - (semitone / 74);
-
-    ampAttack = Math.random() + 0.2;
-
-    if (ampAttack <= 0) { ampAttack = 0.01;}
-      
-    **/
-    ////console.log('ampAttack',ampAttack);
-
-    
+    if (duration) {
+      //release
+      ampEnvelope.gain.linearRampToValueAtTime(0.0, time + ampAttack + duration);    
+    }
+***/
+       
     
     [
     { title: 'fundamental', freq: midi2Hertz(semitone,detuneSemis), volumeRange: [0.5,1.0] },
     { title: 'octave', freq: midi2Hertz(semitone+12,detuneSemis), volumeRange: [0.1,0.2] },
     { title: 'dominant', freq: midi2Hertz(semitone+19,detuneSemis), volumeRange: [0.0,0.15] }
     ].each(function(o){
-      
-      oscillatorBank[semitone] = context.createOscillator();/////BufferSource();
-      var osc = oscillatorBank[semitone];
+  
 
+      var slot = oscillatorBank[semitone];
+      if (!slot) {
+        slot = [];
+        oscillatorBank[semitone] = slot;
+      }; 
+      var osc = context.createOscillator();/////BufferSource();
+      oscillatorBank[semitone].push(osc);
       var gain = context.createGain();
       
       var myVolume = randomInRange(o.volumeRange[0],o.volumeRange[1]) * volume;
 
+      if (velocity) {
+        myVolume *= (velocity / 128);
+      }
+
       osc.connect(gain);
       gain.connect(ampEnvelope);
+      //gain.connect(destination);
     
       var rate = o.freq * Math.pow(2.0, -detune1/1200);
       osc.frequency.value = rate;
       //////osc.type = (Math.random() > 0.9) ? SINE : TRIANGLE;/////].atRandom();//SINE;
       osc.type = 'sine';
   
-      gain.gain.setTargetAtTime(myVolume, time, ampAttack);
-      gain.gain.setTargetAtTime(0, time + ampAttack, ampDecay);
       ///gain.gain.exponentialRampToValueAtTime(0.1,time+ampAttack);
 
 
@@ -124,17 +131,40 @@ BSD.StringOscillator = function(spec) {
       osc.start(0);/////noteOn(0);
       self.playing = true;
       
-      setTimeout(function(){ 
-        osc.stop();   
-        osc.disconnect();
-        self.playing = false;
-      },duration);
+
+      if (duration) {
+
+        gain.gain.setTargetAtTime(myVolume, time, ampAttack);
+        gain.gain.setTargetAtTime(0, time + ampAttack, ampDecay);
+
+        setTimeout(function(){ 
+          self.stopSemitone(semitone);
+        },duration);
+      }
+
     });
   };
+
+  self.stopSemitone = function(semitone) {
+      var slot = oscillatorBank[semitone];
+      if (!slot) { return false; }
+      slot.forEach(osc => self.stopOsc(osc) );
+  };
+
+  self.stopOsc = function(osc) {
+    osc.stop();   
+    osc.disconnect();
+    self.playing = false;   
+  };
+
+
   
-  self.playNote = function(note,duration) {
+  self.playNote = function(note,duration,velocity) {
     self.play(note.value(),duration);  
   };
-  
+ self.stopNote = function(note) {
+  self.stopSemitone(note.value());
+ }
+
   return self;
 };

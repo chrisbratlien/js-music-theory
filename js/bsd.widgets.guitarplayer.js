@@ -28,13 +28,13 @@ BSD.Widgets.GuitarPlayer = function(spec) {
     self.addNewString();
   }
 
-  self.play = function(semitone, duration) {   
+  self.play = function(semitone, duration, velocity) {   
     var o = self.idleStrings().detect(function(o) { return true; }); 
     if (!o) { 
       console.log('could not find idle oscillator');       
       return false; 
     }
-    o.play(semitone, duration);
+    o.play(semitone, duration,velocity);
   };
   
   self.idleStrings = function() {
@@ -42,14 +42,21 @@ BSD.Widgets.GuitarPlayer = function(spec) {
       return o.playing == false;
     });  
   };
-  self.playNote = function(note,duration) {
+  self.playNote = function(note,duration,velocity) {
     ////console.log('spec.range>>',spec.range);
   
     var v = note.value();
     while (v > spec.range[1]) {
       v -= 12;
     }
-    self.play(v, duration);  
+    self.play(v, duration,velocity);  
   };  
+
+  self.stopNote = function(note) {
+    self.oscillators.forEach(o => o.stopNote(note) );
+  };
+
+
+
   return self;
 };

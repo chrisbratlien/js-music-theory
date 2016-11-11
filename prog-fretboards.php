@@ -1011,6 +1011,15 @@ checkTiny();
     });
 
 
+    keyboardist = BSD.Widgets.GuitarPlayer({
+    //BSD.Widgets.SimplePlayer({
+      context: context,
+      destination: common,
+      polyphonyCount: 48,//polyphonyCount,
+      range: [28,100]
+    });
+
+
 
    
     var waiter = BSD.Widgets.Procrastinator({ timeout: 250 });
@@ -1197,13 +1206,18 @@ checkTiny();
     campfire.subscribe('set-master-volume',function(o){
       BSD.audioPlayer.publish('set-master-volume',BSD.volume);
       bassist.publish('set-master-volume',BSD.volume);
+      keyboardist.publish('set-master-volume',BSD.volume*0.5);
     });
 
 
 
 
+  campfire.subscribe('stop-note',function(payload) {
+    BSD.audioPlayer.stopNote(payload.note);    
+  });
+
   campfire.subscribe('play-note',function(payload) {
-    BSD.audioPlayer.playNote(payload.note,payload.duration);    
+    BSD.audioPlayer.playNote(payload.note,payload.duration,payload.velocity);    
   });    
   campfire.subscribe('play-notes',function(notes) {
 
@@ -2361,8 +2375,20 @@ function onMIDIMessage(message) {
     console.log('type',type);
 
     if (velocity > 0) {
-      campfire.publish('play-note',{ note: Note(note), duration: 1000 });
+      ///campfire.publish('play-note',{ note: Note(note), duration: null, velocity: velocity });
+      keyboardist.playNote(Note(note),null,velocity);    
+
+
+
     }
+    else {
+      keyboardist.stopNote(Note(note));////notepayload.note,payload.duration,payload.velocity);    
+      //////campfire.publish('stop-note',{ note: Note(note) });
+    }
+
+
+
+
 }
 
 
