@@ -41,9 +41,6 @@ BSD.StringOscillator = function(spec) {
   
   
   
-  function randomInRange(min, max) {
-    return Math.random() * (max-min) + min;
-  }  
   
 
   self.play = function(semitone,duration,velocity)  {
@@ -99,7 +96,7 @@ BSD.StringOscillator = function(spec) {
     var items = [
     { title: 'fundamental', freq: midi2Hertz(semitone,detuneSemis), volumeRange: [0.5,1.0] },
     { title: 'octave', freq: midi2Hertz(semitone+12,detuneSemis), volumeRange: [0.1,0.2] },
-    //{ title: 'dominant', freq: midi2Hertz(semitone+19,detuneSemis), volumeRange: [0.0,0.13] },
+    { title: 'dominant', freq: midi2Hertz(semitone+19,detuneSemis), volumeRange: [0.0,0.13] },
     
     //{ title: 'dominant+fourth(octave2)', freq: midi2Hertz(semitone+24,detuneSemis), volumeRange: [0.0,0.04] },
     ///{ title: 'third', freq: midi2Hertz(semitone+28,detuneSemis), volumeRange: [0.0,0.02] },
@@ -113,7 +110,7 @@ BSD.StringOscillator = function(spec) {
       var osc = context.createOscillator();/////BufferSource();
       var gain = context.createGain();
       
-      var myVolume = randomInRange(o.volumeRange[0],o.volumeRange[1]);
+      var myVolume = BSD.randomInRange(o.volumeRange[0],o.volumeRange[1]);
 
       myVolume *= volume; //our established volume (0-1)
 
@@ -142,8 +139,8 @@ BSD.StringOscillator = function(spec) {
 
         env.oscillators.forEach(o => self.stopOsc(o));
         env.gains.forEach(g => {
-          g.gain.setTargetAtTime(0,0);
-          //g.gain.linearRampToValueAtTime(0.0,0); //do it now....              
+          ///g.gain.setTargetAtTime(0,context.currentTime,0); //do it now...
+          g.gain.linearRampToValueAtTime(0.0,0); //do it now....              
         });
         
       };

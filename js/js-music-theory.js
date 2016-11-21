@@ -842,9 +842,21 @@ var RootNoteWithIntervals = function(spec) {
   self.hasDominantQuality = function() {
     return (self.hasMajorThirdInterval() && self.hasDominantSeventhInterval());
   };
+  self.hasMajorSeventhQuality = function() {
+    return (self.hasMajorThirdInterval() && self.hasMajorSeventhInterval());
+  };
+  self.hasMinorSeventhQuality = function() {
+    return (self.hasMinorThirdInterval() && self.hasMinorSeventhInterval());
+  };
   
   self.hasDominantSeventhInterval = function() {
     var hit = self.intervals().detect(function(i) { return i == 10; });  
+    return hit !== false;
+  };
+  self.hasMinorSeventhInterval = self.hasDominantSeventhInterval;
+
+  self.hasMajorSeventhInterval = function() {
+    var hit = self.intervals().detect(function(i) { return i == 11; });  
     return hit !== false;
   };
 

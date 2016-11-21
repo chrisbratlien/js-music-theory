@@ -28,6 +28,11 @@ function midi2Hertz(x,detuneSemitoneOffset) {
 }
 
 
+BSD.randomInRange = function(min, max) {
+    return Math.random() * (max-min) + min;
+};  
+
+
 
 
 BSD.parseProgression = function(progString) {

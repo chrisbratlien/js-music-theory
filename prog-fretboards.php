@@ -401,6 +401,7 @@ add_action('wp_footer',function(){
     <script src="js/draggy.js"></script>
     <script src="js/sticky-note.js"></script>
     <script src="js/bsd.widgets.songlist.js"></script>
+    <script src="js/bsd.widgets.simpleplayer.js"></script>
     
     <script type="text/javascript">
 
@@ -933,54 +934,6 @@ checkTiny();
 
 
 
-    BSD.Widgets.SimplePlayer = function(spec) {
-
-      var bank = {};
-
-      var self = BSD.PubSub({});
-
-
-      self.playNote = function(note,duration,velocity) {
-        var env = {};
-        var v = note.value();
-        while (v > spec.range[1]) {
-          v -= 12;
-        }
-        while (v < spec.range[0]) {
-          v += 12;
-        }
-        ///console.log('v?',v);
-        var freq = midi2Hertz(v);
-        var osc = context.createOscillator();/////BufferSource();
-
-        osc.frequency.value = freq;
-        osc.type = 'sine';
-        osc.start(0);      
-        osc.connect(spec.destination);
-
-        env.oscillators = [];
-        env.oscillators.push(osc);
-        env.stop = function() {
-          env.oscillators.forEach(o => {
-            o.disconnect();
-            o.stop();
-          });
-        };
-
-        if (duration) { setTimeout(env.stop,duration); }
-        return env;
-
-      };
-      self.playChord = function(chord,duration) {
-        chord.notes().forEach(function(note){
-          self.playNote(note,duration);
-        });
-      };
-
-      self.spec = spec;
-      return self;
-    };
-
 
     var common = context.createGain();
     common.gain = 1.0;
@@ -992,31 +945,30 @@ checkTiny();
     var convolver = context.createConvolver();
     convolver.buffer = impulseResponse(1.5,1.5,false);
 
-    wet.gain.value = 0.5;
+    wet.gain.value = 0.4;
     wet.connect(convolver);
     convolver.connect(context.destination);
 
-    dry.gain.value = 0.5;
+    dry.gain.value = 0.6;
     dry.connect(context.destination);
 
     common.connect(wet);
     common.connect(dry);
 
-
+    /**
     BSD.audioPlayer = BSD.Widgets.GuitarPlayer({
-    /////BSD.Widgets.SimplePlayer({
       context: context,
       destination: common,
       polyphonyCount: 48,//polyphonyCount,
       range: [40,128]
     });
+    ***/
 
 
     /****
     var simpleGain = context.createGain();
     simpleGain.gain.value = 0.04;
     simpleGain.connect(common);
-
     BSD.audioPlayer = BSD.Widgets.SimplePlayer({
       context: context,
       destination: simpleGain,
@@ -1025,6 +977,12 @@ checkTiny();
     });
     ****/
 
+    BSD.audioPlayer = BSD.Widgets.SimplePlayer({
+      context: context,
+      destination: common,
+      polyphonyCount: 48,//polyphonyCount,
+      range: [40,128]
+    });
 
 
 
@@ -1032,8 +990,7 @@ checkTiny();
 
 
 
-    var bassist = BSD.Widgets.GuitarPlayer({
-    //BSD.Widgets.SimplePlayer({
+    var bassist = BSD.Widgets.SimplePlayer({
       context: context,
       destination: common,
       polyphonyCount: 48,//polyphonyCount,
@@ -1234,12 +1191,10 @@ checkTiny();
 
 
     campfire.subscribe('set-master-volume',function(o){
-      BSD.audioPlayer.publish('set-master-volume',BSD.volume);
-      bassist.publish('set-master-volume',BSD.volume);
-      keyboardist.publish('set-master-volume',BSD.volume*0.5);
+      BSD.audioPlayer.publish('set-master-volume',o);
+      bassist.publish('set-master-volume',o);
+      keyboardist.publish('set-master-volume',o*0.5);
     });
-
-
 
 
   campfire.subscribe('stop-note',function(payload) {
@@ -1438,6 +1393,10 @@ function outsideJudge(o,env) {
   var hit9 = env.ninthAV == o.chromaticValue; 
   var hit6or9 = hit6 || hit9;
 
+  var hit11 = env.eleventhAV == o.chromaticValue;
+  var hitSharp11 = env.sharpEleventhAV == o.chromaticValue;
+
+
   if (BSD.options.fretRange && o.fret > BSD.options.fretRange[1]) {
     return 'fret > maxFret';
   }
@@ -1452,8 +1411,17 @@ function outsideJudge(o,env) {
     return 'minor7 with 6th clashes (7b with 6)';
   }
   ***/
+
   if (hit6 && meta.isStrongBeat) {
     return '6th on strong beat';    
+  }
+
+  if (env.hasMinor3rd && hit11) {
+    return "OK";
+  }
+
+  if (env.hasMajor7thQuality && hitSharp11) {
+    return "OK";
   }
 
 
@@ -1761,10 +1729,18 @@ campfire.subscribe('do-it',function(prog){
 
 
       meta.rootAbstractValue = myChord.rootNote.abstractValue();
-      meta.majorSixthAV = (meta.rootAbstractValue + 9) % 12;
+      meta.majorSixthAV = (meta.rootAbstractValue + 9) % 12; 
       meta.ninthAV = (meta.rootAbstractValue + 2) % 12;
+      meta.eleventhAV = (meta.rootAbstractValue + 5) % 12;
+      meta.sharpEleventhAV = (meta.rootAbstractValue + 6) % 12;
+
+
       meta.hasPerfectFifth = myChord.hasPerfectFifthInterval(); ///move this to o itself?
-      meta.hasMinor7Quality = myChord.hasMinorThirdInterval() && myChord.hasPerfectFifthInterval() && myChord.hasDominantSeventhInterval();
+      meta.hasMinor3rd = myChord.hasMinorThirdInterval();
+      meta.hasMajor3rd = myChord.hasMajorThirdInterval();
+      meta.hasDominant7th = myChord.hasDominantSeventhInterval();
+      meta.hasMajor7thQuality = myChord.hasMajorSeventhQuality();
+      meta.hasMinor7thQuality = myChord.hasMinorSeventhQuality();
       meta.maxFretDistance = meta.defaults.maxFretDistance;
       meta.maxDiff = meta.defaults.maxDiff; 
       meta.isStrongBeat = true;
