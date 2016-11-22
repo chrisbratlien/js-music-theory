@@ -137,8 +137,10 @@ BSD.StringOscillator = function(spec) {
       env.gains.push(gain);
       env.stop = function() {
 
-        env.oscillators.forEach(o => self.stopOsc(o));
-        env.gains.forEach(g => {
+        env.oscillators.forEach(function(o) { 
+          self.stopOsc(o); 
+        });
+        env.gains.forEach(function(g){
           ///g.gain.setTargetAtTime(0,context.currentTime,0); //do it now...
           g.gain.linearRampToValueAtTime(0.0,0); //do it now....              
         });
