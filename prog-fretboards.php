@@ -16,10 +16,13 @@ add_action('wp_head',function(){
 
   .color-grey { color: #888; }
   .color-white  { color: white; }
+  .color-black { color: black; }
 
 
 
-
+  .stringset-name { 
+    color: #888;
+   }
 
   .stage { 
     float: left;
@@ -373,6 +376,7 @@ get_header(); ?>
 
 <div class="venue">
   <h3 class="song-name"></h3>
+  <h5 class="stringset-name"></h5>
   <div class="song-form-position-wrap noprint">
     <div class="song-cycle-position noprint"></div>
     <div class="clear-both"></div>
@@ -1372,6 +1376,9 @@ campfire.subscribe('gather-inputs-and-do-it',function(){
 
   var prog = BSD.parseProgression(progInput.val());
   ///////campfire.publish('do-it-prog',prog);
+
+
+
   campfire.publish('do-it',prog);    
 });
 
@@ -1679,6 +1686,7 @@ campfire.subscribe('do-it',function(prog){
     ////BSD.boards.push(extraBoard);
 
 
+    jQuery('.stringset-name').html(BSD.options.stringSet);
 
     var activeStrings = BSD.options.stringSet.split('');
     BSD.activeStrings = activeStrings; //FIXME, this won't work in the long run
