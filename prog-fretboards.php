@@ -14,6 +14,13 @@ add_action('wp_head',function(){
 
   .clear-both { clear: both; }
 
+  .color-grey { color: #888; }
+  .color-white  { color: white; }
+
+
+
+
+
   .stage { 
     float: left;
     margin: 0; 
@@ -81,6 +88,11 @@ add_action('wp_head',function(){
 
     .inner { page-break-inside: avoid; }
 
+
+    .featured { 
+      color: red !important; 
+      background: red !important; 
+    }
   
   
   }
@@ -88,10 +100,6 @@ add_action('wp_head',function(){
  
   .controls { margin-left: 0.4rem; }
   .controls .fa-close { cursor: pointer; }
-
-  .color-grey { color: #888; }
-  .color-white  { color: white; }
-
 
 
 
@@ -108,9 +116,10 @@ add_action('wp_head',function(){
 
 
   .featured { 
-    color: black !important; 
-    background: yellow !important; 
+    color: black !important;
+    background: yellow !important;
   }
+
 
   /**
   .control.play-all { background: green; height: 50px; max-height: 50px; line-height: 50px; } 
@@ -225,25 +234,6 @@ add_action('wp_head',function(){
 }
 
 
-/**
-.stringset-4321 .string-4 { border-bottom: 1px solid rgba(0,0,0,0.1); }
-.stringset-4321 .string-5 { display: none; }
-.stringset-4321 .string-6 { display: none; }
-
-
-.stringset-5432 .string-5 { border-bottom: 1px solid rgba(0,0,0,0.1); }
-.stringset-5432 .string-1 { display: none; }
-.stringset-5432 .string-6 { display: none; }
-
-
-.stringset-6543 .string-2 { display: none; }
-.stringset-6543 .string-1 { display: none; }
-
-
-
-.stringset-6432 .string-1 { display: none; }
-.stringset-5321 .string-6 { display: none; }
-***/
 
 
 </style>
@@ -299,58 +289,35 @@ get_header(); ?>
         <div class="form-inline form-progression">
           <label>Progression</label>
           <div class="form-group">
-            <input type="text" id="progression" class="form-control progression" />
             <button class="btn btn-info btn-start">Start</button>          
+            <input type="text" id="progression" class="form-control progression" />
           </div>
         </div>
         
-        <label>String sets</label>
+        <label>String Set</label>
 
-        <div class="all">
-          <label>All</label>
-          <input type="checkbox" class="cb-stringset-654321" checked="true" />
-          <label>654321</label>
-        </div>
-        <div class="drop2">
-          <label>Drop 2</label>
-          <input type="checkbox" class="cb-stringset-4321" />
-          <label>4321</label>
+        <select class="stringset">
+          <optgroup label="All">
+            <option value="654321">654321</option>
+          </optgroup>
+          <optgroup label="Drop 2">
+            <option value="4321">4321</option>
+            <option value="5432">5432</option>
+            <option value="6543">6543</option>
+          </optgroup>
+          <optgroup label="Drop 3">
+            <option value="6432">6432</option>
+            <option value="5321">5321</option>            
+          </optgroup>
+          <optgroup label="Other">
+            <option value="321">321</option>
+            <option value="432">432</option>
+            <option value="543">543</option>
+            <option value="654">654</option>
+          </optgroup>
+        </select>
 
-          <input type="checkbox" class="cb-stringset-5432" />
-          <label>5432</label>
-          <input type="checkbox" class="cb-stringset-6543" />
-          <label>6543</label>
-        </div>
-        <div class="drop3">
-          <label>Drop 3</label>
-          <input type="checkbox" class="cb-stringset-6432" />
-          <label>6432</label>
-          <input type="checkbox" class="cb-stringset-5321" />
-          <label>5321</label>
-        </div>
-        <div class="other">
-          <label>Other</label>
-          <input type="checkbox" class="cb-stringset-321" />
-          <label>321</label>
-          <input type="checkbox" class="cb-stringset-432" />
-          <label>432</label>
-          <input type="checkbox" class="cb-stringset-543" />
-          <label>543</label>
-          <input type="checkbox" class="cb-stringset-654" />
-          <label>654</label>
-        </div>
-
-
-
-
-
-
-
-
-
-
-
-
+  <div class="clear-both">&nbsp;</div>
 
   <button class="btn btn-info btn-pause"><i class="fa fa-pause"></i> Pause</button>
   <button class="btn btn-info btn-toggle-text noprint">Toggle Text</button>
@@ -405,6 +372,7 @@ get_header(); ?>
 </div>
 
 <div class="venue">
+  <h3 class="song-name"></h3>
   <div class="song-form-position-wrap noprint">
     <div class="song-cycle-position noprint"></div>
     <div class="clear-both"></div>
@@ -414,7 +382,7 @@ get_header(); ?>
     </ul>
   </div>
 </div><!-- venue -->
-<div class="venue-footer noprint">
+<div class="venue-footer noprint clear-both">
 </div>
 <h3 class="noprint">Songs</h3>
 <ul class="song-list-wrap noprint">
@@ -563,6 +531,9 @@ btnSaveProg.click(function(){
   }
 
 var venue = jQuery('.venue');
+var songName = jQuery('.song-name');
+
+
 var btnToggleTiny = jQuery('.btn-toggle-tiny');
 btnToggleTiny.click(function(){
   BSD.options.tiny = !BSD.options.tiny;
@@ -1043,7 +1014,8 @@ checkTiny();
   BSD.songlist.renderOn(songlistWrap);
   BSD.songlist.subscribe('song-selected',function(song) {
     BSD.currentSong = song;
-    console.log('Z>>EEEEE>>>song',song);
+    songName.html(song.title);
+    ////console.log('Z>>EEEEE>>>song',song);
     /////campfire.publish('lets-do-this',song.progression);
     progInput.val(song.progression);
     BSD.options.progression = song.progression;
@@ -1160,6 +1132,21 @@ checkTiny();
       BSD.noteResolution = parseInt(this.value,10);
     });
     ddNoteResolution.find('option[value="' + BSD.noteResolution + '"]').attr('selected',true);
+
+
+    if (!BSD.options.stringSet) {
+      BSD.options.stringSet = '654321';
+      storage.setItem('options',JSON.stringify(BSD.options));
+    }
+    var ddStringSet = jQuery('.stringset');
+    ddStringSet.change(function(){
+      ///////BSD.beatsPerMeasure = parseInt(this.value,10);
+      BSD.options.stringSet = this.value;
+      storage.setItem('options',JSON.stringify(BSD.options));
+    });
+    ddStringSet.find('option[value="' + BSD.options.stringSet + '"]').attr('selected',true);
+
+
 
 
 
@@ -1691,16 +1678,13 @@ campfire.subscribe('do-it',function(prog){
     });
     ////BSD.boards.push(extraBoard);
 
-  ['654321','6432','4321','5432','5321','6543','321','432','543','654'].forEach(function(stringSet){
-    var cb = jQuery('.cb-stringset-' + stringSet);
-    if (!cb.attr('checked')) { return false; }
 
 
-    var activeStrings = stringSet.split('');
+    var activeStrings = BSD.options.stringSet.split('');
     BSD.activeStrings = activeStrings; //FIXME, this won't work in the long run
     prog.forEach(function(chordItem,chordItemIdx){
       var chord = chordItem.chord;
-      var stage = DOM.div().addClass('stage hidden stringset-' + stringSet);
+      var stage = DOM.div().addClass('stage hidden stringset-' + BSD.options.stringSet);
 
       venue.append(stage);
       var board = makeFretboardOn(stage,{
@@ -1709,7 +1693,7 @@ campfire.subscribe('do-it',function(prog){
       });
       BSD.boards.push(board);
     });
-  });
+
 
   campfire.publish('fret-range-updated',BSD.options.fretRange); //this affects boards..
 
