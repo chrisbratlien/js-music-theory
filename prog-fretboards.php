@@ -216,7 +216,7 @@ add_action('wp_head',function(){
 }
 
 
-/* drop 2 string sets */
+/**
 .stringset-4321 .string-4 { border-bottom: 1px solid rgba(0,0,0,0.1); }
 .stringset-4321 .string-5 { display: none; }
 .stringset-4321 .string-6 { display: none; }
@@ -231,10 +231,10 @@ add_action('wp_head',function(){
 .stringset-6543 .string-1 { display: none; }
 
 
-/* Drop 3 string sets */
+
 .stringset-6432 .string-1 { display: none; }
 .stringset-5321 .string-6 { display: none; }
-
+***/
 
 
 </style>
