@@ -12,6 +12,8 @@ add_action('wp_head',function(){
     font-size: 10px;
   }
 
+  .clear-both { clear: both; }
+
   .stage { 
     float: left;
     margin: 0; 
@@ -22,7 +24,9 @@ add_action('wp_head',function(){
     font-size: 10px; 
     margin-left: 2%; 
     width: 50%; 
+    float: left;
   }
+
 
   .inner table { float: left; }
   .inner .controls { float: left; }
@@ -65,6 +69,7 @@ add_action('wp_head',function(){
 
 
   @media print  { 
+    .noprint { display: none;  }
 
     body { font-size: 7pt; }
     .inner { font-size: 7pt; }
@@ -73,6 +78,10 @@ add_action('wp_head',function(){
       color : #777;
       color: rgba(0,0,0,0.5); 
     }
+
+    .inner { page-break-inside: avoid; }
+
+  
   
   }
   
@@ -253,6 +262,15 @@ get_header(); ?>
   <br />
   <br />
 </div>
+
+
+
+
+<div class="navbar-spacer screen-only noprint">
+</div>
+
+<div class="controls noprint">
+
 <div class="color-pickers-wrap noprint">
 
       <button id="more-palettes">Redraw Palettes</button>
@@ -322,10 +340,18 @@ get_header(); ?>
           <label>654</label>
         </div>
 
-<div class="navbar-spacer screen-only noprint">
-</div>
 
-<div class="controls">
+
+
+
+
+
+
+
+
+
+
+
   <button class="btn btn-info btn-pause"><i class="fa fa-pause"></i> Pause</button>
   <button class="btn btn-info btn-toggle-text noprint">Toggle Text</button>
   <button class="btn btn-info btn-save-prog"><i class="fa fa-save"></i> Save Prog</button>
@@ -377,20 +403,21 @@ get_header(); ?>
 
   <br />
 </div>
-<div class="venue">
-  <div class="song-form-position-wrap">
-    <div class="song-cycle-position"></div>
 
-    <div class="btn btn-loop-start">A</div>
-    <div class="btn btn-loop-end">B</div>
-    <ul class="song-form-position">
+<div class="venue">
+  <div class="song-form-position-wrap noprint">
+    <div class="song-cycle-position noprint"></div>
+    <div class="clear-both"></div>
+    <div class="btn btn-loop-start noprint">A</div>
+    <div class="btn btn-loop-end noprint">B</div>
+    <ul class="song-form-position noprint">
     </ul>
   </div>
 </div><!-- venue -->
-<div class="venue-footer">
+<div class="venue-footer noprint">
 </div>
-<h3>Songs</h3>
-<ul class="song-list-wrap">
+<h3 class="noprint">Songs</h3>
+<ul class="song-list-wrap noprint">
 </ul>
 
 <?php
@@ -1656,7 +1683,7 @@ campfire.subscribe('do-it',function(prog){
 
   var venue = jQuery('.venue');
 
-    var stage = DOM.div().addClass('stage extra');
+    var stage = DOM.div().addClass('stage extra noprint');
     venue.append(stage);
     extraBoard = makeFretboardOn(stage,{
         //chord: chord,
