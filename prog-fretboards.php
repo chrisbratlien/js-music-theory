@@ -24,6 +24,17 @@ add_action('wp_head',function(){
     color: #888;
    }
 
+  .venue {
+    float: left;
+  }
+
+  .venue-column {
+    float: left;
+    width: 33%;
+  }
+
+
+
   .stage { 
     float: left;
     margin: 0; 
@@ -128,7 +139,9 @@ add_action('wp_head',function(){
   .control.play-all { background: green; height: 50px; max-height: 50px; line-height: 50px; } 
   .control.play-all:active { background: #0f0; }
   **/ 
-     
+   
+
+
   .venue-footer { 
     height: 400px; 
   }
@@ -377,6 +390,7 @@ get_header(); ?>
 <div class="venue">
   <h3 class="song-name"></h3>
   <h5 class="stringset-name"></h5>
+  
   <div class="song-form-position-wrap noprint">
     <div class="song-cycle-position noprint"></div>
     <div class="clear-both"></div>
@@ -385,7 +399,7 @@ get_header(); ?>
     <ul class="song-form-position noprint">
     </ul>
   </div>
-</div><!-- venue -->
+</div><!-- venue row -->
 <div class="venue-footer noprint clear-both">
 </div>
 <h3 class="noprint">Songs</h3>
@@ -1651,6 +1665,9 @@ campfire.subscribe('do-it',function(prog){
 
   var venue = jQuery('.venue');
 
+  var venueColumn = false; 
+
+
     var stage = DOM.div().addClass('stage extra noprint');
     venue.append(stage);
     extraBoard = makeFretboardOn(stage,{
@@ -1660,19 +1677,35 @@ campfire.subscribe('do-it',function(prog){
     ////BSD.boards.push(extraBoard);
 
 
+
+
     jQuery('.stringset-name').html(BSD.options.stringSet);
 
     var activeStrings = BSD.options.stringSet.split('');
     BSD.activeStrings = activeStrings; //FIXME, this won't work in the long run
     prog.forEach(function(chordItem,chordItemIdx){
+
+
       var chord = chordItem.chord;
+      if (chordItemIdx % 8 == 0) {
+        venueColumn = DOM.div().addClass('column venue-column');
+        venue.append(venueColumn);
+      }
+
       var stage = DOM.div().addClass('stage hidden stringset-' + BSD.options.stringSet);
 
-      venue.append(stage);
+
+      venueColumn.append(stage);
       var board = makeFretboardOn(stage,{
         chord: chord,
         activeStrings: activeStrings
       });
+
+
+
+
+
+
       BSD.boards.push(board);
     });
 
