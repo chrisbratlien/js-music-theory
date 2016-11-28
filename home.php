@@ -17,10 +17,10 @@
   <br />
   <br />
 </div>
-
-    <ul>
+    <h3>Links</h3>
+    <ul class="mobile-line-height list-style-type-none">
       <li><a href="http://github.com/chrisbratlien/js-music-theory">js-music-theory on Github</a> Fork and download the code here</li>
-      <li><a href="chords">Chords</a> some fretbaord flashcards over various jazz chord names (circa 2012)</li>
+      <li><a href="chords">Chords</a> some fretbaord flashcards over various jazz chord names (from what I understood circa 2012)</li>
       <li><a href="guitar">Guitar</a> Maps fretboard for each chord change in progression. Has song list for preset progressions</li>
       <li><a href="mandolin.html">Mandolin (may be broken)</a> has mandolin tuning on its fretboard</li>
       <li><a href="palette.html">Palette</a> scratch page for various junk</li>
@@ -34,6 +34,7 @@
       <li><a href="multiple-fretboards">Multiple Fretboards</a> paint and play on fretboards</li>
       <li><a href="paint">Paint</a> paint</li>
       <li><a href="prog-fretboards">Prog Fretboards</a> paint and play on fretboards drawn to match a progression</li>
+      <li><a href="mandolin-fretboards">Mandolin Fretboards</a> paint and play on fretboards drawn to match a progression</li>
       <li><a href="hexagon">Hexagon</a> Hexagon inputs</li>
       <li><a href="vex4">Vex4</a> VexFlow progressions sandbox</li>
     </ul>

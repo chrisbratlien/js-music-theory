@@ -9,3 +9,4 @@ data
 local.php
 .htaccess
 node_modules
+data/remote.db

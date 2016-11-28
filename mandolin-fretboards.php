@@ -1,7 +1,7 @@
 <?php 
 
 
-add_filter('wp_title',function($o){ return 'Prog Fretboards'; });
+add_filter('wp_title',function($o){ return 'Mandolin Fretboards'; });
 add_action('wp_head',function(){
 ?>
 
@@ -714,7 +714,9 @@ checkTiny();
           table.empty();
           //console.log('cscale',cscale);
 
-          var openValues = BSD.guitarData.select(function(o) { return o.fret == 0; }).map(function(o){ return o.noteValue; });
+
+          var openValues = BSD.mandolinData.select(function(o) { return o.fret == 0; }).map(function(o){ return o.noteValue; });
+
           openValues.forEach(function(open,stringIdx) { 
             var row = DOM.tr();     
             [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17].each(function(fret){ 
@@ -865,8 +867,8 @@ checkTiny();
       
       function makeFretboardOn(wrap,opts) {
         var chord = opts.chord;
-        var activeStrings = opts.activeStrings || [1,2,3,4,5,6];
-        var defaultData = JSON.parse(JSON.stringify(BSD.guitarData));
+        var activeStrings = opts.activeStrings || [1,2,3,4];
+        var defaultData = JSON.parse(JSON.stringify(BSD.mandolinData));
         ///console.log('defaultData',defaultData);
         
 
@@ -958,6 +960,7 @@ checkTiny();
 
     common.connect(wet);
     common.connect(dry);
+
 
     BSD.audioPlayer = BSD.Widgets.SimplePlayer({
       context: context,
@@ -1269,8 +1272,8 @@ checkTiny();
   });
       
     
-  BSD.importJSON('data/guitar.json',function(o) { 
-    BSD.guitarData = o;
+  BSD.importJSON('data/mandolin.json',function(o) { 
+    BSD.mandolinData = o;
 
 
   },
@@ -1778,7 +1781,7 @@ campfire.subscribe('do-it',function(prog){
         direction = 'up';
       }
 
-      candidates = BSD.guitarData;
+      candidates = BSD.mandolinData;
 
 
       var scale = 10;//12; //rightmost fret to idealize.
@@ -1866,7 +1869,6 @@ campfire.subscribe('do-it',function(prog){
       var retries = 0;
       while (retries < 110 && candidates.length == 0) {
         console.log('pre-proto uh oh retry#',retries);
-
         var last;
         if (BSD.sequence.length > 0) {
           last = BSD.sequence[BSD.sequence.length-1];
@@ -1880,7 +1882,7 @@ campfire.subscribe('do-it',function(prog){
         ///console.log('flip! (necessity)');
         rejections = [];
         outsideRejections = [];
-        candidates = BSD.guitarData.select(function(o) {
+        candidates = BSD.mandolinData.select(function(o) {
           return criteria(o,meta);
         });
         retries += 1;

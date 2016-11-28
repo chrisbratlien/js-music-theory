@@ -1,5 +1,14 @@
 body { font-family: Lucida Grande; }
 
+
+.mobile-line-height {
+  line-height: 40px;
+}
+
+.list-style-type-none {
+  list-style-type: none;
+}
+
 @media print { 
   .screen-only { display: none;  }
   .noprint { display: none;  }
