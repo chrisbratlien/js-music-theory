@@ -415,7 +415,7 @@ add_action('wp_footer',function(){
     <script src="js/sticky-note.js"></script>
     <script src="js/bsd.widgets.songlist.js"></script>
     <script src="js/bsd.widgets.simpleplayer.js"></script>
-    
+    <script src="js/bsd.widgets.tonalityguru.js"></script>    
     <script type="text/javascript">
 
 
@@ -1663,6 +1663,9 @@ campfire.subscribe('do-it',function(prog){
   });
 
 
+  var guru = BSD.Widgets.TonalityGuru({});
+
+
   var venue = jQuery('.venue');
 
   var venueColumn = false; 
@@ -1986,6 +1989,14 @@ campfire.subscribe('do-it',function(prog){
       result.avgFret = avgFret;
       ///result.idx = i;
       
+      var advice = guru.analyze(result);
+      console.log('advice',advice);
+      result.tonalityScale = advice.tonalityScale;
+
+
+
+
+
       console.log('result',result);
 
 
