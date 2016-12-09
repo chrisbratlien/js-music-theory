@@ -1429,20 +1429,38 @@ function outsideJudge(o,env) {
     return "OK";
   }
 
+
+
+  /** not always fond of this..
   if (env.hasMajor7thQuality && hitSharp11) {
     return "OK";
   }
+  ***/
 
-
-
+  /* sometimes this is ok, but going back to keeping chord tones strictly on strong beat 12/9
   if (hit6or9 && meta.hasPerfectFifth) {
     //if (hit6) { alert('hit6'); }
     //if (hit6) { console.log('hit6',meta); }
     //console.log('hit6or9 meta',env);
     return 'OK';
   }
+  ****/
 
-  if (abstractNoteValues.indexOf(o.chromaticValue) < 0) { return 'outside'; }
+
+
+  //FIXME: need UI toggle to determine which combo of outside tonalityScale and outside chord will disqualify a candidate
+  //otherwise, outside chord will always further whittle down and reduce the candidates to a set smaller than the tonalityScale, making tonalityScale useless as a filter.
+
+
+  if (meta.isStrongBeat && abstractNoteValues.indexOf(o.chromaticValue) < 0) { 
+    return 'strong beat and outside chord'; 
+  }
+
+  if (meta.tonalityScaleAbstractValues.indexOf(o.chromaticValue) < 0) { 
+    return 'outside of tonalityScale'; 
+  }
+  
+
   if (o.fret > 13) { return 'too high'; }
   if (BSD.activeStrings && !BSD.activeStrings.detect(function(as) { 
     ///console.log('as',as,'o.string',o.string);
@@ -1635,6 +1653,10 @@ function initLast() {
 
 
 
+var guru = BSD.Widgets.TonalityGuru({});
+
+
+
 
 campfire.subscribe('do-it',function(prog){
   initLast();
@@ -1663,7 +1685,23 @@ campfire.subscribe('do-it',function(prog){
   });
 
 
-  var guru = BSD.Widgets.TonalityGuru({});
+  //link up the prog
+  var last = false;
+  prog.forEach(function(o){
+    if (last) {
+      last.next = o;
+    }
+    last = o;
+  });
+  last.next = prog[0];
+
+
+  prog.forEach(function(o){
+    var advice = guru.analyze(o);
+    console.log('advice',advice);
+    /////result.tonalityScale = advice.tonalityScale;
+    o.scaleAdvice = advice;
+  });
 
 
   var venue = jQuery('.venue');
@@ -1773,7 +1811,9 @@ campfire.subscribe('do-it',function(prog){
       meta.maxFretDistance = meta.defaults.maxFretDistance;
       meta.maxDiff = meta.defaults.maxDiff; 
       meta.isStrongBeat = true;
-
+      meta.advice = chordItem.advice;
+      meta.tonalityScale = makeScale(chordItem.scaleAdvice.advice);
+      meta.tonalityScaleAbstractValues = meta.tonalityScale.abstractNoteValues();
 
 
       var totQuarterNoteBeats = BSD.beatsPerMeasure; //for this chord.
@@ -1989,12 +2029,6 @@ campfire.subscribe('do-it',function(prog){
       result.avgFret = avgFret;
       ///result.idx = i;
       
-      var advice = guru.analyze(result);
-      console.log('advice',advice);
-      result.tonalityScale = advice.tonalityScale;
-
-
-
 
 
       console.log('result',result);

@@ -162,21 +162,40 @@ JSMT.twelveNotes = function() {
 
 JSMT.scaleMap = {
     'major' : { name: 'major', intervals: [0,2,4,5,7,9,11] },
+    'ionian' : { name: 'ionian', intervals: [0,2,4,5,7,9,11] },
 
     'minor' : { name: 'minor', intervals: [0,2,3,5,7,8,10] },
+    'aeolian' : { name: 'aeolian', intervals: [0,2,3,5,7,8,10] },
     'natural minor' : { name: 'natural minor', intervals: [0,2,3,5,7,8,10] },
+
+
+    'dorian' : { name: 'dorian', intervals: [0,2,3,5,7,9,10] },
+
+    'lydian' : { name: 'lydian', intervals: [0,2,4,6,7,9,11] },
 
 
     'HM' : { name: 'harmonic minor', intervals: [0,2,3,5,7,8,11] },
     'harmonic minor' : { name: 'harmonic minor', intervals: [0,2,3,5,7,8,11] },
 
+    'HM2' : { name: 'harmonic minor mode 2', intervals: [0,1,3,5,6,9,10] },
+    'HM5' : { name: 'harmonic minor mode 5', intervals: [0,1,4,5,7,8,10] },
+
+
     'MM' : { name: 'melodic minor', intervals: [0,2,3,5,7,9,11] },
+    'MM1' : { name: 'melodic minor', intervals: [0,2,3,5,7,9,11] },
     'mm' : { name: 'melodic minor', intervals: [0,2,3,5,7,9,11] },
     'melodic minor' : { name: 'melodic minor', intervals: [0,2,3,5,7,9,11] },
+
+
+    'MM2' : { name: 'melodic minor mode 2', intervals: [0,1,3,5,7,9,10] },
+
+
 
     'MM4' : { name: 'melodic minor mode 4', intervals: [0,2,4,6,7,9,10] },
     'mm4' : { name: 'melodic minor mode 4', intervals: [0,2,4,6,7,9,10] },
 
+
+    'MM6' : { name: 'melodic minor mode 6', intervals: [0,2,3,5,6,8,10] },
 
     'MM7' : { name: 'melodic minor mode 7', intervals: [0,1,3,4,6,8,10] },
     'mm7' : { name: 'melodic minor mode 7', intervals: [0,1,3,4,6,8,10] },
@@ -186,6 +205,11 @@ JSMT.scaleMap = {
     'dorian' : { name: 'dorian', intervals: [0,2,3,5,7,9,10] },
 
     'dominant' : { name: 'dominant', intervals: [0,2,4,5,7,9,10] },
+    'mixolydian' : { name: 'mixolydian', intervals: [0,2,4,5,7,9,10] },
+
+
+    'locrian' : { name: 'locrian', intervals: [0,1,3,5,6,8,10] },
+
 
 
     'half whole diminished' : { name: 'half whole diminished', intervals: [0,1,3,4,6,7,9,10] },
