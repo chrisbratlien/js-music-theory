@@ -39,7 +39,7 @@ BSD.Widgets.TonalityGuru = function(spec) {
     var isTwoToNextChord = (currentChord.rootNote.fourth().abstractValue() == nextChord.rootNote.abstractValue());
 
     var isFunctioningDominant = isTwoToNextChord && isDominant; //is it "going home?"
-
+    var isNonFunctioningDominant = isDominant && !isFunctioningDominant;
 
     var isSubstituteDominant = (currentChord.abbrev == '7' && currentChord.rootNote.plus(-1).abstractValue() == nextChord.rootNote.abstractValue());
         /////if (isSubstituteDominant) { alert('SUBST!'); }
@@ -68,20 +68,22 @@ BSD.Widgets.TonalityGuru = function(spec) {
       solutions.push({ advice: currentChordRootNoteName + ' MM2', just: 'cb5'  }); //maybe restrict this more to ensure heading towards a i-7 after the dominant?
     }
 
-    if (solutions.length == 0 && isFunctioningDominant && nextChordMinor7) {
-      solutions.push({ advice: currentChordRootNoteName + ' HM5', just: 'cb6'  });
+    if (solutions.length == 0 && isFunctioningDominant) {
+      if (nextChordMinor7) {
+        solutions.push({ advice: currentChordRootNoteName + ' HM5', just: 'cb6'  });
+      }
+      else {
+
+        if (nextChordMajor7) {
+          solutions.push({ advice: currentChordRootNoteName + ' mixolydian', just: 'cb7'  });
+        }
+        solutions.push({ advice: currentChordRootNoteName + ' MM7', just: 'cb8'  });
+      }
     }
 
-    if (solutions.length == 0 && isFunctioningDominant && nextChordMajor7) {
-      solutions.push({ advice: currentChordRootNoteName + ' mixolydian', just: 'cb7'  });
-      solutions.push({ advice: currentChordRootNoteName + ' MM7', just: 'cb8'  });
-    }
 
-    if (solutions.length == 0 && isFunctioningDominant && nextChordDominant) {
-      solutions.push({ advice: currentChordRootNoteName + ' MM7', just: 'cb9'  });
-    }
 
-    if (solutions.length == 0 && isDominant && !isFunctioningDominant) {
+    if (solutions.length == 0 && isNonFunctioningDominant) {
       solutions.push({ advice: currentChordRootNoteName + ' MM4', just: 'cb10'  });
     }
 
