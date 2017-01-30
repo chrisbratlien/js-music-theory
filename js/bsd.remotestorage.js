@@ -27,7 +27,7 @@ BSD.RemoteStorage = function(spec) {
   self.getItem = function(k,success,error) {
     self.morlock('getItem',{ key: prefix+k, value: null },success,error);
   };
-  self.removeItem = function(k,v,success,error) {
+  self.removeItem = function(k,success,error) {
     self.morlock('removeItem',{ key: prefix+k, value: null },success,error);
   };
   self.clear = function() {
