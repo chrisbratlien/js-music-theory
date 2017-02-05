@@ -254,6 +254,7 @@ JSMT.chordMap = {
 
     'dim':  { name: 'diminished', intervals: [0,3,6] },
     'o':  { name: 'diminished', intervals: [0,3,6] },
+    '°':  { name: 'diminished', intervals: [0,3,6] },
 
 
 
@@ -336,6 +337,7 @@ JSMT.chordMap = {
     'm6':  { name: 'minor6', intervals: [0,3,7,9] },
 
     'o7':  { name: 'diminished 7', intervals: [0,3,6,9] },
+    '°7':  { name: 'diminished 7', intervals: [0,3,6,9] },
 
 
     '6/9':  { name: 'sixNine', intervals: [0,4,7,9,14] },
