@@ -1456,7 +1456,7 @@ function outsideJudge(o,env) {
     return 'strong beat and outside chord'; 
   }
 
-  if (meta.tonalityScaleAbstractValues.indexOf(o.chromaticValue) < 0) { 
+  if (meta.tonalityScaleAbstractValues && meta.tonalityScaleAbstractValues.indexOf(o.chromaticValue) < 0) { 
     return 'outside of tonalityScale'; 
   }
   
@@ -1811,9 +1811,11 @@ campfire.subscribe('do-it',function(prog){
       meta.maxFretDistance = meta.defaults.maxFretDistance;
       meta.maxDiff = meta.defaults.maxDiff; 
       meta.isStrongBeat = true;
-      meta.advice = chordItem.advice;
-      meta.tonalityScale = makeScale(chordItem.scaleAdvice.advice);
-      meta.tonalityScaleAbstractValues = meta.tonalityScale.abstractNoteValues();
+      /////meta.advice = chordItem.advice;
+      if (chordItem.scaleAdvice && chordItem.scaleAdvice.advice) {
+        meta.tonalityScale = makeScale(chordItem.scaleAdvice.advice);
+        meta.tonalityScaleAbstractValues = meta.tonalityScale.abstractNoteValues();        
+      }
 
 
       var totQuarterNoteBeats = BSD.beatsPerMeasure; //for this chord.
