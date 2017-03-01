@@ -2417,7 +2417,8 @@ function onMIDIMessage(message) {
 
     console.log('type',type);
 
-    if (velocity > 0) {
+
+    if (type == 144 && velocity > 0) { //note on
       ///campfire.publish('play-note',{ note: Note(note), duration: null, velocity: velocity });
       bank[note] = keyboardist.playNote(Note(note),null,velocity);    
     }
