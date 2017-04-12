@@ -1456,7 +1456,7 @@ function outsideJudge(o,env) {
     return 'strong beat and outside chord'; 
   }
 
-  if (meta.tonalityScaleAbstractValues.indexOf(o.chromaticValue) < 0) { 
+  if (meta.tonalityScaleAbstractValues && meta.tonalityScaleAbstractValues.indexOf(o.chromaticValue) < 0) { 
     return 'outside of tonalityScale'; 
   }
   
@@ -1811,9 +1811,13 @@ campfire.subscribe('do-it',function(prog){
       meta.maxFretDistance = meta.defaults.maxFretDistance;
       meta.maxDiff = meta.defaults.maxDiff; 
       meta.isStrongBeat = true;
-      meta.advice = chordItem.advice;
-      meta.tonalityScale = makeScale(chordItem.scaleAdvice.advice);
-      meta.tonalityScaleAbstractValues = meta.tonalityScale.abstractNoteValues();
+      ////meta.advice = chordItem.advice;
+
+      meta.tonalityScale = false;
+      if (chordItem.scaleAdvice) { 
+        meta.tonalityScale = makeScale(chordItem.scaleAdvice.advice);
+        meta.tonalityScaleAbstractValues = meta.tonalityScale.abstractNoteValues();
+      }
 
 
       var totQuarterNoteBeats = BSD.beatsPerMeasure; //for this chord.
@@ -2415,6 +2419,14 @@ function onMIDIMessage(message) {
 
     console.log('type',type);
 
+    if (type == 176) {
+      //mod wheel (at least on the alesis qx49 it is)
+      return false;
+    }
+    if (type == 224) {
+      //pitch wheel
+      return false;
+    }
 
     if (type == 144 && velocity > 0) { //note on
       ///campfire.publish('play-note',{ note: Note(note), duration: null, velocity: velocity });
