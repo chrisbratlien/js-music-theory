@@ -1811,12 +1811,9 @@ campfire.subscribe('do-it',function(prog){
       meta.maxFretDistance = meta.defaults.maxFretDistance;
       meta.maxDiff = meta.defaults.maxDiff; 
       meta.isStrongBeat = true;
-      ////meta.advice = chordItem.advice;
-
-      meta.tonalityScale = false;
-      if (chordItem.scaleAdvice) { 
+      if (chordItem.scaleAdvice && chordItem.scaleAdvice.advice) {
         meta.tonalityScale = makeScale(chordItem.scaleAdvice.advice);
-        meta.tonalityScaleAbstractValues = meta.tonalityScale.abstractNoteValues();
+        meta.tonalityScaleAbstractValues = meta.tonalityScale.abstractNoteValues();        
       }
 
 
