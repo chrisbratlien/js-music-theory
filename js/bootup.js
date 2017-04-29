@@ -222,7 +222,8 @@ BSD.tempoToMillis = function(bpm) {
 
 
 
-var context;
+var context = (window.AudioContext) ? new AudioContext : new webkitAudioContext;
+BSD.audioContext = context;
 
 
 BSD.allMIDIValues = [];
@@ -241,5 +242,7 @@ BSD.sorter = function(selectorFunc) {
     };
     return sortFunc;
 };
+
+
 
 

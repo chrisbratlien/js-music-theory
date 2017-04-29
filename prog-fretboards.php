@@ -50,7 +50,10 @@ add_action('wp_head',function(){
 
 
   .inner table { float: left; }
-  .inner .controls { float: left; }
+  .inner .controls { 
+    float: left; 
+  }
+
   .inner .spacer { clear: both; }
 
   .bsd-control { margin-top: 1rem; }
@@ -330,6 +333,7 @@ get_header(); ?>
             <option value="432">432</option>
             <option value="543">543</option>
             <option value="654">654</option>
+            <option value="21">21</option>
           </optgroup>
         </select>
 
@@ -794,6 +798,12 @@ checkTiny();
               
               });
 
+              self.subscribe('scale-change',function(scale){
+                fretData.selected = scale.containsNote(note);
+                self.styleCell(cell,fretData);      
+              });
+
+
               self.styleCell(cell,fretData);      
               self.subscribe('feature-fret',function(o){
                 var hit = (o.string == stringIdx + 1) && o.fret == fret;
@@ -831,6 +841,15 @@ checkTiny();
           playAll.click(function(){
             self.publish('play-notes',self.selectedNotes());
           });
+
+
+          var scaleInput = DOM.input().attr('type','text').addClass('scale-input');
+          scaleInput.on('blur change',function(){
+            var scale = makeScale(this.value);
+            self.publish('scale-change',scale);
+          });
+          controls.append(scaleInput);
+
           controls.append(playAll);
 
 
@@ -928,8 +947,8 @@ checkTiny();
 
 
 
-  var context = (window.AudioContext) ? new AudioContext : new webkitAudioContext;
-  BSD.audioContext = context;
+  //var context = (window.AudioContext) ? new AudioContext : new webkitAudioContext;
+  //BSD.audioContext = context;
 
 
       function impulseResponse( duration, decay, reverse ) {

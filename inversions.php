@@ -130,8 +130,8 @@ add_action('wp_footer',function(){
 
   var rulersWrap = jQuery('#rulers');
 
-  var context = new webkitAudioContext();
-  BSD.audioContext = context;
+  ///var context = new webkitAudioContext();
+  ///BSD.audioContext = context;
 
    BSD.audioPlayer = BSD.Widgets.GuitarPlayer({
       ////gossip: campfire,
