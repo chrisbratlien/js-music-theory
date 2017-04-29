@@ -848,7 +848,7 @@ checkTiny();
             var scale = this.value.length ?  makeScale(this.value) : false;
             self.publish('scale-change',scale);
           });
-          controls.append(scaleInput);
+          inner.append(scaleInput); //i want this visible big or small.
 
           controls.append(playAll);
 
