@@ -687,7 +687,7 @@ checkTiny();
         self.styleCell = function(cell,fretData) {
           cell.addClass('color-white');
 
-                if (fretData.selected) {
+                if (fretData.selected || fretData.isScaleNote) {
                   var hex = BSD.chosenColor.toHex();
                   var sum = BSD.chosenColor.r + BSD.chosenColor.g + BSD.chosenColor.b;
                   
@@ -799,7 +799,7 @@ checkTiny();
               });
 
               self.subscribe('scale-change',function(scale){
-                fretData.selected = scale.containsNote(note);
+                fretData.isScaleNote = scale && scale.containsNote(note);
                 self.styleCell(cell,fretData);      
               });
 
@@ -845,7 +845,7 @@ checkTiny();
 
           var scaleInput = DOM.input().attr('type','text').addClass('scale-input');
           scaleInput.on('blur change',function(){
-            var scale = makeScale(this.value);
+            var scale = this.value.length ?  makeScale(this.value) : false;
             self.publish('scale-change',scale);
           });
           controls.append(scaleInput);
