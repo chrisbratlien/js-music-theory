@@ -2430,7 +2430,7 @@ campfire.subscribe('brown-note',function(){
 
   var gn = context.createGain();
   gn.gain.value = 0;
-  gn.connect(context.destination);
+  gn.connect(common);
   brownNoise.connect(gn);
   campfire.subscribe('brown-tick',function(){
     gn.gain.setTargetAtTime(0.5,context.currentTime,0); //do it now...
