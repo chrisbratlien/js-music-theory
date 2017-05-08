@@ -2338,13 +2338,16 @@ campfire.subscribe('tick',function(cursor){
 
 });
 
-/**
 campfire.subscribe('tick',function(cursor){
-
-
-
+  //high hat
+  if (BSD.noteResolution == 4 && cursor.chordNoteIdx == 1) {
+    campfire.publish('brown-tick');
+  }
+  if (BSD.noteResolution == 4 && cursor.chordNoteIdx + 1 == cursor.totQuarterNoteBeats) {
+    campfire.publish('brown-tick');
+  }
 });
-
+/**
 campfire.subscribe('tick',function(cursor){
 
 });
@@ -2404,6 +2407,36 @@ campfire.subscribe('tick',function(cursor){
     tick(BSD.loop[0]);
   });
 
+
+
+
+campfire.subscribe('brown-note',function(){
+  var bufferSize = 4096;
+  var brownNoise = (function() {
+      var lastOut = 0.0;
+      var node = context.createScriptProcessor(bufferSize, 1, 1);
+      node.onaudioprocess = function(e) {
+          var output = e.outputBuffer.getChannelData(0);
+          for (var i = 0; i < bufferSize; i++) {
+              var white = Math.random() * 2 - 1;
+              output[i] = (lastOut + (0.02 * white)) / 1.02;
+              lastOut = output[i];
+              output[i] *= 3.5; // (roughly) compensate for gain
+          }
+      }
+      return node;
+  })();
+
+
+  var gn = context.createGain();
+  gn.gain.value = 0;
+  gn.connect(context.destination);
+  brownNoise.connect(gn);
+  campfire.subscribe('brown-tick',function(){
+    gn.gain.setTargetAtTime(0.5,context.currentTime,0); //do it now...
+    gn.gain.linearRampToValueAtTime(0, context.currentTime + 0.03);    
+  });
+});
 
 
 
@@ -2471,6 +2504,9 @@ function onMIDIFailure(error) {
     // when we get a failed response, run this code
     console.log("No access to MIDI devices or your browser doesn't support WebMIDI API. Please use WebMIDIAPIShim " + error);
 }
+
+
+
 
 
       
