@@ -2410,7 +2410,7 @@ campfire.subscribe('tick',function(cursor){
 
 
 
-campfire.subscribe('brown-note',function(){
+campfire.subscribe('bootup-hi-hat',function(){
   var bufferSize = 4096;
   var brownNoise = (function() {
       var lastOut = 0.0;
@@ -2433,8 +2433,8 @@ campfire.subscribe('brown-note',function(){
   gn.connect(common);
   brownNoise.connect(gn);
   campfire.subscribe('brown-tick',function(){
-    gn.gain.setTargetAtTime(0.5,context.currentTime,0); //do it now...
-    gn.gain.linearRampToValueAtTime(0, context.currentTime + 0.03);    
+    gn.gain.setTargetAtTime(0.9,context.currentTime,0); //do it now...
+    gn.gain.linearRampToValueAtTime(0, context.currentTime + 0.015);    
   });
 });
 
@@ -2505,7 +2505,7 @@ function onMIDIFailure(error) {
     console.log("No access to MIDI devices or your browser doesn't support WebMIDI API. Please use WebMIDIAPIShim " + error);
 }
 
-
+campfire.publish('bootup-hi-hat');
 
 
 
