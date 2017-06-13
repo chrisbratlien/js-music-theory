@@ -53,7 +53,7 @@ BSD.Widgets.GuitarPlayer = function(spec) {
   };  
 
   self.stopNote = function(note) {
-    self.oscillators.forEach(o => o.stopNote(note) );
+    self.oscillators.forEach(function(o) { o.stopNote(note); });
   };
 
 
