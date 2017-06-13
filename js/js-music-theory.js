@@ -194,6 +194,7 @@ JSMT.scaleMap = {
 
     'MM4' : { name: 'melodic minor mode 4', intervals: [0,2,4,6,7,9,10] },
     'mm4' : { name: 'melodic minor mode 4', intervals: [0,2,4,6,7,9,10] },
+    'lydian dominant' : { name: 'melodic minor mode 4', intervals: [0,2,4,6,7,9,10] },
                                                         
     'MM5' : { name: 'melodic minor mode 5', intervals: [0,2,4,5,7,8,10] },
     'mm5' : { name: 'melodic minor mode 5', intervals: [0,2,4,5,7,8,10] },
