@@ -685,7 +685,7 @@ checkTiny();
 
 
         self.styleCell = function(cell,fretData) {
-          cell.addClass('color-white');
+          cell.addClass('color-white').removeClass('color-black');
 
                 if (fretData.selected || fretData.isScaleNote) {
                   var hex = BSD.chosenColor.toHex();
@@ -705,7 +705,7 @@ checkTiny();
                   cell.removeClass('color-grey');
 
                   
-                  (sum > 500) ? cell.addClass('color-black') : cell.addClass('color-white');
+                  (sum > 500) ? cell.addClass('color-black').removeClass('color-white') : cell.addClass('color-white').removeClass('color-black');
 
 
                 }
