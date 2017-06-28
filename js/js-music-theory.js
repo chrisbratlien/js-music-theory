@@ -220,8 +220,10 @@ JSMT.scaleMap = {
 
 
     'half whole diminished' : { name: 'half whole diminished', intervals: [0,1,3,4,6,7,9,10] },
+    'hw diminished' : { name: 'half whole diminished', intervals: [0,1,3,4,6,7,9,10] },
 
     'whole half diminished' : { name: 'whole half diminished', intervals: [0,2,3,5,6,8,9,11] },
+    'wh diminished' : { name: 'whole half diminished', intervals: [0,2,3,5,6,8,9,11] },
 
     'diminished whole tone' : { name: 'diminished whole tone', intervals: [0,1,3,4,6,8,10] },
 
