@@ -99,10 +99,15 @@ BSD.Widgets.SimplePlayer = function(spec) {
     { title: 'octave', freq: midi2Hertz(v+12,0), volumeRange: [0.1,0.2] },
     { title: 'dominant', freq: midi2Hertz(v+19,0), volumeRange: [0.0,0.13] },
     { title: 'dominant+fourth(octave2)', freq: midi2Hertz(v+24,0), volumeRange: [0.0,0.02] },
-    ///{ title: 'third', freq: midi2Hertz(semitone+28,detuneSemis), volumeRange: [0.0,0.02] },
-    //{ title: '6/b7', freq: midi2Hertz(semitone+33.5,detuneSemis), volumeRange: [0.0,0.08] },
-
+    { title: 'third', freq: midi2Hertz(v+28,0), volumeRange: [0.0,0.02] },
+    { title: '6/b7', freq: midi2Hertz(v+33.5,0), volumeRange: [0.0,0.08] },
     ];
+
+    if (spec.itemTitles) {
+      items = items.select(function(item){  
+        return spec.itemTitles.indexOf(item.title) > -1;
+      });
+    }
 
     var environments = items.map(function(item) {
     		return self.getEnviron(item.freq,BSD.randomInRange(item.volumeRange[0],item.volumeRange[1]));

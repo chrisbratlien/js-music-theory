@@ -1,4 +1,7 @@
 if (typeof BSD == "undefined") { var BSD = {}; }
+
+BSD.iOS = (navigator.userAgent.match(/(iPod|iPhone|iPad)/));
+
 BSD.keycodes = {
   d: 68,
   f: 70
