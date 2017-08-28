@@ -115,7 +115,7 @@ BSD.Widgets.SimplePlayer = function(spec) {
   
     result.stop = function() {
 	  	environments.forEach(function(env) {
-        env.stop());
+        env.stop();
     };
 		return result;
   };
