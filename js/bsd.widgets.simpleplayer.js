@@ -116,7 +116,8 @@ BSD.Widgets.SimplePlayer = function(spec) {
     result.stop = function() {
 	  	environments.forEach(function(env) {
         env.stop();
-    });
+      });
+    };
 		return result;
   };
   self.playChord = function(chord,duration) {
