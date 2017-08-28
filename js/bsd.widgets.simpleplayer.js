@@ -108,13 +108,14 @@ BSD.Widgets.SimplePlayer = function(spec) {
     		return self.getEnviron(item.freq,BSD.randomInRange(item.volumeRange[0],item.volumeRange[1]));
     });
   	
-  	environments.forEach(env => {
+  	environments.forEach(function(env){
 	    env.start();
 	    if (duration) { setTimeout(env.stop,duration); }
   	});
   
     result.stop = function() {
-	  	environments.forEach( env => env.stop());
+	  	environments.forEach(function(env) {
+        env.stop());
     };
 		return result;
   };
