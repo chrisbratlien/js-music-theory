@@ -396,10 +396,13 @@ get_header(); ?>
   <h5 class="stringset-name"></h5>
   
   <div class="song-form-position-wrap noprint">
+    Cycle
     <div class="song-cycle-position noprint"></div>
     <div class="clear-both"></div>
-    <div class="btn btn-loop-start noprint">A</div>
-    <div class="btn btn-loop-end noprint">B</div>
+    <div class="btn btn-default btn-loop-start noprint">A</div>
+    <div class="btn  btn-default btn-loop-end noprint">B</div>
+    <div class="clear-both"></div>
+    Bar
     <ul class="song-form-position noprint">
     </ul>
   </div>
@@ -2130,7 +2133,7 @@ campfire.subscribe('reset-song-form-ui',function(){
     div.click(function(){
       BSD.clickedBar = i;
       var event = BSD.sequence.detect(function(o) {
-        return o.barIdx == i;
+        return o.barIdx == i && o.cycleIdx == BSD.currentCycleIdx;
       });
       console.log('event',event);
       tick(event);
@@ -2149,7 +2152,7 @@ campfire.subscribe('reset-song-form-ui',function(){
     div.click(function(){
       BSD.clickedCycle = i;
       var event = BSD.sequence.detect(function(o) {
-        return o.cycleIdx == i;
+        return o.cycleIdx == i && o.barIdx == BSD.currentBarIdx;
       });
       console.log('event',event);
       tick(event);
@@ -2226,9 +2229,12 @@ campfire.subscribe('test-periodic',function(o){
   });
 
   var saveBarIdx = false;
+  BSD.currentBarIdx = false;
   campfire.subscribe('tick',function(cursor){
-    if (cursor.barIdx != saveBarIdx) {
+    if (cursor.barIdx != BSD.currentBarIdx || cursor.cycleIdx != BSD.currentCycleIdx) {
       saveBarIdx = cursor.barIdx;
+      BSD.currentBarIdx = cursor.barIdx;
+      BSD.currentCycleIdx = cursor.cycleIdx;
       campfire.publish('song-form-position',cursor);
     }
   });
