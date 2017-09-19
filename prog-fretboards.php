@@ -438,6 +438,13 @@ storage.getItem('options',function(o){
 
 
 
+BSD.itemTitles = ['fundamental','octave','dominant','dominant+fourth(octave2)'];
+if (BSD.iOS) {
+  BSD.itemTitles = ['fundamental'];
+}
+////alert(BSD.itemTitles);
+
+
 BSD.progressions = [];
 
 
@@ -999,6 +1006,7 @@ checkTiny();
       context: context,
       destination: common,
       polyphonyCount: 48,//polyphonyCount,
+      itemTitles: BSD.itemTitles,
       range: [40,128]
     });
 
@@ -1007,6 +1015,7 @@ checkTiny();
       context: context,
       destination: common,
       polyphonyCount: 48,//polyphonyCount,
+      itemTitles: BSD.itemTitles,//['fundamental','octave','dominant','dominant+fourth(octave2)'],
       range: [28,100]
     });
 
@@ -1015,6 +1024,7 @@ checkTiny();
       context: context,
       destination: common,
       polyphonyCount: 48,//polyphonyCount,
+      itemTitles: BSD.itemTitles,//['fundamental','octave','dominant','dominant+fourth(octave2)'],
       range: [28,100]
     });
 
