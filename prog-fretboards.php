@@ -1691,6 +1691,7 @@ var guru = BSD.Widgets.TonalityGuru({});
 
 
 campfire.subscribe('do-it',function(prog){
+  BSD.pause = false;
   initLast();
 
 
