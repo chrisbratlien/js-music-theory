@@ -329,6 +329,8 @@ get_header(); ?>
             <option value="5321">5321</option>            
           </optgroup>
           <optgroup label="Other">
+            <option value="64321">64321</option>
+            <option value="54321">54321</option>
             <option value="321">321</option>
             <option value="432">432</option>
             <option value="543">543</option>
@@ -382,7 +384,7 @@ get_header(); ?>
 
   <div class="slider-wrap bsd-control">
       <label>Min-Max Frets</label>
-      <span class="fret-range-amount">0-15</span>
+      <span class="fret-range-amount">0-17</span>
       <div class="slider fret-range-input"></div>
       <div style="clear: both;">&nbsp;</div>
   </div>
@@ -1126,7 +1128,7 @@ checkTiny();
         orientation: 'horizontal',
         range: 'min',
         min: 0,
-        max: 15,
+        max: 17,
         step: 1,
         values: BSD.options.fretRange,
         slide: function( event, ui ) {

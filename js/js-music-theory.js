@@ -865,7 +865,8 @@ var RootNoteWithIntervals = function(spec) {
       for (key in JSMT.scaleMap) {
         var spec = JSMT.scaleMap[key];
         var scale = Scale({ rootNote: n, intervals: spec.intervals, name: spec.name, abbrev: key });
-        if (self.notesNotFoundIn(scale).length == 0) {
+        var outsiders = self.notesNotFoundIn(scale);
+        if (outsiders.length == 0) {
           result.push(scale);
         }
       }  
