@@ -112,6 +112,7 @@ add_action('wp_footer',function() {
 <script src="js/bsd.widgets.baseplayer.js"></script>
 <script src="js/bsd.widgets.stringoscillator.js"></script>
 <script src="js/bsd.widgets.guitarplayer.js"></script>
+<script src="js/bsd.widgets.simpleplayer.js"></script>
 <script src="js/bsd.guitar.js"></script>
 
 <script type="text/javascript" src="js/bsd.widgets.procrastinator.js"></script>
@@ -271,6 +272,7 @@ BSD.ChordRulerPanel = function(spec) {
   var polyphonyCount = 48;
 
     
+    /**
     BSD.audioPlayer = BSD.Widgets.GuitarPlayer({
       gossip: campfire,
       context: context,
@@ -278,6 +280,18 @@ BSD.ChordRulerPanel = function(spec) {
       polyphonyCount: polyphonyCount,
       range: [-300,128]
     });
+    **/
+
+
+    BSD.audioPlayer = BSD.Widgets.SimplePlayer({
+      context: context,
+      destination: context,
+      polyphonyCount: 48,//polyphonyCount,
+      name: 'piano',
+      itemTitles: BSD.itemTitles,
+      range: [40,128]
+    });
+
     
 
 

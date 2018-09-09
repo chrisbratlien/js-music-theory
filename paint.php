@@ -22,7 +22,6 @@ add_action('wp_head',function(){
 
 get_header();
 
-
 ?>
 <div class="navbar-spacer screen-only noprint">
   <br>
@@ -34,8 +33,13 @@ get_header();
 </div>
 <button class="btn btn-info btn-undo">Undo</button>
 <button class="btn btn-info btn-redo">Redo</button>
+
+
+IMAGE URL<input class="image-url">
+
 <div class="paint-wrap" id="wPaint">	
 </div>
+
 
 <img class="song-img" />
 
@@ -119,6 +123,16 @@ var songImg = document.querySelector('.song-img');
 
 
 
+	});
+
+
+	jQuery('.image-url').change(function(){
+		songImg.src = this.value;
+		jQuery('.paint-wrap').css('width',songImg.clientWidth);
+		jQuery('.paint-wrap').css('height',songImg.clientHeight);
+
+		jQuery('#wPaint').wPaint({ image: songImg.src});
+		$('#wPaint').wPaint('image', songImg.src);
 	});
 
 	songImg.src = 'images/alice-in-wonderland.png';
