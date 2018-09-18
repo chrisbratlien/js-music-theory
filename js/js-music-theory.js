@@ -876,8 +876,6 @@ var RootNoteWithIntervals = function(spec) {
   };
 
 
-  self.hasMajorQuality = self.hasMajorThirdInterval;
-  self.hasMinorQuality = self.hasMinorThirdInterval;
 
   self.hasDominantQuality = function() {
     return (self.hasMajorThirdInterval() && self.hasDominantSeventhInterval());
@@ -904,11 +902,13 @@ var RootNoteWithIntervals = function(spec) {
     var hit = self.intervals().detect(function(i) { return i == 3; });  
     return hit !== false;
   };
+  self.hasMinorQuality = self.hasMinorThirdInterval;
 
   self.hasMajorThirdInterval = function() {
     var hit = self.intervals().detect(function(i) { return i == 4; });  
     return hit !== false;
   };
+  self.hasMajorQuality = self.hasMajorThirdInterval;
 
   self.hasPerfectFifthInterval = function() {
     var hit = self.intervals().detect(function(i) { return i == 7; });  
