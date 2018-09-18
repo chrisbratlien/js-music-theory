@@ -329,6 +329,8 @@ get_header(); ?>
             <option value="5321">5321</option>            
           </optgroup>
           <optgroup label="Other">
+            <option value="64321">64321</option>
+            <option value="54321">54321</option>
             <option value="321">321</option>
             <option value="432">432</option>
             <option value="543">543</option>
@@ -383,7 +385,7 @@ get_header(); ?>
 
   <div class="slider-wrap bsd-control">
       <label>Min-Max Frets</label>
-      <span class="fret-range-amount">0-15</span>
+      <span class="fret-range-amount">0-17</span>
       <div class="slider fret-range-input"></div>
       <div style="clear: both;">&nbsp;</div>
   </div>
@@ -962,23 +964,6 @@ checkTiny();
   //BSD.audioContext = context;
 
 
-      function impulseResponse( duration, decay, reverse ) {
-          var sampleRate = context.sampleRate;
-          var length = sampleRate * duration;
-          var impulse = context.createBuffer(2, length, sampleRate);
-          var impulseL = impulse.getChannelData(0);
-          var impulseR = impulse.getChannelData(1);
-
-          if (!decay)
-              decay = 2.0;
-          for (var i = 0; i < length; i++){
-            var n = reverse ? length - i : i;
-            impulseL[i] = (Math.random() * 2 - 1) * Math.pow(1 - n / length, decay);
-            impulseR[i] = (Math.random() * 2 - 1) * Math.pow(1 - n / length, decay);
-          }
-          return impulse;
-      }
-
 
 
 
@@ -1127,7 +1112,7 @@ checkTiny();
         orientation: 'horizontal',
         range: 'min',
         min: 0,
-        max: 15,
+        max: 17,
         step: 1,
         values: BSD.options.fretRange,
         slide: function( event, ui ) {

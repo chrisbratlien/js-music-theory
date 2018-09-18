@@ -109,11 +109,20 @@ add_action('wp_footer',function() {
 
 
 
-<script src="js/bsd.widgets.baseplayer.js"></script>
+
+<!--<script src="js/bsd.widgets.baseplayer.js"></script>
 <script src="js/bsd.widgets.stringoscillator.js"></script>
 <script src="js/bsd.widgets.guitarplayer.js"></script>
 <script src="js/bsd.widgets.simpleplayer.js"></script>
 <script src="js/bsd.guitar.js"></script>
+-->
+
+
+
+
+    <script src="js/bsd.widgets.simpleplayer.js"></script>
+    <script src="js/bsd.widgets.tonalityguru.js"></script>    
+
 
 <script type="text/javascript" src="js/bsd.widgets.procrastinator.js"></script>
 
@@ -271,23 +280,31 @@ BSD.ChordRulerPanel = function(spec) {
 
   var polyphonyCount = 48;
 
-    
-    /**
-    BSD.audioPlayer = BSD.Widgets.GuitarPlayer({
-      gossip: campfire,
-      context: context,
-      name: 'Piano',
-      polyphonyCount: polyphonyCount,
-      range: [-300,128]
-    });
-    **/
 
+    var common = context.createGain();
+    common.gain = 1.0;
+
+    var wet = context.createGain();
+    var dry = context.createGain();
+
+
+    var convolver = context.createConvolver();
+    convolver.buffer = impulseResponse(1.5,1.5,false);
+
+    wet.gain.value = 0.4;
+    wet.connect(convolver);
+    convolver.connect(context.destination);
+
+    dry.gain.value = 0.6;
+    dry.connect(context.destination);
+
+    common.connect(wet);
+    common.connect(dry);
 
     BSD.audioPlayer = BSD.Widgets.SimplePlayer({
       context: context,
-      destination: context,
+      destination: common,
       polyphonyCount: 48,//polyphonyCount,
-      name: 'piano',
       itemTitles: BSD.itemTitles,
       range: [40,128]
     });

@@ -23,6 +23,8 @@ BSD.Widgets.TonalityGuru = function(spec) {
     var nextChord2 = o.next.next.chord;
     ///var prevChord = o.prev.chord;
     //var barCount = o.current.barCount;
+    var isMajor = currentChord.hasMajorQuality();
+    var isMinor = currentChord.hasMinorQuality();
     var isMinor7 = currentChord.hasMinorSeventhQuality();
     var isMajor7 = currentChord.hasMajorSeventhQuality();
     var isMinor7b5 = currentChord.abbrev == '-7b5';
@@ -98,7 +100,12 @@ BSD.Widgets.TonalityGuru = function(spec) {
       solutions.push({ advice: currentChordRootNoteName + ' aeolian', just: 'catch-all 13'  });
       solutions.push({ advice: currentChordRootNoteName + ' MM1', just: 'catch-all 14'  });
     }
-
+    if (solutions.length == 0 && isMajor) {
+      solutions.push({ advice: currentChordRootNoteName + ' major', just: 'catch-all 15'  });
+    }
+    if (solutions.length == 0 && isMinor) {
+      solutions.push({ advice: currentChordRootNoteName + ' minor', just: 'catch-all 16'  });
+    }
 
 
     result = solutions.atRandom();
