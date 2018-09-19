@@ -2412,7 +2412,7 @@ campfire.subscribe('tick',function(cursor){
 
 
 
-
+BSD.hiHatVol = 0.8;
 campfire.subscribe('bootup-hi-hat',function(){
   var bufferSize = 4096;
   var brownNoise = (function() {
@@ -2433,10 +2433,11 @@ campfire.subscribe('bootup-hi-hat',function(){
 
   var gn = context.createGain();
   gn.gain.value = 0;
+
   gn.connect(common);
   brownNoise.connect(gn);
   campfire.subscribe('brown-tick',function(){
-    gn.gain.setTargetAtTime(0.9,context.currentTime,0); //do it now...
+    gn.gain.setTargetAtTime(BSD.hiHatVol,context.currentTime,0); //do it now...
     gn.gain.linearRampToValueAtTime(0, context.currentTime + 0.015);    
   });
 });
