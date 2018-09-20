@@ -378,6 +378,12 @@ get_header(); ?>
   </div>
   <div class="bsd-control">
     <label>
+      <input class="must-be-inside-chord" type="checkbox">
+      Improv Notes Must Be Inside Chord
+    </label>
+  </div>
+  <div class="bsd-control">
+    <label>
       <input class="show-current-chord-fretboard-only" type="checkbox">
       See Current Chord's Fretboard Only
     </label>
@@ -1180,6 +1186,15 @@ checkTiny();
       storage.setItem('options',JSON.stringify(BSD.options));
     });
 
+    var cbMustBeInsideChord = jQuery('.must-be-inside-chord');
+    cbMustBeInsideChord.attr('checked',BSD.options.mustBeInsideChord);
+    cbMustBeInsideChord.change(function(){
+      BSD.options.mustBeInsideChord = this.checked;
+      storage.setItem('options',JSON.stringify(BSD.options));
+    });
+
+
+
 
 
     if (!BSD.options.fretRange) {
@@ -1473,6 +1488,11 @@ function outsideJudge(o,env) {
   if (meta.isStrongBeat && abstractNoteValues.indexOf(o.chromaticValue) < 0) { 
     return 'strong beat and outside chord'; 
   }
+
+  if (BSD.options.mustBeInsideChord && abstractNoteValues.indexOf(o.chromaticValue) < 0) { 
+    return 'must be inside chord, yet outside chord'; 
+  }
+
 
   if (meta.tonalityScaleAbstractValues && meta.tonalityScaleAbstractValues.indexOf(o.chromaticValue) < 0) { 
     return 'outside of tonalityScale'; 
