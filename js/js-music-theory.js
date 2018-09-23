@@ -265,8 +265,11 @@ JSMT.chordMap = {
     '+':   { name: 'aug', intervals: [0,4,8] }, //verified
 
 
-    'sus4':  { name: 'sevenSuspended4', intervals: [0,5,7] }, //TODO: make sure
-    'sus':  { name: 'sevenSuspended4', intervals: [0,5,7] }, //TODO: make sure
+    '5':  { name: 'power', intervals: [0,7] },
+
+    'sus4':  { name: 'suspended4', intervals: [0,5,7] }, //TODO: make sure
+    'sus':  { name: 'suspended4', intervals: [0,5,7] }, //TODO: make sure
+    'sus2':  { name: 'suspended2', intervals: [0,2,7] }, //TODO: make sure
 
 
     'M7': { name: 'major7', intervals: [0,4,7,11] }, //verified
