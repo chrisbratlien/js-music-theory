@@ -11,8 +11,9 @@
   <!--<script src="lib/jquery-ui-touch-punch/jquery-ui-touch-punch.min.js"></script>-->
 
 
+  <!--
   <script src="lib/require.js"></script>
-
+  -->
   
   <script src="js/array.js"></script>
   <script src="js/color.js"></script>
