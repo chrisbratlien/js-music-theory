@@ -18,9 +18,17 @@ function resetGame() {
   }
 }
 
+
+
+function scores() {
+  var scores = allBirds.map(o => o.score);
+  return scores;
+}
+
+
 // Create the next generation
 function nextGeneration() {
-  resetGame();
+  ///resetGame();
   // Normalize the fitness values 0-1
   normalizeFitness(allBirds);
   // Generate a new set of birds
@@ -44,7 +52,7 @@ function generate(oldBirds) {
 function normalizeFitness(birds) {
   // Make score exponentially better?
   for (let i = 0; i < birds.length; i++) {
-    birds[i].score = pow(birds[i].score, 2);
+    birds[i].score = Math.pow(birds[i].score, 2);
   }
 
   // Add up all the scores

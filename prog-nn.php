@@ -443,18 +443,6 @@ add_action('wp_footer',function(){
 
 
 
-let activeBirds = [];
-// All birds for any given population
-let allBirds = [];
-let birds = [];
-
-
-let TOTAL_BIRDS = 100;
-for (var i = 0; i < TOTAL_BIRDS; i++) {
-  let bird = new Bird(null);
-  allBirds.push(bird);
-  activeBirds.push(bird);
-}
 
 BSD.timeout = false;
 
@@ -1020,6 +1008,20 @@ checkTiny();
       range: [28,100]
     });
 
+
+
+let activeBirds = [];
+// All birds for any given population
+let allBirds = [];
+let birds = [];
+
+
+let TOTAL_BIRDS = 5;
+for (var i = 0; i < TOTAL_BIRDS; i++) {
+  let bird = new Bird(null,BSD.audioPlayer.spec.range);
+  allBirds.push(bird);
+  activeBirds.push(bird);
+}
 
 
    
@@ -1696,6 +1698,24 @@ var guru = BSD.Widgets.TonalityGuru({});
 
 
 
+function think(chordItem,meta) {
+  if (activeBirds.length == 0) {
+    nextGeneration();
+  }
+  var result;
+  for (let i = activeBirds.length - 1; i > 0; i--) {
+    var b = activeBirds[i];
+    result = b.pick(chordItem,meta);
+    if (result < BSD.audioPlayer.spec.range[0] ||
+      result > BSD.audioPlayer.spec.range[1] 
+      ) {
+        console.log('out of range!!',result);
+        activeBirds.splice(i, 1); 
+      }
+  }
+  return result;
+}
+
 campfire.subscribe('do-it',function(prog){
   BSD.pause = false;
   initLast();
@@ -1970,32 +1990,20 @@ campfire.subscribe('do-it',function(prog){
 
       rejections = [];
       outsideRejections = [];
+      candidates = [];
 
+      while (candidates.length == 0){
+        nextGeneration();
+        var guessMIDIValue = think(chordItem,meta);
+        candidates = BSD.guitarData.select(function(o) {
+          return o.noteValue === guessMIDIValue;
+        });
 
-    if (activeBirds.length == 0) {
-      nextGeneration();
-    }
-    for (let i = activeBirds.length - 1; i > 0; i--) {
-      var b = activeBirds[i];
-      var guessMIDIValue = b.pick(chordItem,meta);
-      if (guessMIDIValue < BSD.audioPlayer.spec.range[0] ||
-        guessMIDIValue > BSD.audioPlayer.spec.range[1] 
-        ) {
-        console.log('out of range!!',guessMIDIValue);
-        activeBirds.splice(i, 1); 
       }
-    }
-    if (activeBirds.length == 0) {
-      nextGeneration();
-    }
 
 
-      //throw "REFACTOR THIS SELECT TO USE NN";
-      candidates = candidates.select(function(o) {
-        return o.noteValue === guessMIDIValue;
-        //return true; //let NN do it.
-        //return criteria(o,meta);
-      });
+
+
 
 
       var solutions = [

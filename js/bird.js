@@ -12,13 +12,17 @@ function mutate(x) {
 }
 
 class Bird {
-  constructor(brain){
+  constructor(brain,range){
+
+    this.range = range;
+
+    var oNodeCount = range[1] - range[0] + 1;
     if (brain instanceof NeuralNetwork) {
       this.brain = brain.copy();
-      this.brain.mutate(mutate);            
+      this.brain.mutate(mutate);
     }
     else {
-        this.brain = new NeuralNetwork(36,72,128);
+        this.brain = new NeuralNetwork(36,72,oNodeCount);
     }
 
     this.prevMidiValue = 0;
@@ -31,6 +35,10 @@ class Bird {
   }
   scale(num, in_min, in_max, out_min, out_max){
     return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+  }
+  // Create a copy of this bird
+  copy() {
+    return new Bird(this.brain,this.range);
   }
   pick(chordItem,meta) {
     ///console.log('PICK! chordItem',chordItem,'meta',meta);
@@ -88,13 +96,13 @@ class Bird {
 
 
 
-    let actionMIDIValue = Object.keys(action).reduce(function(a,b){
+    let actionIndex = +Object.keys(action).reduce(function(a,b){
       return action[a] > action[b] ? a : b;
     });
     // Decide to jump or not!
     this.score += 1;
 
-    var result = +actionMIDIValue;
+    var result = this.range[0] + actionIndex;
     return result;
   }
 
