@@ -436,13 +436,25 @@ add_action('wp_footer',function(){
     <script src="lib/matrix.js"></script>    
     <script src="lib/nn.js"></script>    
     <script src="js/bird.js"></script>    
+    <script src="js/ga.js"></script>    
 
 
     <script type="text/javascript">
 
 
 
-let bird = new Bird(null);
+let activeBirds = [];
+// All birds for any given population
+let allBirds = [];
+let birds = [];
+
+
+let TOTAL_BIRDS = 100;
+for (var i = 0; i < TOTAL_BIRDS; i++) {
+  let bird = new Bird(null);
+  allBirds.push(bird);
+  activeBirds.push(bird);
+}
 
 BSD.timeout = false;
 
@@ -1959,14 +1971,24 @@ campfire.subscribe('do-it',function(prog){
       rejections = [];
       outsideRejections = [];
 
-      var guessMIDIValue = bird.pick(chordItem,meta);
-      while (guessMIDIValue < BSD.audioPlayer.spec.range[0] ||
+
+    if (activeBirds.length == 0) {
+      nextGeneration();
+    }
+    for (let i = activeBirds.length - 1; i > 0; i--) {
+      var b = activeBirds[i];
+      var guessMIDIValue = b.pick(chordItem,meta);
+      if (guessMIDIValue < BSD.audioPlayer.spec.range[0] ||
         guessMIDIValue > BSD.audioPlayer.spec.range[1] 
         ) {
         console.log('out of range!!',guessMIDIValue);
-        bird = new Bird(bird.brain);
-        guessMIDIValue = bird.pick(chordItem,meta);
+        activeBirds.splice(i, 1); 
       }
+    }
+    if (activeBirds.length == 0) {
+      nextGeneration();
+    }
+
 
       //throw "REFACTOR THIS SELECT TO USE NN";
       candidates = candidates.select(function(o) {

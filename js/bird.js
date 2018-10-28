@@ -33,7 +33,7 @@ class Bird {
     return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
   }
   pick(chordItem,meta) {
-    console.log('PICK! chordItem',chordItem,'meta',meta);
+    ///console.log('PICK! chordItem',chordItem,'meta',meta);
       // Now create the inputs to the neural network
     let prevChord = chordItem.prev.chord;
     let currentChord = chordItem.chord;
