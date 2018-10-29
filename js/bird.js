@@ -14,15 +14,27 @@ function mutate(x) {
 class Bird {
   constructor(brain,range){
 
+    this.history = {
+      intervalVelocity: [],
+      predict: []
+    };
     this.range = range;
+    this.prevResult = -1;
+    this.intervalVelocity = 0;
+    var iNodeCount = 36; //chromatic notes for prev, cur, next chordItems
+    iNodeCount += 1; //if prevResult used.
+    iNodeCount += 1; //if intervalVelocity used.
+    iNodeCount += 1; //chordNoteIdx used.
 
-    var oNodeCount = range[1] - range[0] + 1;
+    var oNodeCount = range[1] - range[0] + 1 ;
+
+
     if (brain instanceof NeuralNetwork) {
       this.brain = brain.copy();
       this.brain.mutate(mutate);
     }
     else {
-        this.brain = new NeuralNetwork(36,72,oNodeCount);
+        this.brain = new NeuralNetwork(iNodeCount,iNodeCount *2,oNodeCount);
     }
 
     this.prevMidiValue = 0;
@@ -40,7 +52,56 @@ class Bird {
   copy() {
     return new Bird(this.brain,this.range);
   }
-  pick(chordItem,meta) {
+
+  judge(result) {
+    if (
+      result < BSD.audioPlayer.spec.range[0] ||
+      result > BSD.audioPlayer.spec.range[1] 
+    ) {
+        console.log('out of range!!',result);
+      //this.score--;
+      return "out of range";
+    }
+
+    if (Math.abs(this.intervalVelocity) > 7) {
+      //this.score--;
+      return "internal velocity too high";
+    }
+    if (this.history.intervalVelocity.length > 3 && this.intervalDistance() == 0) {
+      //this.score--;
+      console.log("intervalDistance too low");
+      return "intervalDistance too low";
+    }
+
+    this.score++;
+
+  }
+
+  getScore() {
+    var result = this.score;
+    var runLength = longestRunLength(this.history.predict);
+    result -= (runLength * runLength);
+
+    var d = this.noteDiversity();
+    result += Math.sign(d) * (d*d);
+
+    return result;
+  }
+
+
+
+  intervalDistance() {
+    var total = this.history.intervalVelocity.sum();
+    var result = Math.abs(total);
+    return result;
+  }
+  noteDiversity() {
+    var hash = histogram(this.history.predict);
+    var result = Object.keys(hash).length;
+    return result;
+  }
+
+  pick(chordItem,chordNoteIdx) {
     ///console.log('PICK! chordItem',chordItem,'meta',meta);
       // Now create the inputs to the neural network
     let prevChord = chordItem.prev.chord;
@@ -77,6 +138,9 @@ class Bird {
     inputs = inputs.concat(cNotP);
     inputs = inputs.concat(currentChordBitmap);
     inputs = inputs.concat(cNotN);
+    inputs.push(this.prevResult);
+    inputs.push(this.intervalVelocity);
+    inputs.push(chordNoteIdx);
     ///console.table([inputs]);
 
     /****
@@ -94,15 +158,16 @@ class Bird {
     // Get the outputs from the network
     let action = this.brain.predict(inputs);
 
-
-
     let actionIndex = +Object.keys(action).reduce(function(a,b){
       return action[a] > action[b] ? a : b;
     });
-    // Decide to jump or not!
-    this.score += 1;
 
     var result = this.range[0] + actionIndex;
+    this.intervalVelocity = result - this.prevResult;
+    this.prevResult = result;
+    this.judge(result);
+    this.history.predict.push(result);
+    this.history.intervalVelocity.push(this.intervalVelocity);
     return result;
   }
 

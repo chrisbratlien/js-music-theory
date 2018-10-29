@@ -14,25 +14,81 @@ function resetGame() {
   counter = 0;
   // Resetting best bird score to 0
   if (bestBird) {
-    bestBird.score = 0;
+    //bestBird.score = 0;
   }
 }
 
+function longestRunLength(a) {
+  var longest = 0;
+  var run = 0;
+  a.forEach(function(v,i) {
+    if (i > 0 && a[i] == a[i-1]) {
+      run++;
+      if (run > longest) { longest = run; }
+    } else {
+      run = 0;
+    }
+  });
+  return longest;
+}
+
+function histogram(a) {
+  var hash = {};
+  a.forEach(function(o){
+    hash[o] ? hash[o]++ : hash[o] = 1;
+  });
+  return hash;
+}
 
 
 function scores() {
-  var scores = allBirds.map(o => o.score);
+  var scores = allBirds.map(o => o.getScore());
   return scores;
 }
 
+function getBestBird() {
+  var result = activeBirds.slice().sort(BSD.sorter(function(o){
+    return o.getScore();
+  })).pop();
+  return result;
+}
+function showBirds() {
+  activeBirds.forEach(o => console.table([o.history.predict]));
+}
 
 // Create the next generation
 function nextGeneration() {
   ///resetGame();
   // Normalize the fitness values 0-1
-  normalizeFitness(allBirds);
+  activeBirds = activeBirds.select(function(bird){
+    return bird.getScore() >= 0;
+  });
+
+
+  activeBirds = activeBirds.select(function(bird){
+    var d = bird.noteDiversity();
+    if (bird.history.predict.length == 0) { return true; }
+    return d > 4;
+  });
+
+
+  normalizeFitness(activeBirds);
   // Generate a new set of birds
-  activeBirds = generate(allBirds);
+  activeBirds = generate(activeBirds);
+
+
+
+  while(activeBirds.length < TOTAL_BIRDS) {
+    //activeBirds.push(new Bird(null,BSD.audioPlayer.spec.range));
+    if (activeBirds.length == 0) {
+      console.log('all gone, rebuilding');
+      activeBirds.push(new Bird(null,BSD.audioPlayer.spec.range));
+    }
+    else {
+      //activeBirds.push(activeBirds.atRandom().copy());
+      activeBirds.push(getBestBird().copy());
+    }
+  }
   // Copy those birds to another array
   allBirds = activeBirds.slice();
 }
@@ -51,19 +107,25 @@ function generate(oldBirds) {
 // Normalize the fitness of all birds
 function normalizeFitness(birds) {
   // Make score exponentially better?
-  for (let i = 0; i < birds.length; i++) {
-    birds[i].score = Math.pow(birds[i].score, 2);
-  }
+
+  /**
+  birds.forEach(function(bird){
+    bird.score = Math.pow(bird.score,2);
+  })
+  **/
+
+  var scores = birds.map(function(bird){
+    return bird.getScore();
+  });
 
   // Add up all the scores
-  let sum = 0;
-  for (let i = 0; i < birds.length; i++) {
-    sum += birds[i].score;
-  }
+  var sum = scores.sum();
+
+
   // Divide by the sum
-  for (let i = 0; i < birds.length; i++) {
-    birds[i].fitness = birds[i].score / sum;
-  }
+  birds.forEach(function(bird){
+    bird.fitness = bird.getScore() / sum;
+  })
 }
 
 
@@ -74,7 +136,7 @@ function poolSelection(birds) {
   let index = 0;
 
   // Pick a random number between 0 and 1
-  let r = p5.prototype.random(1);
+  let r = Math.random();
 
   // Keep subtracting probabilities until you get less than zero
   // Higher probabilities will be more likely to be fixed since they will

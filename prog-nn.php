@@ -1016,7 +1016,7 @@ let allBirds = [];
 let birds = [];
 
 
-let TOTAL_BIRDS = 5;
+let TOTAL_BIRDS = 25;
 for (var i = 0; i < TOTAL_BIRDS; i++) {
   let bird = new Bird(null,BSD.audioPlayer.spec.range);
   allBirds.push(bird);
@@ -1099,7 +1099,7 @@ for (var i = 0; i < TOTAL_BIRDS; i++) {
         orientation: 'horizontal',
         range: 'min',
         min: 1,
-        max: 64,
+        max: 640,
         step: 1,
         value: BSD.progCycles,
         slide: function( event, ui ) {
@@ -1703,16 +1703,9 @@ function think(chordItem,meta) {
     nextGeneration();
   }
   var result;
-  for (let i = activeBirds.length - 1; i > 0; i--) {
-    var b = activeBirds[i];
+  activeBirds.forEach(function(b){
     result = b.pick(chordItem,meta);
-    if (result < BSD.audioPlayer.spec.range[0] ||
-      result > BSD.audioPlayer.spec.range[1] 
-      ) {
-        console.log('out of range!!',result);
-        activeBirds.splice(i, 1); 
-      }
-  }
+  });
   return result;
 }
 
@@ -1759,7 +1752,7 @@ campfire.subscribe('do-it',function(prog){
 
   prog.forEach(function(o){
     var advice = guru.analyze(o);
-    console.log('advice',advice);
+    //console.log('advice',advice);
     /////result.tonalityScale = advice.tonalityScale;
     o.scaleAdvice = advice;
   });
@@ -1822,8 +1815,51 @@ campfire.subscribe('do-it',function(prog){
     cycleRange.push(i); 
   }
 
+  cycleRange.forEach(function(cycleIdx){
+    nextGeneration();
+    prog.forEach(function(chordItem,chordItemIdx) {
+      var barIdx = chordItem.barIndex;
+      var chordIdx = chordItemIdx;
+      var barChordIdx = chordItem.barChordIndex;
+      var myChord = chordItem.chord;
+
+      abstractNoteValues = myChord.abstractNoteValues();
+
+      var totQuarterNoteBeats = BSD.beatsPerMeasure; //for this chord.
+      if (chordItem.halfBar) {
+        if (BSD.beatsPerMeasure == 3) {
+          if (barChordIdx == 0) {
+            totQuarterNoteBeats = 2;
+          }
+          else {
+            totQuarterNoteBeats = 1;
+          }
+        }
+        else {
+          totQuarterNoteBeats = 2;
+        }
+      }
+
+      var totNoteEvents = Math.ceil(totQuarterNoteBeats * BSD.beatsPerMeasure / BSD.noteResolution); 
+      var eventRange = [];
+      for (var i = 0; i < totNoteEvents; i += 1) {
+        eventRange.push(i);
+      }
+      eventRange.forEach(function(o,chordNoteIdx) {
+        think(chordItem,chordNoteIdx);
+      });
+    });
+    //showBirds();
+    console.log('scores',scores());///,'activeBirds',activeBirds);
+  });
+
+  //console.log('scores',scores(),'activeBirds',activeBirds);
 
 
+
+
+
+  var bestBird = getBestBird();
   cycleRange.forEach(function(cycleIdx){
     prog.forEach(function(chordItem,chordItemIdx) {
       if (errors) { return false; }
@@ -1992,64 +2028,16 @@ campfire.subscribe('do-it',function(prog){
       outsideRejections = [];
       candidates = [];
 
-      while (candidates.length == 0){
-        nextGeneration();
-        var guessMIDIValue = think(chordItem,meta);
-        candidates = BSD.guitarData.select(function(o) {
-          return o.noteValue === guessMIDIValue;
-        });
-
-      }
-
-
-
-
-
-
-      var solutions = [
-        function() { meta.maxDiff += 1;  console.log("increased meta.maxDiff to " + meta.maxDiff); },
-        function() { meta.maxFretDistance += 1;  console.log("increased meta.maxFretDistance to " + meta.maxFretDistance); },
-        function() { direction = nextDirection[direction]; console.log("changed direction to " + direction);   },
-      ];
-
-      var retries = 0;
-      while (retries < 110 && candidates.length == 0) {
-        console.log('pre-proto uh oh retry#',retries);
-
-        var last;
-        if (BSD.sequence.length > 0) {
-          last = BSD.sequence[BSD.sequence.length-1];
-          console.log('last barIdx',last.barIdx,'cycleIdx',last.cycleIdx,'last',last);
-        }
-
-        var solution = solutions.atRandom();
-
-        solution();
-
-        ///console.log('flip! (necessity)');
-        rejections = [];
-        outsideRejections = [];
-
-
-
-        throw "REFACTOR THIS SELECT TO USE NN";
-        /** let the NN whittle it down **/
-        candidates = BSD.guitarData.select(function(o) {
-          return true; //let nn do it.
-          return criteria(o,meta);
-        });
-
-
-
-
-        retries += 1;
-      }
-
-
+      //nextGeneration();
+      var guessMIDIValue = bestBird.pick(chordItem,chordNoteIdx);
+      candidates = BSD.guitarData.select(function(o) {
+        return o.noteValue === guessMIDIValue;
+      });
 
 
       if (candidates.length == 0) {
           errors += 1;
+          throw "what happened?";
           return false;
       }
 
