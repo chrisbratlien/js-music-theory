@@ -1815,51 +1815,54 @@ campfire.subscribe('do-it',function(prog){
     cycleRange.push(i); 
   }
 
-  cycleRange.forEach(function(cycleIdx){
-    nextGeneration();
-    prog.forEach(function(chordItem,chordItemIdx) {
-      var barIdx = chordItem.barIndex;
-      var chordIdx = chordItemIdx;
-      var barChordIdx = chordItem.barChordIndex;
-      var myChord = chordItem.chord;
+  times(100)(function(n) {
+    console.log('Generation',n);
 
-      abstractNoteValues = myChord.abstractNoteValues();
+    cycleRange.forEach(function(cycleIdx){
+      nextGeneration();
+      prog.forEach(function(chordItem,chordItemIdx) {
+        var barIdx = chordItem.barIndex;
+        var chordIdx = chordItemIdx;
+        var barChordIdx = chordItem.barChordIndex;
+        var myChord = chordItem.chord;
 
-      var totQuarterNoteBeats = BSD.beatsPerMeasure; //for this chord.
-      if (chordItem.halfBar) {
-        if (BSD.beatsPerMeasure == 3) {
-          if (barChordIdx == 0) {
-            totQuarterNoteBeats = 2;
+        abstractNoteValues = myChord.abstractNoteValues();
+
+        var totQuarterNoteBeats = BSD.beatsPerMeasure; //for this chord.
+        if (chordItem.halfBar) {
+          if (BSD.beatsPerMeasure == 3) {
+            if (barChordIdx == 0) {
+              totQuarterNoteBeats = 2;
+            }
+            else {
+              totQuarterNoteBeats = 1;
+            }
           }
           else {
-            totQuarterNoteBeats = 1;
+            totQuarterNoteBeats = 2;
           }
         }
-        else {
-          totQuarterNoteBeats = 2;
+
+        var totNoteEvents = Math.ceil(totQuarterNoteBeats * BSD.beatsPerMeasure / BSD.noteResolution); 
+        var eventRange = [];
+        for (var i = 0; i < totNoteEvents; i += 1) {
+          eventRange.push(i);
         }
-      }
-
-      var totNoteEvents = Math.ceil(totQuarterNoteBeats * BSD.beatsPerMeasure / BSD.noteResolution); 
-      var eventRange = [];
-      for (var i = 0; i < totNoteEvents; i += 1) {
-        eventRange.push(i);
-      }
-      eventRange.forEach(function(o,chordNoteIdx) {
-        think(chordItem,chordNoteIdx);
+        eventRange.forEach(function(o,chordNoteIdx) {
+          think(chordItem,chordNoteIdx);
+        });
       });
+      //showBirds();
+      console.log('scores',scores());///,'activeBirds',activeBirds);
     });
-    //showBirds();
-    console.log('scores',scores());///,'activeBirds',activeBirds);
   });
-
   //console.log('scores',scores(),'activeBirds',activeBirds);
 
 
 
 
 
-  var bestBird = getBestBird();
+  bestBird = getBestBird();
   cycleRange.forEach(function(cycleIdx){
     prog.forEach(function(chordItem,chordItemIdx) {
       if (errors) { return false; }
@@ -2029,7 +2032,7 @@ campfire.subscribe('do-it',function(prog){
       candidates = [];
 
       //nextGeneration();
-      var guessMIDIValue = bestBird.pick(chordItem,chordNoteIdx);
+      var guessMIDIValue = bestBirdEver.pick(chordItem,chordNoteIdx);
       candidates = BSD.guitarData.select(function(o) {
         return o.noteValue === guessMIDIValue;
       });

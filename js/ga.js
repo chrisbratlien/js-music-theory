@@ -10,6 +10,20 @@
 // of birds.
 
 // Start the game over
+
+var bestBird, bestBirdEver;
+
+const times = function(n) { 
+  return function(f) {
+    let iter = function(i) {
+      if (i === n) return;
+      f (i);
+      iter (i + 1);
+    };
+    return iter (0);
+  };
+};
+
 function resetGame() {
   counter = 0;
   // Resetting best bird score to 0
@@ -50,6 +64,7 @@ function getBestBird() {
   var result = activeBirds.slice().sort(BSD.sorter(function(o){
     return o.getScore();
   })).pop();
+  bestBird = result;
   return result;
 }
 function showBirds() {
@@ -60,17 +75,26 @@ function showBirds() {
 function nextGeneration() {
   ///resetGame();
   // Normalize the fitness values 0-1
+  bestBird = getBestBird();
+  if (!bestBirdEver) { bestBirdEver = bestBird; }
+  if (bestBird && bestBirdEver && bestBird.getScore() > bestBirdEver.getScore()) {
+    bestBirdEver = bestBird;
+    console.log('new bestBirdEver with score',bestBirdEver.getScore(),bestBirdEver);
+  }
+
+
   activeBirds = activeBirds.select(function(bird){
     return bird.getScore() >= 0;
   });
 
 
+  /***
   activeBirds = activeBirds.select(function(bird){
     var d = bird.noteDiversity();
     if (bird.history.predict.length == 0) { return true; }
     return d > 4;
   });
-
+  **/
 
   normalizeFitness(activeBirds);
   // Generate a new set of birds
@@ -85,8 +109,8 @@ function nextGeneration() {
       activeBirds.push(new Bird(null,BSD.audioPlayer.spec.range));
     }
     else {
-      //activeBirds.push(activeBirds.atRandom().copy());
-      activeBirds.push(getBestBird().copy());
+      activeBirds.push(activeBirds.atRandom().copy());
+      //activeBirds.push((bestBirdEver || bestBird || getBestBird()).copy());
     }
   }
   // Copy those birds to another array
