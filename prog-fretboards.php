@@ -698,7 +698,9 @@ checkTiny();
           ////Object.keys(state).select(function(n){ return state[n]; });
           
           //console.log('numbers',numbers);
-          var result = numbers.map(function(n) { return Note(n); });
+          var result = numbers.map(function(n) { 
+            return Note(n,spec.chord && spec.chord.getAccidental()); 
+          });
           return result;
         };
 
@@ -779,7 +781,7 @@ checkTiny();
               var midiValue = open+fret;
               var note = Note(midiValue);
              
-              var noteName = note.name();
+              var noteName = note.name(spec.chord && spec.chord.getAccidental());
               
 
               
