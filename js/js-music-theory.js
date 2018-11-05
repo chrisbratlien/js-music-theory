@@ -770,6 +770,9 @@ var RootNoteWithIntervals = function(spec) {
     if (self.hasMinorQuality()) {
       return '♭';
     }
+    if (self.hasMinorSeventhInterval()) {
+      return '♭';
+    }
     //otherwise
     return '♯';
   };
