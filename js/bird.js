@@ -12,7 +12,7 @@ function mutate(x) {
 }
 
 class Bird {
-  constructor(brain,range){
+  constructor(brain,range,lr){
 
     this.history = {
       intervalVelocity: [],
@@ -35,6 +35,7 @@ class Bird {
     }
     else {
         this.brain = new NeuralNetwork(iNodeCount,iNodeCount *2,oNodeCount);
+        this.brain.setLearningRate(lr || 0.1);
     }
 
     this.prevMidiValue = 0;

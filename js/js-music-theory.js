@@ -409,15 +409,17 @@ var Note = function(foo,accidental) {
   self.accidental = accidental || false;
   
   if (typeof foo == 'string') {
-    
-    var acc = foo.match(/#|b$/);
+
+    var acc = foo.match(/#|♯|b|♭$/);
     if (acc && foo.length > 1) { 
       var m = acc[0];
+      /*
       var map = { 
         'b': 'flat', 
         '#': 'sharp' 
       };
-      self.accidental = map[m]; 
+      */
+      self.accidental = foo.substr(1);
     }
   }
   
@@ -475,8 +477,8 @@ var Note = function(foo,accidental) {
     return foo.value();
   };
   
-  self.name = function() { 
-    return self.nameFromValue(self.value(),self.accidental);
+  self.name = function(accidental) { 
+    return self.nameFromValue(self.value(),accidental || self.accidental);
   };
   
   
@@ -523,7 +525,11 @@ var Note = function(foo,accidental) {
     var flats = ["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"];    
     var map = {
       'sharp': sharps,
-      'flat': flats
+      '#': sharps,
+      '♯': sharps,
+      'flat': flats,
+      'b': flats,
+      '♭': flats
     };
     var idx = value%12;
     if (accidental) {
@@ -610,8 +616,16 @@ var Note = function(foo,accidental) {
     if (typeof spec == "undefined") {
       console.log(abbrev,'not defined');
     }
-    
-    return Chord({ rootNote: self, intervals: spec.intervals, name: spec.name, "abbrev": abbrev });          
+
+
+
+    return Chord({ 
+      rootNote: self, 
+      intervals: spec.intervals, 
+      name: spec.name, 
+      abbrev: abbrev,
+      //accidental: accidental
+    });          
   };
 
 
@@ -636,7 +650,7 @@ function makeChord(name) {
   var rootName = false;
   var chordName = false;
 
-  if (name.substr(1,1).match(/#|b/)) {
+  if (name.substr(1,1).match(/#|♯|b|♭/)) {
     rootName = name.substr(0,2);
     chordName = name.substr(2);
   }
@@ -747,8 +761,18 @@ var RootNoteWithIntervals = function(spec) {
   self.rootNote = spec.rootNote;
 
 
+  self.getAccidental = function() {
+    if (spec.rootNote.accidental) {
+      return spec.rootNote.accidental;
+    }
 
-
+    //root note isn't sharp or flat, so...
+    if (self.hasMinorQuality()) {
+      return '♭';
+    }
+    //otherwise
+    return '♯';
+  };
 
   /////console.log('self.name',self.name);
 
@@ -817,14 +841,21 @@ var RootNoteWithIntervals = function(spec) {
   
   
   self.noteFromInterval = function(interval) {
-    return Note(self.rootNote.value() + interval,self.rootNote.accidental)
+    return Note(self.rootNote.value() + interval,
+      self.getAccidental()
+      ////self.rootNote.accidental
+      );
   };
   
   self.notes = function() {
     return self.intervals().map(function(interval) { return self.noteFromInterval(interval); });    
   };
   self.noteNames = function() {
-    return self.notes().map(function(note) { return note.name(); });    
+    return self.notes().map(function(note) { 
+      var useFlat = !spec.rootNote.accidental && self.hasMinorQuality() ||
+        spec.rootNote.accidental && spec.rootNote.accidental.match(/b|♭/);
+      return note.name(spec.rootNote.accidental || useFlat && '♭'); 
+    });
   };
 
   self.noteValues = function() {
@@ -1116,9 +1147,9 @@ var Scale = function(spec) {
 var Chord = function(spec) {
   var self = RootNoteWithIntervals(spec);
   
+
   /////console.log('Chord spec',spec);
-  
-  
+ 
   self.constructor = Chord;
 
   self.fullAbbrev = function() { //override superclass, don't want space separator

@@ -12,6 +12,7 @@
 // Start the game over
 
 var bestBird, bestBirdEver;
+var abort;
 
 const times = function(n) { 
   return function(f) {
@@ -83,9 +84,11 @@ function nextGeneration() {
   }
 
 
+  
   activeBirds = activeBirds.select(function(bird){
     return bird.getScore() >= 0;
   });
+  
 
 
   /***
@@ -104,9 +107,10 @@ function nextGeneration() {
 
   while(activeBirds.length < TOTAL_BIRDS) {
     //activeBirds.push(new Bird(null,BSD.audioPlayer.spec.range));
+    //activeBirds.push(activeBirds.atRandom().copy());
     if (activeBirds.length == 0) {
       console.log('all gone, rebuilding');
-      activeBirds.push(new Bird(null,BSD.audioPlayer.spec.range));
+      activeBirds.push(new Bird(null,BSD.audioPlayer.spec.range,0.12));
     }
     else {
       activeBirds.push(activeBirds.atRandom().copy());
