@@ -363,6 +363,9 @@ JSMT.chordMap = {
     'maj9':   { name: 'major9', intervals: [0,4,7,11,14] },
 
 
+    'add9':   { name: 'add9', intervals: [0,4,7,14] },
+    'madd9':   { name: 'madd9', intervals: [0,3,7,14] },
+
     '13':   { name: 'dominant13', intervals: [0,4,7,10,21] },
 
 
