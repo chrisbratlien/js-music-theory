@@ -2333,13 +2333,14 @@ campfire.subscribe('tick',function(cursor){
   BSD.boards.forEach(function(board){
     board.publish('unfeature-frets');
   });
+  predictBoard.updateCursor(cursor);
+
   predictBoard.publish('unfeature-frets');
 
   if (!BSD.options.playChordsOnly) {
     cursor.board.publish('feature-fret',cursor);
     extraBoard.publish('feature-fret',cursor);
     predictBoard.publish('feature-fret',cursor);
-    predictBoard.updateCursor(cursor);
   }
 });
 
