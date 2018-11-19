@@ -14,9 +14,12 @@ function mutate(x) {
 class Bird {
   constructor(brain,range,lr){
 
+    this.guru = BSD.Widgets.TonalityGuru({});
+
+
     this.history = {
-      intervalVelocity: [],
-      predict: []
+      intervalVelocity: new StatsArray,
+      predict: new StatsArray
     };
     this.range = range;
     this.prevResult = -1;
@@ -54,7 +57,18 @@ class Bird {
     return new Bird(this.brain,this.range);
   }
 
-  judge(result) {
+  judge(result,chordItem) {
+
+
+    let abstractScaleNotes = makeScale(chordItem.scaleAdvice.advice).abstractNoteValues();
+    var abstractResult = result % 12;
+    if (abstractScaleNotes.indexOf(abstractResult) == -1) {
+      //console.log(abstractResult,'outside advice',abstractScaleNotes);
+      return "outside advice";
+    }
+
+    let x = 123;
+
     if (
       result < BSD.audioPlayer.spec.range[0] ||
       result > BSD.audioPlayer.spec.range[1] 
@@ -73,6 +87,30 @@ class Bird {
       console.log("intervalDistance too low");
       return "intervalDistance too low";
     }
+    let sd = this.history.predict.standardDeviation();
+
+    /**
+    if (sd > 7) {
+      return "sd is too high";
+    }
+    if (sd < 2) {
+      return "sd is too low";
+    }
+    ***/
+    
+    var recent5Vels = this.history.intervalVelocity.slice(-3);
+    if (recent5Vels.length == 3) {
+      if (recent5Vels.sum() == 0) {
+        return "boring, not moving";
+      }
+      if (recent5Vels.range() > 12) {
+        return "range is too big";
+      }
+      //console.log('rec5 vel',recent5Vels);
+      
+    }
+
+    //console.log('predict',this.history.predict,'sd',sd);
 
     this.score++;
 
@@ -166,7 +204,7 @@ class Bird {
     var result = this.range[0] + actionIndex;
     this.intervalVelocity = result - this.prevResult;
     this.prevResult = result;
-    this.judge(result);
+    this.judge(result,chordItem);
     this.history.predict.push(result);
     this.history.intervalVelocity.push(this.intervalVelocity);
     return result;

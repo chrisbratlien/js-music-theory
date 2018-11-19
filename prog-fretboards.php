@@ -708,7 +708,7 @@ checkTiny();
         self.styleCell = function(cell,fretData) {
           cell.addClass('color-white').removeClass('color-black');
 
-                if (fretData.selected || fretData.isScaleNote) {
+                if (fretData.selected || fretData.isScaleNote || fretData.isChordNote) {
                   var hex = BSD.chosenColor.toHex();
                   var sum = BSD.chosenColor.r + BSD.chosenColor.g + BSD.chosenColor.b;
                   
@@ -740,6 +740,13 @@ checkTiny();
 
         };
 
+
+        self.getFretData = function(string,fret) {
+          var result = spec.data.detect(function(o){
+            return (o.string == string) && o.fret == fret;
+          });
+          return result;
+        };
         
         self.renderOn = function(wrap) {      
           var inner = DOM.div().addClass('inner');
@@ -758,20 +765,8 @@ checkTiny();
             var row = DOM.tr();     
             [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17].each(function(fret){ 
 
-              /***
-              BSD.foo.push({
-                fret: fret,
-                string: stringIdx+1,
-                midiValue: open+fret
-              });
-              ***/
-
-                  
-              var fretData = spec.data.detect(function(o){
-                return (o.string == stringIdx + 1) && o.fret == fret;
-              });
-              
-             //console.log('fretData',fretData);
+              let fretData = self.getFretData(stringIdx + 1,fret);
+              //console.log('fretData',fretData);
               
               var cell = DOM.td();
               
@@ -965,15 +960,6 @@ checkTiny();
         
         return board;      
       }
-
-
-
-  //var context = (window.AudioContext) ? new AudioContext : new webkitAudioContext;
-  //BSD.audioContext = context;
-
-
-
-
 
 
     var common = context.createGain();
@@ -1406,7 +1392,7 @@ campfire.subscribe('gather-inputs-and-do-it',function(){
 });
 
 
-var extraBoard;
+var extraBoard, predictBoard;
 var headerHeight = jQuery('header').height();
 var delayMS = {
 
@@ -1707,6 +1693,12 @@ campfire.subscribe('do-it',function(prog){
     extraBoard.close();
     extraBoard = null;
   }
+  if (predictBoard) {
+    predictBoard.close();
+    predictBoard = null;
+  }
+
+
   BSD.boards.forEach(function(board){
     board.close();
   });
@@ -1756,7 +1748,10 @@ campfire.subscribe('do-it',function(prog){
         //chord: chord,
         activeStrings: '654321'.split('')
     });
-    ////BSD.boards.push(extraBoard);
+    predictBoard = makeFretboardOn(stage,{
+        //chord: chord,
+        activeStrings: '654321'.split('')
+    });
 
 
 
@@ -1767,27 +1762,17 @@ campfire.subscribe('do-it',function(prog){
     BSD.activeStrings = activeStrings; //FIXME, this won't work in the long run
     prog.forEach(function(chordItem,chordItemIdx){
 
-
       var chord = chordItem.chord;
       if (chordItemIdx % 8 == 0) {
         venueColumn = DOM.div().addClass('column venue-column');
         venue.append(venueColumn);
       }
-
       var stage = DOM.div().addClass('stage hidden stringset-' + BSD.options.stringSet);
-
-
       venueColumn.append(stage);
       var board = makeFretboardOn(stage,{
         chord: chord,
         activeStrings: activeStrings
       });
-
-
-
-
-
-
       BSD.boards.push(board);
     });
 
@@ -2277,6 +2262,7 @@ campfire.subscribe('tick',function(cursor){
   if (!BSD.options.playChordsOnly) {
     cursor.board.publish('feature-fret',cursor);
     extraBoard.publish('feature-fret',cursor);
+    predictBoard.publish('feature-fret',cursor);
   }
 });
 
@@ -2444,9 +2430,9 @@ campfire.subscribe('bootup-hi-hat',function(){
           var output = e.outputBuffer.getChannelData(0);
           for (var i = 0; i < bufferSize; i++) {
               var white = Math.random() * 2 - 1;
-              output[i] = (lastOut + (0.02 * white)) / 1.02;
+              output[i] = (lastOut + (0.02 * white)) / 1.32;
               lastOut = output[i];
-              output[i] *= 3.5; // (roughly) compensate for gain
+              output[i] *= Math.PI;//3.5; // (roughly) compensate for gain
           }
       }
       return node;

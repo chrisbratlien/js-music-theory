@@ -8,14 +8,14 @@
     <meta name="author" content="">
     <title><?php echo apply_filters('wp_title','JSMT'); ?></title>
     <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">-->
-    <link rel="stylesheet" href="lib/font-awesome-4.6.3/css/font-awesome.min.css">
+    <link rel="stylesheet" href="<?php bloginfo('url'); ?>/lib/font-awesome-4.6.3/css/font-awesome.min.css">
 
      <!-- CSS -->
-      <link rel="stylesheet" href="lib/jquery-ui.css">
-      <link href="lib/bootstrap/css/bootstrap.css" rel="stylesheet">
+      <link rel="stylesheet" href="<?php bloginfo('url'); ?>/lib/jquery-ui.css">
+      <link href="<?php bloginfo('url'); ?>/lib/bootstrap/css/bootstrap.css" rel="stylesheet">
       <!-- <link href="lib/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">-->
     
-      <link rel="stylesheet" href="style.css?v=2.1">
+      <link rel="stylesheet" href="<?php bloginfo('url'); ?>/style.css?v=2.1">
 
 
 

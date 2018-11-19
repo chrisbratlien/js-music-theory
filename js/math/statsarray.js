@@ -15,4 +15,7 @@ class StatsArray extends Collection {
     standardDeviation() {
         return Math.sqrt(this.variance());
     }
+    range() {
+        return Math.max.apply(null,this) - Math.min.apply(null,this);
+    }
 }
