@@ -715,11 +715,11 @@ checkTiny();
 
         self.styleCell = function(cell,fretData) {
           cell.addClass('color-white').removeClass('color-black');
+            let boolCustomColor = fretData.selected || fretData.isScaleNote || fretData.isChordNote || fretData.isUpcoming || fretData.isCustomColor;
 
-                if (fretData.selected || fretData.isScaleNote || fretData.isChordNote) {
+                if (boolCustomColor) {
                   var hex = BSD.chosenColor.toHex();
-                  var sum = BSD.chosenColor.r + BSD.chosenColor.g + BSD.chosenColor.b;
-                  
+                  var sum = BSD.chosenColor.r + BSD.chosenColor.g + BSD.chosenColor.b;                  
                   if (fretData.color) {
                     var hex = fretData.color.toHex();
                     var sum = fretData.color.r + fretData.color.g + fretData.color.b;
@@ -770,8 +770,15 @@ checkTiny();
         };
 
         self.updateCursor = function(cursor) {
+          var tries = 9;
+          while(tries > 0 && cursor.chord.abstractlyEqualTo(cursor.next.chord)) {
+            cursor = cursor.next;
+            tries -= 1;
+          }
+
           var currentChord = cursor.chord;
           var nextChord = cursor.next.chord;
+
           let currentChordBitmap = JSMT.noteBitmap(currentChord);
           let nextChordBitmap = JSMT.noteBitmap(nextChord);
           var cNotN = currentChordBitmap.map(function(v,i){
@@ -789,14 +796,14 @@ checkTiny();
               o.selected = true;
             }
             if (cNotN[o.chromaticValue]) {
-              o.color = BSD.colorFromHex('#00ff00');
+              o.selected = true; //already is, but anyway
+              o.color = BSD.colorFromHex('#094');
             }
             if (nNotC[o.chromaticValue]) {
+              o.isUpcoming = true; //needs to be explicitly set here..
               o.color = BSD.colorFromHex('#ff9900');
             }
             return o;
-            let x = 123;
-            return true;
           });
 
           self.publish('update-cursor-cells',newData); 
