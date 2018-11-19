@@ -124,6 +124,14 @@ add_action('wp_head',function(){
     background: #ccc;
     color: white;
   }
+  .predict .was-once-featured {
+    /*
+    background: #ccc;
+    color: white;
+    **/
+  }
+
+
 
   .extra .featured { 
     background: yellow;
@@ -740,6 +748,60 @@ checkTiny();
 
         };
 
+        self.pick = function(chordItem) {
+          ///console.log('PICK! chordItem',chordItem,'meta',meta);
+          // Now create the inputs to the neural network
+          let prevChord = chordItem.prev.chord;
+          let currentChord = chordItem.chord;
+          let nextChord = chordItem.next.chord;
+
+          let inputs = [];
+          let idx = 0;
+          let prevChordBitmap = JSMT.noteBitmap(prevChord);
+          let currentChordBitmap = JSMT.noteBitmap(currentChord);
+          let nextChordBitmap = JSMT.noteBitmap(nextChord);
+          /////////////////////
+          var cNotP = currentChordBitmap.map(function(v,i){
+            return (v && !prevChordBitmap[i]) ? 1 : 0;
+          });
+          var cNotN = currentChordBitmap.map(function(v,i){
+            return (v && !nextChordBitmap[i]) ? 1 : 0;
+          });
+        };
+
+        self.updateCursor = function(cursor) {
+          var currentChord = cursor.chord;
+          var nextChord = cursor.next.chord;
+          let currentChordBitmap = JSMT.noteBitmap(currentChord);
+          let nextChordBitmap = JSMT.noteBitmap(nextChord);
+          var cNotN = currentChordBitmap.map(function(v,i){
+            return (v && !nextChordBitmap[i]) ? 1 : 0;
+          });
+          var nNotC = nextChordBitmap.map(function(v,i){
+            return (v && !currentChordBitmap[i]) ? 1 : 0;
+          });
+
+
+
+          var newData = spec.data.map(function(o){
+            o.selected = false;
+            if (currentChordBitmap[o.chromaticValue]) {
+              o.selected = true;
+            }
+            if (cNotN[o.chromaticValue]) {
+              o.color = BSD.colorFromHex('#00ff00');
+            }
+            if (nNotC[o.chromaticValue]) {
+              o.color = BSD.colorFromHex('#ff9900');
+            }
+            return o;
+            let x = 123;
+            return true;
+          });
+
+          self.publish('update-cursor-cells',newData); 
+
+        };
 
         self.getFretData = function(string,fret) {
           var result = spec.data.detect(function(o){
@@ -819,6 +881,12 @@ checkTiny();
                 self.styleCell(cell,fretData);      
               });
 
+              self.subscribe('update-cursor-cells',function(newData){
+                let phretData = newData.detect(function(nd){
+                  return nd.string == stringIdx + 1 && nd.fret == fret;
+                })
+                self.styleCell(cell,phretData);     
+              });
 
               self.styleCell(cell,fretData);      
               self.subscribe('feature-fret',function(o){
@@ -2258,11 +2326,13 @@ campfire.subscribe('tick',function(cursor){
   BSD.boards.forEach(function(board){
     board.publish('unfeature-frets');
   });
+  predictBoard.publish('unfeature-frets');
 
   if (!BSD.options.playChordsOnly) {
     cursor.board.publish('feature-fret',cursor);
     extraBoard.publish('feature-fret',cursor);
     predictBoard.publish('feature-fret',cursor);
+    predictBoard.updateCursor(cursor);
   }
 });
 
