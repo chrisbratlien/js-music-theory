@@ -1448,6 +1448,11 @@ function outsideJudge(o,env) {
     return 'fret < minFret';
   }
 
+  if (BSD.options.mustBeInsideChord && abstractNoteValues.indexOf(o.chromaticValue) < 0) { 
+    return 'must be inside chord, yet outside chord'; 
+  }
+
+
 
   /** THIS IS OK, NEVERMIND
   if (hit6 && meta.hasMinor7Quality) {
@@ -1489,10 +1494,6 @@ function outsideJudge(o,env) {
 
   if (meta.isStrongBeat && abstractNoteValues.indexOf(o.chromaticValue) < 0) { 
     return 'strong beat and outside chord'; 
-  }
-
-  if (BSD.options.mustBeInsideChord && abstractNoteValues.indexOf(o.chromaticValue) < 0) { 
-    return 'must be inside chord, yet outside chord'; 
   }
 
 
