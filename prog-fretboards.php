@@ -748,12 +748,12 @@ checkTiny();
 
         };
 
-        self.pick = function(chordItem) {
-          ///console.log('PICK! chordItem',chordItem,'meta',meta);
+        self.pick = function(progItem) {
+          ///console.log('PICK! progItem',progItem,'meta',meta);
           // Now create the inputs to the neural network
-          let prevChord = chordItem.prev.chord;
-          let currentChord = chordItem.chord;
-          let nextChord = chordItem.next.chord;
+          let prevChord = progItem.prev.chord;
+          let currentChord = progItem.chord;
+          let nextChord = progItem.next.chord;
 
           let inputs = [];
           let idx = 0;
@@ -770,14 +770,10 @@ checkTiny();
         };
 
         self.updateCursor = function(cursor) {
-          var tries = 9;
-          while(tries > 0 && cursor.chord.abstractlyEqualTo(cursor.next.chord)) {
-            cursor = cursor.next;
-            tries -= 1;
-          }
+
 
           var currentChord = cursor.chord;
-          var nextChord = cursor.next.chord;
+          var nextChord = cursor.nextChordChange;
 
           let currentChordBitmap = JSMT.noteBitmap(currentChord);
           let nextChordBitmap = JSMT.noteBitmap(nextChord);
@@ -788,16 +784,16 @@ checkTiny();
             return (v && !currentChordBitmap[i]) ? 1 : 0;
           });
 
-
-
-          var newData = spec.data.map(function(o){
+          var newData = spec.data.slice().map(function(o){
             o.selected = false;
+            o.color = BSD.colorFromHex('#ffffff');
             if (currentChordBitmap[o.chromaticValue]) {
               o.selected = true;
+              o.color = BSD.colorFromHex('#bbbbbb');
             }
             if (cNotN[o.chromaticValue]) {
               o.selected = true; //already is, but anyway
-              o.color = BSD.colorFromHex('#094');
+              o.color = BSD.colorFromHex('#009944');
             }
             if (nNotC[o.chromaticValue]) {
               o.isUpcoming = true; //needs to be explicitly set here..
@@ -1804,6 +1800,20 @@ campfire.subscribe('do-it',function(prog){
   last.next = prog[0];
 
 
+prog.forEach(function(o){
+  let cursor = o;
+  let tries = 9;
+  while(tries > 0 && cursor.chord.abstractlyEqualTo(cursor.next.chord)) {
+    cursor = cursor.next;
+    tries -= 1;
+  }
+  o.nextChordChange = cursor.next.chord;
+});
+
+console.log('PROG W CHANGES?',prog);
+
+
+
   prog.forEach(function(o){
     var advice = guru.analyze(o);
     console.log('advice',advice);
@@ -1835,10 +1845,10 @@ campfire.subscribe('do-it',function(prog){
 
     var activeStrings = BSD.options.stringSet.split('');
     BSD.activeStrings = activeStrings; //FIXME, this won't work in the long run
-    prog.forEach(function(chordItem,chordItemIdx){
+    prog.forEach(function(progItem,progItemIdx){
 
-      var chord = chordItem.chord;
-      if (chordItemIdx % 8 == 0) {
+      var chord = progItem.chord;
+      if (progItemIdx % 8 == 0) {
         venueColumn = DOM.div().addClass('column venue-column');
         venue.append(venueColumn);
       }
@@ -1865,19 +1875,19 @@ campfire.subscribe('do-it',function(prog){
 
 
   cycleRange.forEach(function(cycleIdx){
-    prog.forEach(function(chordItem,chordItemIdx) {
+    prog.forEach(function(progItem,progItemIdx) {
       if (errors) { return false; }
 
 
       rejections = [];
       outsideRejections = [];
       ///var barIdx = Math.floor(i / BSD.noteResolution);
-      var barIdx = chordItem.barIndex;
+      var barIdx = progItem.barIndex;
       //var chordIdx = barIdx % chords.length;
-      var chordIdx = chordItemIdx;
-      var barChordIdx = chordItem.barChordIndex;
+      var chordIdx = progItemIdx;
+      var barChordIdx = progItem.barChordIndex;
       //var myChord = chords[chordIdx];
-      var myChord = chordItem.chord;
+      var myChord = progItem.chord;
       ///var cycleIdx = Math.floor(barIdx / prog.length);
       //var cycleIdx = Math.floor(barIdx / chords.length);
       ///cycleIdx = Math.floor(cycleIdx / chords.length);
@@ -1912,14 +1922,14 @@ campfire.subscribe('do-it',function(prog){
       meta.maxFretDistance = meta.defaults.maxFretDistance;
       meta.maxDiff = meta.defaults.maxDiff; 
       meta.isStrongBeat = true;
-      if (chordItem.scaleAdvice && chordItem.scaleAdvice.advice) {
-        meta.tonalityScale = makeScale(chordItem.scaleAdvice.advice);
+      if (progItem.scaleAdvice && progItem.scaleAdvice.advice) {
+        meta.tonalityScale = makeScale(progItem.scaleAdvice.advice);
         meta.tonalityScaleAbstractValues = meta.tonalityScale.abstractNoteValues();        
       }
 
 
       var totQuarterNoteBeats = BSD.beatsPerMeasure; //for this chord.
-      if (chordItem.halfBar) {
+      if (progItem.halfBar) {
         if (BSD.beatsPerMeasure == 3) {
           if (barChordIdx == 0) {
             totQuarterNoteBeats = 2;
@@ -2130,7 +2140,8 @@ campfire.subscribe('do-it',function(prog){
       result.idealFret = idealFret;
       result.avgFret = avgFret;
       ///result.idx = i;
-      
+      result.nextChordChange = progItem.nextChordChange;
+      result.progItem = progItem;
 
 
       console.log('result',result);
@@ -2333,6 +2344,10 @@ campfire.subscribe('tick',function(cursor){
   BSD.boards.forEach(function(board){
     board.publish('unfeature-frets');
   });
+
+  if (cursor.chordIdx > 0) {
+    let x = 123;
+  }
   predictBoard.updateCursor(cursor);
 
   predictBoard.publish('unfeature-frets');
