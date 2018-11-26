@@ -159,6 +159,12 @@ JSMT.twelveNotes = function() {
   return JSMT.twelveTones().map(function(n) { return Note(n); });
 };
 
+JSMT.noteBitmap = function(chordOrScale) {
+  var result = JSMT.twelveNotes().map(function(note){
+    return chordOrScale.containsNote(note) ? 1 : 0;
+  });
+  return result;
+};
 
 JSMT.scaleMap = {
     'major' : { name: 'major', intervals: [0,2,4,5,7,9,11] },

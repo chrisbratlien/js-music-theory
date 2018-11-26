@@ -124,14 +124,6 @@ add_action('wp_head',function(){
     background: #ccc;
     color: white;
   }
-  .predict .was-once-featured {
-    /*
-    background: #ccc;
-    color: white;
-    **/
-  }
-
-
 
   .extra .featured { 
     background: yellow;
@@ -434,13 +426,25 @@ get_header(); ?>
 
 add_action('wp_footer',function(){
 ?>
-    
-    <script src="js/draggy.js"></script>
-    <script src="js/sticky-note.js"></script>
-    <script src="js/bsd.widgets.songlist.js"></script>
-    <script src="js/bsd.widgets.simpleplayer.js"></script>
-    <script src="js/bsd.widgets.tonalityguru.js"></script>    
+ <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.6.0/p5.min.js"></script>
+     
+    <script src="<?php bloginfo('url'); ?>/js/draggy.js"></script>
+    <script src="<?php bloginfo('url'); ?>/js/sticky-note.js"></script>
+    <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.songlist.js"></script>
+    <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.simpleplayer.js"></script>
+    <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.tonalityguru.js"></script>    
+    <script src="<?php bloginfo('url'); ?>/lib/matrix.js"></script>    
+    <script src="<?php bloginfo('url'); ?>/lib/nn.js"></script>    
+    <script src="<?php bloginfo('url'); ?>/js/bird.js"></script>    
+    <script src="<?php bloginfo('url'); ?>/js/ga.js"></script>    
+    <script src="<?php bloginfo('url'); ?>/js/math/vector.js"></script>    
+    <script src="<?php bloginfo('url'); ?>/js/collection.js"></script>    
+    <script src="<?php bloginfo('url'); ?>/js/math/statsarray.js"></script>    
+
+
     <script type="text/javascript">
+
+
 
 
 BSD.timeout = false;
@@ -470,18 +474,6 @@ BSD.durations = {
   chord: 1000,
   note: 1000
 };
-
-
-/**
-storage.getItem('progressions',function(o){
-  ////BSD.progressions = JSON.parse(o);
-  var them = JSON.parse(o);
-  them.forEach(function(o){
-    BSD.progressions.push(o);
-  });
-  campfire.publish('progressions-loaded',BSD.progressions); //needed?
-});
-***/
 
 
 campfire.subscribe('progressions-loaded',function(){
@@ -591,15 +583,6 @@ btnToggleTiny.click(function(){
 });
 checkTiny();
 
-/**
-
-"[{"title":"Blue Bossa","prog":"C-7 C-7 F-7 F-7 D-7b5 G7 C-7 C-7 Eb-7 Ab7 DbM7 DbM7 D-7b5 G7 C-7 G7"},{"prog":"C-7|C-7|F-7|F-7|D-7b5| G7 |C-7 |C-7 |Eb-7 |Ab7 |DbM7 |DbM7 |D-7b5 |G7 |C-7| D-7b5 G7","title":"Blue Bossa (again)"},{"prog":"F7|Bb7|F7|F7|Bb7|Bb7|F7|F7|G-7|C7|F7|C7","title":"F blues #1"}]"
-
-**/
-
-
-
-
       BSD.foo = [];
 
       BSD.chosenColor = BSD.colorFromHex('#888888');
@@ -706,20 +689,18 @@ checkTiny();
           ////Object.keys(state).select(function(n){ return state[n]; });
           
           //console.log('numbers',numbers);
-          var result = numbers.map(function(n) { 
-            return Note(n,spec.chord && spec.chord.getAccidental()); 
-          });
+          var result = numbers.map(function(n) { return Note(n); });
           return result;
         };
 
 
         self.styleCell = function(cell,fretData) {
           cell.addClass('color-white').removeClass('color-black');
-            let boolCustomColor = fretData.selected || fretData.isScaleNote || fretData.isChordNote || fretData.isUpcoming || fretData.isCustomColor;
 
-                if (boolCustomColor) {
+                if (fretData.selected || fretData.isScaleNote) {
                   var hex = BSD.chosenColor.toHex();
-                  var sum = BSD.chosenColor.r + BSD.chosenColor.g + BSD.chosenColor.b;                  
+                  var sum = BSD.chosenColor.r + BSD.chosenColor.g + BSD.chosenColor.b;
+                  
                   if (fretData.color) {
                     var hex = fretData.color.toHex();
                     var sum = fretData.color.r + fretData.color.g + fretData.color.b;
@@ -748,70 +729,6 @@ checkTiny();
 
         };
 
-        self.pick = function(progItem) {
-          ///console.log('PICK! progItem',progItem,'meta',meta);
-          // Now create the inputs to the neural network
-          let prevChord = progItem.prev.chord;
-          let currentChord = progItem.chord;
-          let nextChord = progItem.next.chord;
-
-          let inputs = [];
-          let idx = 0;
-          let prevChordBitmap = JSMT.noteBitmap(prevChord);
-          let currentChordBitmap = JSMT.noteBitmap(currentChord);
-          let nextChordBitmap = JSMT.noteBitmap(nextChord);
-          /////////////////////
-          var cNotP = currentChordBitmap.map(function(v,i){
-            return (v && !prevChordBitmap[i]) ? 1 : 0;
-          });
-          var cNotN = currentChordBitmap.map(function(v,i){
-            return (v && !nextChordBitmap[i]) ? 1 : 0;
-          });
-        };
-
-        self.updateCursor = function(cursor) {
-
-
-          var currentChord = cursor.chord;
-          var nextChord = cursor.nextChordChange;
-
-          let currentChordBitmap = JSMT.noteBitmap(currentChord);
-          let nextChordBitmap = JSMT.noteBitmap(nextChord);
-          var cNotN = currentChordBitmap.map(function(v,i){
-            return (v && !nextChordBitmap[i]) ? 1 : 0;
-          });
-          var nNotC = nextChordBitmap.map(function(v,i){
-            return (v && !currentChordBitmap[i]) ? 1 : 0;
-          });
-
-          var newData = spec.data.slice().map(function(o){
-            o.selected = false;
-            o.color = BSD.colorFromHex('#ffffff');
-            if (currentChordBitmap[o.chromaticValue]) {
-              o.selected = true;
-              o.color = BSD.colorFromHex('#bbbbbb');
-            }
-            if (cNotN[o.chromaticValue]) {
-              o.selected = true; //already is, but anyway
-              o.color = BSD.colorFromHex('#009944');
-            }
-            if (nNotC[o.chromaticValue]) {
-              o.isUpcoming = true; //needs to be explicitly set here..
-              o.color = BSD.colorFromHex('#ff9900');
-            }
-            return o;
-          });
-
-          self.publish('update-cursor-cells',newData); 
-
-        };
-
-        self.getFretData = function(string,fret) {
-          var result = spec.data.detect(function(o){
-            return (o.string == string) && o.fret == fret;
-          });
-          return result;
-        };
         
         self.renderOn = function(wrap) {      
           var inner = DOM.div().addClass('inner');
@@ -830,8 +747,20 @@ checkTiny();
             var row = DOM.tr();     
             [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17].each(function(fret){ 
 
-              let fretData = self.getFretData(stringIdx + 1,fret);
-              //console.log('fretData',fretData);
+              /***
+              BSD.foo.push({
+                fret: fret,
+                string: stringIdx+1,
+                midiValue: open+fret
+              });
+              ***/
+
+                  
+              var fretData = spec.data.detect(function(o){
+                return (o.string == stringIdx + 1) && o.fret == fret;
+              });
+              
+             //console.log('fretData',fretData);
               
               var cell = DOM.td();
               
@@ -841,7 +770,7 @@ checkTiny();
               var midiValue = open+fret;
               var note = Note(midiValue);
              
-              var noteName = note.name(spec.chord && spec.chord.getAccidental());
+              var noteName = note.name();
               
 
               
@@ -884,12 +813,6 @@ checkTiny();
                 self.styleCell(cell,fretData);      
               });
 
-              self.subscribe('update-cursor-cells',function(newData){
-                let phretData = newData.detect(function(nd){
-                  return nd.string == stringIdx + 1 && nd.fret == fret;
-                })
-                self.styleCell(cell,phretData);     
-              });
 
               self.styleCell(cell,fretData);      
               self.subscribe('feature-fret',function(o){
@@ -1033,6 +956,15 @@ checkTiny();
       }
 
 
+
+  //var context = (window.AudioContext) ? new AudioContext : new webkitAudioContext;
+  //BSD.audioContext = context;
+
+
+
+
+
+
     var common = context.createGain();
     common.gain = 1.0;
 
@@ -1058,7 +990,7 @@ checkTiny();
       destination: common,
       polyphonyCount: 48,//polyphonyCount,
       itemTitles: BSD.itemTitles,
-      range: [40,128]
+      range: [40,88]
     });
 
 
@@ -1079,6 +1011,20 @@ checkTiny();
       range: [28,100]
     });
 
+
+
+let activeBirds = [];
+// All birds for any given population
+let allBirds = [];
+let birds = [];
+
+
+let TOTAL_BIRDS = 25;
+for (var i = 0; i < TOTAL_BIRDS; i++) {
+  let bird = new Bird(null,BSD.audioPlayer.spec.range,0.12);
+  allBirds.push(bird);
+  activeBirds.push(bird);
+}
 
 
    
@@ -1156,7 +1102,7 @@ checkTiny();
         orientation: 'horizontal',
         range: 'min',
         min: 1,
-        max: 64,
+        max: 640,
         step: 1,
         value: BSD.progCycles,
         slide: function( event, ui ) {
@@ -1375,7 +1321,7 @@ checkTiny();
   });
       
     
-  BSD.importJSON('data/guitar.json',function(o) { 
+  BSD.importJSON(BSD.baseURL + '/data/guitar.json',function(o) { 
     BSD.guitarData = o;
 
 
@@ -1463,7 +1409,7 @@ campfire.subscribe('gather-inputs-and-do-it',function(){
 });
 
 
-var extraBoard, predictBoard;
+var extraBoard;
 var headerHeight = jQuery('header').height();
 var delayMS = {
 
@@ -1504,11 +1450,6 @@ function outsideJudge(o,env) {
   if (BSD.options.fretRange && o.fret < BSD.options.fretRange[0]) {
     return 'fret < minFret';
   }
-
-  if (BSD.options.mustBeInsideChord && abstractNoteValues.indexOf(o.chromaticValue) < 0) { 
-    return 'must be inside chord, yet outside chord'; 
-  }
-
 
 
   /** THIS IS OK, NEVERMIND
@@ -1551,6 +1492,10 @@ function outsideJudge(o,env) {
 
   if (meta.isStrongBeat && abstractNoteValues.indexOf(o.chromaticValue) < 0) { 
     return 'strong beat and outside chord'; 
+  }
+
+  if (BSD.options.mustBeInsideChord && abstractNoteValues.indexOf(o.chromaticValue) < 0) { 
+    return 'must be inside chord, yet outside chord'; 
   }
 
 
@@ -1756,6 +1701,17 @@ var guru = BSD.Widgets.TonalityGuru({});
 
 
 
+function think(chordItem,meta) {
+  if (activeBirds.length == 0) {
+    nextGeneration();
+  }
+  var result;
+  activeBirds.forEach(function(b){
+    result = b.pick(chordItem,meta);
+  });
+  return result;
+}
+
 campfire.subscribe('do-it',function(prog){
   BSD.pause = false;
   initLast();
@@ -1765,12 +1721,6 @@ campfire.subscribe('do-it',function(prog){
     extraBoard.close();
     extraBoard = null;
   }
-  if (predictBoard) {
-    predictBoard.close();
-    predictBoard = null;
-  }
-
-
   BSD.boards.forEach(function(board){
     board.close();
   });
@@ -1795,29 +1745,17 @@ campfire.subscribe('do-it',function(prog){
   prog.forEach(function(o){
     if (last) {
       last.next = o;
+      o.prev = last;
     }
     last = o;
   });
   last.next = prog[0];
-
-
-prog.forEach(function(o){
-  let cursor = o;
-  let tries = 9;
-  while(tries > 0 && cursor.chord.abstractlyEqualTo(cursor.next.chord)) {
-    cursor = cursor.next;
-    tries -= 1;
-  }
-  o.nextChordChange = cursor.next.chord;
-});
-
-console.log('PROG W CHANGES?',prog);
-
+  last.next.prev = last;
 
 
   prog.forEach(function(o){
     var advice = guru.analyze(o);
-    console.log('advice',advice);
+    //console.log('advice',advice);
     /////result.tonalityScale = advice.tonalityScale;
     o.scaleAdvice = advice;
   });
@@ -1834,10 +1772,7 @@ console.log('PROG W CHANGES?',prog);
         //chord: chord,
         activeStrings: '654321'.split('')
     });
-    predictBoard = makeFretboardOn(stage,{
-        //chord: chord,
-        activeStrings: '654321'.split('')
-    });
+    ////BSD.boards.push(extraBoard);
 
 
 
@@ -1846,19 +1781,29 @@ console.log('PROG W CHANGES?',prog);
 
     var activeStrings = BSD.options.stringSet.split('');
     BSD.activeStrings = activeStrings; //FIXME, this won't work in the long run
-    prog.forEach(function(progItem,progItemIdx){
+    prog.forEach(function(chordItem,chordItemIdx){
 
-      var chord = progItem.chord;
-      if (progItemIdx % 8 == 0) {
+
+      var chord = chordItem.chord;
+      if (chordItemIdx % 8 == 0) {
         venueColumn = DOM.div().addClass('column venue-column');
         venue.append(venueColumn);
       }
+
       var stage = DOM.div().addClass('stage hidden stringset-' + BSD.options.stringSet);
+
+
       venueColumn.append(stage);
       var board = makeFretboardOn(stage,{
         chord: chord,
         activeStrings: activeStrings
       });
+
+
+
+
+
+
       BSD.boards.push(board);
     });
 
@@ -1873,22 +1818,69 @@ console.log('PROG W CHANGES?',prog);
     cycleRange.push(i); 
   }
 
+  var takeABreak;
+  times(100)(function(n) {
+    if (takeABreak) { return false; }
+    console.log('Generation',n);
+    cycleRange.forEach(function(cycleIdx){
+      nextGeneration();
+      prog.forEach(function(chordItem,chordItemIdx) {
+        var barIdx = chordItem.barIndex;
+        var chordIdx = chordItemIdx;
+        var barChordIdx = chordItem.barChordIndex;
+        var myChord = chordItem.chord;
+
+        abstractNoteValues = myChord.abstractNoteValues();
+
+        var totQuarterNoteBeats = BSD.beatsPerMeasure; //for this chord.
+        if (chordItem.halfBar) {
+          if (BSD.beatsPerMeasure == 3) {
+            if (barChordIdx == 0) {
+              totQuarterNoteBeats = 2;
+            }
+            else {
+              totQuarterNoteBeats = 1;
+            }
+          }
+          else {
+            totQuarterNoteBeats = 2;
+          }
+        }
+
+        var totNoteEvents = Math.ceil(totQuarterNoteBeats * BSD.beatsPerMeasure / BSD.noteResolution); 
+        var eventRange = [];
+        for (var i = 0; i < totNoteEvents; i += 1) {
+          eventRange.push(i);
+        }
+        eventRange.forEach(function(o,chordNoteIdx) {
+          think(chordItem,chordNoteIdx);
+        });
+      });
+      //showBirds();
+      console.log('scores',scores());///,'activeBirds',activeBirds);
+    });
+  });
+  //console.log('scores',scores(),'activeBirds',activeBirds);
 
 
+
+
+
+  bestBird = getBestBird();
   cycleRange.forEach(function(cycleIdx){
-    prog.forEach(function(progItem,progItemIdx) {
+    prog.forEach(function(chordItem,chordItemIdx) {
       if (errors) { return false; }
 
 
       rejections = [];
       outsideRejections = [];
       ///var barIdx = Math.floor(i / BSD.noteResolution);
-      var barIdx = progItem.barIndex;
+      var barIdx = chordItem.barIndex;
       //var chordIdx = barIdx % chords.length;
-      var chordIdx = progItemIdx;
-      var barChordIdx = progItem.barChordIndex;
+      var chordIdx = chordItemIdx;
+      var barChordIdx = chordItem.barChordIndex;
       //var myChord = chords[chordIdx];
-      var myChord = progItem.chord;
+      var myChord = chordItem.chord;
       ///var cycleIdx = Math.floor(barIdx / prog.length);
       //var cycleIdx = Math.floor(barIdx / chords.length);
       ///cycleIdx = Math.floor(cycleIdx / chords.length);
@@ -1923,14 +1915,14 @@ console.log('PROG W CHANGES?',prog);
       meta.maxFretDistance = meta.defaults.maxFretDistance;
       meta.maxDiff = meta.defaults.maxDiff; 
       meta.isStrongBeat = true;
-      if (progItem.scaleAdvice && progItem.scaleAdvice.advice) {
-        meta.tonalityScale = makeScale(progItem.scaleAdvice.advice);
+      if (chordItem.scaleAdvice && chordItem.scaleAdvice.advice) {
+        meta.tonalityScale = makeScale(chordItem.scaleAdvice.advice);
         meta.tonalityScaleAbstractValues = meta.tonalityScale.abstractNoteValues();        
       }
 
 
       var totQuarterNoteBeats = BSD.beatsPerMeasure; //for this chord.
-      if (progItem.halfBar) {
+      if (chordItem.halfBar) {
         if (BSD.beatsPerMeasure == 3) {
           if (barChordIdx == 0) {
             totQuarterNoteBeats = 2;
@@ -2041,45 +2033,18 @@ console.log('PROG W CHANGES?',prog);
 
       rejections = [];
       outsideRejections = [];
-      candidates = candidates.select(function(o) {
-        return criteria(o,meta);
+      candidates = [];
+
+      //nextGeneration();
+      var guessMIDIValue = bestBird.pick(chordItem,chordNoteIdx);
+      candidates = BSD.guitarData.select(function(o) {
+        return o.noteValue === guessMIDIValue;
       });
-
-
-      var solutions = [
-        function() { meta.maxDiff += 1;  console.log("increased meta.maxDiff to " + meta.maxDiff); },
-        function() { meta.maxFretDistance += 1;  console.log("increased meta.maxFretDistance to " + meta.maxFretDistance); },
-        function() { direction = nextDirection[direction]; console.log("changed direction to " + direction);   },
-      ];
-
-      var retries = 0;
-      while (retries < 110 && candidates.length == 0) {
-        console.log('pre-proto uh oh retry#',retries);
-
-        var last;
-        if (BSD.sequence.length > 0) {
-          last = BSD.sequence[BSD.sequence.length-1];
-          console.log('last barIdx',last.barIdx,'cycleIdx',last.cycleIdx,'last',last);
-        }
-
-        var solution = solutions.atRandom();
-
-        solution();
-
-        ///console.log('flip! (necessity)');
-        rejections = [];
-        outsideRejections = [];
-        candidates = BSD.guitarData.select(function(o) {
-          return criteria(o,meta);
-        });
-        retries += 1;
-      }
-
-
 
 
       if (candidates.length == 0) {
           errors += 1;
+          throw "what happened?";
           return false;
       }
 
@@ -2141,8 +2106,7 @@ console.log('PROG W CHANGES?',prog);
       result.idealFret = idealFret;
       result.avgFret = avgFret;
       ///result.idx = i;
-      result.nextChordChange = progItem.nextChordChange;
-      result.progItem = progItem;
+      
 
 
       console.log('result',result);
@@ -2346,17 +2310,9 @@ campfire.subscribe('tick',function(cursor){
     board.publish('unfeature-frets');
   });
 
-  if (cursor.chordIdx > 0) {
-    let x = 123;
-  }
-  predictBoard.updateCursor(cursor);
-
-  predictBoard.publish('unfeature-frets');
-
   if (!BSD.options.playChordsOnly) {
     cursor.board.publish('feature-fret',cursor);
     extraBoard.publish('feature-fret',cursor);
-    predictBoard.publish('feature-fret',cursor);
   }
 });
 
@@ -2524,9 +2480,9 @@ campfire.subscribe('bootup-hi-hat',function(){
           var output = e.outputBuffer.getChannelData(0);
           for (var i = 0; i < bufferSize; i++) {
               var white = Math.random() * 2 - 1;
-              output[i] = (lastOut + (0.02 * white)) / 1.32;
+              output[i] = (lastOut + (0.02 * white)) / 1.02;
               lastOut = output[i];
-              output[i] *= Math.PI;//3.5; // (roughly) compensate for gain
+              output[i] *= 3.5; // (roughly) compensate for gain
           }
       }
       return node;
