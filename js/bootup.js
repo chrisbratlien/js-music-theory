@@ -266,3 +266,11 @@ BSD.sorter = function(selectorFunc) {
           return impulse;
       }
 
+
+
+function interleave(a,size,skip) {
+  var starter = new Array(size).fill(0).map((o,i) => i);
+  console.log('starter');
+  console.table(starter);
+}
+
