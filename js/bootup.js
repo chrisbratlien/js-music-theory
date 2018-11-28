@@ -266,3 +266,20 @@ BSD.sorter = function(selectorFunc) {
           return impulse;
       }
 
+ 
+
+function chordify(orig,size,skip) {
+  var alpha = new Array(size).fill(0).map( (o,i) => i);
+  console.log('alpha');console.table(alpha);
+  var beta = alpha.map( (o,i) => i*(skip+1));//%alpha.length); //hmmm...can't mod(%) here then also mod later.
+  //console.log('beta');console.table(beta);
+  var gamma = orig.map((o,j) => beta.map(b => orig[(b+j)%orig.length]));
+  console.log('gamma');console.table(gamma);
+  return gamma;
+  return "NOTHING";
+  //now use beta for the inner loop
+  var result = alpha.map((o,j) => beta.map(b => a[b]));
+  return result;
+  //console.table(a.map((o,i) => [o,a[(i+2)%a.length],a[(i+4)%a.length]]))
+}
+

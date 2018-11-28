@@ -812,6 +812,13 @@ checkTiny();
           });
           return result;
         };
+
+        self.showIntervals = function() {
+            self.publish('show-interval',true);
+        }
+        self.showNames = function() {
+            self.publish('show-interval',false);
+        }
         
         self.renderOn = function(wrap) {      
           var inner = DOM.div().addClass('inner');
