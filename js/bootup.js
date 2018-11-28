@@ -283,3 +283,8 @@ function chordify(orig,size,skip) {
   //console.table(a.map((o,i) => [o,a[(i+2)%a.length],a[(i+4)%a.length]]))
 }
 
+function interleave(a,size,skip) {
+  var starter = new Array(size).fill(0).map((o,i) => i);
+  console.log('starter');
+  console.table(starter);
+}
