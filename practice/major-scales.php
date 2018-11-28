@@ -59,8 +59,20 @@ var sevenths = chordify(['c','d','e','f','g','a','b'],4,1);
 console.log('sevenths',sevenths);
 
 var last = null;
+var flip = false;
+
+BSD.options = {
+    alternate: true
+};
+
+flip = false;
 sevenths.forEach(function(arp){
+    if (BSD.options.alternate) {
+        flip = !flip;
+    }
+    var ordered = flip ? arp.reverse() : arp;
     arp.forEach(noteName => {
+
         var note = Note(noteName.toUpperCase());
         if (last) {
             last.next = note;
