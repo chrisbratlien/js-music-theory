@@ -268,7 +268,7 @@ BSD.sorter = function(selectorFunc) {
 
  
 
-function chordify(orig,size,skip) {
+function wasChordify(orig,size,skip) {
   var alpha = new Array(size).fill(0).map( (o,i) => i);
   console.log('alpha');console.table(alpha);
   var beta = alpha.map( (o,i) => i*(skip+1));//%alpha.length); //hmmm...can't mod(%) here then also mod later.
@@ -283,8 +283,21 @@ function chordify(orig,size,skip) {
   //console.table(a.map((o,i) => [o,a[(i+2)%a.length],a[(i+4)%a.length]]))
 }
 
-function interleave(a,size,skip) {
+function interleave(orig,size,skip) {
   var starter = new Array(size).fill(0).map((o,i) => i);
-  console.log('starter');
-  console.table(starter);
+  //console.log('starter');
+  //console.table(starter);
+  var beta = starter.map( (o,i) => i*(skip+1));//%alpha.length); //hmmm...can't mod(%) here then also mod later.
+  //console.log('beta');
+  //console.table(beta);
+  var gamma = orig.map((o,j) => beta.map(b => (b+j)%orig.length));
+  //console.log('gamma');
+  //console.table(gamma);
+  return gamma;
+}
+
+function chordify(orig,size,skip) {
+  var groups = interleave(orig,size,skip);
+  var result = groups.map((group,j) => group.map(offset => orig[offset]));
+  return result;
 }

@@ -435,12 +435,12 @@ get_header(); ?>
 add_action('wp_footer',function(){
 ?>
     
-    <script src="js/draggy.js"></script>
-    <script src="js/sticky-note.js"></script>
-    <script src="js/bsd.widgets.songlist.js"></script>
-    <script src="js/bsd.widgets.simpleplayer.js"></script>
-    <script src="js/bsd.widgets.tonalityguru.js"></script>    
-    <script src="js/bsd.widgets.fretboard.js"></script>    
+    <script src="<?php bloginfo('url'); ?>/js/draggy.js"></script>
+    <script src="<?php bloginfo('url'); ?>/js/sticky-note.js"></script>
+    <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.songlist.js"></script>
+    <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.simpleplayer.js"></script>
+    <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.tonalityguru.js"></script>    
+    <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.fretboard.js"></script>    
     <script type="text/javascript">
 
 
