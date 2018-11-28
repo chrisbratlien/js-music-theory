@@ -65,27 +65,26 @@ BSD.options = {
     alternate: true
 };
 
-flip = false;
-sevenths.forEach(function(arp){
-    if (BSD.options.alternate) {
-        flip = !flip;
-    }
-    var ordered = flip ? arp.reverse() : arp;
-    arp.forEach(noteName => {
 
-        var note = Note(noteName.toUpperCase());
-        if (last) {
-            last.next = note;
-        }
-        last = note;
-        sequence.push(note);
-    });
-});
+function buildSequence() {
+  flip = false;
+  sequence = [];
+  sevenths.forEach(function(arp){
+      if (BSD.options.alternate) {
+          flip = !flip;
+      }
+      var ordered = flip ? arp.reverse() : arp;
+      arp.forEach(noteName => {
 
-//x = keyboardist.playNote(Note('C'),null,90);    
-
-
-
+          var note = Note(noteName.toUpperCase());
+          if (last) {
+              last.next = note;
+          }
+          last = note;
+          sequence.push(note);
+      });
+  }); 
+}
 
 
 function tick(cursor) {
@@ -98,6 +97,9 @@ function tick(cursor) {
         tick(cursor.next);
     },900);
 }
+
+
+
 
 </script>
 <?php
