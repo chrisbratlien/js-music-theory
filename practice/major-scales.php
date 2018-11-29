@@ -119,8 +119,13 @@ function tick(cursor) {
     },900);
 }
 
-
-
+  BSD.importJSON(BSD.baseURL + '/data/guitar.json',function(err,data) { 
+    if (err) {
+      throw err;
+      return err;
+    }
+    BSD.guitarData = data;
+  });
 
 </script>
 <?php

@@ -156,13 +156,13 @@ BSD.parseProgression = function(progString) {
 
 
 
-BSD.importJSON = function(url,callback,error) {
+BSD.importJSON = function(url,callback) {
     jQuery.ajax({
       type: 'GET',
       url: url,
       dataType: 'json',
-      success: callback,
-      error: error
+      success: function(data) { callback(null,data); },
+      error: callback
     });
 };
 

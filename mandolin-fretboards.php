@@ -1272,14 +1272,12 @@ checkTiny();
   });
       
     
-  BSD.importJSON('data/mandolin.json',function(o) { 
-    BSD.mandolinData = o;
-
-
-  },
-  function(e){
-    console.log('e',e);
-  
+  BSD.importJSON(BSD.baseURL + '/data/mandolin.json',function(err,data) { 
+    if (err) {
+      throw err;
+      return err;
+    }
+    BSD.mandolinData = data;
   });
 
   

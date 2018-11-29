@@ -1084,16 +1084,13 @@ checkTiny();
   });
       
     
-  BSD.importJSON('data/guitar.json',function(o) { 
-    BSD.guitarData = o;
-
-
-  },
-  function(e){
-    console.log('e',e);
-  
+  BSD.importJSON(BSD.baseURL + '/data/guitar.json',function(err,data) { 
+    if (err) {
+      throw err;
+      return err;
+    }
+    BSD.guitarData = data;
   });
-
   
   var btnToggleText = jQuery('.btn-toggle-text');
   var hideText = false;

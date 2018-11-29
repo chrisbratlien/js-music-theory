@@ -409,15 +409,14 @@ add_action('wp_footer',function(){
   });
       
     
-  BSD.importJSON('data/guitar.json',function(o) { 
-    BSD.guitarData = o;
-
-  },
-  function(e){
-    console.log('e',e);
-  
+  BSD.importJSON(BSD.baseURL + '/data/guitar.json',function(err,data) { 
+    if (err) {
+      throw err;
+      return err;
+    }    
+    BSD.guitarData = data;
   });
-  
+ 
   
   jQuery('#redo').click(function(){
     var myChords = [];

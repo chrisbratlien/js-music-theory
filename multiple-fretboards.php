@@ -507,17 +507,12 @@ add_action('wp_footer',function(){
   });
       
     
-  BSD.importJSON('data/guitar.json',function(o) { 
-    BSD.guitarData = o;
+  BSD.importJSON(BSD.baseURL + '/data/guitar.json',function(err,data) { 
+    BSD.guitarData = data;
     for (var i = 0; i < 12 ; i++) {
       makeFretboardOn(stage);
     }
-  },
-  function(e){
-    console.log('e',e);
-  
   });
-
   
   var btnToggleText = jQuery('.btn-toggle-text');
   var hideText = false;
