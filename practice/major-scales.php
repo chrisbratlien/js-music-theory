@@ -65,24 +65,44 @@ BSD.options = {
     alternate: true
 };
 
+var cMajorScale = makeScale('C major').octaveDown();
+var extra1 = cMajorScale.octaveUp();
+var extra2 = extra1.octaveUp();
 
+var accum = [];
+accum = accum.concat(cMajorScale.noteValues());
+accum = accum.concat(extra1.noteValues());
+accum = accum.concat(extra2.noteValues());
+var sevenths = chordify(accum,4,1);
+
+var lastNoteValue = accum[accum.length-1];
+console.log('lastNoteValue',lastNoteValue);
 function buildSequence() {
+  var done = false;
   flip = false;
   sequence = [];
+
   sevenths.forEach(function(arp){
+    if (done) {
+        console.log("DONE WITH SEVENTHS");
+        return false;
+    }
       if (BSD.options.alternate) {
           flip = !flip;
       }
       var ordered = flip ? arp.reverse() : arp;
-      arp.forEach(noteName => {
+      arp.forEach(noteValue => {
 
-          var note = Note(noteName.toUpperCase());
+          var note = Note(noteValue);
           if (last) {
               last.next = note;
           }
           last = note;
           sequence.push(note);
       });
+      if (arp[0] == lastNoteValue) {
+        done = true;
+      }   
   }); 
 }
 
@@ -92,6 +112,7 @@ function tick(cursor) {
         console.log("DONE");
         return "DONE";
     }
+    console.log('cursor noteValue',cursor.value());
     keyboardist.playNote(cursor);
     setTimeout(function(){
         tick(cursor.next);

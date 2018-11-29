@@ -816,11 +816,18 @@ var RootNoteWithIntervals = function(spec) {
     return self.constructor({ rootNote: newRoot, intervals: newIntervals });
   };
   
+
+  self.octaveDown = function() {
+    return self.constructor({
+      rootNote: self.rootNote.plus(-12),
+      intervals: self.intervals()
+    });
+  };
   
   self.octaveUp = function() {
     return self.constructor({
       rootNote: self.rootNote.plus(12),
-      intervals: self.intervals().map(function(i){ return i + 12; })
+      intervals: self.intervals()
     });
   };
   
