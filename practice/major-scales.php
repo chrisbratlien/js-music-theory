@@ -4,7 +4,18 @@
 
 
 get_header();
+?>
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<input class="scale-name" />
 
+<?php
 
 add_action('wp_footer',function(){
 ?>
@@ -70,14 +81,20 @@ var extra1 = cMajorScale.octaveUp();
 var extra2 = extra1.octaveUp();
 
 var accum = [];
-accum = accum.concat(cMajorScale.noteValues());
-accum = accum.concat(extra1.noteValues());
-accum = accum.concat(extra2.noteValues());
-var sevenths = chordify(accum,4,1);
+////var sevenths = chordify(accum,4,1);
 
-var lastNoteValue = accum[accum.length-1];
-console.log('lastNoteValue',lastNoteValue);
-function buildSequence() {
+function buildSequence(scaleName) {
+  var myScale = makeScale(scaleName).octaveDown();
+  var extra1 = myScale.octaveUp();
+  var extra2 = extra1.octaveUp();
+
+  accum = [];
+  accum = accum.concat(myScale.noteValues());
+  accum = accum.concat(extra1.noteValues());
+  accum = accum.concat(extra2.noteValues());
+  var lastNoteValue = accum[accum.length-1];
+  console.log('lastNoteValue',lastNoteValue);
+  sevenths = chordify(accum,4,1);
   var done = false;
   flip = false;
   sequence = [];
@@ -126,10 +143,15 @@ function tick(cursor) {
     }
     BSD.guitarData = data;
   });
+jQuery('.scale-name').change(function(){
+  buildSequence(this.value);
+
+});
 
 </script>
 <?php
 });
+
 
 
 get_footer();
