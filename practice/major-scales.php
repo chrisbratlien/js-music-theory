@@ -13,7 +13,10 @@ get_header();
 <br />
 <br />
 <br />
-<input class="scale-name" />
+<input class="scale-name" value="C major" />
+<input class="group" value="4" />
+<input class="skip" value="1" />
+<button class="btn btn-go">Go</button>
 
 <?php
 
@@ -83,7 +86,12 @@ var extra2 = extra1.octaveUp();
 var accum = [];
 ////var sevenths = chordify(accum,4,1);
 
-function buildSequence(scaleName) {
+function buildSequence(scaleName,group,skip) {
+
+  group = parseInt(group,10); 
+  skip = parseInt(skip,10); 
+
+
   var myScale = makeScale(scaleName).octaveDown();
   var extra1 = myScale.octaveUp();
   var extra2 = extra1.octaveUp();
@@ -94,7 +102,7 @@ function buildSequence(scaleName) {
   accum = accum.concat(extra2.noteValues());
   var lastNoteValue = accum[accum.length-1];
   console.log('lastNoteValue',lastNoteValue);
-  sevenths = chordify(accum,4,1);
+  sevenths = chordify(accum,group,skip);
   var done = false;
   flip = false;
   sequence = [];
@@ -143,10 +151,16 @@ function tick(cursor) {
     }
     BSD.guitarData = data;
   });
-jQuery('.scale-name').change(function(){
-  buildSequence(this.value);
 
+jQuery('.btn-go').click(function(){
+  buildSequence(
+    jQuery('.scale-name').val(),
+    jQuery('.group').val(),
+    jQuery('.skip').val()
+  );
+  tick(sequence[0]);
 });
+
 
 </script>
 <?php
