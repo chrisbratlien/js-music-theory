@@ -91,7 +91,7 @@ function buildSequence() {
           flip = !flip;
       }
       var ordered = flip ? arp.reverse() : arp;
-      arp.forEach(noteValue => {
+      ordered.forEach(noteValue => {
 
           var note = Note(noteValue);
           if (last) {
