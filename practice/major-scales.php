@@ -50,6 +50,13 @@ common.connect(dry);
 
 
 
+BSD.itemTitles = ['fundamental','octave','dominant','dominant+fourth(octave2)'];
+if (BSD.iOS) {
+  BSD.itemTitles = ['fundamental'];
+}
+////alert(BSD
+
+
 var keyboardist = BSD.Widgets.SimplePlayer({
   context: context,
   destination: common,
