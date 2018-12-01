@@ -27,6 +27,7 @@ get_header();
 
 add_action('wp_footer',function(){
 ?>
+<script src="<?php bloginfo('url'); ?>/js/bsd.widgets.colorpicker.js"></script>
 <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.songlist.js"></script>
 <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.simpleplayer.js"></script>
 <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.tonalityguru.js"></script>    
@@ -149,6 +150,9 @@ function buildSequence(scaleName,group,skip) {
   BSD.boards = [];
   var activeStrings =  [1,2,3,4,5,6];
   var board;
+  
+  BSD.chosenColor = BSD.colorFromHex('#bbbbbb');
+
 
 
 function tick(cursor) {

@@ -437,6 +437,7 @@ add_action('wp_footer',function(){
     
     <script src="<?php bloginfo('url'); ?>/js/draggy.js"></script>
     <script src="<?php bloginfo('url'); ?>/js/sticky-note.js"></script>
+    <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.colorpicker.js"></script>
     <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.songlist.js"></script>
     <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.simpleplayer.js"></script>
     <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.tonalityguru.js"></script>    
@@ -604,32 +605,6 @@ checkTiny();
       BSD.foo = [];
 
       BSD.chosenColor = BSD.colorFromHex('#888888');
-      BSD.ColorPicker = function(spec) {
-        var self = BSD.PubSub({});
-        self.renderOn = function(wrap) {
-      ///console.log('hello');
-          var square = DOM.div('').addClass('color-picker');
-          square.css('background-color','#' + spec.color.toHex());
-          
-          var handler = function() {
-            BSD.chosenColor = spec.color;
-          };
-          
-          square.click(function() {
-            self.publish('click',spec.color);
-            ////handler();
-            ///var newGuy = square.clone();
-            //newGuy.click(handler);
-            //wrap.append(newGuy);    
-          });
-      ////console.log('html',html);
-          wrap.append(square);
-        };
-        return self;
-      };
-
-
-
 
 
 
