@@ -288,3 +288,52 @@
         
         return self;
       };
+
+      function makeFretboardOn(wrap,opts) {
+        var chord = opts.chord;
+        var activeStrings = opts.activeStrings || [1,2,3,4,5,6];
+        var defaultData = JSON.parse(JSON.stringify(BSD.guitarData));
+        ///console.log('defaultData',defaultData);
+        
+
+
+        abstractNoteValues = chord && chord.abstractNoteValues() || [];
+        var newData = defaultData.map(function(o){
+          var hit = abstractNoteValues.detect(function(av) { 
+              if (o.chromaticValue !== av) { return false };
+              if (!chord) { return false; } //chord not mandatory
+              if (!activeStrings.detect(function(s) { return o.string == s; })) {
+                return false;
+              }
+              var interval = o.chromaticValue - chord.rootNote.abstractValue();
+              while (interval < 0) { interval += 12; }
+              while (interval > 11) { interval -= 12; }
+              //console.log('interval',interval);
+              o.interval = interval;
+              return true;
+          });
+          if (typeof hit == "number") { o.selected = true; }
+          if (colorHash[o.interval]) {
+            o.color = colorHash[o.interval];
+            o.colorHex = '#' + o.color.toHex();
+          }
+          return o;
+        });
+
+
+        var board = BSD.Widgets.Fretboard({
+          data: newData,//defaultData,
+          activeStrings: activeStrings,
+          chord: chord
+        });
+        board.renderOn(wrap);
+        
+        board.subscribe('play-notes',function(notes){
+          campfire.publish('play-notes',notes);
+        });
+        board.subscribe('note-hover',function(o){
+          campfire.publish('note-hover',o);
+        });
+        
+        return board;      
+      }

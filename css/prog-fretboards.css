@@ -1,0 +1,136 @@
+  body { 
+    font-size: 10px;
+  }
+
+  .clear-both { clear: both; }
+
+  .color-grey { color: #888; }
+  .color-white  { color: white; }
+  .color-black { color: black; }
+
+
+
+  .stringset-name { 
+    color: #888;
+   }
+
+  .venue {
+    float: left;
+  }
+
+  .venue-column {
+    float: left;
+    width: 33%;
+  }
+
+
+
+  .stage { 
+    float: left;
+    margin: 0; 
+    width: 70%; 
+  }
+  
+  .inner { 
+    font-size: 10px; 
+    margin-left: 2%; 
+    width: 50%; 
+    float: left;
+  }
+
+
+  .inner table { float: left; }
+  .inner .controls { 
+    float: left; 
+  }
+
+  .inner .spacer { clear: both; }
+
+  .bsd-control { margin-top: 1rem; }
+  .hidden { display: none; } /* consider refactoring this name */
+  .invisible { visibility: hidden; }
+
+  table { 
+    border-bottom: 1px solid rgba(0,0,0,0.1); 
+    border-right: 1px solid  rgba(0,0,0,0.1); 
+    
+  }
+  table td { 
+    border-radius: 1rem;
+    border-top: 1px solid  rgba(0,0,0,0.1); 
+    border-left: 1px solid  rgba(0,0,0,0.1); 
+
+    height: 1.5em;    
+    min-width: 23px;
+    padding: 0.2em; text-align: center; 
+  
+  
+    -webkit-user-select: none;   /* Chrome/Safari/Opera */
+    -khtml-user-select: none;    /* Konqueror */
+    -moz-user-select: none;      /* Firefox */
+    -ms-user-select: none;       /* Internet Explorer/Edge */
+    text-align: center;
+    user-select: none;      
+    width: 23px;
+  
+  }
+  .fretboard-table { margin-bottom: 1.75em; }    
+  
+  .cell { cursor: pointer; }
+  table td { cursor: pointer; }
+  
+  .hide-text td { color: transparent; }
+
+
+  @media print  { 
+    .noprint { display: none;  }
+
+    body { font-size: 7pt; }
+    .inner { font-size: 7pt; }
+    
+    .stage { 
+      color : #777;
+      color: rgba(0,0,0,0.5); 
+    }
+
+    .inner { page-break-inside: avoid; }
+
+
+    .featured { 
+      color: red !important; 
+      background: red !important; 
+    }
+  
+  
+  }
+  
+ 
+  .controls { margin-left: 0.4rem; }
+  .controls .fa-close { cursor: pointer; }
+
+
+
+  .extra .was-once-featured {
+    background: #ccc;
+    color: white;
+  }
+  .predict .was-once-featured {
+    /*
+    background: #ccc;
+    color: white;
+    **/
+  }
+
+
+
+  .extra .featured { 
+    background: yellow;
+    color: black;
+  }
+
+
+
+  .featured { 
+    color: black !important;
+    background: yellow !important;
+  }

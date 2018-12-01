@@ -1,6 +1,11 @@
 <?php
 
 
+add_action('wp_head',function(){
+?>
+<link rel="stylesheet" href="<?php bloginfo('url'); ?>/css/prog-fretboards.css">
+<?php
+});
 
 
 get_header();
@@ -17,7 +22,7 @@ get_header();
 <input class="group" value="4" />
 <input class="skip" value="1" />
 <button class="btn btn-go">Go</button>
-
+<div class="stage"></div>
 <?php
 
 add_action('wp_footer',function(){
@@ -139,6 +144,13 @@ function buildSequence(scaleName,group,skip) {
 }
 
 
+
+  var stage = jQuery('.stage');
+  BSD.boards = [];
+  var activeStrings =  [1,2,3,4,5,6];
+  var board;
+
+
 function tick(cursor) {
     if (!cursor) { 
         console.log("DONE");
@@ -146,10 +158,28 @@ function tick(cursor) {
     }
     console.log('cursor noteValue',cursor.value());
     keyboardist.playNote(cursor);
+
+    var f = BSD.guitarData.detect(o => o.noteValue == cursor.value());
+    board.publish('feature-fret',f);
+
     setTimeout(function(){
         tick(cursor.next);
     },900);
 }
+
+
+var pa = '#FF0000-#E6DF52-#FFDD17-#4699D4-#4699D4-#000000-#000000-#000000-#bbbbbb-#67AFAD-#8C64AB-#8C64AB'.split(/-/);
+
+  var colorHash = {};
+  var palette = pa.map(function(o) {
+    return BSD.colorFromHex(o);
+  });
+  ///palette = BSD.randomPalette2(12,200);
+  palette.forEach(function(color,i) {
+    ///var color = palette.shift();
+    colorHash[i] = color;
+  });
+
 
   BSD.importJSON(BSD.baseURL + '/data/guitar.json',function(err,data) { 
     if (err) {
@@ -157,7 +187,16 @@ function tick(cursor) {
       return err;
     }
     BSD.guitarData = data;
+    board = makeFretboardOn(stage,{
+      //chord: chord,
+      activeStrings: activeStrings
+    });
+    //BSD.boards.push(board);
+
   });
+
+
+
 
 jQuery('.btn-go').click(function(){
   buildSequence(
