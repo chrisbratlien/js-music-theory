@@ -18,19 +18,24 @@ get_header();
 <br />
 <br />
 <br />
-<br />
-<input class="scale-name" value="C major" />
-<input class="group" value="4" />
-<input class="skip" value="1" />
-<input class="octaves" value="2" />
-<input class="tempo" value="100" />
-<div class="btn-group">
-  <button class="btn btn-play"><i class="fa fa-play"></i></button>
-  <button class="btn btn-pause"><i class="fa fa-pause"></i></button>
-  <button class="btn btn-rewind"><i class="fa fa-backward"></i></button>
-  <button class="btn btn-fast-forward"><i class="fa fa-forward"></i></button>
+<div class="panel">
+  <input class="scale-name" value="C major" />
+  <input class="group" value="4" />
+  <input class="skip" value="1" />
+  <input class="octaves" value="2" />
+  <input class="tempo" value="100" />
 </div>
-<div class="stage"></div>
+<div style="clear: both;"></div>
+<div class="venue">
+  <div class="btn-group pull-left">
+    <button class="btn btn-play"><i class="fa fa-play"></i></button>
+    <button class="btn btn-pause"><i class="fa fa-pause"></i></button>
+    <button class="btn btn-rewind"><i class="fa fa-backward"></i></button>
+    <button class="btn btn-fast-forward"><i class="fa fa-forward"></i></button>
+  </div>
+  <div style="clear: both;"></div>
+  <div class="stage"></div>
+</div>
 <?php
 
 add_action('wp_footer',function(){
@@ -71,29 +76,23 @@ BSD.itemTitles = ['fundamental','octave','dominant','dominant+fourth(octave2)'];
 if (BSD.iOS) {
   BSD.itemTitles = ['fundamental'];
 }
-////alert(BSD
 
-
-var keyboardist = BSD.Widgets.SimplePlayer({
+var guitarist = BSD.Widgets.SimplePlayer({
   context: context,
   destination: common,
   polyphonyCount: 48,//polyphonyCount,
   itemTitles: BSD.itemTitles,//['fundamental','octave','dominant','dominant+fourth(octave2)'],
-  range: [28,100]
+  range: [40,100]
 });
 
 
 campfire.subscribe('set-master-volume',function(o){
-  BSD.audioPlayer.publish('set-master-volume',o);
-  bassist.publish('set-master-volume',o);
-  keyboardist.publish('set-master-volume',o);
+  guitarist.publish('set-master-volume',o);
 });
 
-
-
-var sequence = [];
-
-var sevenths = chordify(['c','d','e','f','g','a','b'],4,1);
+var noteSequence = [];
+var fretSequence = [];
+var sevenths = [];
 ///console.log('sevenths',sevenths);
 
 var last = null;
@@ -103,15 +102,10 @@ BSD.options = {
     alternate: true
 };
 
-//var cMajorScale = makeScale('C major').octaveDown();
-//var extra1 = cMajorScale.octaveUp();
-///var extra2 = extra1.octaveUp();
-
 var accum = [];
-////var sevenths = chordify(accum,4,1);
 
 function buildSequence(scaleName,group,skip,octaves) {
-
+  previousFret = BSD.frets.detect(o => o.spec.string == 5 && o.spec.fret == 3);
   fretHistory = [];
   fretHistory.push(previousFret);
   fretHistory.push(previousFret);
@@ -140,7 +134,8 @@ console.table([sevenths]);
 
   var done = false;
   flip = false;
-  sequence = [];
+  noteSequence = [];
+  fretSequence = [];
 
   sevenths.forEach(function(arp){
     arp = new StatsArray(...arp);
@@ -159,21 +154,42 @@ console.table([sevenths]);
       }
       var ordered = flip ? arp.reverse() : arp;
       ordered.forEach(noteValue => {
-
           var note = Note(noteValue);
-          if (last) {
-              last.next = note;
-          }
-          last = note;
-          sequence.push(note);
+          noteSequence.push(note);
       });
       if (arp[0] == lastNoteValue) {
         done = true;
       }   
-  }); 
+  });
+
+  last = false;
+  fretSequence = noteSequence.map(function(cursor){
+    let testFret = fretHistory[fretHistory.length-2];
+    var candidates = BSD.frets.select(o => o.spec.noteValue == cursor.value());
+    var sorted = candidates.sort(BSD.sorter(fret => {
+      let mp = testFret.midpointTo(previousFret);
+      var direct = fret.distanceSquaredTo(mp);
+      var dx = fret.fretDistanceTo(mp);
+      var dy = fret.stringDistanceTo(mp);
+      var adx = Math.abs(dx);
+      var ady = Math.abs(dy);
+      
+      return direct + adx;// - ady;
+      ////return dx;
+    }));
+    var f = sorted[0];
+
+    var result = {
+      note: cursor,
+      fret: f
+    };
+    if (last) {
+      last.next = result;
+    }
+    last = result;
+    return result;
+  });
 }
-
-
 
   var stage = jQuery('.stage');
   BSD.boards = [];
@@ -197,28 +213,10 @@ function tick(cursor) {
         console.log("DONE");
         return "DONE";
     }
-    //console.log('cursor noteValue',cursor.value());
-    keyboardist.playNote(cursor);
-
-    //let testFret = fretHistory[fretHistory.length-2];
-    let testFret = fretHistory[fretHistory.length-2];
-
-    var candidates = BSD.frets.select(o => o.spec.noteValue == cursor.value());
-    var sorted = candidates.sort(BSD.sorter(fret => {
-      let mp = testFret.midpointTo(previousFret);
-      var direct = fret.distanceSquaredTo(mp);
-      var dx = fret.fretDistanceTo(mp);
-      var dy = fret.stringDistanceTo(mp);
-      var adx = Math.abs(dx);
-      var ady = Math.abs(dy);
-      
-      return direct + adx;// - ady;
-      ////return dx;
-    }));
-    var f = sorted[0];
-    board.publish('feature-fret',f.spec);
-    previousFret = f;
-    fretHistory.push(f);
+    board.publish('feature-fret',cursor.fret.spec);
+    previousFret = cursor.fret;
+    fretHistory.push(cursor.fret);
+    guitarist.playNote(cursor.note);
     if (paused) {
       return "PAUSED";
     }
@@ -252,9 +250,6 @@ var pa = '#FF0000-#E6DF52-#FFDD17-#4699D4-#4699D4-#000000-#000000-#000000-#bbbbb
       //chord: chord,
       activeStrings: activeStrings
     });
-    //BSD.boards.push(board);
-    previousFret = BSD.frets.detect(o => o.spec.string == 5 && o.spec.fret == 3);
-    //history.push(previousFret);
   });
 
 
@@ -275,7 +270,7 @@ jQuery('.btn-play').click(function(){
     jQuery('.skip').val(),
     jQuery('.octaves').val()
   );
-  saveCursor = sequence[0];
+  saveCursor = fretSequence[0];
   board.publish('scale-change',makeScale(scaleName));
   tick(saveCursor);
 });
