@@ -20,10 +20,10 @@ get_header();
 <br />
 <div class="panel">
   <input class="scale-name" value="C major" />
-  <input class="group" value="4" />
+  <input class="group" value="3" />
   <input class="skip" value="1" />
   <input class="octaves" value="2" />
-  <input class="tempo" value="100" />
+  <input class="tempo" value="120" />
 </div>
 <div style="clear: both;"></div>
 <div class="venue">
@@ -185,6 +185,7 @@ console.table([sevenths]);
     };
     if (last) {
       last.next = result;
+      result.prev = last;
     }
     last = result;
     return result;
@@ -221,7 +222,7 @@ function tick(cursor) {
       return "PAUSED";
     }
     handle = setTimeout(function(){
-        tick(cursor.next);
+        tick(saveCursor.next);
     },tempoMS);
 }
 
@@ -277,6 +278,9 @@ jQuery('.btn-play').click(function(){
 
 jQuery('.btn-pause').click(function(){
   paused = true;
+});
+jQuery('.btn-rewind').click(function(){
+  saveCursor = saveCursor.prev.prev;
 });
 
 
