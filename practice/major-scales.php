@@ -164,21 +164,30 @@ console.table([sevenths]);
 
   last = false;
   fretSequence = noteSequence.map(function(cursor){
-    let testFret = fretHistory[fretHistory.length-2];
+    //let testFret = fretHistory[fretHistory.length-2];
+    let minus1 = fretHistory[fretHistory.length-1];
+    let minus2 = fretHistory[fretHistory.length-2];
+    let minus1p5 = minus1.midpointTo(minus2);
+
+    //let testFret = minus2;
+    //let testFret = minus1;
+    let testFret = minus1p5;//2;//minus1p5.midpointTo(minus1);
+
     var candidates = BSD.frets.select(o => o.spec.noteValue == cursor.value());
     var sorted = candidates.sort(BSD.sorter(fret => {
-      let mp = testFret.midpointTo(previousFret);
-      var direct = fret.distanceSquaredTo(mp);
-      var dx = fret.fretDistanceTo(mp);
-      var dy = fret.stringDistanceTo(mp);
+      //let mp = minus2;//testFret.midpointTo(previousFret);
+      var direct = fret.distanceSquaredTo(testFret);
+      var dx = fret.fretDistanceTo(testFret);
+      var dy = fret.stringDistanceTo(testFret);
       var adx = Math.abs(dx);
       var ady = Math.abs(dy);
       
-      return direct + adx;// - ady;
+      return direct + adx*adx;// - ady;
       ////return dx;
     }));
     var f = sorted[0];
-
+    fretHistory.push(f);
+    previousFret = f;
     var result = {
       note: cursor,
       fret: f
@@ -215,8 +224,7 @@ function tick(cursor) {
         return "DONE";
     }
     board.publish('feature-fret',cursor.fret.spec);
-    previousFret = cursor.fret;
-    fretHistory.push(cursor.fret);
+    /////fretHistory.push(cursor.fret);
     guitarist.playNote(cursor.note);
     if (paused) {
       return "PAUSED";

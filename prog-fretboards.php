@@ -604,7 +604,7 @@ checkTiny();
 
       BSD.foo = [];
 
-      BSD.chosenColor = BSD.colorFromHex('#888888');
+      BSD.chosenColor = BSD.colorFromHex('#bbbbbb');
 
 
 
