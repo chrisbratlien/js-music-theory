@@ -301,3 +301,46 @@ function chordify(orig,size,skip) {
   var result = groups.map((group,j) => group.map(offset => orig[offset]));
   return result;
 }
+
+
+
+function andTests() {
+ var tests = Array.prototype.slice.call(arguments);    
+ if (tests.length == 1 && Array.isArray(tests[0])) {
+  tests = tests[0];
+ }
+  var func = function(o) {
+    var failure = tests.detect(function(test){
+      return !test(o);
+    });
+    if (failure) { return false; }
+    return true;
+  };
+  return func;
+}
+function orTests() {
+ var tests = Array.prototype.slice.call(arguments);    
+ if (tests.length == 1 && Array.isArray(tests[0])) {
+  tests = tests[0];
+ }
+  var func = function(o) {
+    var success = tests.detect(function(test){
+      return test(o);
+    });
+    if (success) { return true; }
+    return false;
+  };
+  return func;
+}
+
+
+function isOdd (x) { return x%2 != 0; }
+function isEven (x) { return x%2 == 0; }
+function isGT5(x) { return x > 5; }
+var nums = [1,2,3,4,5,6,7,8,9];
+
+//examples:
+//nums.select(orTests(isOdd,isEven))  // => [1, 2, 3, 4, 5, 6, 7, 8, 9]
+//nums.select(andTests(isOdd,isEven)) // => []
+//nums.select(andTests(isOdd,isGT5))  // [7,9]
+

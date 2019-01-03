@@ -474,6 +474,12 @@ BSD.durations = {
 };
 
 
+
+
+
+BSD.tests = [];
+
+
 /**
 storage.getItem('progressions',function(o){
   ////BSD.progressions = JSON.parse(o);
@@ -1122,6 +1128,7 @@ function distScore(a,b) {
 }
 
 
+
 function outsideJudge(o,env) {
   var hit6 = env.majorSixthAV == o.chromaticValue; 
   var hit9 = env.ninthAV == o.chromaticValue; 
@@ -1235,7 +1242,7 @@ function tick(cursor) {
 
   BSD.noteResolution = 4;
 
-  var direction = (Math.random() > 0.5) ? 'up' : 'down';
+  var direction = (Math.random() > 0.5) ? 'up' : 'down'; //initial direction.
   var nextDirection = { 'up': 'down', 'down': 'up'};
   
   var avgFret,
@@ -1270,11 +1277,7 @@ function tick(cursor) {
   var songFormPosition = jQuery('.song-form-position');
   var songCyclePosition = jQuery('.song-cycle-position');
   ///var songCycleIndicator = jQuery('.song-cycle-indicator');
-
-
-
 function initLast() {
-
   meta = {};
   avgFret = false;
   avgString = false;
@@ -1286,6 +1289,7 @@ function initLast() {
   candidates = [];
   lastAbstractValue = false;
   lastValue = false; //60
+  lastDiff = false;
   lastString = false;/////2; //5
   lastStrings = [];///[5];
   lastFret = false;////BSD.idealFret || 7;//3;
@@ -1296,104 +1300,90 @@ function initLast() {
   result = false;
   lastResult = false;
   BSD.sequence = [];
+
+  meta.maxNoteValue = BSD.guitarData.detect(function(o){
+    var result = o.string == 1 && o.fret == BSD.options.fretRange[1];
+    return result;
+  }).noteValue;
+
+  meta.minNoteValue = BSD.guitarData.detect(function(o){
+    var result = o.string == 6 && o.fret == BSD.options.fretRange[0];
+    return result;
+  }).noteValue;
+
+
 }
 
 
 
 
 
+function judge(o,env) {
+  var diff = lastValue ? o.noteValue - lastValue : 0;
+  //if (Math.abs(diff) > 6) { return 'diff>6:' + diff; }
+  //if (Math.abs(diff) > 5) { return 'diff>5:' + diff; }
+  if (Math.abs(diff) > env.maxDiff) { return 'diff > ' + env.maxDiff + ': ' + diff; }
+  var idealFretDiff = Math.abs(o.fret - idealFret);
+  if (idealFretDiff > 9) { return 'idealFretDiff>9'; }      
+  if (env.chordNoteIdx > 0 && diff > 0 && direction == 'down') { return 'wrong dir, direction=' + direction + ', diff=' + diff; }
+  if (env.chordNoteIdx > 0 && diff < 0 && direction == 'up') { return 'wrong dir, direction=' + direction + ', diff=' + diff; }
+  if (lastValue && diff == 0) { return 'no diff'; }
+  var fretDiff = lastFret ? o.fret - lastFret : 0; 
+  //FIXME: can probably simplify this once my goals are better understood
+  if (drift3 && Math.abs(drift3 + fretDiff) > 4) { 
+    return 'drift3: drifting too much in one direction, drift3: ' + drift3 + ' fretDiff: ' + fretDiff; 
+  }
+  if (drift2 && Math.abs(drift2 + fretDiff) > 4) { 
+    return 'drift2: drifting too much in one direction, drift2: ' + drift2 + ' fretDiff: ' + fretDiff; 
+  }
+  if (lastFretDiff && Math.abs(lastFretDiff + fretDiff) > 4) { 
+    return 'lastFretDiff: drifting too much in one direction, lastFretDiff: ' + lastFretDiff + ' fretDiff: ' + fretDiff; 
+  }
+  var fretDistance = Math.abs(fretDiff);
+  if (fretDistance > env.maxFretDistance) { return 'fretDistance > ' + env.maxFretDistance; }
+  ///if (fretDistance > 3) { return 'fretDistance > 3'; }
+  if (lastFretDiff && Math.abs(lastFretDiff + fretDiff) > 4) { return 'lastFretDiff+fretDiff >4'; } ///if they don't cancel each other out and their total is too big
 
-    var judge = function(o,env) {  
+  var stringDiff = lastString? Math.abs(o.string - lastString) : 0;
+  if (stringDiff > 2) { return 'stringDiff>2'; }
 
-      var diff = lastValue ? o.noteValue - lastValue : 0;
-      //if (Math.abs(diff) > 6) { return 'diff>6:' + diff; }
-      //if (Math.abs(diff) > 5) { return 'diff>5:' + diff; }
-      if (Math.abs(diff) > env.maxDiff) { return 'diff > ' + env.maxDiff + ': ' + diff; }
+  //now for the avg
+  var avgFretDistance = avgFret ? Math.abs(o.fret - avgFret) : 0;
+  var avgStringDiff = avgString ? Math.abs(o.string - avgString): 0;
+  if (avgFretDistance > 4) { return 'avgFretDistance>4'; }
+  ///if (avgStringDiff > 2) { return 'avgStringDiff>2'; }
 
-      var idealFretDiff = Math.abs(o.fret - idealFret);
-      if (idealFretDiff > 9) { return 'idealFretDiff>9'; }      
-      ///if (idealFretDiff > 8) { return 'idealFretDiff>8'; }      
-      //if (idealFretDiff > 7) { return 'idealFretDiff>7'; }      
-      //if (idealFretDiff > 6) { return 'idealFretDiff>6'; }      
-      //if (idealFretDiff > 5) { return 'idealFretDiff>5'; }      
-      ///if (idealFretDiff > 4) { return 'idealFretDiff>4'; }      
+  return 'OK';
+}
 
-      if (env.chordNoteIdx > 0 && diff > 0 && direction == 'down') { return 'wrong dir, direction=' + direction + ', diff=' + diff; }
-      if (env.chordNoteIdx > 0 && diff < 0 && direction == 'up') { return 'wrong dir, direction=' + direction + ', diff=' + diff; }
-      if (lastValue && diff == 0) { return 'no diff'; }
+function criteria(o,env) {
+  var outsideDecision = outsideJudge(o,env);
+  if (outsideDecision !== 'OK') { 
+    outsideRejections.push({
+        candidate: o,
+        decision:outsideDecision,
+        lastResult: lastResult
+    });
+    return false; 
+  }
+  //console.log('decision',decision);
+  var decision = judge(o,env);
 
-
-      var fretDiff = lastFret ? o.fret - lastFret : 0; 
-      ///console.log('fretDiff',fretDiff,'lastFretDiff',lastFretDiff);
-
-      //FIXME: can probably simplify this once my goals are better understood
-      if (drift3 && Math.abs(drift3 + fretDiff) > 4) { 
-        return 'drift3: drifting too much in one direction, drift3: ' + drift3 + ' fretDiff: ' + fretDiff; 
-      }
-
-      if (drift2 && Math.abs(drift2 + fretDiff) > 4) { 
-        return 'drift2: drifting too much in one direction, drift2: ' + drift2 + ' fretDiff: ' + fretDiff; 
-      }
-
-      if (lastFretDiff && Math.abs(lastFretDiff + fretDiff) > 4) { 
-        return 'lastFretDiff: drifting too much in one direction, lastFretDiff: ' + lastFretDiff + ' fretDiff: ' + fretDiff; 
-      }
-
-      var fretDistance = Math.abs(fretDiff);
-
-
-
-      if (fretDistance > env.maxFretDistance) { return 'fretDistance > ' + env.maxFretDistance; }
-      ///if (fretDistance > 3) { return 'fretDistance > 3'; }
-      if (lastFretDiff && Math.abs(lastFretDiff + fretDiff) > 4) { return 'lastFretDiff+fretDiff >4'; } ///if they don't cancel each other out and their total is too big
-
-      var stringDiff = lastString? Math.abs(o.string - lastString) : 0;
-      if (stringDiff > 2) { return 'stringDiff>2'; }
-
-      //now for the avg
-      var avgFretDistance = avgFret ? Math.abs(o.fret - avgFret) : 0;
-      var avgStringDiff = avgString ? Math.abs(o.string - avgString): 0;
-      if (avgFretDistance > 4) { return 'avgFretDistance>4'; }
-      ///if (avgStringDiff > 2) { return 'avgStringDiff>2'; }
-
-      return 'OK';
-    };
-
-    var criteria = function(o,env){
-      var outsideDecision = outsideJudge(o,env);
-      if (outsideDecision !== 'OK') { 
-        outsideRejections.push({
-            candidate: o,
-            decision:outsideDecision,
-            lastResult: lastResult
-        });
-        return false; 
-      }
-      //console.log('decision',decision);
-      var decision = judge(o,env);
-
-      if (decision != 'OK') { //chordNoteIdx == 0 && 
-        rejections.push({
-            candidate: o,
-            decision:decision,
-            lastResult: lastResult
-        });
-      }
-      return  outsideDecision == 'OK' && decision == 'OK';
-    };
-
-
+  if (decision != 'OK') { //chordNoteIdx == 0 && 
+    rejections.push({
+        candidate: o,
+        decision:decision,
+        lastResult: lastResult
+    });
+  }
+  return  outsideDecision == 'OK' && decision == 'OK';
+}
 
 var guru = BSD.Widgets.TonalityGuru({});
-
-
-
 
 campfire.subscribe('do-it',function(prog){
   BSD.pause = false;
   initLast();
-
-
   if (extraBoard) {
     extraBoard.close();
     extraBoard = null;
@@ -1505,6 +1495,9 @@ console.log('PROG W CHANGES?',prog);
   for(var i = 0; i < BSD.progCycles; i += 1) {
     cycleRange.push(i); 
   }
+
+
+
 
 
 
@@ -1789,10 +1782,13 @@ console.log('PROG W CHANGES?',prog);
 
       lastResult = result;
       ///sequence[i] = result;
+      lastDiff = lastValue ? result.noteValue - lastValue : 0;
+      console.log('lastDiff',lastDiff);
       lastValue = result.noteValue;
       lastNote = Note(lastValue);
       lastAbstractValue = lastNote.abstractValue();
       lastString = result.string;
+
       lastFretDiff = lastFret ? result.fret - lastFret : 0;
       lastFretDiffs.push(lastFretDiff);
 
