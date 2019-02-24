@@ -42,9 +42,14 @@ function route($uri) {
   $path = ltrim($path,'/');
   
   $tests = Array();  
-  array_push($tests,sprintf('%s/%s/index.php',dirname(__FILE__),$path));
-  array_push($tests,sprintf('%s/page-%s.php',dirname(__FILE__),$path));
-  array_push($tests,sprintf('%s/%s.php',dirname(__FILE__),$path));
+
+  array_push($tests,sprintf('%s/endpoints/%s/index.php',APP_PATH,$path));
+  array_push($tests,sprintf('%s/endpoints/page-%s.php',APP_PATH,$path));
+  array_push($tests,sprintf('%s/endpoints/%s.php',APP_PATH,$path));
+
+  array_push($tests,sprintf('%s/%s/index.php',APP_PATH,$path));
+  array_push($tests,sprintf('%s/page-%s.php',APP_PATH,$path));
+  array_push($tests,sprintf('%s/%s.php',APP_PATH,$path));
   
   
   /**  

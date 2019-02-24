@@ -240,7 +240,9 @@
           });
 
 
-          var scaleInput = DOM.input().attr('type','text').addClass('scale-input');
+          var scaleInput = DOM.input()
+            .attr('type','text')
+            .addClass('scale-input noprint');
           scaleInput.on('blur change',function(){
             var scale = this.value.length ?  makeScale(this.value) : false;
             self.publish('scale-change',scale);
