@@ -423,6 +423,7 @@ get_header(); ?>
     <ul class="song-form-position noprint">
     </ul>
   </div>
+  <div class="stage svg-wrap noprint"></div>
 </div><!-- venue row -->
 <div class="venue-footer noprint clear-both">
 </div>
@@ -434,6 +435,7 @@ get_header(); ?>
 
 add_action('wp_footer',function(){
 ?>
+    <script src="<?php bloginfo('url'); ?>/lib/Snap.svg/dist/snap.svg.js"></script>    
     
     <script src="<?php bloginfo('url'); ?>/js/draggy.js"></script>
     <script src="<?php bloginfo('url'); ?>/js/sticky-note.js"></script>
@@ -443,6 +445,7 @@ add_action('wp_footer',function(){
     <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.tonalityguru.js"></script>    
     <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.fretboard.js"></script>    
     <script type="text/javascript">
+
 
 
 BSD.timeout = false;
@@ -1381,6 +1384,14 @@ function criteria(o,env) {
 
 var guru = BSD.Widgets.TonalityGuru({});
 
+var svgWrap = jQuery('.svg-wrap');
+BSD.importHTML(BSD.baseURL + '/images/C_Major_Scale_on_fretboard.svg',function(err,data){
+  if (err) { return console.log(err); }
+  svgWrap.append(data);
+  //console.log('data?',data);
+  svgBoard = Snap('.svg-wrap svg');
+});
+
 campfire.subscribe('do-it',function(prog){
   BSD.pause = false;
   initLast();
@@ -1461,7 +1472,6 @@ console.log('PROG W CHANGES?',prog);
         //chord: chord,
         activeStrings: '654321'.split('')
     });
-
 
 
 

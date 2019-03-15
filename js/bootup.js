@@ -156,15 +156,24 @@ BSD.parseProgression = function(progString) {
 
 
 
-BSD.importJSON = function(url,callback) {
+BSD.importer = function(dataType,url,callback) {
     jQuery.ajax({
       type: 'GET',
       url: url,
-      dataType: 'json',
+      dataType: dataType,
       success: function(data) { callback(null,data); },
       error: callback
     });
 };
+BSD.importJSON = function(url,callback) {
+  BSD.importer('json',url,callback);
+};
+BSD.importHTML = function(url,callback) {
+  BSD.importer('html',url,callback);
+};
+
+
+
 
 var campfire = BSD.PubSub({});
 var storage = BSD.Storage('JSMT::');

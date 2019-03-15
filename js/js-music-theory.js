@@ -38,7 +38,10 @@ if (typeof String.prototype.supplant == 'undefined') {
 }
 
 JSMT = {};
-
+JSMT.symbols = {
+  flat: '♭',
+  sharp: '♯'
+}
 
 JSMT.midi2Hertz = function(x) {
     return Math.pow(2,(x-69)/12)*440;
