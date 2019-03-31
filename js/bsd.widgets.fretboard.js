@@ -28,37 +28,38 @@
 
         self.styleCell = function(cell,fretData) {
           cell.addClass('color-white').removeClass('color-black');
-            let boolCustomColor = fretData.selected || fretData.isScaleNote || fretData.isChordNote || fretData.isUpcoming || fretData.isCustomColor;
+          let boolCustomColor = fretData.selected || fretData.isScaleNote || fretData.isChordNote || fretData.isUpcoming || fretData.isCustomColor;
 
-                if (boolCustomColor) {
-                  var hex = BSD.chosenColor.toHex();
-                  var sum = BSD.chosenColor.r + BSD.chosenColor.g + BSD.chosenColor.b;                  
-                  if (fretData.color) {
-                    var hex = fretData.color.toHex();
-                    var sum = fretData.color.r + fretData.color.g + fretData.color.b;
-                  }
-
-
-                  ////console.log('hex',hex,'sum',sum);
-
-                  cell.css('background-color','#' + hex);
-                  //cell.css('color','white');
-                  //cell.removeClass('color-white');
-                  cell.removeClass('color-grey');
-
-                  
-                  (sum > 500) ? cell.addClass('color-black').removeClass('color-white') : cell.addClass('color-white').removeClass('color-black');
+          if (boolCustomColor) {
+            var hex = BSD.chosenColor.toHex();
+            var sum = BSD.chosenColor.r + BSD.chosenColor.g + BSD.chosenColor.b;                  
+            if (fretData.color) {
+              var hex = fretData.color.toHex();
+              var sum = fretData.color.r + fretData.color.g + fretData.color.b;
+            }
 
 
-                }
-                else {
-                  ///cell.css('background-color','inherit');
-                  cell.css('background-color',null);
-                  cell.attr('style',null);
-                  //cell.removeClass('color-white');
-                }
+            ////console.log('hex',hex,'sum',sum);
+
+            cell.css('background-color','#' + hex);
+            //cell.css('color','white');
+            //cell.removeClass('color-white');
+            cell.removeClass('color-grey');
+
+            
+            (sum > 500) ? cell.addClass('color-black').removeClass('color-white') : cell.addClass('color-white').removeClass('color-black');
 
 
+          }
+          else {
+            ///cell.css('background-color','inherit');
+            cell.css('background-color',null);
+            cell.attr('style',null);
+            //cell.removeClass('color-white');
+          }
+          if (!fretData.selected) {
+            cell.addClass('color-white').removeClass('color-black');
+          }
         };
 
         self.pick = function(progItem) {
@@ -197,8 +198,11 @@
               self.subscribe('update-cursor-cells',function(newData){
                 let phretData = newData.detect(function(nd){
                   return nd.string == stringIdx + 1 && nd.fret == fret;
-                })
+                });
+
+                cell.removeClass('color-black').addClass('color-white');
                 self.styleCell(cell,phretData);     
+                //self.styleCell(cell,newData);     
               });
 
               self.styleCell(cell,fretData);      
