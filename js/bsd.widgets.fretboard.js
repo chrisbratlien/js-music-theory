@@ -150,15 +150,15 @@
           var openValues = BSD.guitarData.select(function(o) { return o.fret == 0; }).map(function(o){ return o.noteValue; });
           openValues.forEach(function(open,stringIdx) { 
             var row = DOM.tr();     
-            [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17].each(function(fret){ 
+            [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].each(function(fret){ 
 
               let fretData = self.getFretData(stringIdx + 1,fret);
               //console.log('fretData',fretData);
               
               var cell = DOM.td();
               
-              cell.addClass('fret-' + fret);
-              cell.addClass('string-' + (stringIdx+1));
+              cell.addClass('fret fret-' + fret);
+              cell.addClass('string string-' + (stringIdx+1));
               
               var midiValue = open+fret;
               var note = Note(midiValue);
@@ -171,7 +171,7 @@
               //noteName = JSMT.toUTF8(noteName);
               
               if (true || noteNames.indexOf(noteName) > -1) {
-                cell.html(noteName);                
+                cell.html(JSMT.toUTF8(noteName));                
               }
               self.subscribe('show-interval',function(wish){
                 if (wish) {
@@ -179,7 +179,7 @@
                   //cell.text(intervalMap[fretData.chromaticValue]);
                 }
                 else {
-                  cell.text(noteName);
+                  cell.text(JSMT.toUTF8(noteName));
                 }
               });
             

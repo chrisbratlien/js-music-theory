@@ -52,12 +52,8 @@ BSD.StringOscillator = function(spec) {
 
     var detune1 = 4.5;    
     var time = context.currentTime;
-    var ampAttack = Math.random() / 10; //////[0.056,0.099,0.07,0.5].atRandom();
-    var ampDecay = Math.random() + 0.2; 
-
-
-    //ampAttack = Math.random() * 0.4 + 0.01;
-    ampAttack = Math.random() * 0.2;
+    var ampAttack = spec.attack || Math.random() * 0.2; //////[0.056,0.099,0.07,0.5].atRandom();
+    var ampDecay = spec.decay || Math.random() + 0.2; 
 
     var ampEnvelope = gainBank[semitone];
     if (!ampEnvelope) {
@@ -67,9 +63,6 @@ BSD.StringOscillator = function(spec) {
 
 
     ampEnvelope.connect(destination);
-
-
-
 
 
     var myGain = volume;
@@ -84,14 +77,6 @@ BSD.StringOscillator = function(spec) {
     ///immediate
     ///ampEnvelope.gain.value = volume;////0.0; // default value
     ampEnvelope.gain.value = myGain;////0.0; // default value
-
-
-
-
-
-
-
-
 
     var items = [
     { title: 'fundamental', freq: midi2Hertz(semitone,detuneSemis), volumeRange: [0.5,1.0] },

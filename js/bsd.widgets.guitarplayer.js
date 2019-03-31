@@ -14,7 +14,9 @@ BSD.Widgets.GuitarPlayer = function(spec) {
       id: id, 
       context: context, 
       destination: spec.destination,
-      volume: 0
+      volume: 0,
+      attack: 100,
+      decay: 0
     });
     self.oscillators.push(string1);
 

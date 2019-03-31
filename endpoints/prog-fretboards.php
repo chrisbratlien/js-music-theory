@@ -261,6 +261,9 @@ add_action('wp_head',function(){
 }
 
 
+.fret {
+  letter-spacing: -0.2rem;
+}
 
 
 </style>
@@ -822,7 +825,7 @@ checkTiny();
         orientation: 'horizontal',
         range: 'min',
         min: 0,
-        max: 17,
+        max: 20,
         step: 1,
         values: BSD.options.fretRange,
         slide: function( event, ui ) {
