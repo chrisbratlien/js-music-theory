@@ -1855,7 +1855,9 @@ campfire.subscribe('do-it',function(prog){
         });
       });
       //showBirds();
-      console.log('scores',scores());///,'activeBirds',activeBirds);
+      if (cycleIdx == 0 && n%2 == 0) {
+        console.log('scores',scores());///,'activeBirds',activeBirds);
+      }
     });
   });
   //console.log('scores',scores(),'activeBirds',activeBirds);

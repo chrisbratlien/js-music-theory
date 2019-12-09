@@ -25,7 +25,7 @@ class Bird {
     this.prevResult = -1;
     this.intervalVelocity = 0;
     var iNodeCount = 36; //chromatic notes for prev, cur, next chordItems
-    iNodeCount += 1; //if prevResult used.
+    //iNodeCount += 1; //if prevResult used.
     iNodeCount += 1; //if intervalVelocity used.
     iNodeCount += 1; //chordNoteIdx used.
 
@@ -37,7 +37,11 @@ class Bird {
       this.brain.mutate(mutate);
     }
     else {
-        this.brain = new NeuralNetwork(iNodeCount,iNodeCount *2,oNodeCount);
+        this.brain = new NeuralNetwork(
+          iNodeCount,
+          Math.floor(iNodeCount *1.5),
+          oNodeCount
+        );
         this.brain.setLearningRate(lr || 0.1);
     }
 
@@ -140,6 +144,10 @@ class Bird {
     return result;
   }
 
+  normalize(val, min, max) { 
+    return (val - min) / (max - min); 
+  }  
+
   pick(chordItem,chordNoteIdx) {
     ///console.log('PICK! chordItem',chordItem,'meta',meta);
       // Now create the inputs to the neural network
@@ -177,10 +185,12 @@ class Bird {
     inputs = inputs.concat(cNotP);
     inputs = inputs.concat(currentChordBitmap);
     inputs = inputs.concat(cNotN);
-    inputs.push(this.prevResult);
-    inputs.push(this.intervalVelocity);
-    inputs.push(chordNoteIdx);
+    //inputs.push(this.prevResult);
+    inputs.push(this.normalize(this.intervalVelocity,-100,100));
+    inputs.push(this.normalize(chordNoteIdx,0,3));
     ///console.table([inputs]);
+
+    //console.log('vel',this.intervalVelocity);
 
     /****
     // x position of closest pipe
