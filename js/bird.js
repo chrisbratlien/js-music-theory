@@ -11,10 +11,13 @@ function mutate(x) {
   }
 }
 
+
+
 class Bird {
+  static guru = BSD.Widgets.TonalityGuru({});
   constructor(brain,range,lr){
 
-    this.guru = BSD.Widgets.TonalityGuru({});
+    this.guru = Bird.guru;
 
 
     this.history = {

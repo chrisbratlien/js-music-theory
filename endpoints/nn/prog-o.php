@@ -1817,7 +1817,7 @@ campfire.subscribe('do-it',function(prog){
   }
 
   var takeABreak;
-  times(100)(function(n) {
+  times(10)(function(n) {
     if (takeABreak) { return false; }
     console.log('Generation',n);
     cycleRange.forEach(function(cycleIdx){
@@ -1967,51 +1967,7 @@ campfire.subscribe('do-it',function(prog){
       var progress = i; //step
       var loopsPerTotal = 1;
 
-
-      if (BSD.idealFret) {
-        idealFret = BSD.idealFret;
-      }
-      else {
-        //TODO: really undestand scaling trig unit radius circle and scaling better.
-        /**
-        idealFret = Math.round(scale * (Math.cos ((2 * Math.PI) / tot * progress * loopsPerTotal ) + 1) / 2);
-        **/
-        var start = 7; //gets blown away..
-        if (BSD.options.fretRange) {
-          start = Math.floor(BSD.options.fretRange.average());
-        }
-
-
-        /////campfire.publish('test-periodic',{ total: BSD.progCycles, scale: start, shift: start });
-        
-        ////return "ROOOOOOO";;;;
-
-        ////idealFret = scaleThenShift(cycleIdx,BSD.progCycles,start,start,Math.cos);
-        //////console.log('periodic idealFret',idealFret,'cycle',cycleIdx);
-
-
-
-        //var offset = start;
-        /****
-
-        var width = BSD.options.fretRange[1] - BSD.options.fretRange[0];
-        var total = BSD.progCycles;
-        var offset = start;
-        var centerShift = 0;
-        var i = cycleIdx
-        ///for (let i = 0; i < total; i += 1) { console.log(  offset + (Math.cos(  i/total * 2 * Math.PI) * (width/2) + centerShift)  ); }
-
-        ***/
-        var width = BSD.options.fretRange[1] - BSD.options.fretRange[0];
-        var total = BSD.progCycles;
-        var centerShift = 0;
-        var offset = start;
-        idealFret = offset + (Math.cos(cycleIdx/total * 2 * Math.PI) * (width/2) + centerShift);
-
-
-      }
-
-
+      idealFret = BSD.idealFret;
       ///console.log('i/idealFret',i,idealFret);
 
       if (lastFrets.length >0) {
@@ -2037,12 +1993,13 @@ campfire.subscribe('do-it',function(prog){
 
       //nextGeneration();
       var guessMIDIValue = bestBird.pick(chordItem,chordNoteIdx);
-      candidates = BSD.guitarData.select(function(o) {
+      result = BSD.guitarData.detect(function(o) {
         return o.noteValue === guessMIDIValue;
       });
 
 
-      if (candidates.length == 0) {
+
+      if (!result && candidates.length == 0) {
           errors += 1;
           throw "what happened?";
           return false;
@@ -2054,42 +2011,15 @@ campfire.subscribe('do-it',function(prog){
       meta.maxDiff = meta.defaults.maxDiff      
 
 
-      if (chordNoteIdx == 0) { //first note in new chord change... try to get nearest pitch to last note played.
-
-    
-        var sorted = candidates.sort(BSD.sorter(function(o) {
-          return distScore(o.chromaticValue,lastAbstractValue);
-        }));
-
-        console.log('remaining choices',sorted.map(function(o){ return Note(o.chromaticValue).name(); }).join(','));
-
-
-        var sortedScores = sorted.map(function(o){ 
-          return [Note(o.chromaticValue).name(),distScore(o.chromaticValue,lastAbstractValue)]; 
-        });
-        console.log('sorted Scores',sortedScores);
-
-        result = sorted[0];
-        console.log('*FN* i',i,
-          myChord.fullAbbrev(),
-          'chose',Note(result.noteValue).name(),
-          'lastNote',lastNote.name(),
-          'distScore()',distScore(result.chromaticValue,lastAbstractValue),
-          'result.chromaticValue',result.chromaticValue,
-          'lastAbstractValue',lastAbstractValue
-        );
-      }
-      else {
-        result = candidates.atRandom();
-        console.log('i',i,
-          myChord.fullAbbrev(),
-          'chose',Note(result.noteValue).name(),
-          'lastNote',lastNote.name(),
-          'distScore()',distScore(result.chromaticValue,lastAbstractValue),
-          'result.chromaticValue',result.chromaticValue,
-          'lastAbstractValue',lastAbstractValue
-        );
-      }
+      /////result = candidates.atRandom();
+      console.log('i',i,
+        myChord.fullAbbrev(),
+        'chose',Note(result.noteValue).name(),
+        'lastNote',lastNote.name(),
+        'distScore()',distScore(result.chromaticValue,lastAbstractValue),
+        'result.chromaticValue',result.chromaticValue,
+        'lastAbstractValue',lastAbstractValue
+      );
 
       result = JSON.parse(JSON.stringify(result));
       result.barIdx = barIdx;
@@ -2106,12 +2036,7 @@ campfire.subscribe('do-it',function(prog){
       result.idealFret = idealFret;
       result.avgFret = avgFret;
       ///result.idx = i;
-      
-
-
       console.log('result',result);
-
-
       if (!result) {
         errors += 1;
       }

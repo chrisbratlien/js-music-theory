@@ -104,16 +104,18 @@ function nextGeneration() {
   activeBirds = generate(activeBirds);
 
 
+var limitedRange = [44,81];
 
   while(activeBirds.length < TOTAL_BIRDS) {
     //activeBirds.push(new Bird(null,BSD.audioPlayer.spec.range));
     //activeBirds.push(activeBirds.atRandom().copy());
     if (activeBirds.length == 0) {
       console.log('all gone, rebuilding');
-      activeBirds.push(new Bird(null,BSD.audioPlayer.spec.range,0.12));
+      activeBirds.push(new Bird(null,limitedRange,0.12));
     }
     else {
-      activeBirds.push(activeBirds.atRandom().copy());
+      ///activeBirds.push(activeBirds.atRandom().copy());
+      activeBirds.push(bestBird.copy());
       //activeBirds.push((bestBirdEver || bestBird || getBestBird()).copy());
     }
   }
