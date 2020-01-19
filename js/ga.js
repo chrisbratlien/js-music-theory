@@ -56,8 +56,12 @@ function histogram(a) {
 }
 
 
-function scores() {
+function allBirdsScores() {
   var scores = allBirds.map(o => o.getScore());
+  return scores;
+}
+function activeBirdsScores() {
+  var scores = activeBirds.map(o => o.getScore());
   return scores;
 }
 
@@ -103,8 +107,6 @@ function nextGeneration() {
   // Generate a new set of birds
   activeBirds = generate(activeBirds);
 
-
-var limitedRange = [44,81];
 
   while(activeBirds.length < TOTAL_BIRDS) {
     //activeBirds.push(new Bird(null,BSD.audioPlayer.spec.range));

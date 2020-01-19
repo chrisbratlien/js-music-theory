@@ -109,6 +109,7 @@ BSD.Widgets.TonalityGuru = function(spec) {
 
 
     result = solutions.atRandom();
+    console.log('tonality guru picked:',result);
     return result;
 
     return "FAIL";

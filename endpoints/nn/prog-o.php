@@ -212,7 +212,7 @@ add_action('wp_head',function(){
     width: 90%;
   }
   .form-progression .btn-start {
-    width: 8%;
+    /** width: 8%; **/
   }
 
   .song-cycle-position {
@@ -440,6 +440,8 @@ add_action('wp_footer',function(){
     <script src="<?php bloginfo('url'); ?>/js/math/vector.js"></script>    
     <script src="<?php bloginfo('url'); ?>/js/collection.js"></script>    
     <script src="<?php bloginfo('url'); ?>/js/math/statsarray.js"></script>    
+
+    <script src="<?php bloginfo('url'); ?>/lib/la.js"></script>
 
 
     <script type="text/javascript">
@@ -1016,12 +1018,13 @@ checkTiny();
 let activeBirds = [];
 // All birds for any given population
 let allBirds = [];
-let birds = [];
+
+var limitedRange = [44,71];
 
 
 let TOTAL_BIRDS = 25;
 for (var i = 0; i < TOTAL_BIRDS; i++) {
-  let bird = new Bird(null,BSD.audioPlayer.spec.range,0.12);
+  let bird = new Bird(null,limitedRange,0.12);
   allBirds.push(bird);
   activeBirds.push(bird);
 }
@@ -1710,6 +1713,12 @@ function think(chordItem,meta) {
   return result;
 }
 
+var takeABreak;
+
+function checkForBreak() {
+  return takeABreak;
+}
+
 campfire.subscribe('do-it',function(prog){
   BSD.pause = false;
   initLast();
@@ -1816,9 +1825,8 @@ campfire.subscribe('do-it',function(prog){
     cycleRange.push(i); 
   }
 
-  var takeABreak;
   times(10)(function(n) {
-    if (takeABreak) { return false; }
+    if (checkForBreak()) { return false; }
     console.log('Generation',n);
     cycleRange.forEach(function(cycleIdx){
       nextGeneration();
@@ -1856,7 +1864,9 @@ campfire.subscribe('do-it',function(prog){
       });
       //showBirds();
       if (cycleIdx == 0 && n%2 == 0) {
-        console.log('scores',scores());///,'activeBirds',activeBirds);
+        console.log('(active) scores',activeBirdsScores());///,'activeBirds',activeBirds);
+        ///console.log('In/Out',activeBirds.map(b => b.insideToOutsideRatio()));
+        console.log('In/Out',activeBirds.map(b => b.insideFraction()));
       }
     });
   });

@@ -22,10 +22,13 @@ class Bird {
 
     this.history = {
       intervalVelocity: new StatsArray,
-      predict: new StatsArray
+      predict: new StatsArray,
+      notesInside: 0,
+      notesOutside: 0
     };
+
     this.range = range;
-    this.prevResult = -1;
+    this.prevResult = false;
     this.intervalVelocity = 0;
     var iNodeCount = 36; //chromatic notes for prev, cur, next chordItems
     //iNodeCount += 1; //if prevResult used.
@@ -66,13 +69,24 @@ class Bird {
 
   judge(result,chordItem) {
 
-
+    let abstractChordNotes = chordItem.chord.abstractNoteValues();
     let abstractScaleNotes = makeScale(chordItem.scaleAdvice.advice).abstractNoteValues();
     var abstractResult = result % 12;
+
+
+    if (abstractChordNotes.indexOf(abstractResult) < 0) { 
+      this.history.notesOutside += 1;
+      return 'must be inside chord, yet outside chord'; 
+    }
+
+    /**
     if (abstractScaleNotes.indexOf(abstractResult) == -1) {
       //console.log(abstractResult,'outside advice',abstractScaleNotes);
+      this.history.notesOutside += 1;
       return "outside advice";
     }
+    ***/
+    this.history.notesInside += 1;
 
     let x = 123;
 
@@ -91,7 +105,7 @@ class Bird {
     }
     if (this.history.intervalVelocity.length > 3 && this.intervalDistance() == 0) {
       //this.score--;
-      console.log("intervalDistance too low");
+      //console.log("intervalDistance too low");
       return "intervalDistance too low";
     }
     let sd = this.history.predict.standardDeviation();
@@ -128,12 +142,40 @@ class Bird {
     var runLength = longestRunLength(this.history.predict);
     result -= (runLength * runLength);
 
+
+
     var d = this.noteDiversity();
-    result += Math.sign(d) * (d*d);
+    result += Math.sign(d) * 0.5 * (d*d);
+
+    var iof = this.insideFraction();
+    if (iof < 0.99) {
+      return -1;
+    }
+
+    var ior = this.insideToOutsideRatio();
+    if (ior < 6) { 
+      return -1;
+    }
+
+    result += (ior);
+
 
     return result;
   }
 
+  insideToOutsideRatio() { //sort of
+    if (this.history.notesInside == 0) {
+      return 0;
+    }
+    if (this.history.notesOutside == 0) {
+      return this.history.notesInside;
+    }
+    var result = this.history.notesInside / this.history.notesOutside;
+    return result;
+  }
+  insideFraction() {
+    return this.history.notesInside / (this.history.notesInside + this.history.notesOutside);
+  }
 
 
   intervalDistance() {
@@ -215,7 +257,7 @@ class Bird {
     });
 
     var result = this.range[0] + actionIndex;
-    this.intervalVelocity = result - this.prevResult;
+    this.intervalVelocity = this.prevResult ? (result - this.prevResult) : 0;
     this.prevResult = result;
     this.judge(result,chordItem);
     this.history.predict.push(result);
