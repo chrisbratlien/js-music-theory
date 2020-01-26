@@ -103,15 +103,15 @@
             o.color = BSD.colorFromHex('#ffffff');
             if (currentChordBitmap[o.chromaticValue]) {
               o.selected = true;
-              o.color = BSD.colorFromHex('#bbbbbb');
+              o.color = BSD.colorFromHex('#008833');
             }
             if (cNotN[o.chromaticValue]) {
               o.selected = true; //already is, but anyway
-              o.color = BSD.colorFromHex('#009944');
+              o.color = BSD.colorFromHex('#00aa55');
             }
             if (nNotC[o.chromaticValue]) {
               o.isUpcoming = true; //needs to be explicitly set here..
-              o.color = BSD.colorFromHex('#ff9900');
+              o.color = BSD.colorFromHex('#ffbb00');
             }
             return o;
           });

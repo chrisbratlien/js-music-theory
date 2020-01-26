@@ -346,6 +346,7 @@ get_header(); ?>
             <option value="432">432</option>
             <option value="543">543</option>
             <option value="654">654</option>
+            <option value="643">643</option>
             <option value="531">531</option>
             <option value="21">21</option>
           </optgroup>
@@ -2004,7 +2005,15 @@ campfire.subscribe('tick',function(cursor){
 
 campfire.subscribe('tick',function(cursor){
   if (cursor.chordNoteIdx == 0) {
-    bassist.playNote(cursor.chord.rootNote.plus(-12),BSD.durations.bass);
+    var beatOneNote = [
+      cursor.chord.rootNote,
+      cursor.chord.myThird(),
+      cursor.chord.mySeventh()
+    ].atRandom();
+    bassist.playNote(
+      beatOneNote.plus(-12),
+      BSD.durations.bass
+    );
   }
   if (cursor.totQuarterNoteBeats == 4 && BSD.noteResolution == 4 && cursor.chordNoteIdx == 2) { //3rd beat in [0,1,2,3]
     bassist.playNote(cursor.chord.myFifth().plus(-12),BSD.durations.bass);
