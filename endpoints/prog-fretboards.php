@@ -441,6 +441,10 @@ add_action('wp_footer',function(){
 ?>
     <script src="<?php bloginfo('url'); ?>/lib/Snap.svg/dist/snap.svg.js"></script>    
     
+    <script src="<?php bloginfo('url'); ?>/lib/CodingMath/utils.js"></script>
+    <script src="<?php bloginfo('url'); ?>/lib/la.js"></script>
+
+
     <script src="<?php bloginfo('url'); ?>/js/draggy.js"></script>
     <script src="<?php bloginfo('url'); ?>/js/sticky-note.js"></script>
     <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.colorpicker.js"></script>
@@ -2009,7 +2013,8 @@ campfire.subscribe('tick',function(cursor){
       cursor.chord.rootNote,
       cursor.chord.myThird(),
       cursor.chord.mySeventh()
-    ].atRandom();
+    ].filter(o => o)
+      .atRandom();
     bassist.playNote(
       beatOneNote.plus(-12),
       BSD.durations.bass
@@ -2265,7 +2270,123 @@ function onMIDIFailure(error) {
 campfire.publish('bootup-hi-hat');
 
 
+function getRandomInt(max) {
+  return Math.floor(Math.random() * Math.floor(max));
+}
+function getRandomRGBA() {
+  var rgb = [192,192,192].map(max => getRandomInt(max) + 63);
+  var a = Math.random() * (1 - 0.9) + 0.9;
+  a = Math.round(a*100) / 100;
+  return [...rgb,a];  
+}
 
+function getRandomColor() {
+  var vRGBA = getRandomRGBA();
+  var result = `rgba(${vRGBA.join(',')})`;
+  ///console.log(result);
+  return result;
+}
+
+let firstStringFrets, fps,fretStarts,fretWidths;
+
+BSD.Widgets.SVGFretboard = function(spec) {
+
+  var self = BSD.PubSub({});
+
+
+  let fretX = 0;
+  var svg = jQuery(
+      document.createElementNS("http://www.w3.org/2000/svg", "svg")
+  )
+  .addClass("baz")
+  .append(
+    DOM.rect()//bg
+      .attr({
+        width: '100%',
+        height: '100%',
+        fill: '#bbb'
+      }),
+    /**
+    DOM.text('Blahhhhhh')
+      .attr({
+        x: 50,
+        y: 50
+      }),
+    **/
+    DOM.g().append(
+      BSD.guitarData.map( fret => {
+        //fretX = vlerp([+fretX],[100],100/22/100);
+        var totW = 100;
+        var h = (100 / 6);
+        let fretXCoeff = Math.pow(1 + 100/fps/100,fret.fret+1) - 1;
+        let fretX = fretXCoeff * totW;
+        //console.log('fretX',fretX);
+        return DOM.rect()
+          .attr({
+            class: `string-${fret.string} fret-${fret.fret}`,
+            fill: getRandomColor(),
+            stroke: 'black',
+            strokeWeight: 1,
+            x: fretStarts[fret.fret] + '%',
+            y: (fret.string-1) * h + '%',
+            width: fretWidths[fret.fret] + '%',
+            height: h + '%'
+          })
+      })
+    )
+    .attr({ 
+      class: 'base-board',
+      width: '100%'
+    })
+  ).attr({ 
+      //baseProfile: 'full',
+      class: 'baz',
+      width: "300", 
+      height: "200",
+      //xmlns: "http://www.w3.org/2000/svg" 
+  });
+
+  self.ui = function() {
+    return svg;
+  }
+  ///self.on('wake-up', () => console.log('WOKE!'))
+
+  return self;
+};
+
+
+
+  setTimeout(function(){
+    firstStringFrets = BSD.guitarData.filter(o => o.string == 1);
+    fps = firstStringFrets.length;
+
+    fretStarts = [];
+    firstStringFrets.forEach(fret => {
+      let last = fretStarts.length ? fretStarts[fretStarts.length-1] : 0;
+      fretStarts.push(vlerp([last],[100],100/fps/100)[0]);
+    });
+    fretWidths = fretStarts.map((s,i) => {
+      var result =  i ? s - fretStarts[i-1] : s;
+      return result;
+    });
+    fretStarts.unshift(0);
+    console.log(
+      'fretWidths',fretWidths,
+      'fretStarts',fretStarts
+    );
+
+    var fred = BSD.Widgets.SVGFretboard({
+        foo: 'bar'
+    })
+      .on('wake-up',() => console.log('WOKE!!'))
+
+    console.log(fred,'fred?');
+
+    svgWrap.append(
+      fred.ui()
+    );
+    console.log(fred);
+  },1000);
       
     </script>
 <?php

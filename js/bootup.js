@@ -204,6 +204,13 @@ BSD.hzTable[x] = midi2Hertz(x);
 }
 
 
+let fretsForChordNameAndStringSet = (chordName,stringset) => BSD.guitarData
+    .filter(fret => stringset.includes(fret.string) && 
+      makeChord(chordName)
+        .abstractNoteValues()
+        .includes( fret.noteValue % 12)
+    );
+
 
 function loadImpulseResponse(url, convolver) {
     // Load impulse response asynchronously
