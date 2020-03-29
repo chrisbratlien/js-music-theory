@@ -26,6 +26,7 @@ add_action('wp_head',function(){
 
   .venue {
     float: left;
+    min-width: 70%;
   }
 
   .venue-column {
@@ -266,6 +267,12 @@ add_action('wp_head',function(){
 }
 
 
+.svg-wrap {
+  min-width: 70%;
+  margin: 0 auto;
+  width: 70%;
+}
+
 </style>
 
 <?php
@@ -412,6 +419,10 @@ get_header(); ?>
   <br />
 </div>
 
+
+<div class="svg-wrap">
+</div>
+
 <div class="venue">
   <h3 class="song-name"></h3>
   <h5 class="stringset-name"></h5>
@@ -427,7 +438,7 @@ get_header(); ?>
     <ul class="song-form-position noprint">
     </ul>
   </div>
-  <div class="stage svg-wrap noprint"></div>
+  <div class="stage noprint"></div>
 </div><!-- venue row -->
 <div class="venue-footer noprint clear-both">
 </div>
@@ -1393,13 +1404,14 @@ function criteria(o,env) {
 var guru = BSD.Widgets.TonalityGuru({});
 
 var svgWrap = jQuery('.svg-wrap');
+/**
 BSD.importHTML(BSD.baseURL + '/images/C_Major_Scale_on_fretboard.svg',function(err,data){
   if (err) { return console.log(err); }
   svgWrap.append(data);
   //console.log('data?',data);
   svgBoard = Snap('.svg-wrap svg');
 });
-
+***/
 campfire.subscribe('do-it',function(prog){
   BSD.pause = false;
   initLast();
@@ -2287,24 +2299,28 @@ function getRandomColor() {
   return result;
 }
 
-let firstStringFrets, fps,fretStarts,fretWidths;
+let firstStringFrets, fps,fretStarts,fretWidths,fretHeights;
+
+fretHeights = 100/6;
 
 BSD.Widgets.SVGFretboard = function(spec) {
 
   var self = BSD.PubSub({});
-
-
+  let rects = [];
+  var gFrets = DOM.g();
+  var gFretted = DOM.g().attr({ class: 'fretted' });
   let fretX = 0;
   var svg = jQuery(
       document.createElementNS("http://www.w3.org/2000/svg", "svg")
   )
-  .addClass("baz")
+  .addClass("baz svg-board")
   .append(
     DOM.rect()//bg
       .attr({
+        class: 'bg',
         width: '100%',
         height: '100%',
-        fill: '#bbb'
+        fill: '#fee'
       }),
     /**
     DOM.text('Blahhhhhh')
@@ -2313,38 +2329,70 @@ BSD.Widgets.SVGFretboard = function(spec) {
         y: 50
       }),
     **/
-    DOM.g().append(
+    gFrets.append(
       BSD.guitarData.map( fret => {
         //fretX = vlerp([+fretX],[100],100/22/100);
         var totW = 100;
         var h = (100 / 6);
         let fretXCoeff = Math.pow(1 + 100/fps/100,fret.fret+1) - 1;
+        //fretXCoeff *= 1.56;
         let fretX = fretXCoeff * totW;
         //console.log('fretX',fretX);
-        return DOM.rect()
+        let rect = DOM.rect()
           .attr({
             class: `string-${fret.string} fret-${fret.fret}`,
-            fill: getRandomColor(),
+            fill: 'rgba(0,0,0,0.1)',//getRandomColor(),
             stroke: 'black',
-            strokeWeight: 1,
+            'stroke-width': 0.5,
+            'stroke-opacity': 0.5,
+            'stroke-fill': '#777',
             x: fretStarts[fret.fret] + '%',
-            y: (fret.string-1) * h + '%',
+            y: (fret.string-1) * fretHeights + '%',
             width: fretWidths[fret.fret] + '%',
-            height: h + '%'
-          })
+            height: fretHeights + '%'
+          });
+        rects.push(rect);
+        return rect;
       })
     )
     .attr({ 
       class: 'base-board',
       width: '100%'
-    })
+    }),
+    gFretted,
   ).attr({ 
       //baseProfile: 'full',
       class: 'baz',
-      width: "300", 
-      height: "200",
+      width: "100%", 
+      height: "80",
       //xmlns: "http://www.w3.org/2000/svg" 
   });
+
+  self.testCircle = function(){
+    gFretted.append(DOM.circle()
+        .attr({
+          cx: 25,
+          cy: 25,
+          r: '1.5%'
+        }));
+  };
+  self.plotFret = function(fret){
+    var x = fretStarts[fret.fret] + fretWidths[fret.fret]/2;
+    var radius = utils.map(fret.fret,0,fps,1.5,0.75);
+    gFretted.append(DOM.circle()
+        .attr({
+          cx:  x + '%',
+          cy: (fret.string-1) * fretHeights + fretHeights/2 + '%',
+          fill: 'rgba(0,0,0,0.1)',
+          WASr: '1.5%',
+          r: radius + '%',
+          'stroke-width': 0.5,
+          'stroke': '#f77'
+        }));
+  };
+  self.clearFretted = function() {
+    gFretted.empty();
+  }
 
   self.ui = function() {
     return svg;
@@ -2355,6 +2403,7 @@ BSD.Widgets.SVGFretboard = function(spec) {
 };
 
 
+var fred;
 
   setTimeout(function(){
     firstStringFrets = BSD.guitarData.filter(o => o.string == 1);
@@ -2365,6 +2414,7 @@ BSD.Widgets.SVGFretboard = function(spec) {
       let last = fretStarts.length ? fretStarts[fretStarts.length-1] : 0;
       fretStarts.push(vlerp([last],[100],100/fps/100)[0]);
     });
+    fretStarts = fretStarts.map(o => o * 1.56);
     fretWidths = fretStarts.map((s,i) => {
       var result =  i ? s - fretStarts[i-1] : s;
       return result;
@@ -2375,7 +2425,7 @@ BSD.Widgets.SVGFretboard = function(spec) {
       'fretStarts',fretStarts
     );
 
-    var fred = BSD.Widgets.SVGFretboard({
+    fred = BSD.Widgets.SVGFretboard({
         foo: 'bar'
     })
       .on('wake-up',() => console.log('WOKE!!'))
