@@ -213,7 +213,7 @@ let fretsForChordNameAndStringSet = (chordName,stringset) => BSD.guitarData
 
 let getFrets = (spec) => BSD.guitarData
     .filter(fret => {
-      let chord = typeof spec.chord == 'string' ? makeChord(spec.chord) : chord;
+      let chord = typeof spec.chord == 'string' ? makeChord(spec.chord) : spec.chord;
       return spec.strings.includes(fret.string) && 
       fret.fret >= Math.min(...spec.fretRange) &&
       fret.fret <= Math.max(...spec.fretRange) &&
@@ -371,4 +371,16 @@ var nums = [1,2,3,4,5,6,7,8,9];
 //nums.select(orTests(isOdd,isEven))  // => [1, 2, 3, 4, 5, 6, 7, 8, 9]
 //nums.select(andTests(isOdd,isEven)) // => []
 //nums.select(andTests(isOdd,isGT5))  // [7,9]
+
+
+
+spinner = function(ary,fn,timeout) { 
+  var cursor = 0; 
+  var handle = setInterval(() => { 
+    cursor += 1; 
+    cursor %= ary.length; 
+    fn(ary[cursor]) 
+  },timeout); 
+  return handle;  
+}
 

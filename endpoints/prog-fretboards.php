@@ -331,33 +331,6 @@ get_header(); ?>
           </div>
         </div>
         
-        <label>String Set</label>
-
-        <select class="stringset">
-          <optgroup label="All">
-            <option value="654321">654321</option>
-          </optgroup>
-          <optgroup label="Drop 2">
-            <option value="4321">4321</option>
-            <option value="5432">5432</option>
-            <option value="6543">6543</option>
-          </optgroup>
-          <optgroup label="Drop 3">
-            <option value="6432">6432</option>
-            <option value="5321">5321</option>            
-          </optgroup>
-          <optgroup label="Other">
-            <option value="64321">64321</option>
-            <option value="54321">54321</option>
-            <option value="321">321</option>
-            <option value="432">432</option>
-            <option value="543">543</option>
-            <option value="654">654</option>
-            <option value="643">643</option>
-            <option value="531">531</option>
-            <option value="21">21</option>
-          </optgroup>
-        </select>
 
   <div class="clear-both">&nbsp;</div>
 
@@ -414,6 +387,33 @@ get_header(); ?>
       <div class="slider fret-range-input"></div>
       <div style="clear: both;">&nbsp;</div>
   </div>
+        <label>String Set</label>
+
+        <select class="stringset">
+          <optgroup label="All">
+            <option value="654321">654321</option>
+          </optgroup>
+          <optgroup label="Drop 2">
+            <option value="4321">4321</option>
+            <option value="5432">5432</option>
+            <option value="6543">6543</option>
+          </optgroup>
+          <optgroup label="Drop 3">
+            <option value="6432">6432</option>
+            <option value="5321">5321</option>            
+          </optgroup>
+          <optgroup label="Other">
+            <option value="64321">64321</option>
+            <option value="54321">54321</option>
+            <option value="321">321</option>
+            <option value="432">432</option>
+            <option value="543">543</option>
+            <option value="654">654</option>
+            <option value="643">643</option>
+            <option value="531">531</option>
+            <option value="21">21</option>
+          </optgroup>
+        </select>
 
 
   <br />
@@ -463,6 +463,7 @@ add_action('wp_footer',function(){
     <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.simpleplayer.js"></script>
     <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.tonalityguru.js"></script>    
     <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.fretboard.js"></script>    
+    <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.svgfretboard.js"></script>    
     <script type="text/javascript">
 
 
@@ -979,7 +980,14 @@ checkTiny();
 
 
   campfire.subscribe('play-chord',function(o) {
-    var filtered = o.chord.spec.intervals.select(function(n){ return n >0 && n !== 7; }); //no root, no 5
+    var filtered = o.chord.spec.intervals
+      .select(function(n){ 
+        return n > 0 && n !== 7; 
+      }) //no root, no 5
+      .map(function(n){
+        //if (n == 10) { return n - 12; }
+        return n;
+      })
     var rootless = Chord({ rootNote: o.chord.rootNote, intervals: filtered });
     BSD.audioPlayer.playChord(rootless,o.duration);    
   });
@@ -2017,6 +2025,23 @@ campfire.subscribe('tick',function(cursor){
     extraBoard.publish('feature-fret',cursor);
     predictBoard.publish('feature-fret',cursor);
   }
+
+  fred.clearFretted();
+  getFrets({ 
+    chord: cursor.chord, 
+    fretRange: [0,24], 
+    strings: BSD.options.stringSet.split('').map(o => +o)
+  }).forEach(f => {
+
+    let opts = {
+      stroke: 'white',
+      fill: 'blue'
+    }
+    fred.plotFret(f,opts)
+
+  });
+
+
 });
 
 campfire.subscribe('tick',function(cursor){
@@ -2303,104 +2328,6 @@ let firstStringFrets, fps,fretStarts,fretWidths,fretHeights;
 
 fretHeights = 100/6;
 
-BSD.Widgets.SVGFretboard = function(spec) {
-
-  var self = BSD.PubSub({});
-  let rects = [];
-  var gFrets = DOM.g();
-  var gFretted = DOM.g().attr({ class: 'fretted' });
-  let fretX = 0;
-  var svg = jQuery(
-      document.createElementNS("http://www.w3.org/2000/svg", "svg")
-  )
-  .addClass("baz svg-board")
-  .append(
-    DOM.rect()//bg
-      .attr({
-        class: 'bg',
-        width: '100%',
-        height: '100%',
-        fill: '#fee'
-      }),
-    /**
-    DOM.text('Blahhhhhh')
-      .attr({
-        x: 50,
-        y: 50
-      }),
-    **/
-    gFrets.append(
-      BSD.guitarData.map( fret => {
-        //fretX = vlerp([+fretX],[100],100/22/100);
-        var totW = 100;
-        var h = (100 / 6);
-        let fretXCoeff = Math.pow(1 + 100/fps/100,fret.fret+1) - 1;
-        //fretXCoeff *= 1.56;
-        let fretX = fretXCoeff * totW;
-        //console.log('fretX',fretX);
-        let rect = DOM.rect()
-          .attr({
-            class: `string-${fret.string} fret-${fret.fret}`,
-            fill: 'rgba(0,0,0,0.1)',//getRandomColor(),
-            stroke: 'black',
-            'stroke-width': 0.5,
-            'stroke-opacity': 0.5,
-            'stroke-fill': '#777',
-            x: fretStarts[fret.fret] + '%',
-            y: (fret.string-1) * fretHeights + '%',
-            width: fretWidths[fret.fret] + '%',
-            height: fretHeights + '%'
-          });
-        rects.push(rect);
-        return rect;
-      })
-    )
-    .attr({ 
-      class: 'base-board',
-      width: '100%'
-    }),
-    gFretted,
-  ).attr({ 
-      //baseProfile: 'full',
-      class: 'baz',
-      width: "100%", 
-      height: "80",
-      //xmlns: "http://www.w3.org/2000/svg" 
-  });
-
-  self.testCircle = function(){
-    gFretted.append(DOM.circle()
-        .attr({
-          cx: 25,
-          cy: 25,
-          r: '1.5%'
-        }));
-  };
-  self.plotFret = function(fret){
-    var x = fretStarts[fret.fret] + fretWidths[fret.fret]/2;
-    var radius = utils.map(fret.fret,0,fps,1.5,0.75);
-    gFretted.append(DOM.circle()
-        .attr({
-          cx:  x + '%',
-          cy: (fret.string-1) * fretHeights + fretHeights/2 + '%',
-          fill: 'rgba(0,0,0,0.1)',
-          WASr: '1.5%',
-          r: radius + '%',
-          'stroke-width': 0.5,
-          'stroke': '#f77'
-        }));
-  };
-  self.clearFretted = function() {
-    gFretted.empty();
-  }
-
-  self.ui = function() {
-    return svg;
-  }
-  ///self.on('wake-up', () => console.log('WOKE!'))
-
-  return self;
-};
 
 
 var fred;
@@ -2437,7 +2364,19 @@ var fred;
     );
     console.log(fred);
   },1000);
-      
+      //
+      let chords = ['D-7','G7','Cmajor7'];
+      h = spinner(chords,chordName => { 
+        fred.clearFretted(); 
+        getFrets({ 
+          chord: chordName, 
+          strings: BSD.options.stringSet.split('').map(o => +o), 
+          fretRange: [3,9]
+        }).forEach(fret => fred.plotFret(fret)) 
+      }, 
+      5500);
+
+
     </script>
 <?php
 });
