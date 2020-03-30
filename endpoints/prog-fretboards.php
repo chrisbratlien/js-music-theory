@@ -2037,7 +2037,7 @@ campfire.subscribe('tick',function(cursor){
       stroke: 'white',
       fill: 'blue'
     }
-    fred.plotFret(f,opts)
+    fred.plotFret(f,BSD.options.defaultSVGCircleAttrs)
 
   });
 
@@ -2363,16 +2363,17 @@ var fred;
       fred.ui()
     );
     console.log(fred);
+    fred.plotInlays();
   },1000);
       //
       let chords = ['D-7','G7','Cmajor7'];
-      h = spinner(chords,chordName => { 
+      let wheely = spinner(chords,chordName => { 
         fred.clearFretted(); 
         getFrets({ 
           chord: chordName, 
           strings: BSD.options.stringSet.split('').map(o => +o), 
-          fretRange: [3,9]
-        }).forEach(fret => fred.plotFret(fret)) 
+          fretRange: BSD.options.fretRange,
+        }).forEach(fret => fred.plotFret(fret,BSD.options.defaultSVGCircleAttrs)) 
       }, 
       5500);
 

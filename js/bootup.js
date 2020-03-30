@@ -374,13 +374,21 @@ var nums = [1,2,3,4,5,6,7,8,9];
 
 
 
-spinner = function(ary,fn,timeout) { 
+let spinner = function(ary,fn,timeout) { 
   var cursor = 0; 
-  var handle = setInterval(() => { 
+  let repeater = () => { 
     cursor += 1; 
     cursor %= ary.length; 
     fn(ary[cursor]) 
-  },timeout); 
-  return handle;  
-}
+  };
+  var handle;
+  return {
+    start: () => {
+      handle = setInterval(repeater,timeout);
+    },
+    stop: () => {
+      clearInterval(handle);
+    }
+  }
+};
 

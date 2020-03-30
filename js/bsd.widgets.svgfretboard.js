@@ -5,6 +5,7 @@ BSD.Widgets.SVGFretboard = function(spec) {
   let rects = [];
   var gFrets = DOM.g();
   var gFretted = DOM.g().attr({ class: 'fretted' });
+  var gInlays = DOM.g().attr({ class: 'inlays' });
   let fretX = 0;
   var svg = jQuery(
       document.createElementNS("http://www.w3.org/2000/svg", "svg")
@@ -70,6 +71,7 @@ BSD.Widgets.SVGFretboard = function(spec) {
       width: '100%'
     }),
     gFretted,
+    gInlays,
   ).attr({ 
       //baseProfile: 'full',
       class: 'baz',
@@ -86,6 +88,23 @@ BSD.Widgets.SVGFretboard = function(spec) {
           r: '1.5%'
         }));
   };
+
+  self.plotInlays = function() {
+    [3,5,7,9,12,15,17,19,21].forEach(function(fret){
+      gInlays.append(DOM.rect()
+        .attr({
+          fill: 'rgba(0,0,0,0.1)',
+          stroke: 'none',
+          x: fretStarts[fret] + fretWidths[fret]/6 + '%',
+          y: '10%',
+          //r: '1.5%',
+          width: fretWidths[fret] * 0.6 + '%',
+          height: 80 + '%'
+        }));      
+
+    });
+  }
+
   self.plotFret = function(fret,opts){
     var x = fretStarts[fret.fret] + fretWidths[fret.fret]/2;
     var radius = utils.map(fret.fret,0,fps,1.5,0.75);
@@ -109,6 +128,7 @@ BSD.Widgets.SVGFretboard = function(spec) {
     gFretted.empty();
     return self;
   }
+
 
   self.ui = function() {
     return svg;
