@@ -146,9 +146,9 @@ BSD.Widgets.SVGFretboard = function(spec) {
           WASr: '1.5%',
           r: radius + '%',
           'stroke-width': 0.5,
-          'stroke': '#f77'
+          //'stroke': '#f77'
     },opts);
-    opts.class = 'fretted ' + opts.class;
+    opts.class = 'fretted ' + (opts.class || '');
 
     gFretted.append(DOM.circle()
         .attr(opts));
