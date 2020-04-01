@@ -268,9 +268,15 @@ add_action('wp_head',function(){
 
 
 .svg-wrap {
-  min-width: 70%;
+  min-width: 50%;
   margin: 0 auto;
-  width: 70%;
+  width: 50%;
+}
+.svg-wrap .bg {
+  fill: blanchedalmond;
+}
+.svg-wrap .fretted {
+  fill: cornsilk;
 }
 
 </style>
@@ -443,8 +449,8 @@ get_header(); ?>
 <div class="venue-footer noprint clear-both">
 </div>
 <h3 class="noprint">Songs</h3>
-<ul class="song-list-wrap noprint">
-</ul>
+<div class="song-list-wrap noprint">
+</div>
 
 <?php
 
@@ -454,8 +460,7 @@ add_action('wp_footer',function(){
     
     <script src="<?php bloginfo('url'); ?>/lib/CodingMath/utils.js"></script>
     <script src="<?php bloginfo('url'); ?>/lib/la.js"></script>
-
-
+    <script src="<?php bloginfo('url'); ?>/lib/async.min.js"></script>    
     <script src="<?php bloginfo('url'); ?>/js/draggy.js"></script>
     <script src="<?php bloginfo('url'); ?>/js/sticky-note.js"></script>
     <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.colorpicker.js"></script>
@@ -503,7 +508,6 @@ BSD.durations = {
 BSD.tests = [];
 
 
-/**
 storage.getItem('progressions',function(o){
   ////BSD.progressions = JSON.parse(o);
   var them = JSON.parse(o);
@@ -512,7 +516,7 @@ storage.getItem('progressions',function(o){
   });
   campfire.publish('progressions-loaded',BSD.progressions); //needed?
 });
-***/
+
 
 
 campfire.subscribe('progressions-loaded',function(){
@@ -2034,8 +2038,8 @@ campfire.subscribe('tick',function(cursor){
   }).forEach(f => {
 
     let opts = {
-      stroke: 'white',
-      fill: 'blue'
+      //stroke: 'white',
+      //fill: 'blue'
     }
     fred.plotFret(f,BSD.options.defaultSVGCircleAttrs)
 
@@ -2363,8 +2367,10 @@ var fred;
       fred.ui()
     );
     console.log(fred);
+    fred.plotFingerboardFrets();
     fred.plotInlays();
-  },1000);
+    fred.plotStrings();
+  },2000);
       //
       let chords = ['D-7','G7','Cmajor7'];
       let wheely = spinner(chords,chordName => { 
