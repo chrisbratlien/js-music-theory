@@ -138,11 +138,15 @@ BSD.Widgets.SVGFretboard = function(spec) {
     var x = fretStarts[fret.fret] + fretWidths[fret.fret]/2;
     var radius = utils.map(fret.fret,0,fps,1.5,0.75);
 
+    var fill = opts.fill || 'rgba(0,0,0,0.1)';
+
+
+
     opts = Object.assign({
           //////class: 'fretted',
           cx:  x + '%',
           cy: (fret.string-1) * fretHeights + fretHeights/2 + '%',
-          fill: 'rgba(0,0,0,0.1)',
+          fill: fill,
           WASr: '1.5%',
           r: radius + '%',
           'stroke-width': 0.5,

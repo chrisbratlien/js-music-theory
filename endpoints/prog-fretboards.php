@@ -276,7 +276,7 @@ add_action('wp_head',function(){
   fill: blanchedalmond;
 }
 .svg-wrap .fretted {
-  fill: cornsilk;
+  /* fill: cornsilk; **/
 }
 
 </style>
@@ -2035,13 +2035,21 @@ campfire.subscribe('tick',function(cursor){
     chord: cursor.chord, 
     fretRange: [0,24], 
     strings: BSD.options.stringSet.split('').map(o => +o)
-  }).forEach(f => {
+  }).forEach(fret => {
+
+    console.log('cursor',cursor,'fret',fret);
+
+    let idx = fret.chromaticValue - cursor.chord.spec.rootNote.chromaticValue();
+    if (idx < 0) { idx += 12; }
+    let fill = '#' + colorHash[idx].toHex();
 
     let opts = {
+      fill: fill
       //stroke: 'white',
       //fill: 'blue'
     }
-    fred.plotFret(f,BSD.options.defaultSVGCircleAttrs)
+    opts = Object.assign({},BSD.options.defaultSVGCircleAttrs,opts);
+    fred.plotFret(fret,opts);
 
   });
 
