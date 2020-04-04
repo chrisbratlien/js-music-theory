@@ -2419,8 +2419,14 @@ var fred;
       }
 
       jQuery('.btn-chord').on('click',function() {
-        var chord = makeChord(fretPlotterInput.val());
-        plotHelper(chord);
+        var str = fretPlotterInput.val();
+        let chordNames = str.split(/\ +|\+|,/g)
+          .filter(o => o)
+          .map(o => o.trim());
+        chordNames.forEach(name => {
+          var chord = makeChord(name);
+          plotHelper(chord);          
+        })
       });
       jQuery('.btn-scale').on('click',function() {
         var scale = makeScale(fretPlotterInput.val());
@@ -2428,7 +2434,7 @@ var fred;
       });
       btnClear.on('click',() => { 
         fred.clearFretted();
-        fretPlotterInput.val(null);
+        //fretPlotterInput.val(null);
       });
 
     </script>
