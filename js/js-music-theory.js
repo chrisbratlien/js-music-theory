@@ -743,7 +743,24 @@ JSMT.rnwiFromNoteValues = function(noteValues) {
   return result;
 };
 
+JSMT.twelveBitMask = [
+  0x800,
+  0x400,
+  0x200,
+  0x100,
+  0x80,
+  0x40,
+  0x20,
+  0x10,
+  0x8,
+  0x4,
+  0x2,
+  0x1
+];
 
+JSMT.twelveBitHash = function(ary) {
+  return ary.reduce( (accum,val) => JSMT.twelveBitMask[val] | accum, 0);
+};
 
 var RootNoteWithIntervals = function(spec) {
 
@@ -771,6 +788,26 @@ var RootNoteWithIntervals = function(spec) {
   
   
   self.rootNote = spec.rootNote;
+
+  self.intervalHash = function() {
+    //return a number which, in binary, would represent a 12-bit string with 1s for
+    //each interval.
+    //The fact that the 0 interval (root note) will hit the 0x800 in the bitmask
+    //takes care of allocating the 12 bits because
+    //(0x800).toString(2) = "100000000000" 
+    return JSMT.twelveBitHash(spec.intervals);
+  }
+  self.intervalBitString = function() {
+    return self.intervalHash().toString(2).padStart(12,'0');
+  };
+
+  self.chromaticHash = function() {
+    return JSMT.twelveBitHash(self.chromaticNoteValues());
+  };
+  self.chromaticBitString = function() {
+    return self.chromaticHash().toString(2).padStart(12,'0');
+  };
+
 
 
   self.getAccidental = function() {
@@ -887,6 +924,8 @@ var RootNoteWithIntervals = function(spec) {
     return self.notes().map(function(note) { return note.abstractValue(); }).sort(function(a,b){return a-b});    
   };
 
+  self.chromaticNoteValues = self.abstractNoteValues;
+
 
 
 
@@ -913,7 +952,6 @@ var RootNoteWithIntervals = function(spec) {
   self.utf8FullAbbrev = function() {
     return self.rootNote.utf8Name() + JSMT.toUTF8(self.abbrev);
   };
-
   
   self.compatibleScales = function() {
     var result = [];

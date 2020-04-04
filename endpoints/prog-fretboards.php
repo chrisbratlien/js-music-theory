@@ -1234,7 +1234,7 @@ function outsideJudge(o,env) {
   
 
   if (o.fret > 13) { return 'too high'; }
-  if (BSD.activeStrings && !BSD.activeStrings.detect(function(as) { 
+  if (BSD.activeStrings && !BSD.activeStrings.find(function(as) { 
     ///console.log('as',as,'o.string',o.string);
     return as == o.string; 
   })) {
@@ -1335,12 +1335,12 @@ function initLast() {
   lastResult = false;
   BSD.sequence = [];
 
-  meta.maxNoteValue = BSD.guitarData.detect(function(o){
+  meta.maxNoteValue = BSD.guitarData.find(function(o){
     var result = o.string == 1 && o.fret == BSD.options.fretRange[1];
     return result;
   }).noteValue;
 
-  meta.minNoteValue = BSD.guitarData.detect(function(o){
+  meta.minNoteValue = BSD.guitarData.find(function(o){
     var result = o.string == 6 && o.fret == BSD.options.fretRange[0];
     return result;
   }).noteValue;
@@ -1398,20 +1398,20 @@ function criteria(o,env) {
         decision:outsideDecision,
         lastResult: lastResult
     });
-    return false; 
+    return outsideDecision;
   }
   //console.log('decision',decision);
-  var decision = judge(o,env);
+  var judgeDecision = judge(o,env);
 
-  if (decision != 'OK') { //chordNoteIdx == 0 && 
+  if (judgeDecision != 'OK') { //chordNoteIdx == 0 && 
     rejections.push({
         candidate: o,
-        decision:decision,
+        decision: judgeDecision,
         lastResult: lastResult
     });
   }
-  return  outsideDecision == 'OK' && decision == 'OK';
-}
+  return judgeDecision;
+};
 
 var guru = BSD.Widgets.TonalityGuru({});
 
@@ -1710,7 +1710,7 @@ console.log('PROG W CHANGES?',prog);
       rejections = [];
       outsideRejections = [];
       candidates = candidates.select(function(o) {
-        return criteria(o,meta);
+        return criteria(o,meta) == 'OK';
       });
 
 
@@ -1718,6 +1718,7 @@ console.log('PROG W CHANGES?',prog);
         function() { meta.maxDiff += 1;  console.log("increased meta.maxDiff to " + meta.maxDiff); },
         function() { meta.maxFretDistance += 1;  console.log("increased meta.maxFretDistance to " + meta.maxFretDistance); },
         function() { direction = nextDirection[direction]; console.log("changed direction to " + direction);   },
+        //function() { idealFret -= 1; console.log('changed idealFret to '  + idealFret) }
       ];
 
       var retries = 0;
@@ -1727,7 +1728,7 @@ console.log('PROG W CHANGES?',prog);
         var last;
         if (BSD.sequence.length > 0) {
           last = BSD.sequence[BSD.sequence.length-1];
-          console.log('last barIdx',last.barIdx,'cycleIdx',last.cycleIdx,'last',last);
+          //console.log('last barIdx',last.barIdx,'cycleIdx',last.cycleIdx,'last',last);
         }
 
         var solution = solutions.atRandom();
@@ -1738,7 +1739,7 @@ console.log('PROG W CHANGES?',prog);
         rejections = [];
         outsideRejections = [];
         candidates = BSD.guitarData.select(function(o) {
-          return criteria(o,meta);
+          return criteria(o,meta) == 'OK';
         });
         retries += 1;
       }
@@ -1894,7 +1895,7 @@ campfire.subscribe('reset-song-form-ui',function(){
 
     div.click(function(){
       BSD.clickedBar = i;
-      var event = BSD.sequence.detect(function(o) {
+      var event = BSD.sequence.find(function(o) {
         return o.barIdx == i && o.cycleIdx == BSD.currentCycleIdx;
       });
       console.log('event',event);
@@ -1913,7 +1914,7 @@ campfire.subscribe('reset-song-form-ui',function(){
 
     div.click(function(){
       BSD.clickedCycle = i;
-      var event = BSD.sequence.detect(function(o) {
+      var event = BSD.sequence.find(function(o) {
         return o.cycleIdx == i && o.barIdx == BSD.currentBarIdx;
       });
       console.log('event',event);
@@ -2359,10 +2360,12 @@ var fred;
       return result;
     });
     fretStarts.unshift(0);
+    /**
     console.log(
       'fretWidths',fretWidths,
       'fretStarts',fretStarts
     );
+    ***/
 
     fred = BSD.Widgets.SVGFretboard({
         foo: 'bar'
