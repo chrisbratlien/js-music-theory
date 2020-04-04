@@ -428,6 +428,14 @@ get_header(); ?>
 
 <div class="svg-wrap">
 </div>
+<div class="svg-controls">
+  <div class="btn-group svg-buttons">
+    <button class="btn btn-sm btn-primary btn-chord">chord</button>
+    <button class="btn btn-sm btn-primary btn-scale">scale</button>
+    <button class="btn btn-sm btn-primary btn-clear">clear</button>
+  </div>
+  <input class="form-input fret-plotter-input" type="text"></div>
+</div>
 
 <div class="venue">
   <h3 class="song-name"></h3>
@@ -2394,6 +2402,34 @@ var fred;
       }, 
       5500);
 
+      var fretPlotterInput = jQuery('.fret-plotter-input');
+      var btnClear = jQuery('.btn-clear');
+
+      function plotHelper(chordOrScale) {
+        var fr = BSD.options.fretRange;
+        var strings = BSD.options.stringSet.split('').map(o => +o);
+        var hash = chordOrScale.chromaticHash();
+        var frets = getFretsByChromaticHash(hash)
+          .filter(fret => fret.fret >= fr[0] && fret.fret <= fr[1])
+          .filter(fret => strings.contains(fret.string));
+        let opts = {
+          fill: '#' + BSD.chosenColor.toHex()
+        };
+        fred.plotFrets(frets,opts);
+      }
+
+      jQuery('.btn-chord').on('click',function() {
+        var chord = makeChord(fretPlotterInput.val());
+        plotHelper(chord);
+      });
+      jQuery('.btn-scale').on('click',function() {
+        var scale = makeScale(fretPlotterInput.val());
+        plotHelper(scale);
+      });
+      btnClear.on('click',() => { 
+        fred.clearFretted();
+        fretPlotterInput.val(null);
+      });
 
     </script>
 <?php
