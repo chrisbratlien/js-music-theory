@@ -189,6 +189,8 @@ JSMT.scaleMap = {
 
     'HM2' : { name: 'harmonic minor mode 2', intervals: [0,1,3,5,6,9,10] },
 
+    'HM4' : { name: 'harmonic minor mode 4', intervals: [0,2,3,6,7,9,10] },
+
     'HM5' : { name: 'harmonic minor mode 5', intervals: [0,1,4,5,7,8,10] },
 
 

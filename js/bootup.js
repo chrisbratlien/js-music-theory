@@ -223,6 +223,12 @@ let getFrets = (spec) => BSD.guitarData
     });
 
 
+let getFretsByChromaticHash = (selectHash) => BSD.guitarData
+  .filter(fret => {
+    let fretHash = JSMT.twelveBitMask[fret.chromaticValue];
+    return (fretHash & selectHash) == fretHash;
+  });
+
 
 function loadImpulseResponse(url, convolver) {
     // Load impulse response asynchronously

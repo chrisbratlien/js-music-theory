@@ -134,6 +134,10 @@ BSD.Widgets.SVGFretboard = function(spec) {
     });
   }
 
+  self.plotFrets = (frets,opts) => frets
+    .forEach(fret => self.plotFret(fret,opts))
+
+
   self.plotFret = function(fret,opts){
     var x = fretStarts[fret.fret] + fretWidths[fret.fret]/2;
     var radius = utils.map(fret.fret,0,fps,1.5,0.75);
