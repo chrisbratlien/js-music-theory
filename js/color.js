@@ -171,7 +171,7 @@ BSD.Color = function(spec){
     }
     return result;
   };
-  self.toHex = function() {
+  self.toHex = function(prefixHash) {
     var result = ('00' + Math.floor(self.r).toString(16)).substr(-2) + ('00' + Math.floor(self.g).toString(16)).substr(-2) + ('00' + Math.floor(self.b).toString(16)).substr(-2);
     ///console.log(result);
     return result;

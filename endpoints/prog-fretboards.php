@@ -2413,7 +2413,7 @@ var fred;
           .filter(fret => fret.fret >= fr[0] && fret.fret <= fr[1])
           .filter(fret => strings.contains(fret.string));
         let opts = {
-          fill: '#' + BSD.chosenColor.toHex()
+          fill: '#' + BSD.chosenColor.toHex() + '77'
         };
         fred.plotFrets(frets,opts);
       }
