@@ -428,7 +428,8 @@ get_header(); ?>
     <button class="btn btn-sm btn-primary btn-clear">clear</button>
     <button class="btn btn-sm btn-primary btn-color">&nbsp;color&nbsp;</button>
   </div>
-  <input class="form-input fret-plotter-input" type="text"></div>
+  <input class="form-input fret-plotter-input" type="text" />
+  <input class="svg-alpha" type="range" min="0" max="1" step="0.01" value="0.7" />
 </div>
 
 <div class="venue">
@@ -2394,8 +2395,9 @@ var fred;
           .filter(fret => fret.fret >= fr[0] && fret.fret <= fr[1])
           .filter(fret => strings.contains(fret.string));
         let opts = {
-          fill: '#' + myColor.toHex() + '77'
-        };
+      		fill: '#' + BSD.chosenColor.toHex(),
+      		'fill-opacity': BSD.svgAlpha
+    	};
         fred.plotFrets(frets,opts);
       }
 
