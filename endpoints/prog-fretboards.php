@@ -426,9 +426,7 @@ get_header(); ?>
     <button class="btn btn-sm btn-primary btn-chord">chord</button>
     <button class="btn btn-sm btn-primary btn-scale">scale</button>
     <button class="btn btn-sm btn-primary btn-clear">clear</button>
-    <button class="btn btn-sm btn-primary btn-color">
-      <i class="chosen-color">&nbsp;&nbsp;</i> Color
-    </button>
+    <button class="btn btn-sm btn-primary btn-color">&nbsp;color</button>
   </div>
   <input class="form-input fret-plotter-input" type="text"></div>
 </div>
@@ -661,6 +659,7 @@ checkTiny();
       BSD.foo = [];
 
       BSD.chosenColor = BSD.colorFromHex('#bbbbbb');
+      BSD.chosenColors = [BSD.chosenColor];
 
 
 
@@ -2384,6 +2383,9 @@ var fred;
       var btnClear = jQuery('.btn-clear');
 
       function plotHelper(chordOrScale) {
+
+        BSD.chosenColors.push(BSD.chosenColors.shift());
+
         var fr = BSD.options.fretRange;
         var strings = BSD.options.stringSet.split('').map(o => +o);
         var hash = chordOrScale.chromaticHash();
@@ -2391,7 +2393,7 @@ var fred;
           .filter(fret => fret.fret >= fr[0] && fret.fret <= fr[1])
           .filter(fret => strings.contains(fret.string));
         let opts = {
-          fill: '#' + BSD.chosenColor.toHex() + '77'
+          fill: '#' + BSD.chosenColors[0].toHex() + '77'
         };
         fred.plotFrets(frets,opts);
       }
@@ -2401,7 +2403,7 @@ var fred;
         let chordNames = str.split(/\ +|\+|,/g)
           .filter(o => o)
           .map(o => o.trim());
-        chordNames.forEach(name => {
+        chordNames.forEach( (name,i) => {          
           var chord = makeChord(name);
           plotHelper(chord);          
         })
@@ -2412,20 +2414,29 @@ var fred;
       });
       btnClear.on('click',() => { 
         fred.clearFretted();
+        btnColor.find('span')
+          .remove();
         //fretPlotterInput.val(null);
       });
 
       var btnColor =jQuery('.btn-color');
       btnColor.on('click', () => {
         let rc = lightbox('Choose Color',function(wrap){
+          BSD.chosenColors = []
+          btnColor.find('span')
+            .remove();
           wrap.append(
             App.ColorPalette()
               .on('color-chosen', color => {
                 BSD.chosenColor = color;
+                BSD.chosenColors.push(color);
                 console.log('chosen!!',color);
-                btnColor.find('i')
-                  .css('background','#' + color.toHex());
-                rc.hide();
+                console.log('all chosen',BSD.chosenColors);
+                btnColor.prepend(
+                  DOM.span('&nbsp;&nbsp;')
+                    .css('background-color','#' + color.toHex())
+                )
+                //rc.hide();
               })
               .redraw()
               .ui()
