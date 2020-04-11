@@ -2421,6 +2421,12 @@ var fred;
           .remove();
         //fretPlotterInput.val(null);
       });
+      
+      BSD.svgAlpha = 0.7
+      let svgAlphaInput = jQuery('.svg-alpha');
+      svgAlphaInput.on('change',e => {
+        BSD.svgAlpha = + e.target.value;
+      });
 
       var btnColor =jQuery('.btn-color');
       btnColor.on('click', () => {
