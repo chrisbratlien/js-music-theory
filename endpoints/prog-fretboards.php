@@ -2417,8 +2417,6 @@ var fred;
       });
       btnClear.on('click',() => { 
         fred.clearFretted();
-        btnColor.find('span')
-          .remove();
         //fretPlotterInput.val(null);
       });
       
