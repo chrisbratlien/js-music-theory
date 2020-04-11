@@ -426,7 +426,7 @@ get_header(); ?>
     <button class="btn btn-sm btn-primary btn-chord">chord</button>
     <button class="btn btn-sm btn-primary btn-scale">scale</button>
     <button class="btn btn-sm btn-primary btn-clear">clear</button>
-    <button class="btn btn-sm btn-primary btn-color">&nbsp;color</button>
+    <button class="btn btn-sm btn-primary btn-color">&nbsp;color&nbsp;</button>
   </div>
   <input class="form-input fret-plotter-input" type="text"></div>
 </div>
@@ -2384,6 +2384,7 @@ var fred;
 
       function plotHelper(chordOrScale) {
 
+        let myColor = BSD.chosenColors[0];
         BSD.chosenColors.push(BSD.chosenColors.shift());
 
         var fr = BSD.options.fretRange;
@@ -2393,7 +2394,7 @@ var fred;
           .filter(fret => fret.fret >= fr[0] && fret.fret <= fr[1])
           .filter(fret => strings.contains(fret.string));
         let opts = {
-          fill: '#' + BSD.chosenColors[0].toHex() + '77'
+          fill: '#' + myColor.toHex() + '77'
         };
         fred.plotFrets(frets,opts);
       }
@@ -2432,7 +2433,7 @@ var fred;
                 BSD.chosenColors.push(color);
                 console.log('chosen!!',color);
                 console.log('all chosen',BSD.chosenColors);
-                btnColor.prepend(
+                btnColor.append(
                   DOM.span('&nbsp;&nbsp;')
                     .css('background-color','#' + color.toHex())
                 )
