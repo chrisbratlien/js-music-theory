@@ -434,7 +434,8 @@ get_header(); ?>
     <button class="btn btn-sm btn-primary btn-scale">scale</button>
     <button class="btn btn-sm btn-primary btn-clear">clear</button>
   </div>
-  <input class="form-input fret-plotter-input" type="text"></div>
+  <input class="form-input fret-plotter-input" type="text" />
+  <input class="svg-alpha" type="range" min="0" max="1" step="0.01" value="0.7" />
 </div>
 
 <div class="venue">
@@ -2391,51 +2392,58 @@ var fred;
     fred.plotStrings();
   },2000);
       //
-      let chords = ['D-7','G7','Cmajor7'];
-      let wheely = spinner(chords,chordName => { 
-        fred.clearFretted(); 
-        getFrets({ 
-          chord: chordName, 
-          strings: BSD.options.stringSet.split('').map(o => +o), 
-          fretRange: BSD.options.fretRange,
-        }).forEach(fret => fred.plotFret(fret,BSD.options.defaultSVGCircleAttrs)) 
-      }, 
-      5500);
+  let chords = ['D-7','G7','Cmajor7'];
+  let wheely = spinner(chords,chordName => { 
+    fred.clearFretted(); 
+    getFrets({ 
+      chord: chordName, 
+      strings: BSD.options.stringSet.split('').map(o => +o), 
+      fretRange: BSD.options.fretRange,
+    }).forEach(fret => fred.plotFret(fret,BSD.options.defaultSVGCircleAttrs)) 
+  }, 
+  5500);
 
-      var fretPlotterInput = jQuery('.fret-plotter-input');
-      var btnClear = jQuery('.btn-clear');
+  var fretPlotterInput = jQuery('.fret-plotter-input');
+  var btnClear = jQuery('.btn-clear');
 
-      function plotHelper(chordOrScale) {
-        var fr = BSD.options.fretRange;
-        var strings = BSD.options.stringSet.split('').map(o => +o);
-        var hash = chordOrScale.chromaticHash();
-        var frets = getFretsByChromaticHash(hash)
-          .filter(fret => fret.fret >= fr[0] && fret.fret <= fr[1])
-          .filter(fret => strings.contains(fret.string));
-        let opts = {
-          fill: '#' + BSD.chosenColor.toHex() + '77'
-        };
-        fred.plotFrets(frets,opts);
-      }
+  function plotHelper(chordOrScale) {
+    var fr = BSD.options.fretRange;
+    var strings = BSD.options.stringSet.split('').map(o => +o);
+    var hash = chordOrScale.chromaticHash();
+    var frets = getFretsByChromaticHash(hash)
+      .filter(fret => fret.fret >= fr[0] && fret.fret <= fr[1])
+      .filter(fret => strings.contains(fret.string));
+    let opts = {
+      fill: '#' + BSD.chosenColor.toHex(),
+      'fill-opacity': BSD.svgAlpha
+    };
+    fred.plotFrets(frets,opts);
+  }
 
-      jQuery('.btn-chord').on('click',function() {
-        var str = fretPlotterInput.val();
-        let chordNames = str.split(/\ +|\+|,/g)
-          .filter(o => o)
-          .map(o => o.trim());
-        chordNames.forEach(name => {
-          var chord = makeChord(name);
-          plotHelper(chord);          
-        })
-      });
-      jQuery('.btn-scale').on('click',function() {
-        var scale = makeScale(fretPlotterInput.val());
-        plotHelper(scale);
-      });
-      btnClear.on('click',() => { 
-        fred.clearFretted();
-        //fretPlotterInput.val(null);
-      });
+  jQuery('.btn-chord').on('click',function() {
+    var str = fretPlotterInput.val();
+    let chordNames = str.split(/\ +|\+|,/g)
+      .filter(o => o)
+      .map(o => o.trim());
+    chordNames.forEach(name => {
+      var chord = makeChord(name);
+      plotHelper(chord);          
+    })
+  });
+  jQuery('.btn-scale').on('click',function() {
+    var scale = makeScale(fretPlotterInput.val());
+    plotHelper(scale);
+  });
+  btnClear.on('click',() => { 
+    fred.clearFretted();
+    //fretPlotterInput.val(null);
+  });
+
+  BSD.svgAlpha = 0.7
+  let svgAlphaInput = jQuery('.svg-alpha');
+  svgAlphaInput.on('change',e => {
+    BSD.svgAlpha = + e.target.value;
+  });
 
     </script>
 <?php
