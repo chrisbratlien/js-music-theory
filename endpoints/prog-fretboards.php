@@ -426,7 +426,7 @@ get_header(); ?>
     <button class="btn btn-sm btn-primary btn-chord">chord</button>
     <button class="btn btn-sm btn-primary btn-scale">scale</button>
     <button class="btn btn-sm btn-primary btn-clear">clear</button>
-    <button class="btn btn-sm btn-primary btn-color">&nbsp;color&nbsp;</button>
+    <button class="btn btn-sm btn-default btn-color">&nbsp;color&nbsp;</button>
   </div>
   <input class="form-input fret-plotter-input" type="text" />
   <input class="svg-alpha" type="range" min="0" max="1" step="0.01" value="0.7" />
@@ -2395,7 +2395,7 @@ var fred;
           .filter(fret => fret.fret >= fr[0] && fret.fret <= fr[1])
           .filter(fret => strings.contains(fret.string));
         let opts = {
-      		fill: '#' + BSD.chosenColor.toHex(),
+          fill: '#' + myColor.toHex(),
       		'fill-opacity': BSD.svgAlpha
     	};
         fred.plotFrets(frets,opts);
