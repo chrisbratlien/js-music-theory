@@ -304,15 +304,8 @@ get_header(); ?>
 
 <div class="controls noprint">
 
-<div class="color-pickers-wrap noprint">
-
-      <button id="more-palettes">Redraw Palettes</button>
-      <div id="pickers">   </div><!-- pickers -->
-      <div id="selected-colors">   </div>
-      <div style="clear: both;">&nbsp;</div>        
-
-</div><!-- color-pickers-wrap -->
-
+<div class="color-palette-wrap noprint">
+</div>
       <label>Beats per Measure</label>
       <select class="beats-per-measure">
         <option value="3">3</option>
@@ -433,6 +426,9 @@ get_header(); ?>
     <button class="btn btn-sm btn-primary btn-chord">chord</button>
     <button class="btn btn-sm btn-primary btn-scale">scale</button>
     <button class="btn btn-sm btn-primary btn-clear">clear</button>
+    <button class="btn btn-sm btn-primary btn-color">
+      <i class="chosen-color">&nbsp;&nbsp;</i> Color
+    </button>
   </div>
   <input class="form-input fret-plotter-input" type="text"></div>
 </div>
@@ -459,6 +455,25 @@ get_header(); ?>
 <h3 class="noprint">Songs</h3>
 <div class="song-list-wrap noprint">
 </div>
+<!-- modal lightbox -->
+<div class="modal fade" id="basicModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Basic Modal</h4>
+      </div>
+      <div class="modal-body">
+        <h3>Modal Body</h3>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+      </div>
+    </div>
+  </div>
+</div><!-- modal -->
+    
 
 <?php
 
@@ -649,55 +664,6 @@ checkTiny();
 
 
 
-
-      var pickers = jQuery('#pickers');
-      var selectedColors = jQuery('#selected-colors');
-      
-      var morePalettes = jQuery('#more-palettes');
-      
-      var palettes = [];
-      
-      var savedColors = {};
-      
-      campfire.subscribe('redraw-palettes',function(){
-        pickers.empty();
-        palettes = [];
-        palettes.push(BSD.colorFromHex('000000').upTo(BSD.colorFromHex('FFFFFF'),20));
-        palettes.push(BSD.randomPalette2(10,60));
-        palettes.push(BSD.randomPalette2(10,60));
-        palettes.push(BSD.randomPalette2(10,60));
-        palettes.push(BSD.randomPalette2(10,50));
-        palettes.push(BSD.randomPalette2(10,40));
-        palettes.push(BSD.randomPalette2(10,30));
-        palettes.push(BSD.randomPalette2(10,30));
-        palettes.push(BSD.randomPalette2(10,30));
-        palettes.push(BSD.randomPalette2(10,30));
-        palettes.push(BSD.randomPalette2(10,30));
-        palettes.push(BSD.randomPalette2(10,30));
-        palettes.push(BSD.randomPalette2(10,30));
-        palettes.push(BSD.randomPalette2(10,30));
-        palettes.push(BSD.randomPalette2(10,30));
-        palettes.push(BSD.randomPalette2(10,30));
-        palettes.each(function(pal) {
-          pal.each(function(randcolor) { 
-            var picker = BSD.ColorPicker({ color: randcolor});
-            picker.renderOn(pickers);
-            picker.subscribe('click',function(color){
-              BSD.chosenColor = color;    
-              var hex = color.toHex();
-              if (!savedColors[hex]) {
-                savedColors[hex] = true;
-                picker.renderOn(selectedColors);
-              }
-            });
-          });
-        });
-      });
-      
-      morePalettes.click(function(){
-        campfire.publish('redraw-palettes');
-      });
-      campfire.publish('redraw-palettes');
 
       var cscale = makeScale('Cmajor');
       var noteNames = cscale.noteNames();
@@ -2389,6 +2355,18 @@ var fred;
     fred.plotFingerboardFrets();
     fred.plotInlays();
     fred.plotStrings();
+
+
+    jQuery('.color-palette-wrap').append(
+      App.ColorPalette('woo')
+      .on('color-chosen',color => {
+        BSD.chosenColor = color;
+        console.log('chosen!!',color);
+      })
+      .redraw()
+      .ui()
+    );
+
   },2000);
       //
       let chords = ['D-7','G7','Cmajor7'];
@@ -2437,6 +2415,23 @@ var fred;
         //fretPlotterInput.val(null);
       });
 
+      var btnColor =jQuery('.btn-color');
+      btnColor.on('click', () => {
+        let rc = lightbox('Choose Color',function(wrap){
+          wrap.append(
+            App.ColorPalette()
+              .on('color-chosen', color => {
+                BSD.chosenColor = color;
+                console.log('chosen!!',color);
+                btnColor.find('i')
+                  .css('background','#' + color.toHex());
+                rc.hide();
+              })
+              .redraw()
+              .ui()
+          )
+        })
+      });
     </script>
 <?php
 });

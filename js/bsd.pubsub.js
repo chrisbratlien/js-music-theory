@@ -1,6 +1,6 @@
 BSD.PubSub = function(spec) {
   var self = {},
-      nickname = spec.nickname || '',
+      nickname = spec && spec.nickname || '',
       callbacks = {};
 
   self.hash = Math.random().toString(36).substr(2);

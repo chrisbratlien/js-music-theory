@@ -1,4 +1,6 @@
-if (typeof BSD == "undefined") { var BSD = {}; }
+BSD = window.BSD || {};
+
+
 
 BSD.iOS = (navigator.userAgent.match(/(iPod|iPhone|iPad)/));
 
@@ -398,3 +400,28 @@ let spinner = function(ary,fn,timeout) {
   }
 };
 
+
+
+function lightbox(title,builder,closeCallback) {
+  var mRoot = jQuery('.modal');
+  var mBody = jQuery('.modal-body');
+  var mTitle = jQuery('.modal-title');
+  var mClose = jQuery('.modal-dialog .close');
+  mClose.on('close',null);
+
+  mTitle.html(title);
+  mBody.empty();
+
+  mRoot.modal('show');  //add to DOM before calling the builder (leaflet requires this)
+  builder(mBody);
+  if (closeCallback) {
+    mClose.on('click',closeCallback);
+  }
+
+  var remoteControl = {
+    hide: function() {
+      mRoot.modal('hide');
+    }
+  }
+  return remoteControl;
+}

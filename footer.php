@@ -14,6 +14,8 @@
   <!--
   <script src="lib/require.js"></script>
   -->
+
+  <script src="<?php bloginfo('url'); ?>/lib/bootstrap/js/bootstrap.min.js"></script>
   
   <script src="<?php bloginfo('url'); ?>/js/array.js"></script>
   <script src="<?php bloginfo('url'); ?>/js/color.js"></script>
@@ -40,7 +42,8 @@
   <script src="<?php bloginfo('url'); ?>/js/bsd.storage.js"></script>
   <script src="<?php bloginfo('url'); ?>/js/bsd.remotestorage.js"></script>
   <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.procrastinator.js"></script>
-  <script src="<?php bloginfo('url'); ?>/js/bootup.js?v=22"></script>
+  <script src="<?php bloginfo('url'); ?>/js/main.js" type="module" ></script>
+  <script src="<?php bloginfo('url'); ?>/js/bootup.js?v=22" ></script>
 
 
   <?php wp_footer(); ?>
