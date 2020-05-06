@@ -1,17 +1,15 @@
-﻿if (!('forEach' in Array.prototype)) { //IE shim
-    Array.prototype.forEach= function(action, that /*opt*/) {
-        for (var i= 0, n= this.length; i<n; i++)
-            if (i in this)
-                action.call(that, this[i], i, this);
-    };
-}
-
-DOM = {
-    rawTags: 'a,abbr,address,area,article,aside,audio,b,base,bdi,bdo,blockquote,body,br,button,canvas,caption,cite,code,col,colgroup,data,datalist,dd,del,details,dfn,dialog,div,dl,dt,em,embed,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,i,iframe,img,input,ins,kbd,label,legend,li,link,main,map,mark,menu,meta,meter,nav,noscript,object,ol,optgroup,option,output,p,param,picture,pre,progress,q,rp,rt,ruby,s,samp,script,section,select,slot,small,source,span,strong,style,sub,summary,sup,table,tbody,td,template,textarea,tfoot,th,thead,time,title,tr,track,u,ul,var,video,wbr',
-    oldTags: 'html,head,script,link,body,div,ul,ol,li,a,i,p,strong,br,span,pre,img,table,thead,tbody,tr,th,td,h1,h2,h3,h4,h5,h6,form,fieldset,select,option,label,input,textarea,button,iframe,audio,object,video,canvas',
-    svgTags: 'circle,ellipse,g,line,path,polygon,polyline,rect,svg,text'
-
+﻿var DOM = window.DOM || {
+    regularTagString: 'a,abbr,address,area,article,aside,audio,b,base,bdi,bdo,blockquote,body,br,button,canvas,caption,cite,code,col,colgroup,data,datalist,dd,del,details,dfn,dialog,div,dl,dt,em,embed,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,i,iframe,img,input,ins,kbd,label,legend,li,link,main,map,mark,menu,meta,meter,nav,noscript,object,ol,optgroup,option,output,p,param,picture,pre,progress,q,rp,rt,ruby,s,samp,script,section,select,slot,small,source,span,strong,style,sub,summary,sup,table,tbody,td,template,textarea,tfoot,th,thead,time,title,tr,track,u,ul,var,video,wbr',
+    svgTagString: 'circle,ellipse,g,line,path,polygon,polyline,rect,svg,text'
 };
+
+DOM.regularTags = DOM.regularTagString
+    .split(',')
+    .filter( function(o) { return o; });
+DOM.svgTags = DOM.svgTagString
+    .split(',')
+    .filter( function(o) { return o; });
+
 DOM.element = function () {
 
     var args = Array.prototype.slice.call(arguments);    
@@ -19,38 +17,41 @@ DOM.element = function () {
     if (arguments.length == 0) { return "ERROR"; }
 
     var tag = arguments[0];
-    var interface;
-    if (DOM.svgTags.match(tag)) {
-        let raw = document.createElementNS('http://www.w3.org/2000/svg', tag);
-        interface = jQuery(raw);
+    var self;
+
+    if ( DOM.svgTags.find( function(o) { return  o == tag; }) ) {
+        var raw = document.createElementNS('http://www.w3.org/2000/svg', tag);
+        self = jQuery(raw);
     }
     else {
-        interface = jQuery('<' + tag + '></' + tag + '>');
+        self = jQuery('<' + tag + '></' + tag + '>');
     }
     if (arguments.length == 1) {
-        return interface;
+        return self;
     }
 
     var children = arguments[1];
     if (typeof children == "string" || typeof children == "number") {
-        interface.html(children);
+        self.html(children);
     }
     else if (typeof children == "object") { //probably another jquery object
-        interface.append(children);
+        self.append(children);
     }
     else if (children && typeof children.length !== "undefined") {
         children.each(function (child) {
-            interface.append(child);
+            self.append(child);
         });
     }
 
-    return interface;
+    return self;
 };
 
-var combined = [
-    ...DOM.rawTags.split(/,/),
-    ...DOM.svgTags.split(/,/)
-];
+var combined = new Set(
+    []
+    .concat(DOM.regularTags)
+    .concat(DOM.svgTags)
+);
+
 combined.forEach(function (tag) {
     DOM[tag] = function () {
 
