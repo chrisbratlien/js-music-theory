@@ -956,6 +956,14 @@ checkTiny();
   });    
 
 
+  function allNotesOff() {
+    let channel = 4;//1-based
+    let noteOffWithzeroBasedChannel = 127 + channel;
+    for (let nv = 0; nv < 128; nv += 1) {
+      openedMIDIOutput.send([noteOffWithzeroBasedChannel,nv,64])
+    }
+  }
+
 
   campfire.subscribe('play-chord',function(o) {
     var filtered = o.chord.spec.intervals
