@@ -967,7 +967,29 @@ checkTiny();
         return n;
       })
     var rootless = Chord({ rootNote: o.chord.rootNote, intervals: filtered });
-    BSD.audioPlayer.playChord(rootless,o.duration);    
+    BSD.audioPlayer.playChord(rootless,o.duration);  
+
+    ///console.log('rooteless notes',rootless.notes());
+    if (openedMIDIOutput && openedMIDIOutput.connection == 'open') {
+      //openedMIDIOutput.send([144,63])
+
+      let midiNoteValues = rootless.notes().map(n => n.value());
+
+      //schedule the NOTE OFF
+      setTimeout(function(){
+        midiNoteValues.map(v =>{
+          openedMIDIOutput.send([144,v,64]);
+        })
+      },o.duration);
+      midiNoteValues.map(v => {
+        let channel = 4;
+        let noteOnWithzeroBasedChannel = 143 + channel; 
+        openedMIDIOutput.send([noteOnWithzeroBasedChannel,v,64]);
+      });
+      
+    }
+
+
   });
     
     
@@ -2012,7 +2034,7 @@ campfire.subscribe('tick',function(cursor){
     strings: BSD.options.stringSet.split('').map(o => +o)
   }).forEach(fret => {
 
-    console.log('cursor',cursor,'fret',fret);
+    //console.log('cursor',cursor,'fret',fret);
 
     let idx = fret.chromaticValue - cursor.chord.spec.rootNote.chromaticValue();
     if (idx < 0) { idx += 12; }
@@ -2274,16 +2296,39 @@ function onMIDIMessage(message) {
 
 }
 
+
+let openedMIDIOutput;
+
 function onMIDISuccess(midiAccess) {
     // when we get a succesful response, run this code
     midi = midiAccess; // this is our raw MIDI data, inputs, outputs, and sysex status
 
     var inputs = midi.inputs.values();
+    
     // loop over all available inputs and listen for any MIDI input
     for (var input = inputs.next(); input && !input.done; input = inputs.next()) {
         // each time there is a midi message call the onMIDIMessage function
         input.value.onmidimessage = onMIDIMessage;
     }
+
+    var outputs = midi.outputs.values();
+    
+    // loop over all available output and listen for any MIDI output
+    for (var output = outputs.next(); output && !output.done; output = outputs.next()) {
+        // each time there is a midi message call the onMIDIMessage function
+        console.log('MIDI output value',output.value)
+        //myMIDIoutput = output;
+
+        output.value.open()
+          .then( (okay,b,c) => {
+            console.log('okay',okay,b,c)
+            openedMIDIOutput = okay;
+          })
+        ////input.value.onmidimessage = onMIDIMessage;
+    }
+
+
+
 }
 
 function onMIDIFailure(error) {
