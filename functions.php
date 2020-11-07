@@ -1,6 +1,8 @@
 <?php
 
 define('APP_PATH',dirname(__FILE__));
+define('LIB_PATH',sprintf('%s/lib',APP_PATH));
+define('DATA_PATH',sprintf('%s/data',APP_PATH));
 define('REMOTE_DB_PATH',sprintf('%s/data/remote.db',APP_PATH));
 
 require_once('local.php');
