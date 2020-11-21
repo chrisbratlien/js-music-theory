@@ -279,6 +279,10 @@ add_action('wp_head',function(){
   /* fill: cornsilk; **/
 }
 
+div.dg.ac {
+  top: 50px;
+}
+
 </style>
 
 <?php
@@ -481,6 +485,7 @@ add_action('wp_footer',function(){
     <script src="<?php bloginfo('url'); ?>/lib/Snap.svg/dist/snap.svg.js"></script>    
     
     <script src="<?php bloginfo('url'); ?>/lib/CodingMath/utils.js"></script>
+    <script src="<?php bloginfo('url'); ?>/lib/dat.gui.js"></script>    
     <script src="<?php bloginfo('url'); ?>/lib/la.js"></script>
     <script src="<?php bloginfo('url'); ?>/lib/async.min.js"></script>    
     <script src="<?php bloginfo('url'); ?>/js/draggy.js"></script>
@@ -497,9 +502,18 @@ add_action('wp_footer',function(){
 
 BSD.timeout = false;
 
-BSD.options = {};
+let defaultOptions = {
+  midiOnly: false,
+  chordMIDIChannel: 4,
+};
 storage.getItem('options',function(o){
-  BSD.options = JSON.parse(o);
+
+  let stored = JSON.parse(o);
+  BSD.options = {
+    ...defaultOptions,
+    ...stored
+  }
+  
   campfire.publish('options-loaded',BSD.options);  //needed?
 });
 
@@ -757,6 +771,23 @@ checkTiny();
 
 
 
+    const gui = new dat.GUI();
+    gui.remember(BSD.options);
+    gui.add(BSD.options,'midiOnly').onChange(function(e){
+      //console.log('e?',e);
+      storage.setItem('options',JSON.stringify(BSD.options));
+    });
+    gui.add(BSD.options,'chordMIDIChannel')
+      .min(1)
+      .max(16)
+      .step(1)
+      .onChange(function(e){
+      //console.log('e?',e);
+      storage.setItem('options',JSON.stringify(BSD.options));
+    });
+
+
+
     $( "#volume-input" ).slider({
       orientation: "horizontal",
       range: "min",
@@ -975,26 +1006,34 @@ checkTiny();
         return n;
       })
     var rootless = Chord({ rootNote: o.chord.rootNote, intervals: filtered });
-    BSD.audioPlayer.playChord(rootless,o.duration);  
+    let midiNoteValues = rootless.notes().map(n => n.value());
+
+
+    if (!BSD.options.midiOnly) {
+      BSD.audioPlayer.playChord(rootless,o.duration);
+    }
 
     ///console.log('rooteless notes',rootless.notes());
     if (openedMIDIOutput && openedMIDIOutput.connection == 'open') {
       //openedMIDIOutput.send([144,63])
 
-      let midiNoteValues = rootless.notes().map(n => n.value());
+ 
+      //let channel = 4;
+      let noteOnWithzeroBasedChannel = 143 + BSD.options.chordMIDIChannel; 
+      let noteOffWithzeroBasedChannel = 127 + BSD.options.chordMIDIChannel; 
+      
+      midiNoteValues.map(v => {
+        openedMIDIOutput.send([noteOnWithzeroBasedChannel,v,64]);
+      });
 
       //schedule the NOTE OFF
       setTimeout(function(){
         midiNoteValues.map(v =>{
-          openedMIDIOutput.send([144,v,64]);
+          openedMIDIOutput.send([noteOffWithzeroBasedChannel,v,64]);
         })
       },o.duration);
-      midiNoteValues.map(v => {
-        let channel = 4;
-        let noteOnWithzeroBasedChannel = 143 + channel; 
-        openedMIDIOutput.send([noteOnWithzeroBasedChannel,v,64]);
-      });
-      
+
+
     }
 
 
