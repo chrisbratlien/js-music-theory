@@ -503,8 +503,11 @@ add_action('wp_footer',function(){
 BSD.timeout = false;
 
 let defaultOptions = {
-  midiOnly: false,
-  chordMIDIChannel: 4,
+  chord: {
+    midi: false,
+    channel: 4,
+    volume: 0.7
+  },
   highHat: {
     midi: false,
     channel: 10,
@@ -581,7 +584,9 @@ BSD.remoteStorage.getItem('progressions',function(o){
   campfire.publish('progressions-loaded',BSD.progressions); //needed?
 });
 
-
+function saveOptions(e) {
+  storage.setItem('options',JSON.stringify(BSD.options));
+}
 
 
 campfire.subscribe('save-progressions',function(){
@@ -779,18 +784,17 @@ checkTiny();
 
     const gui = new dat.GUI();
     gui.remember(BSD.options);
-    gui.add(BSD.options,'midiOnly').onChange(function(e){
-      //console.log('e?',e);
-      storage.setItem('options',JSON.stringify(BSD.options));
-    });
-    gui.add(BSD.options,'chordMIDIChannel')
+
+
+
+    let chordFolder = gui.addFolder('chord','Chords');
+
+    chordFolder.add(BSD.options.chord,'midi').onChange(saveOptions);
+    chordFolder.add(BSD.options.chord,'channel')
       .min(1)
       .max(16)
       .step(1)
-      .onChange(function(e){
-      //console.log('e?',e);
-      storage.setItem('options',JSON.stringify(BSD.options));
-    });
+      .onChange(saveOptions);
 
 
     let hatFolder = gui.addFolder('highHat','High-hat');
@@ -801,9 +805,7 @@ checkTiny();
       .min(0)
       .max(127)
       .step(1)
-    .onChange(function(e){
-      storage.setItem('options',JSON.stringify(BSD.options));
-    });
+      .onChange(saveOptions);
 
 
 
@@ -1030,8 +1032,9 @@ checkTiny();
     let midiNoteValues = rootless.notes().map(n => n.value());
 
 
-    if (!BSD.options.midiOnly) {
+    if (!BSD.options.chord.midi) {
       BSD.audioPlayer.playChord(rootless,o.duration);
+      return false;//done
     }
 
     ///console.log('rooteless notes',rootless.notes());
@@ -1040,8 +1043,8 @@ checkTiny();
 
  
       //let channel = 4;
-      let noteOnWithzeroBasedChannel = 143 + BSD.options.chordMIDIChannel; 
-      let noteOffWithzeroBasedChannel = 127 + BSD.options.chordMIDIChannel; 
+      let noteOnWithzeroBasedChannel = 143 + BSD.options.chord.channel; 
+      let noteOffWithzeroBasedChannel = 127 + BSD.options.chord.channel; 
       
       midiNoteValues.map(v => {
         openedMIDIOutput.send([noteOnWithzeroBasedChannel,v,64]);
