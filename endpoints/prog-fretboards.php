@@ -503,6 +503,7 @@ add_action('wp_footer',function(){
 BSD.timeout = false;
 
 let defaultOptions = {
+  tempo: 120,
   chord: {
     midi: false,
     channel: 4,
@@ -785,6 +786,13 @@ checkTiny();
     const gui = new dat.GUI();
     gui.remember(BSD.options);
 
+
+    let mainFolder = gui.addFolder('main','Main');
+    mainFolder.add(BSD.options,'tempo')
+      .min(50)
+      .max(250)
+      .step(1)
+      .onChange(saveOptions);
 
 
     let chordFolder = gui.addFolder('chord','Chords');
