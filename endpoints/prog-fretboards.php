@@ -505,6 +505,12 @@ BSD.timeout = false;
 let defaultOptions = {
   midiOnly: false,
   chordMIDIChannel: 4,
+  highHat: {
+    midi: false,
+    channel: 10,
+    noteNumber: 64,
+    volume: 0.7
+  }
 };
 storage.getItem('options',function(o){
 
@@ -787,6 +793,20 @@ checkTiny();
     });
 
 
+    let hatFolder = gui.addFolder('highHat','High-hat');
+    hatFolder.add(BSD.options.highHat,'midi').onChange(function(e){
+      storage.setItem('options',JSON.stringify(BSD.options));
+    });
+    hatFolder.add(BSD.options.highHat,'noteNumber')
+      .min(0)
+      .max(127)
+      .step(1)
+    .onChange(function(e){
+      storage.setItem('options',JSON.stringify(BSD.options));
+    });
+
+
+
 
     $( "#volume-input" ).slider({
       orientation: "horizontal",
@@ -988,10 +1008,11 @@ checkTiny();
 
 
   function allNotesOff() {
-    let channel = 4;//1-based
-    let noteOffWithzeroBasedChannel = 127 + channel;
-    for (let nv = 0; nv < 128; nv += 1) {
-      openedMIDIOutput.send([noteOffWithzeroBasedChannel,nv,64])
+    for (var channel = 1; channel <= 16; channel += 1) { 
+      let noteOffWithzeroBasedChannel = 127 + channel;
+      for (let nv = 0; nv < 128; nv += 1) {
+        openedMIDIOutput.send([noteOffWithzeroBasedChannel,nv,64])
+      }
     }
   }
 
@@ -2195,10 +2216,10 @@ campfire.subscribe('tick',function(cursor){
 campfire.subscribe('tick',function(cursor){
   //high hat
   if (BSD.noteResolution == 4 && cursor.chordNoteIdx == 1) {
-    campfire.publish('brown-tick');
+    highHat();
   }
   if (BSD.noteResolution == 4 && cursor.chordNoteIdx + 1 == cursor.totQuarterNoteBeats) {
-    campfire.publish('brown-tick');
+    highHat();
   }
 });
 /**
@@ -2263,8 +2284,8 @@ campfire.subscribe('tick',function(cursor){
 
 
 
-BSD.options.hiHatVol = BSD.options.hiHatVol || 0.7;
-campfire.subscribe('bootup-hi-hat',function(){
+BSD.options.highHat.volume = BSD.options.highHat.volume || 0.7;
+campfire.subscribe('bootup-high-hat',function(){
   var bufferSize = 4096;
   var brownNoise = (function() {
       var lastOut = 0.0;
@@ -2287,13 +2308,23 @@ campfire.subscribe('bootup-hi-hat',function(){
 
   gn.connect(common);
   brownNoise.connect(gn);
-  campfire.subscribe('brown-tick',function(){
-    gn.gain.setTargetAtTime(BSD.options.hiHatVol,context.currentTime,0); //do it now...
+  campfire.subscribe('high-hat',function(){
+    gn.gain.setTargetAtTime(BSD.options.highHat.volume,context.currentTime,0); //do it now...
     gn.gain.linearRampToValueAtTime(0, context.currentTime + 0.015);    
   });
 });
 
-
+function highHat() {
+  if (BSD.options.highHat.midi) {
+    let noteOnChannel = 143 + BSD.options.highHat.channel;
+    let noteNum = BSD.options.highHat.noteNumber;
+    let vel = 127 * BSD.options.highHat.volume; //[0..1] -> [0..127]
+    openedMIDIOutput.send([noteOnChannel,noteNum,vel]);
+  }
+  else {
+    campfire.publish('high-hat'); //the old synthetic brown noise hat
+  }
+}
 
 var midi, data;
 // request MIDI access
@@ -2383,7 +2414,7 @@ function onMIDIFailure(error) {
     console.log("No access to MIDI devices or your browser doesn't support WebMIDI API. Please use WebMIDIAPIShim " + error);
 }
 
-campfire.publish('bootup-hi-hat');
+campfire.publish('bootup-high-hat');
 
 
 function getRandomInt(max) {
