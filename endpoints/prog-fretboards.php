@@ -344,12 +344,6 @@ get_header(); ?>
   <br />
 
 
-  <div class="slider-wrap bsd-control">
-      <label>Tempo</label>
-      <span id="tempo-amount">0</span> bpm
-      <div class="slider" id="tempo-input"></div>
-      <div style="clear: both;">&nbsp;</div>
-  </div>
 
   <div class="slider-wrap bsd-control">
       <label>How many cycles through the progression to hear before repeating</label>
@@ -835,7 +829,7 @@ checkTiny();
       }
     });
 
-
+/*
     campfire.subscribe('render-tempo-control',function(){
       jQuery( "#tempo-amount" ).text( BSD.options.tempo );
       jQuery( "#tempo-input" ).slider({
@@ -853,7 +847,7 @@ checkTiny();
         }
       });
     });
-
+*/
     campfire.subscribe('render-prog-cycles-control',function(){
       jQuery('.prog-cycles-amount').text( BSD.progCycles );
       jQuery('.prog-cycles-input').slider({
@@ -938,8 +932,6 @@ checkTiny();
     });
 
 
-    if (!BSD.options.tempo) { BSD.options.tempo = 100; }
-    campfire.publish('render-tempo-control');
 
 
     var cbPlayChordsOnly = jQuery('.play-chords-only');
