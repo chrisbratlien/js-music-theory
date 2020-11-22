@@ -359,12 +359,9 @@ get_header(); ?>
       Scroll to Current Chord's Fretboard
     </label>
   </div>
-  <div class="bsd-control">
-    <label>
-      <input class="play-chords-only" type="checkbox">
-      Hear Chords Only
-    </label>
-  </div>
+
+  
+  
   <div class="bsd-control">
     <label>
       <input class="must-be-inside-chord" type="checkbox">
@@ -499,15 +496,20 @@ BSD.timeout = false;
 let defaultOptions = {
   tempo: 120,
   chord: {
+    enabled: true,
     midi: false,
     channel: 4,
     volume: 0.7
   },
   highHat: {
+    enabled: true,
     midi: false,
     channel: 10,
     noteNumber: 64,
     volume: 0.7
+  },
+  improv: {
+    enabled: true
   }
 };
 storage.getItem('options',function(o){
@@ -789,8 +791,14 @@ checkTiny();
       .onChange(saveOptions);
 
 
+    let improvFolder = gui.addFolder('improv','Improv');
+    improvFolder.add(BSD.options.improv,'enabled')
+      .onChange(saveOptions);
+
+
     let chordFolder = gui.addFolder('chord','Chords');
 
+    chordFolder.add(BSD.options.chord,'enabled').onChange(saveOptions);
     chordFolder.add(BSD.options.chord,'midi').onChange(saveOptions);
     chordFolder.add(BSD.options.chord,'channel')
       .min(1)
@@ -800,9 +808,8 @@ checkTiny();
 
 
     let hatFolder = gui.addFolder('highHat','High-hat');
-    hatFolder.add(BSD.options.highHat,'midi').onChange(function(e){
-      storage.setItem('options',JSON.stringify(BSD.options));
-    });
+    hatFolder.add(BSD.options.highHat,'enabled').onChange(saveOptions);
+    hatFolder.add(BSD.options.highHat,'midi').onChange(saveOptions);
     hatFolder.add(BSD.options.highHat,'noteNumber')
       .min(0)
       .max(127)
@@ -932,15 +939,6 @@ checkTiny();
     });
 
 
-
-
-    var cbPlayChordsOnly = jQuery('.play-chords-only');
-    cbPlayChordsOnly.attr('checked',BSD.options.playChordsOnly);
-    cbPlayChordsOnly.change(function(){
-      BSD.options.playChordsOnly = this.checked;
-      storage.setItem('options',JSON.stringify(BSD.options));
-    });
-
     var cbMustBeInsideChord = jQuery('.must-be-inside-chord');
     cbMustBeInsideChord.attr('checked',BSD.options.mustBeInsideChord);
     cbMustBeInsideChord.change(function(){
@@ -1020,6 +1018,10 @@ checkTiny();
 
 
   campfire.subscribe('play-chord',function(o) {
+    if (!BSD.options.chord.enabled) {
+      return false;//done
+    }
+
     var filtered = o.chord.spec.intervals
       .select(function(n){ 
         return n > 0 && n !== 7; 
@@ -2092,7 +2094,7 @@ campfire.subscribe('tick',function(cursor){
 
   predictBoard.publish('unfeature-frets');
 
-  if (!BSD.options.playChordsOnly) {
+  if (!BSD.options.improv.enabled) {
     cursor.board.publish('feature-fret',cursor);
     extraBoard.publish('feature-fret',cursor);
     predictBoard.publish('feature-fret',cursor);
@@ -2163,7 +2165,7 @@ campfire.subscribe('tick',function(cursor){
 });
 
 campfire.subscribe('tick',function(cursor){
-  if (!BSD.options.playChordsOnly) {
+  if (BSD.options.improv.enabled) {
     campfire.publish('play-note', { note: Note(cursor.noteValue), duration: BSD.durations.note });
   }
 });
@@ -2218,6 +2220,7 @@ campfire.subscribe('tick',function(cursor){
 
 campfire.subscribe('tick',function(cursor){
   //high hat
+  if (!BSD.options.highHat.enabled) { return false; }
   if (BSD.noteResolution == 4 && cursor.chordNoteIdx == 1) {
     highHat();
   }
