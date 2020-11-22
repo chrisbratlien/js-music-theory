@@ -1064,12 +1064,21 @@ checkTiny();
     campfire.publish('play-chord',{ chord: chord, duration: BSD.durations.chord });
   });    
 
+  const MIDI_CONST = {
+    NOTE_OFF: 0x80,
+    NOTE_ON: 0x90,
+    AFTERTOUCH: 0xA0,
+    CONTROL_CHANGE: 0xB0,
+    PROGRAM_CHANGE: 0xC0
+  };
 
   function allNotesOff() {
     for (var channel = 1; channel <= 16; channel += 1) { 
       let noteOffWithzeroBasedChannel = 127 + channel;
       for (let nv = 0; nv < 128; nv += 1) {
-        openedMIDIOutput.send([noteOffWithzeroBasedChannel,nv,64])
+        //openedMIDIOutput.send([noteOffWithzeroBasedChannel,nv,64])
+        openedMIDIOutput.send([MIDI_CONST.NOTE_OFF | (channel-1) ,nv,0]);
+        //openedMIDIOutput.send([MIDI_CONST.NOTE_ON | (channel-1) ,nv,0]);
       }
     }
   }
@@ -2211,7 +2220,18 @@ campfire.subscribe('tick',function(cursor){
 
   }
   if (cursor.totQuarterNoteBeats == 4 && BSD.noteResolution == 4 && cursor.chordNoteIdx == 2) { //3rd beat in [0,1,2,3]
-    bassist.playNote(cursor.chord.myFifth().plus(-12),BSD.durations.bass);
+
+    let pedal5 = cursor.chord.myFifth().plus(-12);
+    let pedal5Value = pedal5.value();
+    if (BSD.options.bass.midi) {
+      let noteOnChannel = 143 + BSD.options.bass.channel;
+      let noteNum = pedal5Value;
+      let vel = 127 * BSD.options.bass.volume; //[0..1] -> [0..127]
+      openedMIDIOutput.send([noteOnChannel,noteNum,vel]);
+    }
+    else {
+        bassist.playNote(pedal5, BSD.durations.bass);
+    }
   }
 });
 
@@ -2429,6 +2449,15 @@ function onMIDIMessage(message) {
     note = data[1],
     velocity = data[2];
 
+    /* 
+    128 = 0x80 = note off
+    144 = 0x90 = note on
+    160 = 0xA0 = aftertouch
+    176 = 0xB0 = control change
+    192 = 0xC0 = program change
+    */
+
+
     console.log('type',type);
 
     if (type == 176) {
@@ -2440,9 +2469,15 @@ function onMIDIMessage(message) {
       return false;
     }
 
-    if (type == 144 && velocity > 0) { //note on
-      ///campfire.publish('play-note',{ note: Note(note), duration: null, velocity: velocity });
-      bank[note] = keyboardist.playNote(Note(note),null,velocity);    
+    if (type == MIDI_CONST.NOTE_ON && velocity > 0) { //note on
+      campfire.publish('play-note',{ note: Note(note), duration: null, velocity: velocity });
+      //bank[note] = keyboardist.playNote(Note(note),null,velocity);    
+    }
+    else if (type == MIDI_CONST.NOTE_ON && velocity == 0) { //note off
+      openedMIDIOutput.send([MIDI_CONST.NOTE_OFF | (BSD.options.improv.channel - 1), note, 0]);
+    }
+    else if (type == MIDI_CONST.NOTE_OFF) { //note off
+      openedMIDIOutput.send([MIDI_CONST.NOTE_OFF | (BSD.options.improv.channel - 1), note, 0]);
     }
     else {
       var env = bank[note];
