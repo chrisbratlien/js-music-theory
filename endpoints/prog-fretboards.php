@@ -852,6 +852,11 @@ checkTiny();
     let hatFolder = gui.addFolder('highHat','High-hat');
     hatFolder.add(BSD.options.highHat,'enabled').onChange(saveOptions);
     hatFolder.add(BSD.options.highHat,'midi').onChange(saveOptions);
+    hatFolder.add(BSD.options.highHat,'channel')
+      .min(1)
+      .max(16)
+      .step(1)
+      .onChange(saveOptions);
     hatFolder.add(BSD.options.highHat,'noteNumber')
       .min(0)
       .max(127)
