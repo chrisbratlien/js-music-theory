@@ -495,10 +495,16 @@ BSD.timeout = false;
 
 let defaultOptions = {
   tempo: 120,
+  bass: {
+    enabled: true,
+    midi: false,
+    channel: 1,
+    volume: 0.7
+  },
   chord: {
     enabled: true,
     midi: false,
-    channel: 4,
+    channel: 2,
     volume: 0.7
   },
   highHat: {
@@ -509,7 +515,10 @@ let defaultOptions = {
     volume: 0.7
   },
   improv: {
-    enabled: true
+    enabled: true,
+    midi: false,
+    channel: 3,
+    volume: 0.7
   }
 };
 storage.getItem('options',function(o){
@@ -794,6 +803,35 @@ checkTiny();
     let improvFolder = gui.addFolder('improv','Improv');
     improvFolder.add(BSD.options.improv,'enabled')
       .onChange(saveOptions);
+    improvFolder.add(BSD.options.improv,'midi')
+      .onChange(saveOptions);
+    improvFolder.add(BSD.options.improv,'channel')
+      .min(1)
+      .max(16)
+      .step(1)
+      .onChange(saveOptions);
+    improvFolder.add(BSD.options.improv,'volume')
+      .min(0)
+      .max(1)
+      .onChange(saveOptions);
+
+
+    let bassFolder = gui.addFolder('bass','Bass');
+    bassFolder.add(BSD.options.bass,'enabled')
+      .onChange(saveOptions);
+    bassFolder.add(BSD.options.bass,'midi')
+      .onChange(saveOptions);
+    bassFolder.add(BSD.options.bass,'channel')
+      .min(1)
+      .max(16)
+      .step(1)
+      .onChange(saveOptions);
+    bassFolder.add(BSD.options.bass,'volume')
+      .min(0)
+      .max(1)
+      .onChange(saveOptions);
+
+
 
 
     let chordFolder = gui.addFolder('chord','Chords');
@@ -805,6 +843,10 @@ checkTiny();
       .max(16)
       .step(1)
       .onChange(saveOptions);
+    chordFolder.add(BSD.options.chord,'volume')
+      .min(0)
+      .max(1)
+      .onChange(saveOptions);
 
 
     let hatFolder = gui.addFolder('highHat','High-hat');
@@ -815,8 +857,10 @@ checkTiny();
       .max(127)
       .step(1)
       .onChange(saveOptions);
-
-
+    hatFolder.add(BSD.options.highHat,'volume')
+      .min(0)
+      .max(1)
+      .onChange(saveOptions);
 
 
     $( "#volume-input" ).slider({
@@ -993,9 +1037,23 @@ checkTiny();
     BSD.audioPlayer.stopNote(payload.note);    
   });
 
+  //LEAD / IMPROV
   campfire.subscribe('play-note',function(payload) {
+    if (!BSD.options.improv.enabled) { return false; }
+    
+    if (BSD.options.improv.midi) { 
+      let noteOnChannel = 143 + BSD.options.improv.channel;
+      let noteNum = payload.note.value();
+      let vel = 127 * BSD.options.improv.volume; //[0..1] -> [0..127]
+      openedMIDIOutput.send([noteOnChannel,noteNum,vel]);
+      return false; 
+    }
+    
     BSD.audioPlayer.playNote(payload.note,payload.duration,payload.velocity);    
   });    
+
+
+  //CHORD
   campfire.subscribe('play-notes',function(notes) {
 
     //console.log('notes??',notes);
@@ -1041,21 +1099,19 @@ checkTiny();
 
     ///console.log('rooteless notes',rootless.notes());
     if (openedMIDIOutput && openedMIDIOutput.connection == 'open') {
-      //openedMIDIOutput.send([144,63])
 
- 
-      //let channel = 4;
+      let vel = 127 * BSD.options.chord.volume; //[0..1] -> [0..127]
       let noteOnWithzeroBasedChannel = 143 + BSD.options.chord.channel; 
       let noteOffWithzeroBasedChannel = 127 + BSD.options.chord.channel; 
       
       midiNoteValues.map(v => {
-        openedMIDIOutput.send([noteOnWithzeroBasedChannel,v,64]);
+        openedMIDIOutput.send([noteOnWithzeroBasedChannel,v,vel]);
       });
 
       //schedule the NOTE OFF
       setTimeout(function(){
         midiNoteValues.map(v =>{
-          openedMIDIOutput.send([noteOffWithzeroBasedChannel,v,64]);
+          openedMIDIOutput.send([noteOffWithzeroBasedChannel,v,vel]);
         })
       },o.duration);
 
@@ -2126,7 +2182,9 @@ campfire.subscribe('tick',function(cursor){
 
 });
 
+//BASS
 campfire.subscribe('tick',function(cursor){
+  if (!BSD.options.bass.enabled) { return false; }
   if (cursor.chordNoteIdx == 0) {
     var beatOneNote = [
       cursor.chord.rootNote,
@@ -2134,10 +2192,23 @@ campfire.subscribe('tick',function(cursor){
       cursor.chord.mySeventh()
     ].filter(o => o)
       .atRandom();
-    bassist.playNote(
-      beatOneNote.plus(-12),
-      BSD.durations.bass
-    );
+
+    let pedal = beatOneNote.plus(-12);
+    let pedalValue = pedal.value();
+
+    if (BSD.options.bass.midi) {
+      let noteOnChannel = 143 + BSD.options.bass.channel;
+      let noteNum = pedalValue;
+      let vel = 127 * BSD.options.bass.volume; //[0..1] -> [0..127]
+      openedMIDIOutput.send([noteOnChannel,noteNum,vel]);
+    }
+    else {
+      bassist.playNote(
+        pedal,
+        BSD.durations.bass
+      );
+    }
+
   }
   if (cursor.totQuarterNoteBeats == 4 && BSD.noteResolution == 4 && cursor.chordNoteIdx == 2) { //3rd beat in [0,1,2,3]
     bassist.playNote(cursor.chord.myFifth().plus(-12),BSD.durations.bass);
