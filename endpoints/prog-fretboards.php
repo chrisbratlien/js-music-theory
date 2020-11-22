@@ -344,15 +344,6 @@ get_header(); ?>
   <br />
 
 
-
-  <div class="slider-wrap bsd-control">
-      <label>How many cycles through the progression to hear before repeating</label>
-      <span class="prog-cycles-amount">0</span> x
-      <div class="slider prog-cycles-input"></div>
-      <div style="clear: both;">&nbsp;</div>
-  </div>
-
-
   <div class="bsd-control">
     <label>
       <input class="scroll-to-board" type="checkbox">      
@@ -362,12 +353,6 @@ get_header(); ?>
 
   
   
-  <div class="bsd-control">
-    <label>
-      <input class="must-be-inside-chord" type="checkbox">
-      Improv Notes Must Be Inside Chord
-    </label>
-  </div>
   <div class="bsd-control">
     <label>
       <input class="show-current-chord-fretboard-only" type="checkbox">
@@ -494,6 +479,7 @@ add_action('wp_footer',function(){
 BSD.timeout = false;
 
 let defaultOptions = {
+  progCycles: 1,
   tempo: 120,
   bass: {
     enabled: true,
@@ -518,7 +504,8 @@ let defaultOptions = {
     enabled: true,
     midi: false,
     channel: 3,
-    volume: 0.7
+    volume: 0.7,
+    insideChord: true
   }
 };
 storage.getItem('options',function(o){
@@ -787,7 +774,7 @@ checkTiny();
     });
 
 
-
+    //https://stackoverflow.com/questions/18366229/is-it-possible-to-create-a-button-using-dat-gui
     const gui = new dat.GUI();
     gui.remember(BSD.options);
 
@@ -796,6 +783,11 @@ checkTiny();
     mainFolder.add(BSD.options,'tempo')
       .min(50)
       .max(250)
+      .step(1)
+      .onChange(saveOptions);
+    mainFolder.add(BSD.options,'progCycles')
+      .min(1)
+      .max(64)
       .step(1)
       .onChange(saveOptions);
 
@@ -813,6 +805,8 @@ checkTiny();
     improvFolder.add(BSD.options.improv,'volume')
       .min(0)
       .max(1)
+      .onChange(saveOptions);
+    improvFolder.add(BSD.options.improv,'insideChord')
       .onChange(saveOptions);
 
 
@@ -904,23 +898,7 @@ checkTiny();
       });
     });
 */
-    campfire.subscribe('render-prog-cycles-control',function(){
-      jQuery('.prog-cycles-amount').text( BSD.progCycles );
-      jQuery('.prog-cycles-input').slider({
-        orientation: 'horizontal',
-        range: 'min',
-        min: 1,
-        max: 64,
-        step: 1,
-        value: BSD.progCycles,
-        slide: function( event, ui ) {
-          var n = ui.value;
-          BSD.progCycles = parseInt(n,10);
-          storage.setItem('prog-cycles',BSD.progCycles);
-          jQuery( '.prog-cycles-amount' ).text( n );
-        }
-      });
-    });
+
 
 
     campfire.subscribe('render-fret-range-control',function(){
@@ -978,22 +956,6 @@ checkTiny();
 
 
 
-
-    BSD.progCycles = 1;
-    storage.getItem('prog-cycles',function(o){
-      BSD.progCycles = parseInt(o,10);
-      campfire.publish('render-prog-cycles-control');
-    },function(){
-      campfire.publish('render-prog-cycles-control');      
-    });
-
-
-    var cbMustBeInsideChord = jQuery('.must-be-inside-chord');
-    cbMustBeInsideChord.attr('checked',BSD.options.mustBeInsideChord);
-    cbMustBeInsideChord.change(function(){
-      BSD.options.mustBeInsideChord = this.checked;
-      storage.setItem('options',JSON.stringify(BSD.options));
-    });
 
 
 
@@ -1318,7 +1280,7 @@ function outsideJudge(o,env) {
     return 'fret < minFret';
   }
 
-  if (BSD.options.mustBeInsideChord && abstractNoteValues.indexOf(o.chromaticValue) < 0) { 
+  if (BSD.options.improv.insideChord && abstractNoteValues.indexOf(o.chromaticValue) < 0) { 
     return 'must be inside chord, yet outside chord'; 
   }
 
@@ -1673,7 +1635,7 @@ console.log('PROG W CHANGES?',prog);
 
   var errors = 0;
   var cycleRange = [];
-  for(var i = 0; i < BSD.progCycles; i += 1) {
+  for(var i = 0; i < BSD.options.progCycles; i += 1) {
     cycleRange.push(i); 
   }
 
@@ -1797,28 +1759,8 @@ console.log('PROG W CHANGES?',prog);
         }
 
 
-        /////campfire.publish('test-periodic',{ total: BSD.progCycles, scale: start, shift: start });
-        
-        ////return "ROOOOOOO";;;;
-
-        ////idealFret = scaleThenShift(cycleIdx,BSD.progCycles,start,start,Math.cos);
-        //////console.log('periodic idealFret',idealFret,'cycle',cycleIdx);
-
-
-
-        //var offset = start;
-        /****
-
         var width = BSD.options.fretRange[1] - BSD.options.fretRange[0];
-        var total = BSD.progCycles;
-        var offset = start;
-        var centerShift = 0;
-        var i = cycleIdx
-        ///for (let i = 0; i < total; i += 1) { console.log(  offset + (Math.cos(  i/total * 2 * Math.PI) * (width/2) + centerShift)  ); }
-
-        ***/
-        var width = BSD.options.fretRange[1] - BSD.options.fretRange[0];
-        var total = BSD.progCycles;
+        var total = BSD.options.progCycles;
         var centerShift = 0;
         var offset = start;
         idealFret = offset + (Math.cos(cycleIdx/total * 2 * Math.PI) * (width/2) + centerShift);
@@ -1988,7 +1930,7 @@ console.log('PROG W CHANGES?',prog);
 
     }); //prog
 
-  }); //BSD.progCycles
+  }); //BSD.options.progCycles
   ///console.log('sequence',sequence);
 
 
