@@ -502,26 +502,30 @@ let defaultOptions = {
     enabled: true,
     midi: false,
     channel: 1,
-    volume: 0.7
+    volume: 0.7,
+    pan: 64
   },
   chord: {
     enabled: true,
     midi: false,
     channel: 2,
-    volume: 0.7
+    volume: 0.7,
+    pan: 64
   },
   highHat: {
     enabled: true,
     midi: false,
     channel: 10,
     noteNumber: 64,
-    volume: 0.7
+    volume: 0.7,
+    pan: 64
   },
   improv: {
     enabled: true,
     midi: false,
     channel: 3,
     volume: 0.7,
+    pan: 64,
     insideChord: true
   }
 };
@@ -824,6 +828,17 @@ checkTiny();
       .min(0)
       .max(1)
       .onChange(saveOptions);
+    improvFolder.add(BSD.options.improv,'pan')
+      .min(0)
+      .max(127)
+      .onChange(function(e) { 
+        saveOptions();
+        openedMIDIOutput.send([
+          MIDI_CONST.CONTROL_CHANGE | (BSD.options.improv.channel - 1),
+          MIDI_CONST.CC_PAN,
+          e 
+        ]);  
+      });
     improvFolder.add(BSD.options.improv,'insideChord')
       .onChange(saveOptions);
 
@@ -842,6 +857,17 @@ checkTiny();
       .min(0)
       .max(1)
       .onChange(saveOptions);
+    bassFolder.add(BSD.options.bass,'pan')
+      .min(0)
+      .max(127)
+      .onChange(function(e) { 
+        saveOptions();
+        openedMIDIOutput.send([
+          MIDI_CONST.CONTROL_CHANGE | (BSD.options.bass.channel - 1),
+          MIDI_CONST.CC_PAN,
+          e 
+        ]);  
+      });
 
 
 
@@ -859,6 +885,17 @@ checkTiny();
       .min(0)
       .max(1)
       .onChange(saveOptions);
+    chordFolder.add(BSD.options.chord,'pan')
+      .min(0)
+      .max(127)
+      .onChange(function(e) { 
+        saveOptions();
+        openedMIDIOutput.send([
+          MIDI_CONST.CONTROL_CHANGE | (BSD.options.chord.channel - 1),
+          MIDI_CONST.CC_PAN,
+          e 
+        ]);  
+      });
 
 
     let hatFolder = gui.addFolder('highHat','High-hat');
@@ -878,6 +915,17 @@ checkTiny();
       .min(0)
       .max(1)
       .onChange(saveOptions);
+    hatFolder.add(BSD.options.highHat,'pan')
+      .min(0)
+      .max(127)
+      .onChange(function(e) { 
+        saveOptions();
+        openedMIDIOutput.send([
+          MIDI_CONST.CONTROL_CHANGE | (BSD.options.highHat.channel - 1),
+          MIDI_CONST.CC_PAN,
+          e 
+        ]);  
+      });
 
 
     $( "#volume-input" ).slider({
@@ -1054,7 +1102,8 @@ checkTiny();
     NOTE_ON: 0x90,
     AFTERTOUCH: 0xA0,
     CONTROL_CHANGE: 0xB0,
-    PROGRAM_CHANGE: 0xC0
+    PROGRAM_CHANGE: 0xC0,
+    CC_PAN: 10
   };
 
   function allNotesOff() {
