@@ -797,6 +797,7 @@ checkTiny();
 
 
     let mainFolder = gui.addFolder('main','Main');
+    mainFolder.add(window,'allNotesOff');
     mainFolder.add(BSD.options,'tempo')
       .min(50)
       .max(250)
