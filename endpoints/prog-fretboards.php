@@ -2387,27 +2387,15 @@ function highHat() {
   }
 }
 
-var midi, data;
-// request MIDI access
-if (navigator.requestMIDIAccess) {
-    navigator.requestMIDIAccess({
-        sysex: false
-    }).then(onMIDISuccess, onMIDIFailure);
-} else {
-    alert("No MIDI support in your browser.");
-}
-
 // midi functions
-
-
 
 var bank = {};
 function onMIDIMessage(message) {
-    data = message.data; // this gives us our [command/channel, note, velocity] data.
+    let data = message.data; // this gives us our [command/channel, note, velocity] data.
     console.log('MIDI data', data); // MIDI data [144, 63, 73]
 
-    data = event.data,
-    cmd = data[0] >> 4,
+    //data = event.data,
+    let cmd = data[0] >> 4,
     channel = data[0] & 0xf,
     type = data[0] & 0xf0, // channel agnostic message type. Thanks, Phil Burk.
     note = data[1],
@@ -2457,7 +2445,13 @@ function onMIDISuccess(midiAccess) {
     // when we get a succesful response, run this code
     midi = midiAccess; // this is our raw MIDI data, inputs, outputs, and sysex status
 
-    var inputs = midi.inputs.values();
+    midiAccess.onstatechange = function(e) {
+      // Print information about the (dis)connected MIDI controller
+      console.log(e.port.name, e.port.manufacturer, e.port.state);
+    };
+
+
+    var inputs = midiAccess.inputs.values();
     
     // loop over all available inputs and listen for any MIDI input
     for (var input = inputs.next(); input && !input.done; input = inputs.next()) {
@@ -2465,7 +2459,7 @@ function onMIDISuccess(midiAccess) {
         input.value.onmidimessage = onMIDIMessage;
     }
 
-    var outputs = midi.outputs.values();
+    var outputs = midiAccess.outputs.values();
     
     // loop over all available output and listen for any MIDI output
     for (var output = outputs.next(); output && !output.done; output = outputs.next()) {
@@ -2481,14 +2475,28 @@ function onMIDISuccess(midiAccess) {
         ////input.value.onmidimessage = onMIDIMessage;
     }
 
-
-
 }
 
 function onMIDIFailure(error) {
     // when we get a failed response, run this code
     console.log("No access to MIDI devices or your browser doesn't support WebMIDI API. Please use WebMIDIAPIShim " + error);
 }
+
+//var midi, data;
+// request MIDI access
+if (navigator.requestMIDIAccess) {
+    navigator.requestMIDIAccess({
+        //sysex: false
+    }).then(onMIDISuccess, onMIDIFailure)
+    .catch('error',function(e){
+      console.log('midi err',e);
+    })
+} else {
+    alert("No MIDI support in your browser.");
+}
+
+
+
 
 campfire.publish('bootup-high-hat');
 
