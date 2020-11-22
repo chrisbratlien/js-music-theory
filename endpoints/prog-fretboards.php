@@ -283,6 +283,23 @@ div.dg.ac {
   top: 50px;
 }
 
+
+/* Light mode */
+@media (prefers-color-scheme: light) {
+    body {
+        background-color: white;
+        color: #444;
+    }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #303030;
+        color: white;
+    }
+}
+
 </style>
 
 <?php
