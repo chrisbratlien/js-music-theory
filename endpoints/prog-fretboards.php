@@ -524,6 +524,8 @@ let defaultOptions = {
     enabled: true,
     midi: false,
     channel: 3,
+    bank: 1,
+    patch: 1,
     volume: 0.7,
     pan: 64,
     insideChord: true
@@ -839,6 +841,46 @@ checkTiny();
           e 
         ]);  
       });
+    improvFolder.add(BSD.options.improv,'bank')
+      .min(1)
+      .max(128)
+      .step(1)
+      .onChange(function(v){
+        saveOptions();
+        //set bank
+        //NOTE: refactor so that MSB and LSB are obeyed.. just using
+        //LSB for now
+        openedMIDIOutput.send([
+          MIDI_CONST.CONTROL_CHANGE | (BSD.options.improv.channel - 1),
+          0,
+          BSD.options.improv.bank-1
+        ]);
+      });
+    improvFolder.add(BSD.options.improv,'patch')
+      .min(1)
+      .max(128)
+      .step(1)
+      .onChange(function(v){
+        saveOptions();
+        //set bank
+        //NOTE: refactor so that MSB and LSB are obeyed.. just using
+        //LSB for now
+        openedMIDIOutput.send([
+          MIDI_CONST.CONTROL_CHANGE | (BSD.options.improv.channel - 1),
+          0,
+          BSD.options.improv.bank-1
+        ]);
+
+        //set patch (within the bank set previously)
+        openedMIDIOutput.send([
+          MIDI_CONST.PROGRAM_CHANGE | (BSD.options.improv.channel - 1),
+          BSD.options.improv.patch-1
+        ]);     
+      });
+
+
+
+
     improvFolder.add(BSD.options.improv,'insideChord')
       .onChange(saveOptions);
 
