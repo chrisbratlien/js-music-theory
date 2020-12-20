@@ -816,7 +816,10 @@ checkTiny();
       .min(50)
       .max(250)
       .step(1)
-      .onChange(saveOptions);
+      .onChange(function(bpm) {         
+        saveOptions();
+        campfire.publish('tempo-change',bpm)
+      });
     mainFolder.add(BSD.options,'progCycles')
       .min(1)
       .max(64)
@@ -1525,13 +1528,19 @@ let tickEvents = {
 let GAMELOOP = {
   BARS: 2,
   QPBAR: 4,
-  TPQ: 6, // ticks per quarter note or PPQN (pulse per quarter note)
+  //TPQ: 6, // ticks per quarter note or PPQN (pulse per quarter note)
+  TPQ: 1,
   BPM: 120
 }
-GAMELOOP.TPBAR = GAMELOOP.TPQ * GAMELOOP.QPBAR;
-GAMELOOP.TPLOOP = GAMELOOP.TPBAR * GAMELOOP.BARS;
 
-GAMELOOP.MSPT = Math.floor(60000 / (GAMELOOP.BPM * GAMELOOP.TPQ));
+campfire.subscribe('tempo-change', bpm => {
+  GAMELOOP.BPM = bpm;
+  GAMELOOP.TPBAR = GAMELOOP.TPQ * GAMELOOP.QPBAR;
+  GAMELOOP.TPLOOP = GAMELOOP.TPBAR * GAMELOOP.BARS;
+  GAMELOOP.MSPT = Math.floor(60000 / (GAMELOOP.BPM * GAMELOOP.TPQ));
+})
+campfire.publish('tempo-change',GAMELOOP.BPM)
+
 
 for (var i = 0; i < GAMELOOP.TPLOOP; i += 1) {
   tickEvents[i] = [];
@@ -1546,7 +1555,7 @@ function gameloop() {
   function helper() {
     
     let noteOnChanByte = 0x90 + (BSD.options.improv.channel - 1);
-
+    let velocityByte = Math.floor(BSD.options.improv.volume * 127);
     console.log('new helper');
     for (var j = 0; j < tickEvents[i].length; j++) {
       let eventData = tickEvents[i][j];
@@ -1557,12 +1566,14 @@ function gameloop() {
       thirdByte = (eventData & 0x00007F);
       console.log(firstByte,secondByte,thirdByte);
       /* */
+      console.log('vvv',velocityByte,eventData & 0x00007F);
       openedMIDIOutput.send([
         //eventData >> 16, //first byte (status)
         noteOnChanByte,
         (eventData & 0x00FF00) >> 8, //second byte //data
-        (eventData & 0x00007F) // third byte       //data
-      ]) //first byte
+        //(eventData & 0x00007F) // third byte       //data
+        velocityByte
+      ]) 
 
     }
 
