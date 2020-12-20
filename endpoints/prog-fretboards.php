@@ -283,6 +283,11 @@ div.dg.ac {
   top: 50px;
 }
 
+.piano-roll-cell.active {
+  background: #409;
+}
+
+
 
 /* Light mode */
 @media (prefers-color-scheme: light) {
@@ -447,6 +452,9 @@ get_header(); ?>
   <div class="stage noprint"></div>
 </div><!-- venue row -->
 <div class="venue-footer noprint clear-both">
+</div>
+<div class="piano-roll-wrap">
+
 </div>
 <h3 class="noprint">Songs</h3>
 <div class="song-list-wrap noprint">
@@ -816,6 +824,41 @@ checkTiny();
       .onChange(saveOptions);
 
 
+function get7bitMSBAndLSB(orig) {
+  let msb = Math.floor( orig / 128);
+  let lsb = orig % 128;
+  //return console.log('bankSelect','decimalBankNumber',decimalBankNumber,'msb',msb,'lsb',lsb);
+  return [msb,lsb];
+}
+
+function bankSelect(channel,decimalBankNumber) {
+  /*
+  http://midi.teragonaudio.com/tutr/rolarc.htm
+
+  http://midi.teragonaudio.com/tutr/bank.htm
+
+  http://www.andrelouis.com/qws/art/art009.htm
+
+  http://www.mutools.com/info/M8/docs/mulab/using-bank-select-and-prog-changes.html
+
+  https://beatbars.com/blog/what-is-program-change.html    
+  */
+  //return console.log('bankSelect','decimalBankNumber',decimalBankNumber,'msb',msb,'lsb',lsb);
+  let [msb, lsb] = get7bitMSBAndLSB(decimalBankNumber);
+
+  openedMIDIOutput.send([
+    MIDI_CONST.CONTROL_CHANGE | (channel - 1),
+    0,
+    msb
+  ]);
+  openedMIDIOutput.send([
+    MIDI_CONST.CONTROL_CHANGE | (channel - 1),
+    0x20, //32
+    lsb
+  ]);
+}
+
+
     let improvFolder = gui.addFolder('improv','Improv');
     improvFolder.add(BSD.options.improv,'enabled')
       .onChange(saveOptions);
@@ -847,14 +890,7 @@ checkTiny();
       .step(1)
       .onChange(function(v){
         saveOptions();
-        //set bank
-        //NOTE: refactor so that MSB and LSB are obeyed.. just using
-        //LSB for now
-        openedMIDIOutput.send([
-          MIDI_CONST.CONTROL_CHANGE | (BSD.options.improv.channel - 1),
-          0,
-          BSD.options.improv.bank-1
-        ]);
+        bankSelect(BSD.options.improv.channel,BSD.options.improv.bank);
       });
     improvFolder.add(BSD.options.improv,'patch')
       .min(1)
@@ -862,15 +898,8 @@ checkTiny();
       .step(1)
       .onChange(function(v){
         saveOptions();
-        //set bank
-        //NOTE: refactor so that MSB and LSB are obeyed.. just using
-        //LSB for now
-        openedMIDIOutput.send([
-          MIDI_CONST.CONTROL_CHANGE | (BSD.options.improv.channel - 1),
-          0,
-          BSD.options.improv.bank-1
-        ]);
-
+        //bank first
+        bankSelect(BSD.options.improv.channel,BSD.options.improv.bank);
         //set patch (within the bank set previously)
         openedMIDIOutput.send([
           MIDI_CONST.PROGRAM_CHANGE | (BSD.options.improv.channel - 1),
@@ -1483,6 +1512,72 @@ function tick(cursor) {
     tick(cursor); 
   },delayMS.next);
 }
+
+
+let tickEvents = {
+    0: [],
+    1: [],
+    2: [],
+    3: []
+}
+
+
+let GAMELOOP = {
+  BARS: 2,
+  QPBAR: 4,
+  TPQ: 6, // ticks per quarter note or PPQN (pulse per quarter note)
+  BPM: 120
+}
+GAMELOOP.TPBAR = GAMELOOP.TPQ * GAMELOOP.QPBAR;
+GAMELOOP.TPLOOP = GAMELOOP.TPBAR * GAMELOOP.BARS;
+
+GAMELOOP.MSPT = Math.floor(60000 / (GAMELOOP.BPM * GAMELOOP.TPQ));
+
+for (var i = 0; i < GAMELOOP.TPLOOP; i += 1) {
+  tickEvents[i] = [];
+}
+
+function gameloop() {
+  let i = 0;//tick index
+  let MAX = GAMELOOP.TPLOOP;
+
+
+
+  function helper() {
+    
+    let noteOnChanByte = 0x90 + (BSD.options.improv.channel - 1);
+
+    console.log('new helper');
+    for (var j = 0; j < tickEvents[i].length; j++) {
+      let eventData = tickEvents[i][j];
+      console.log('eventData',eventData);
+
+      let firstByte = eventData >> 16,
+      secondByte = (eventData & 0x00FF00) >> 8
+      thirdByte = (eventData & 0x00007F);
+      console.log(firstByte,secondByte,thirdByte);
+      /* */
+      openedMIDIOutput.send([
+        //eventData >> 16, //first byte (status)
+        noteOnChanByte,
+        (eventData & 0x00FF00) >> 8, //second byte //data
+        (eventData & 0x00007F) // third byte       //data
+      ]) //first byte
+
+    }
+
+    i += 1;
+    i %= MAX;
+    setTimeout(helper,GAMELOOP.MSPT);
+  }
+  
+
+  helper();
+}
+
+
+
+
 
   BSD.noteResolution = 4;
 
@@ -2749,6 +2844,20 @@ var fred;
           )
         })
       });
+
+
+      setTimeout(function(){
+        let pianoRoll = App.PianoRoll({
+        ...GAMELOOP,
+        events: tickEvents
+      })
+      jQuery('.piano-roll-wrap').append(pianoRoll.ui())
+
+
+
+      },2000)
+
+
     </script>
 <?php
 });

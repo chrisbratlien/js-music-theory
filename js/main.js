@@ -1,5 +1,6 @@
-import CP from  "./colorpalette.js";
-
+import CP from "./colorpalette.js";
+import PianoRoll from "./PianoRoll.js";
 window.App = {
-	ColorPalette: CP
-}
+  ColorPalette: CP,
+  PianoRoll,
+};
