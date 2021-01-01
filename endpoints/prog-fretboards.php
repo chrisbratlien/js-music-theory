@@ -1,311 +1,383 @@
-<?php 
+<?php
 
 
-add_filter('wp_title',function($o){ return 'Prog Fretboards'; });
-add_action('wp_head',function(){
+add_filter('wp_title', function ($o) {
+  return 'Prog Fretboards';
+});
+add_action('wp_head', function () {
 ?>
 
-<title>12 Fretboards</title>
+  <title>12 Fretboards</title>
 
-<style type="text/css">
-  body { 
-    font-size: 10px;
-  }
-
-  .clear-both { clear: both; }
-
-  .color-grey { color: #888; }
-  .color-white  { color: white; }
-  .color-black { color: black; }
-
-
-
-  .stringset-name { 
-    color: #888;
-   }
-
-  .venue {
-    float: left;
-    min-width: 70%;
-  }
-
-  .venue-column {
-    float: left;
-    width: 33%;
-  }
-
-
-
-  .stage { 
-    float: left;
-    margin: 0; 
-    width: 70%; 
-  }
-  
-  .inner { 
-    font-size: 10px; 
-    margin-left: 2%; 
-    width: 50%; 
-    float: left;
-  }
-
-
-  .inner table { float: left; }
-  .inner .controls { 
-    float: left; 
-  }
-
-  .inner .spacer { clear: both; }
-
-  .bsd-control { margin-top: 1rem; }
-  .hidden { display: none; } /* consider refactoring this name */
-  .invisible { visibility: hidden; }
-
-  table { 
-    border-bottom: 1px solid rgba(0,0,0,0.1); 
-    border-right: 1px solid  rgba(0,0,0,0.1); 
-    
-  }
-  table td { 
-    border-radius: 1rem;
-    border-top: 1px solid  rgba(0,0,0,0.1); 
-    border-left: 1px solid  rgba(0,0,0,0.1); 
-
-    height: 1.5em;    
-    min-width: 23px;
-    padding: 0.2em; text-align: center; 
-  
-  
-    -webkit-user-select: none;   /* Chrome/Safari/Opera */
-    -khtml-user-select: none;    /* Konqueror */
-    -moz-user-select: none;      /* Firefox */
-    -ms-user-select: none;       /* Internet Explorer/Edge */
-    text-align: center;
-    user-select: none;      
-    width: 23px;
-  
-  }
-  .fretboard-table { margin-bottom: 1.75em; }    
-  
-  .cell { cursor: pointer; }
-  table td { cursor: pointer; }
-  
-  .hide-text td { color: transparent; }
-
-
-  @media print  { 
-    .noprint { display: none;  }
-
-    body { font-size: 7pt; }
-    .inner { font-size: 7pt; }
-    
-    .stage { 
-      color : #777;
-      color: rgba(0,0,0,0.5); 
+  <style type="text/css">
+    body {
+      font-size: 10px;
     }
 
-    .inner { page-break-inside: avoid; }
-
-
-    .featured { 
-      color: red !important; 
-      background: red !important; 
+    .clear-both {
+      clear: both;
     }
-  
-  
-  }
-  
- 
-  .controls { margin-left: 0.4rem; }
-  .controls .fa-close { cursor: pointer; }
+
+    .color-grey {
+      color: #888;
+    }
+
+    .color-white {
+      color: white;
+    }
+
+    .color-black {
+      color: black;
+    }
 
 
 
-  .extra .was-once-featured {
-    background: #ccc;
-    color: white;
-  }
-  .predict .was-once-featured {
-    /*
+    .stringset-name {
+      color: #888;
+    }
+
+    .venue {
+      float: left;
+      min-width: 70%;
+    }
+
+    .venue-column {
+      float: left;
+      width: 33%;
+    }
+
+
+
+    .stage {
+      float: left;
+      margin: 0;
+      width: 70%;
+    }
+
+    .inner {
+      font-size: 10px;
+      margin-left: 2%;
+      width: 50%;
+      float: left;
+    }
+
+
+    .inner table {
+      float: left;
+    }
+
+    .inner .controls {
+      float: left;
+    }
+
+    .inner .spacer {
+      clear: both;
+    }
+
+    .bsd-control {
+      margin-top: 1rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* consider refactoring this name */
+    .invisible {
+      visibility: hidden;
+    }
+
+    table {
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+      border-right: 1px solid rgba(0, 0, 0, 0.1);
+
+    }
+
+    table td {
+      border-radius: 1rem;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+      border-left: 1px solid rgba(0, 0, 0, 0.1);
+
+      height: 1.5em;
+      min-width: 23px;
+      padding: 0.2em;
+      text-align: center;
+
+
+      -webkit-user-select: none;
+      /* Chrome/Safari/Opera */
+      -khtml-user-select: none;
+      /* Konqueror */
+      -moz-user-select: none;
+      /* Firefox */
+      -ms-user-select: none;
+      /* Internet Explorer/Edge */
+      text-align: center;
+      user-select: none;
+      width: 23px;
+
+    }
+
+    .fretboard-table {
+      margin-bottom: 1.75em;
+    }
+
+    .cell {
+      cursor: pointer;
+    }
+
+    table td {
+      cursor: pointer;
+    }
+
+    .hide-text td {
+      color: transparent;
+    }
+
+
+    @media print {
+      .noprint {
+        display: none;
+      }
+
+      body {
+        font-size: 7pt;
+      }
+
+      .inner {
+        font-size: 7pt;
+      }
+
+      .stage {
+        color: #777;
+        color: rgba(0, 0, 0, 0.5);
+      }
+
+      .inner {
+        page-break-inside: avoid;
+      }
+
+
+      .featured {
+        color: red !important;
+        background: red !important;
+      }
+
+
+    }
+
+
+    .controls {
+      margin-left: 0.4rem;
+    }
+
+    .controls .fa-close {
+      cursor: pointer;
+    }
+
+
+
+    .extra .was-once-featured {
+      background: #ccc;
+      color: white;
+    }
+
+    .predict .was-once-featured {
+      /*
     background: #ccc;
     color: white;
     **/
-  }
+    }
 
 
 
-  .extra .featured { 
-    background: yellow;
-    color: black;
-  }
+    .extra .featured {
+      background: yellow;
+      color: black;
+    }
 
 
 
-  .featured { 
-    color: black !important;
-    background: yellow !important;
-  }
+    .featured {
+      color: black !important;
+      background: yellow !important;
+    }
 
 
-  /**
+    /**
   .control.play-all { background: green; height: 50px; max-height: 50px; line-height: 50px; } 
   .control.play-all:active { background: #0f0; }
-  **/ 
-   
-
-
-  .venue-footer { 
-    height: 400px; 
-  }
-  
-
-  .song-list { 
-    list-style-type: none; 
-    width: 50%; 
-  }
-  .song-list li { 
-    cursor: pointer; 
-    font-size: 1.2rem; 
-    padding: 3px; 
-  }
-  .song-list .selected{ 
-    background: #409; 
-    color: white; 
-  }
-
-
-  .song-form-position-wrap { 
-    float: right;
-    width: 30%; 
-  }
-
-  .song-form-position {
-    width: 100%;
-  }
-
-  .song-form-position .bar,   .song-cycle-position .cycle { 
-    background: #d5cbe2;
-    color: white;
-    cursor: pointer;
-    float: left;
-    font-size: 1.2rem;
-    height: 45px;
-    line-height: 45px;
-    text-align: center;
-    width: 25%; 
-  }
-
-  .song-form-position-wrap .active {
-    background: yellow;
-    color: black;
-  }
-
-
-  .bar-16, .bar-17, .bar-18, .bar-19 {
-    margin-top: 10px;
-  }
-
-  .bar-32, .bar-33, .bar-34, .bar-35 {
-    margin-top: 10px;
-  }
-
-  .bar-48, .bar-49, .bar-50, .bar-51 {
-    margin-top: 10px;
-  }
-
-
-  .form-progression .form-group {
-    width: 100%;
-  }
-  .form-progression .progression {
-    width: 90%;
-  }
-  .form-progression .btn-start {
-    width: 8%;
-  }
-
-  .song-cycle-position {
-    width: 100%;
-  }
+  **/
 
 
 
+    .venue-footer {
+      height: 400px;
+    }
+
+
+    .song-list {
+      list-style-type: none;
+      width: 50%;
+    }
+
+    .song-list li {
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 3px;
+    }
+
+    .song-list .selected {
+      background: #409;
+      color: white;
+    }
+
+
+    .song-form-position-wrap {
+      float: right;
+      width: 30%;
+    }
+
+    .song-form-position {
+      width: 100%;
+    }
+
+    .song-form-position .bar,
+    .song-cycle-position .cycle {
+      background: #d5cbe2;
+      color: white;
+      cursor: pointer;
+      float: left;
+      font-size: 1.2rem;
+      height: 45px;
+      line-height: 45px;
+      text-align: center;
+      width: 25%;
+    }
+
+    .song-form-position-wrap .active {
+      background: yellow;
+      color: black;
+    }
+
+
+    .bar-16,
+    .bar-17,
+    .bar-18,
+    .bar-19 {
+      margin-top: 10px;
+    }
+
+    .bar-32,
+    .bar-33,
+    .bar-34,
+    .bar-35 {
+      margin-top: 10px;
+    }
+
+    .bar-48,
+    .bar-49,
+    .bar-50,
+    .bar-51 {
+      margin-top: 10px;
+    }
+
+
+    .form-progression .form-group {
+      width: 100%;
+    }
+
+    .form-progression .progression {
+      width: 90%;
+    }
+
+    .form-progression .btn-start {
+      width: 8%;
+    }
+
+    .song-cycle-position {
+      width: 100%;
+    }
 
 
 
-.tiny td {
-  min-width: 15px;
-  /* font-size: 1rem; */
-  height: 15px;
-  width: 15px;
-  height: 10px;
-  min-height: 10px;
-  font-size: 10px;
-  line-height: 10px;
-}
-
-.tiny .spacer {
-  display: none;
-}
-
-.tiny .chord-name {
-  font-size: 10px;
-  margin: 0;
-}
-
-.tiny .inner .controls {
-  display: none;
-}
-
-.tiny .fretboard-table {
-  margin-bottom: 2px;
-}
-
-
-.fret {
-  letter-spacing: -0.2rem;
-}
-
-
-.svg-wrap {
-  min-width: 50%;
-  margin: 0 auto;
-  width: 50%;
-}
-.svg-wrap .bg {
-  fill: blanchedalmond;
-}
-.svg-wrap .fretted {
-  /* fill: cornsilk; **/
-}
-
-div.dg.ac {
-  top: 50px;
-}
-
-.piano-roll-cell.active {
-  background: #409;
-}
 
 
 
-/* Light mode */
-@media (prefers-color-scheme: light) {
-    body {
+    .tiny td {
+      min-width: 15px;
+      /* font-size: 1rem; */
+      height: 15px;
+      width: 15px;
+      height: 10px;
+      min-height: 10px;
+      font-size: 10px;
+      line-height: 10px;
+    }
+
+    .tiny .spacer {
+      display: none;
+    }
+
+    .tiny .chord-name {
+      font-size: 10px;
+      margin: 0;
+    }
+
+    .tiny .inner .controls {
+      display: none;
+    }
+
+    .tiny .fretboard-table {
+      margin-bottom: 2px;
+    }
+
+
+    .fret {
+      letter-spacing: -0.2rem;
+    }
+
+
+    .svg-wrap {
+      min-width: 50%;
+      margin: 0 auto;
+      width: 50%;
+    }
+
+    .svg-wrap .bg {
+      fill: blanchedalmond;
+    }
+
+    .svg-wrap .fretted {
+      /* fill: cornsilk; **/
+    }
+
+    div.dg.ac {
+      top: 50px;
+    }
+
+    .piano-roll-cell.active {
+      background: #409;
+    }
+
+
+
+    /* Light mode */
+    @media (prefers-color-scheme: light) {
+      body {
         background-color: white;
         color: #444;
+      }
     }
-}
 
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-    body {
+    /* Dark mode */
+    @media (prefers-color-scheme: dark) {
+      body {
         background-color: #303030;
         color: white;
+      }
     }
-}
-
-</style>
+  </style>
 
 <?php
 });
@@ -330,32 +402,32 @@ get_header(); ?>
 
 <div class="controls noprint">
 
-<div class="color-palette-wrap noprint">
-</div>
-      <label>Beats per Measure</label>
-      <select class="beats-per-measure">
-        <option value="3">3</option>
-        <option value="4">4</option>
-      </select>
+  <div class="color-palette-wrap noprint">
+  </div>
+  <label>Beats per Measure</label>
+  <select class="beats-per-measure">
+    <option value="3">3</option>
+    <option value="4">4</option>
+  </select>
 
-      <label>Note Resolution</label>
-      <select class="note-resolution">
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="4">4</option>
-        <option value="8">8</option>
-        <option value="16">16</option>
-      </select>
+  <label>Note Resolution</label>
+  <select class="note-resolution">
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="4">4</option>
+    <option value="8">8</option>
+    <option value="16">16</option>
+  </select>
 
 
-        <div class="form-inline form-progression">
-          <label>Progression</label>
-          <div class="form-group">
-            <button class="btn btn-info btn-start">Start</button>          
-            <input type="text" id="progression" class="form-control progression" />
-          </div>
-        </div>
-        
+  <div class="form-inline form-progression">
+    <label>Progression</label>
+    <div class="form-group">
+      <button class="btn btn-info btn-start">Start</button>
+      <input type="text" id="progression" class="form-control progression" />
+    </div>
+  </div>
+
 
   <div class="clear-both">&nbsp;</div>
 
@@ -368,13 +440,13 @@ get_header(); ?>
 
   <div class="bsd-control">
     <label>
-      <input class="scroll-to-board" type="checkbox">      
+      <input class="scroll-to-board" type="checkbox">
       Scroll to Current Chord's Fretboard
     </label>
   </div>
 
-  
-  
+
+
   <div class="bsd-control">
     <label>
       <input class="show-current-chord-fretboard-only" type="checkbox">
@@ -383,38 +455,38 @@ get_header(); ?>
   </div>
 
   <div class="slider-wrap bsd-control">
-      <label>Min-Max Frets</label>
-      <span class="fret-range-amount">0-17</span>
-      <div class="slider fret-range-input"></div>
-      <div style="clear: both;">&nbsp;</div>
+    <label>Min-Max Frets</label>
+    <span class="fret-range-amount">0-17</span>
+    <div class="slider fret-range-input"></div>
+    <div style="clear: both;">&nbsp;</div>
   </div>
-        <label>String Set</label>
+  <label>String Set</label>
 
-        <select class="stringset">
-          <optgroup label="All">
-            <option value="654321">654321</option>
-          </optgroup>
-          <optgroup label="Drop 2">
-            <option value="4321">4321</option>
-            <option value="5432">5432</option>
-            <option value="6543">6543</option>
-          </optgroup>
-          <optgroup label="Drop 3">
-            <option value="6432">6432</option>
-            <option value="5321">5321</option>            
-          </optgroup>
-          <optgroup label="Other">
-            <option value="64321">64321</option>
-            <option value="54321">54321</option>
-            <option value="321">321</option>
-            <option value="432">432</option>
-            <option value="543">543</option>
-            <option value="654">654</option>
-            <option value="643">643</option>
-            <option value="531">531</option>
-            <option value="21">21</option>
-          </optgroup>
-        </select>
+  <select class="stringset">
+    <optgroup label="All">
+      <option value="654321">654321</option>
+    </optgroup>
+    <optgroup label="Drop 2">
+      <option value="4321">4321</option>
+      <option value="5432">5432</option>
+      <option value="6543">6543</option>
+    </optgroup>
+    <optgroup label="Drop 3">
+      <option value="6432">6432</option>
+      <option value="5321">5321</option>
+    </optgroup>
+    <optgroup label="Other">
+      <option value="64321">64321</option>
+      <option value="54321">54321</option>
+      <option value="321">321</option>
+      <option value="432">432</option>
+      <option value="543">543</option>
+      <option value="654">654</option>
+      <option value="643">643</option>
+      <option value="531">531</option>
+      <option value="21">21</option>
+    </optgroup>
+  </select>
 
 
   <br />
@@ -437,7 +509,7 @@ get_header(); ?>
 <div class="venue">
   <h3 class="song-name"></h3>
   <h5 class="stringset-name"></h5>
-  
+
   <div class="song-form-position-wrap noprint">
     Cycle
     <div class="song-cycle-position noprint"></div>
@@ -454,8 +526,9 @@ get_header(); ?>
 <div class="venue-footer noprint clear-both">
 </div>
 <div class="piano-roll-wrap">
-
 </div>
+<div class="monitor-wrap"></div>
+
 <h3 class="noprint">Songs</h3>
 <div class="song-list-wrap noprint">
 </div>
@@ -477,252 +550,256 @@ get_header(); ?>
     </div>
   </div>
 </div><!-- modal -->
-    
+
 
 <?php
 
-add_action('wp_footer',function(){
+add_action('wp_footer', function () {
 ?>
-    <script src="<?php bloginfo('url'); ?>/lib/Snap.svg/dist/snap.svg.js"></script>    
-    
-    <script src="<?php bloginfo('url'); ?>/lib/CodingMath/utils.js"></script>
-    <script src="<?php bloginfo('url'); ?>/lib/dat.gui.js"></script>    
-    <script src="<?php bloginfo('url'); ?>/lib/la.js"></script>
-    <script src="<?php bloginfo('url'); ?>/lib/async.min.js"></script>    
-    <script src="<?php bloginfo('url'); ?>/js/draggy.js"></script>
-    <script src="<?php bloginfo('url'); ?>/js/sticky-note.js"></script>
-    <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.colorpicker.js"></script>
-    <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.songlist.js"></script>
-    <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.simpleplayer.js"></script>
-    <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.tonalityguru.js"></script>    
-    <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.fretboard.js"></script>    
-    <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.svgfretboard.js"></script>    
-    <script type="text/javascript">
+<script>
+  let jvtool = {};
+</script>
+  <script src="<?php bloginfo('url'); ?>/lib/Snap.svg/dist/snap.svg.js"></script>
+  <script src="<?php bloginfo('url'); ?>/lib/CodingMath/utils.js"></script>
+  <script src="<?php bloginfo('url'); ?>/lib/dat.gui.js"></script>
+  <script src="<?php bloginfo('url'); ?>/lib/la.js"></script>
+  <script src="<?php bloginfo('url'); ?>/lib/async.min.js"></script>
+  <script src="<?php bloginfo('url'); ?>/js/draggy.js"></script>
+  <script src="<?php bloginfo('url'); ?>/js/sticky-note.js"></script>
+  <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.colorpicker.js"></script>
+  <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.songlist.js"></script>
+  <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.simpleplayer.js"></script>
+  <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.tonalityguru.js"></script>
+  <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.fretboard.js"></script>
+  <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.svgfretboard.js"></script>
+  <script src="<?php bloginfo('url'); ?>/js/patchList.js"></script>
+  <script type="text/javascript">
+    BSD.timeout = false;
 
 
 
-BSD.timeout = false;
-
-let defaultOptions = {
-  progCycles: 1,
-  tempo: 120,
-  bass: {
-    enabled: true,
-    midi: false,
-    channel: 1,
-    volume: 0.7,
-    pan: 64
-  },
-  chord: {
-    enabled: true,
-    midi: false,
-    channel: 2,
-    volume: 0.7,
-    pan: 64
-  },
-  highHat: {
-    enabled: true,
-    midi: false,
-    channel: 10,
-    noteNumber: 64,
-    volume: 0.7,
-    pan: 64
-  },
-  improv: {
-    enabled: true,
-    midi: false,
-    channel: 3,
-    bank: 1,
-    patch: 1,
-    volume: 0.7,
-    pan: 64,
-    insideChord: true
-  }
-};
-storage.getItem('options',function(o){
-
-  let stored = JSON.parse(o);
-  BSD.options = {
-    ...defaultOptions,
-    ...stored
-  }
-  
-  campfire.publish('options-loaded',BSD.options);  //needed?
-});
-
-///BSD.remoteStorage.getItem('foo',function(){ alert('foo'); });
-
-
-
-BSD.itemTitles = ['fundamental','octave','dominant','dominant+fourth(octave2)'];
-if (BSD.iOS) {
-  BSD.itemTitles = ['fundamental'];
-}
-////alert(BSD.itemTitles);
-
-
-BSD.progressions = [];
-
-
-BSD.durations = {
-  bass: 1500,
-  chord: 1000,
-  note: 1000
-};
-
-
-
-
-
-BSD.tests = [];
-
-
-storage.getItem('progressions',function(o){
-  ////BSD.progressions = JSON.parse(o);
-  var them = JSON.parse(o);
-  them.forEach(function(o){
-    BSD.progressions.push(o);
-  });
-  campfire.publish('progressions-loaded',BSD.progressions); //needed?
-});
-
-
-
-campfire.subscribe('progressions-loaded',function(){
-  BSD.songlist.clear();
-  BSD.progressions.forEach(function(progression){
-    ///console.log('whoah',progression);
-    BSD.songlist.addSong({
-      title: progression.title,
-      progression: progression.prog || progression.progression
-    });
-  });
-});
-
-
-BSD.remoteStorage.getItem('progressions',function(o){
-  var them = JSON.parse(o);
-  them.forEach(function(o){
-    BSD.progressions.push(o);
-  });
-  campfire.publish('progressions-loaded',BSD.progressions); //needed?
-});
-
-function saveOptions(e) {
-  storage.setItem('options',JSON.stringify(BSD.options));
-}
-
-
-campfire.subscribe('save-progressions',function(){
-  BSD.progressions = BSD.progressions.sort(BSD.sorter(function(o){ return o.title; }));
-  BSD.progressions = BSD.progressions.map(function(o){
-    if (!o.progression && o.prog) {
-      o.progression = o.prog;
-      delete o.prog;
-    }
-    return o;
-  });
-
-
-  var unique = {};
-
-  function slugger(o) {
-    return btoa(JSON.stringify(o.progression + o.title));
-  }
-  var uniqueSpecs = [];
-  BSD.progressions.forEach(function(o){
-    var hit = unique[slugger(o)];
-    if (!hit) {
-      unique[slugger(o)] = o;
-      uniqueSpecs.push(o);
-    }
-  });
-
-
-
-  if (BSD.progressions.length == 0) {
-    alert('something messed up');
-    return false;
-  }
-  if (uniqueSpecs.length == 0) {
-    alert('something messed up');
-    return false;
-  }
-
-  var data = JSON.stringify(uniqueSpecs);
-
-  ////////console.log('data!!!!!',data);
-  /////return false;
-
-  var backupDate = (new Date).toISOString().replace(/T.*$/,'');
-  
-
-  storage.setItem('progressions',data);
-  storage.setItem('progressions-' + backupDate,data);
-
-  BSD.remoteStorage.setItem('progressions',data);
-  BSD.remoteStorage.setItem('progressions-' + backupDate,data);
-
-});
-
-var btnSaveProg = jQuery('.btn-save-prog');
-btnSaveProg.click(function(){
-  var title = prompt('Title');
-  if (title) {
-    var spec = {
-      title: title,
-      progression: progInput.val()
+    let defaultOptions = {
+      progCycles: 1,
+      tempo: 120,
+      bass: {
+        enabled: true,
+        midi: false,
+        channel: 1,
+        volume: 0.7,
+        pan: 64
+      },
+      chord: {
+        enabled: true,
+        midi: false,
+        channel: 2,
+        volume: 0.7,
+        pan: 64
+      },
+      highHat: {
+        enabled: true,
+        midi: false,
+        channel: 10,
+        noteNumber: 64,
+        volume: 0.7,
+        pan: 64
+      },
+      improv: {
+        enabled: true,
+        midi: false,
+        channel: 3,
+        bank: 1,
+        patch: 1,
+        volume: 0.7,
+        pan: 64,
+        insideChord: true
+      }
     };
-    BSD.progressions.push(spec);
-    campfire.publish('save-progressions');
-  }
-});
+    storage.getItem('options', function(o) {
+
+      let stored = JSON.parse(o);
+      BSD.options = {
+        ...defaultOptions,
+        ...stored
+      }
+
+      campfire.publish('options-loaded', BSD.options); //needed?
+    });
+
+    ///BSD.remoteStorage.getItem('foo',function(){ alert('foo'); });
 
 
 
-  function checkTiny() {
-    BSD.options.tiny ? venue.addClass('tiny') : venue.removeClass('tiny');
-    BSD.options.tiny ? btnToggleTiny.html('Big') : btnToggleTiny.html('Tiny');    
-  }
-
-var venue = jQuery('.venue');
-var songName = jQuery('.song-name');
+    BSD.itemTitles = ['fundamental', 'octave', 'dominant', 'dominant+fourth(octave2)'];
+    if (BSD.iOS) {
+      BSD.itemTitles = ['fundamental'];
+    }
+    ////alert(BSD.itemTitles);
 
 
-var btnToggleTiny = jQuery('.btn-toggle-tiny');
-btnToggleTiny.click(function(){
-  BSD.options.tiny = !BSD.options.tiny;
-  storage.setItem('options',JSON.stringify(BSD.options));
-  checkTiny();
-});
-checkTiny();
-
-/**
-
-"[{"title":"Blue Bossa","prog":"C-7 C-7 F-7 F-7 D-7b5 G7 C-7 C-7 Eb-7 Ab7 DbM7 DbM7 D-7b5 G7 C-7 G7"},{"prog":"C-7|C-7|F-7|F-7|D-7b5| G7 |C-7 |C-7 |Eb-7 |Ab7 |DbM7 |DbM7 |D-7b5 |G7 |C-7| D-7b5 G7","title":"Blue Bossa (again)"},{"prog":"F7|Bb7|F7|F7|Bb7|Bb7|F7|F7|G-7|C7|F7|C7","title":"F blues #1"}]"
-
-**/
+    BSD.progressions = [];
 
 
-
-
-      BSD.foo = [];
-
-      BSD.chosenColor = BSD.colorFromHex('#bbbbbb');
-      BSD.chosenColors = [BSD.chosenColor];
+    BSD.durations = {
+      bass: 1500,
+      chord: 1000,
+      note: 1000
+    };
 
 
 
 
-      var cscale = makeScale('Cmajor');
-      var noteNames = cscale.noteNames();
-      
+
+    BSD.tests = [];
 
 
-      BSD.boards = [];
-      var colorHash = {};
-      ///var stage = jQuery('.stage');
-      
+    storage.getItem('progressions', function(o) {
+      ////BSD.progressions = JSON.parse(o);
+      var them = JSON.parse(o);
+      them.forEach(function(o) {
+        BSD.progressions.push(o);
+      });
+      campfire.publish('progressions-loaded', BSD.progressions); //needed?
+    });
+
+
+
+    campfire.subscribe('progressions-loaded', function() {
+      BSD.songlist.clear();
+      BSD.progressions.forEach(function(progression) {
+        ///console.log('whoah',progression);
+        BSD.songlist.addSong({
+          title: progression.title,
+          progression: progression.prog || progression.progression
+        });
+      });
+    });
+
+
+    BSD.remoteStorage.getItem('progressions', function(o) {
+      var them = JSON.parse(o);
+      them.forEach(function(o) {
+        BSD.progressions.push(o);
+      });
+      campfire.publish('progressions-loaded', BSD.progressions); //needed?
+    });
+
+    function saveOptions(e) {
+      storage.setItem('options', JSON.stringify(BSD.options));
+    }
+
+
+    campfire.subscribe('save-progressions', function() {
+      BSD.progressions = BSD.progressions.sort(BSD.sorter(function(o) {
+        return o.title;
+      }));
+      BSD.progressions = BSD.progressions.map(function(o) {
+        if (!o.progression && o.prog) {
+          o.progression = o.prog;
+          delete o.prog;
+        }
+        return o;
+      });
+
+
+      var unique = {};
+
+      function slugger(o) {
+        return btoa(JSON.stringify(o.progression + o.title));
+      }
+      var uniqueSpecs = [];
+      BSD.progressions.forEach(function(o) {
+        var hit = unique[slugger(o)];
+        if (!hit) {
+          unique[slugger(o)] = o;
+          uniqueSpecs.push(o);
+        }
+      });
+
+
+
+      if (BSD.progressions.length == 0) {
+        alert('something messed up');
+        return false;
+      }
+      if (uniqueSpecs.length == 0) {
+        alert('something messed up');
+        return false;
+      }
+
+      var data = JSON.stringify(uniqueSpecs);
+
+      ////////console.log('data!!!!!',data);
+      /////return false;
+
+      var backupDate = (new Date).toISOString().replace(/T.*$/, '');
+
+
+      storage.setItem('progressions', data);
+      storage.setItem('progressions-' + backupDate, data);
+
+      BSD.remoteStorage.setItem('progressions', data);
+      BSD.remoteStorage.setItem('progressions-' + backupDate, data);
+
+    });
+
+    var btnSaveProg = jQuery('.btn-save-prog');
+    btnSaveProg.click(function() {
+      var title = prompt('Title');
+      if (title) {
+        var spec = {
+          title: title,
+          progression: progInput.val()
+        };
+        BSD.progressions.push(spec);
+        campfire.publish('save-progressions');
+      }
+    });
+
+
+
+    function checkTiny() {
+      BSD.options.tiny ? venue.addClass('tiny') : venue.removeClass('tiny');
+      BSD.options.tiny ? btnToggleTiny.html('Big') : btnToggleTiny.html('Tiny');
+    }
+
+    var venue = jQuery('.venue');
+    var songName = jQuery('.song-name');
+
+
+    var btnToggleTiny = jQuery('.btn-toggle-tiny');
+    btnToggleTiny.click(function() {
+      BSD.options.tiny = !BSD.options.tiny;
+      storage.setItem('options', JSON.stringify(BSD.options));
+      checkTiny();
+    });
+    checkTiny();
+
+    /**
+
+    "[{"title":"Blue Bossa","prog":"C-7 C-7 F-7 F-7 D-7b5 G7 C-7 C-7 Eb-7 Ab7 DbM7 DbM7 D-7b5 G7 C-7 G7"},{"prog":"C-7|C-7|F-7|F-7|D-7b5| G7 |C-7 |C-7 |Eb-7 |Ab7 |DbM7 |DbM7 |D-7b5 |G7 |C-7| D-7b5 G7","title":"Blue Bossa (again)"},{"prog":"F7|Bb7|F7|F7|Bb7|Bb7|F7|F7|G-7|C7|F7|C7","title":"F blues #1"}]"
+
+    **/
+
+
+
+
+    BSD.foo = [];
+
+    BSD.chosenColor = BSD.colorFromHex('#bbbbbb');
+    BSD.chosenColors = [BSD.chosenColor];
+
+
+
+
+    var cscale = makeScale('Cmajor');
+    var noteNames = cscale.noteNames();
+
+
+
+    BSD.boards = [];
+    var colorHash = {};
+    ///var stage = jQuery('.stage');
+
 
 
     var common = context.createGain();
@@ -733,7 +810,7 @@ checkTiny();
 
 
     var convolver = context.createConvolver();
-    convolver.buffer = impulseResponse(1.5,1.5,false);
+    convolver.buffer = impulseResponse(1.5, 1.5, false);
 
     wet.gain.value = 0.4;
     wet.connect(convolver);
@@ -748,60 +825,62 @@ checkTiny();
     BSD.audioPlayer = BSD.Widgets.SimplePlayer({
       context: context,
       destination: common,
-      polyphonyCount: 48,//polyphonyCount,
+      polyphonyCount: 48, //polyphonyCount,
       itemTitles: BSD.itemTitles,
-      range: [40,128]
+      range: [40, 128]
     });
 
 
     var bassist = BSD.Widgets.SimplePlayer({
       context: context,
       destination: common,
-      polyphonyCount: 48,//polyphonyCount,
-      itemTitles: BSD.itemTitles,//['fundamental','octave','dominant','dominant+fourth(octave2)'],
-      range: [28,100]
+      polyphonyCount: 48, //polyphonyCount,
+      itemTitles: BSD.itemTitles, //['fundamental','octave','dominant','dominant+fourth(octave2)'],
+      range: [28, 100]
     });
 
 
     var keyboardist = BSD.Widgets.SimplePlayer({
       context: context,
       destination: common,
-      polyphonyCount: 48,//polyphonyCount,
-      itemTitles: BSD.itemTitles,//['fundamental','octave','dominant','dominant+fourth(octave2)'],
-      range: [28,100]
+      polyphonyCount: 48, //polyphonyCount,
+      itemTitles: BSD.itemTitles, //['fundamental','octave','dominant','dominant+fourth(octave2)'],
+      range: [28, 100]
     });
 
 
 
-   
-    var waiter = BSD.Widgets.Procrastinator({ timeout: 250 });
+
+    var waiter = BSD.Widgets.Procrastinator({
+      timeout: 250
+    });
 
 
-  var songlistWrap = jQuery('.song-list-wrap');
-  BSD.songlist.renderOn(songlistWrap);
-  BSD.songlist.subscribe('song-selected',function(song) {
-    BSD.currentSong = song;
-    songName.html(song.title);
-    ////console.log('Z>>EEEEE>>>song',song);
-    /////campfire.publish('lets-do-this',song.progression);
-    progInput.val(song.progression);
-    BSD.options.progression = song.progression;
-    storage.setItem('options',JSON.stringify(BSD.options));
-    var prog = BSD.parseProgression(song.progression);
-    campfire.publish('do-it',prog);
-  });
+    var songlistWrap = jQuery('.song-list-wrap');
+    BSD.songlist.renderOn(songlistWrap);
+    BSD.songlist.subscribe('song-selected', function(song) {
+      BSD.currentSong = song;
+      songName.html(song.title);
+      ////console.log('Z>>EEEEE>>>song',song);
+      /////campfire.publish('lets-do-this',song.progression);
+      progInput.val(song.progression);
+      BSD.options.progression = song.progression;
+      storage.setItem('options', JSON.stringify(BSD.options));
+      var prog = BSD.parseProgression(song.progression);
+      campfire.publish('do-it', prog);
+    });
 
 
 
 
     BSD.volume = 0;
-    storage.getItem('volume',function(o){
-        BSD.volume = parseFloat(o);
-        ///waiter.beg(BSD.audioPlayer,'set-master-volume',BSD.volume);
-        ////waiter.beg(bassist,'set-master-volume',BSD.volume);
-        waiter.beg(campfire,'set-master-volume',BSD.volume);
+    storage.getItem('volume', function(o) {
+      BSD.volume = parseFloat(o);
+      ///waiter.beg(BSD.audioPlayer,'set-master-volume',BSD.volume);
+      ////waiter.beg(bassist,'set-master-volume',BSD.volume);
+      waiter.beg(campfire, 'set-master-volume', BSD.volume);
 
-        jQuery( "#volume-amount" ).text( BSD.volume );
+      jQuery("#volume-amount").text(BSD.volume);
     });
 
 
@@ -810,240 +889,274 @@ checkTiny();
     gui.remember(BSD.options);
 
 
-    let mainFolder = gui.addFolder('main','Main');
-    mainFolder.add(window,'allNotesOff');
-    mainFolder.add(BSD.options,'tempo')
+    let mainFolder = gui.addFolder('main', 'Main');
+    mainFolder.add(window, 'allNotesOff');
+    mainFolder.add(BSD.options, 'tempo')
       .min(50)
       .max(250)
       .step(1)
-      .onChange(function(bpm) {         
+      .onChange(function(bpm) {
         saveOptions();
-        campfire.publish('tempo-change',bpm)
+        campfire.publish('tempo-change', bpm)
       });
-    mainFolder.add(BSD.options,'progCycles')
+    mainFolder.add(BSD.options, 'progCycles')
       .min(1)
       .max(64)
       .step(1)
       .onChange(saveOptions);
 
 
-function get7bitMSBAndLSB(orig) {
-  let msb = Math.floor( orig / 128);
-  let lsb = orig % 128;
-  //return console.log('bankSelect','decimalBankNumber',decimalBankNumber,'msb',msb,'lsb',lsb);
-  return [msb,lsb];
-}
+    function get7bitMSBAndLSB(orig) {
+      let msb = Math.floor(orig / 128);
+      let lsb = orig % 128;
+      //return console.log('bankSelect','decimalBankNumber',decimalBankNumber,'msb',msb,'lsb',lsb);
+      return [msb, lsb];
+    }
 
-function bankSelect(channel,decimalBankNumber) {
-  /*
-  http://midi.teragonaudio.com/tutr/rolarc.htm
+    function bankSelect(channel, msb, lsb) {
+      /*
+      http://midi.teragonaudio.com/tutr/rolarc.htm
 
-  http://midi.teragonaudio.com/tutr/bank.htm
+      http://midi.teragonaudio.com/tutr/bank.htm
 
-  http://www.andrelouis.com/qws/art/art009.htm
+      http://www.andrelouis.com/qws/art/art009.htm
 
-  http://www.mutools.com/info/M8/docs/mulab/using-bank-select-and-prog-changes.html
+      http://www.mutools.com/info/M8/docs/mulab/using-bank-select-and-prog-changes.html
 
-  https://beatbars.com/blog/what-is-program-change.html    
-  */
-  //return console.log('bankSelect','decimalBankNumber',decimalBankNumber,'msb',msb,'lsb',lsb);
-  let [msb, lsb] = get7bitMSBAndLSB(decimalBankNumber);
+      https://beatbars.com/blog/what-is-program-change.html    
+      */
+      //return console.log('bankSelect','decimalBankNumber',decimalBankNumber,'msb',msb,'lsb',lsb);
+      ////let [msb, lsb] = get7bitMSBAndLSB(decimalBankNumber);
 
-  openedMIDIOutput.send([
-    MIDI_CONST.CONTROL_CHANGE | (channel - 1),
-    0,
-    msb
-  ]);
-  openedMIDIOutput.send([
-    MIDI_CONST.CONTROL_CHANGE | (channel - 1),
-    0x20, //32
-    lsb
-  ]);
-}
+      openedMIDIOutput.send([
+        MIDI_CONST.CONTROL_CHANGE | (channel - 1),
+        0,
+        msb
+      ]);
+      openedMIDIOutput.send([
+        MIDI_CONST.CONTROL_CHANGE | (channel - 1),
+        0x20, //32
+        lsb
+      ]);
+    }
 
 
-    let improvFolder = gui.addFolder('improv','Improv');
-    improvFolder.add(BSD.options.improv,'enabled')
+    let improvFolder = gui.addFolder('improv', 'Improv');
+    improvFolder.add(BSD.options.improv, 'enabled')
       .onChange(saveOptions);
-    improvFolder.add(BSD.options.improv,'midi')
+    improvFolder.add(BSD.options.improv, 'midi')
       .onChange(saveOptions);
-    improvFolder.add(BSD.options.improv,'channel')
+    improvFolder.add(BSD.options.improv, 'channel')
       .min(1)
       .max(16)
       .step(1)
       .onChange(saveOptions);
-    improvFolder.add(BSD.options.improv,'volume')
+    improvFolder.add(BSD.options.improv, 'volume')
       .min(0)
       .max(1)
       .onChange(saveOptions);
-    improvFolder.add(BSD.options.improv,'pan')
+    improvFolder.add(BSD.options.improv, 'pan')
       .min(0)
       .max(127)
-      .onChange(function(e) { 
+      .onChange(function(e) {
         saveOptions();
         openedMIDIOutput.send([
           MIDI_CONST.CONTROL_CHANGE | (BSD.options.improv.channel - 1),
           MIDI_CONST.CC_PAN,
-          e 
-        ]);  
+          e
+        ]);
       });
-    improvFolder.add(BSD.options.improv,'bank')
+
+
+      /*
+    improvFolder.add(BSD.options.improv, 'bank')
       .min(1)
       .max(128)
       .step(1)
-      .onChange(function(v){
+      .onChange(function(v) {
         saveOptions();
-        bankSelect(BSD.options.improv.channel,BSD.options.improv.bank);
+        bankSelect(BSD.options.improv.channel, BSD.options.improv.bank);
       });
-    improvFolder.add(BSD.options.improv,'patch')
+    */
+    
+      let empty = { name: false }
+
+
+    function hookupJV(parentFolder,opts){
+      Object.keys(jvtool.banks).forEach((bankName,i) => {
+        let bankOpts = jvtool.banks[bankName];
+        let bankFolder = parentFolder.addFolder('bankFolder'+i,bankName);
+        bankOpts.patches.forEach(patch => {
+          let booj = {
+            doIt: function() {
+              let p = + patch.number - 1;
+              console.log('opts',opts,'bankOpts',bankOpts,'patch',patch,'p',p);
+              bankSelect(opts.channel,bankOpts.msb,bankOpts.lsb,p);
+              openedMIDIOutput.send([
+                MIDI_CONST.PROGRAM_CHANGE | (BSD.options.improv.channel - 1),
+                p 
+              ]);
+            }
+
+          }
+          bankFolder.add(booj,'doIt')
+          .name(patch.name)
+        })
+      })
+    }
+
+    hookupJV(improvFolder,BSD.options.improv);
+
+
+    improvFolder.add(BSD.options.improv, 'patch')
       .min(1)
       .max(128)
       .step(1)
-      .onChange(function(v){
+      .onChange(function(v) {
         saveOptions();
         //bank first
-        bankSelect(BSD.options.improv.channel,BSD.options.improv.bank);
+        ///bankSelect(BSD.options.improv.channel, BSD.options.improv.bank);
         //set patch (within the bank set previously)
         openedMIDIOutput.send([
           MIDI_CONST.PROGRAM_CHANGE | (BSD.options.improv.channel - 1),
-          BSD.options.improv.patch-1
-        ]);     
+          BSD.options.improv.patch - 1
+        ]);
       });
 
 
 
 
-    improvFolder.add(BSD.options.improv,'insideChord')
+    improvFolder.add(BSD.options.improv, 'insideChord')
       .onChange(saveOptions);
 
 
-    let bassFolder = gui.addFolder('bass','Bass');
-    bassFolder.add(BSD.options.bass,'enabled')
+    let bassFolder = gui.addFolder('bass', 'Bass');
+    bassFolder.add(BSD.options.bass, 'enabled')
       .onChange(saveOptions);
-    bassFolder.add(BSD.options.bass,'midi')
+    bassFolder.add(BSD.options.bass, 'midi')
       .onChange(saveOptions);
-    bassFolder.add(BSD.options.bass,'channel')
+    bassFolder.add(BSD.options.bass, 'channel')
       .min(1)
       .max(16)
       .step(1)
       .onChange(saveOptions);
-    bassFolder.add(BSD.options.bass,'volume')
+    bassFolder.add(BSD.options.bass, 'volume')
       .min(0)
       .max(1)
       .onChange(saveOptions);
-    bassFolder.add(BSD.options.bass,'pan')
+    bassFolder.add(BSD.options.bass, 'pan')
       .min(0)
       .max(127)
-      .onChange(function(e) { 
+      .onChange(function(e) {
         saveOptions();
         openedMIDIOutput.send([
           MIDI_CONST.CONTROL_CHANGE | (BSD.options.bass.channel - 1),
           MIDI_CONST.CC_PAN,
-          e 
-        ]);  
+          e
+        ]);
       });
 
 
 
 
-    let chordFolder = gui.addFolder('chord','Chords');
+    let chordFolder = gui.addFolder('chord', 'Chords');
 
-    chordFolder.add(BSD.options.chord,'enabled').onChange(saveOptions);
-    chordFolder.add(BSD.options.chord,'midi').onChange(saveOptions);
-    chordFolder.add(BSD.options.chord,'channel')
+    chordFolder.add(BSD.options.chord, 'enabled').onChange(saveOptions);
+    chordFolder.add(BSD.options.chord, 'midi').onChange(saveOptions);
+    chordFolder.add(BSD.options.chord, 'channel')
       .min(1)
       .max(16)
       .step(1)
       .onChange(saveOptions);
-    chordFolder.add(BSD.options.chord,'volume')
+    chordFolder.add(BSD.options.chord, 'volume')
       .min(0)
       .max(1)
       .onChange(saveOptions);
-    chordFolder.add(BSD.options.chord,'pan')
+    chordFolder.add(BSD.options.chord, 'pan')
       .min(0)
       .max(127)
-      .onChange(function(e) { 
+      .onChange(function(e) {
         saveOptions();
         openedMIDIOutput.send([
           MIDI_CONST.CONTROL_CHANGE | (BSD.options.chord.channel - 1),
           MIDI_CONST.CC_PAN,
-          e 
-        ]);  
+          e
+        ]);
       });
 
 
-    let hatFolder = gui.addFolder('highHat','High-hat');
-    hatFolder.add(BSD.options.highHat,'enabled').onChange(saveOptions);
-    hatFolder.add(BSD.options.highHat,'midi').onChange(saveOptions);
-    hatFolder.add(BSD.options.highHat,'channel')
+    let hatFolder = gui.addFolder('highHat', 'High-hat');
+    hatFolder.add(BSD.options.highHat, 'enabled').onChange(saveOptions);
+    hatFolder.add(BSD.options.highHat, 'midi').onChange(saveOptions);
+    hatFolder.add(BSD.options.highHat, 'channel')
       .min(1)
       .max(16)
       .step(1)
       .onChange(saveOptions);
-    hatFolder.add(BSD.options.highHat,'noteNumber')
+    hatFolder.add(BSD.options.highHat, 'noteNumber')
       .min(0)
       .max(127)
       .step(1)
       .onChange(saveOptions);
-    hatFolder.add(BSD.options.highHat,'volume')
+    hatFolder.add(BSD.options.highHat, 'volume')
       .min(0)
       .max(1)
       .onChange(saveOptions);
-    hatFolder.add(BSD.options.highHat,'pan')
+    hatFolder.add(BSD.options.highHat, 'pan')
       .min(0)
       .max(127)
-      .onChange(function(e) { 
+      .onChange(function(e) {
         saveOptions();
         openedMIDIOutput.send([
           MIDI_CONST.CONTROL_CHANGE | (BSD.options.highHat.channel - 1),
           MIDI_CONST.CC_PAN,
-          e 
-        ]);  
+          e
+        ]);
       });
 
 
-    $( "#volume-input" ).slider({
+    $("#volume-input").slider({
       orientation: "horizontal",
       range: "min",
       min: 0,
       max: 0.1,
       step: 0.001,
       value: BSD.volume,
-      slide: function( event, ui ) {
+      slide: function(event, ui) {
         var newVolume = ui.value;
         BSD.volume = newVolume;
-        waiter.beg(campfire,'set-master-volume',BSD.volume);
-        storage.setItem('volume',newVolume);  
+        waiter.beg(campfire, 'set-master-volume', BSD.volume);
+        storage.setItem('volume', newVolume);
         ////waiter.beg(BSD.chunker,'set-master-volume',ui.value);
-        jQuery( "#volume-amount" ).text( newVolume );
+        jQuery("#volume-amount").text(newVolume);
       }
     });
 
-/*
-    campfire.subscribe('render-tempo-control',function(){
-      jQuery( "#tempo-amount" ).text( BSD.options.tempo );
-      jQuery( "#tempo-input" ).slider({
-        orientation: "horizontal",
-        range: "min",
-        min: 0,
-        max: 250,
-        step: 1,
-        value: BSD.options.tempo,
-        slide: function( event, ui ) {
-          var n = ui.value;
-          BSD.options.tempo = n;
-          storage.setItem('options',JSON.stringify(BSD.options));
-          jQuery( "#tempo-amount" ).text( n );
-        }
-      });
-    });
-*/
+    /*
+        campfire.subscribe('render-tempo-control',function(){
+          jQuery( "#tempo-amount" ).text( BSD.options.tempo );
+          jQuery( "#tempo-input" ).slider({
+            orientation: "horizontal",
+            range: "min",
+            min: 0,
+            max: 250,
+            step: 1,
+            value: BSD.options.tempo,
+            slide: function( event, ui ) {
+              var n = ui.value;
+              BSD.options.tempo = n;
+              storage.setItem('options',JSON.stringify(BSD.options));
+              jQuery( "#tempo-amount" ).text( n );
+            }
+          });
+        });
+    */
 
 
 
-    campfire.subscribe('render-fret-range-control',function(){
-      jQuery('.fret-range-amount').text( 
-        BSD.options.fretRange.toString().replace(/,/,'-')
+    campfire.subscribe('render-fret-range-control', function() {
+      jQuery('.fret-range-amount').text(
+        BSD.options.fretRange.toString().replace(/,/, '-')
       );
       jQuery('.fret-range-input').slider({
         orientation: 'horizontal',
@@ -1052,15 +1165,15 @@ function bankSelect(channel,decimalBankNumber) {
         max: 20,
         step: 1,
         values: BSD.options.fretRange,
-        slide: function( event, ui ) {
+        slide: function(event, ui) {
           var n = ui.values;
           BSD.options.fretRange = n;
-          storage.setItem('options',JSON.stringify(BSD.options));
-          console.log('n',n);
-          jQuery( '.fret-range-amount' ).text( 
-            n.toString().replace(/,/,'-')
+          storage.setItem('options', JSON.stringify(BSD.options));
+          console.log('n', n);
+          jQuery('.fret-range-amount').text(
+            n.toString().replace(/,/, '-')
           );
-          campfire.publish('fret-range-updated',BSD.options.fretRange);
+          campfire.publish('fret-range-updated', BSD.options.fretRange);
         }
       });
     });
@@ -1068,30 +1181,30 @@ function bankSelect(channel,decimalBankNumber) {
 
     BSD.beatsPerMeasure = 4;
     var ddBeatsPerMeasure = jQuery('.beats-per-measure');
-    ddBeatsPerMeasure.change(function(){
-      BSD.beatsPerMeasure = parseInt(this.value,10);
+    ddBeatsPerMeasure.change(function() {
+      BSD.beatsPerMeasure = parseInt(this.value, 10);
     });
-    ddBeatsPerMeasure.find('option[value="' + BSD.beatsPerMeasure + '"]').attr('selected',true);
+    ddBeatsPerMeasure.find('option[value="' + BSD.beatsPerMeasure + '"]').attr('selected', true);
 
     BSD.noteResolution = 4;
     var ddNoteResolution = jQuery('.note-resolution');
-    ddNoteResolution.change(function(){
-      BSD.noteResolution = parseInt(this.value,10);
+    ddNoteResolution.change(function() {
+      BSD.noteResolution = parseInt(this.value, 10);
     });
-    ddNoteResolution.find('option[value="' + BSD.noteResolution + '"]').attr('selected',true);
+    ddNoteResolution.find('option[value="' + BSD.noteResolution + '"]').attr('selected', true);
 
 
     if (!BSD.options.stringSet) {
       BSD.options.stringSet = '654321';
-      storage.setItem('options',JSON.stringify(BSD.options));
+      storage.setItem('options', JSON.stringify(BSD.options));
     }
     var ddStringSet = jQuery('.stringset');
-    ddStringSet.change(function(){
+    ddStringSet.change(function() {
       ///////BSD.beatsPerMeasure = parseInt(this.value,10);
       BSD.options.stringSet = this.value;
-      storage.setItem('options',JSON.stringify(BSD.options));
+      storage.setItem('options', JSON.stringify(BSD.options));
     });
-    ddStringSet.find('option[value="' + BSD.options.stringSet + '"]').attr('selected',true);
+    ddStringSet.find('option[value="' + BSD.options.stringSet + '"]').attr('selected', true);
 
 
 
@@ -1102,7 +1215,7 @@ function bankSelect(channel,decimalBankNumber) {
 
 
     if (!BSD.options.fretRange) {
-      BSD.options.fretRange = [0,15];
+      BSD.options.fretRange = [0, 15];
     }
     campfire.publish('render-fret-range-control');
 
@@ -1110,1766 +1223,1819 @@ function bankSelect(channel,decimalBankNumber) {
 
 
     var cbShowCurrentChordFretboadOnly = jQuery('.show-current-chord-fretboard-only');
-    cbShowCurrentChordFretboadOnly.attr('checked',BSD.options.showCurrentChordFretboadOnly);
-    cbShowCurrentChordFretboadOnly.change(function(){
+    cbShowCurrentChordFretboadOnly.attr('checked', BSD.options.showCurrentChordFretboadOnly);
+    cbShowCurrentChordFretboadOnly.change(function() {
       BSD.options.showCurrentChordFretboadOnly = this.checked;
-      storage.setItem('options',JSON.stringify(BSD.options));
+      storage.setItem('options', JSON.stringify(BSD.options));
     });
 
 
     var cbScrollToBoard = jQuery('.scroll-to-board');
-    cbScrollToBoard.attr('checked',BSD.options.scrollToBoard);
-    cbScrollToBoard.change(function(){
+    cbScrollToBoard.attr('checked', BSD.options.scrollToBoard);
+    cbScrollToBoard.change(function() {
       BSD.options.scrollToBoard = this.checked;
-      storage.setItem('options',JSON.stringify(BSD.options));
+      storage.setItem('options', JSON.stringify(BSD.options));
     });
 
 
 
-    campfire.subscribe('fret-range-updated',function(o) {
-      BSD.boards.forEach(function(board){
-        board.publish('visible-fret-range',o);
+    campfire.subscribe('fret-range-updated', function(o) {
+      BSD.boards.forEach(function(board) {
+        board.publish('visible-fret-range', o);
       });
     });
 
 
-    campfire.subscribe('set-master-volume',function(o){
-      BSD.audioPlayer.publish('set-master-volume',o);
-      bassist.publish('set-master-volume',o);
-      keyboardist.publish('set-master-volume',o);
+    campfire.subscribe('set-master-volume', function(o) {
+      BSD.audioPlayer.publish('set-master-volume', o);
+      bassist.publish('set-master-volume', o);
+      keyboardist.publish('set-master-volume', o);
     });
 
 
-  campfire.subscribe('stop-note',function(payload) {
-    BSD.audioPlayer.stopNote(payload.note);    
-  });
-
-  //LEAD / IMPROV
-  campfire.subscribe('play-note',function(payload) {
-    if (!BSD.options.improv.enabled) { return false; }
-    
-    if (BSD.options.improv.midi) { 
-      let noteOnChannel = 143 + BSD.options.improv.channel;
-      let noteNum = payload.note.value();
-      let vel = 127 * BSD.options.improv.volume; //[0..1] -> [0..127]
-      openedMIDIOutput.send([noteOnChannel,noteNum,vel]);
-      return false; 
-    }
-    
-    BSD.audioPlayer.playNote(payload.note,payload.duration,payload.velocity);    
-  });    
-
-
-  //CHORD
-  campfire.subscribe('play-notes',function(notes) {
-
-    //console.log('notes??',notes);
-    var chord = makeChordFromNotes(notes);
-    
-    ///console.log('chord??',chord);
-    
-    campfire.publish('play-chord',{ chord: chord, duration: BSD.durations.chord });
-  });    
-
-  const MIDI_CONST = {
-    NOTE_OFF: 0x80,
-    NOTE_ON: 0x90,
-    AFTERTOUCH: 0xA0,
-    CONTROL_CHANGE: 0xB0,
-    PROGRAM_CHANGE: 0xC0,
-    CC_PAN: 10
-  };
-
-  function allNotesOff() {
-    for (var channel = 1; channel <= 16; channel += 1) { 
-      let noteOffWithzeroBasedChannel = 127 + channel;
-      for (let nv = 0; nv < 128; nv += 1) {
-        //openedMIDIOutput.send([noteOffWithzeroBasedChannel,nv,64])
-        openedMIDIOutput.send([MIDI_CONST.NOTE_OFF | (channel-1) ,nv,0]);
-        //openedMIDIOutput.send([MIDI_CONST.NOTE_ON | (channel-1) ,nv,0]);
-      }
-    }
-  }
-
-
-  campfire.subscribe('play-chord',function(o) {
-    if (!BSD.options.chord.enabled) {
-      return false;//done
-    }
-
-    var filtered = o.chord.spec.intervals
-      .select(function(n){ 
-        return n > 0 && n !== 7; 
-      }) //no root, no 5
-      .map(function(n){
-        //if (n == 10) { return n - 12; }
-        return n;
-      })
-    var rootless = Chord({ rootNote: o.chord.rootNote, intervals: filtered });
-    let midiNoteValues = rootless.notes().map(n => n.value());
-
-
-    if (!BSD.options.chord.midi) {
-      BSD.audioPlayer.playChord(rootless,o.duration);
-      return false;//done
-    }
-
-    ///console.log('rooteless notes',rootless.notes());
-    if (openedMIDIOutput && openedMIDIOutput.connection == 'open') {
-
-      let vel = 127 * BSD.options.chord.volume; //[0..1] -> [0..127]
-      let noteOnWithzeroBasedChannel = 143 + BSD.options.chord.channel; 
-      let noteOffWithzeroBasedChannel = 127 + BSD.options.chord.channel; 
-      
-      midiNoteValues.map(v => {
-        openedMIDIOutput.send([noteOnWithzeroBasedChannel,v,vel]);
-      });
-
-      //schedule the NOTE OFF
-      setTimeout(function(){
-        midiNoteValues.map(v =>{
-          openedMIDIOutput.send([noteOffWithzeroBasedChannel,v,vel]);
-        })
-      },o.duration);
-
-
-    }
-
-
-  });
-    
-    
-    
-    
-  campfire.subscribe('note-hover',function(note){
-    //console.log('note',note.name());
-    BSD.currentNote = note;
-      if (BSD.strum) {
-        BSD.audioPlayer.playNote(note,BSD.durations.note);          
-      }
-
-  });
-  
-
-  jQuery(document).on('keydown',function(e) {
-    var c = e.keyCode || e.which;
-    
-    //console.log(c);///'BSD.currentFretDiv',BSD.currentFretDiv);
-
-
-    /*** possibly obsolete...not 100% sure though yet..    
-    if (BSD.currentFretDiv && c == BSD.keycodes.f) {
-      BSD.currentFretDiv.trigger('click');    
-    }
-    ****/
-    
-
-
-    if (BSD.currentNote && c == BSD.keycodes.f) {
-      BSD.audioPlayer.playNote(BSD.currentNote,BSD.durations.note);    
-    }
-
-    if (BSD.currentChord && c == BSD.keycodes.f) {
-      BSD.audioPlayer.playChord(BSD.currentChord,BSD.durations.chord);    
-    }
-
-
-
-    if (BSD.currentNote && c == BSD.keycodes.d) {
-      BSD.strum = true;
-      ////BSD.audioPlayer.playNote(BSD.currentNote,BSD.durations.note);    
-    }
-    
-    if (e.shiftKey) {
-      BSD.strum = true;
-    }
-    
-    
-    
-  });
-  
-  jQuery(document).on('keyup',function(e) {
-    BSD.strum = false;
-  });
-      
-    
-  BSD.importJSON(BSD.baseURL + '/data/guitar.json',function(err,data) { 
-    if (err) {
-      throw err;
-      return err;
-    }
-    BSD.guitarData = data;
-  });
-  
-  var btnToggleText = jQuery('.btn-toggle-text');
-  var hideText = false;
-  btnToggleText.click(function(){
-    hideText = ! hideText;
-    hideText ? jQuery('html').addClass('hide-text') : jQuery('html').removeClass('hide-text');
-  });
-
-
-
-  
-  var btnPause = jQuery('.btn-pause');
-  btnPause.click(function(){
-
-
-    campfire.publish('first-click');
-    BSD.pause = ! BSD.pause;
-    if (BSD.pause) { 
-      campfire.publish('stop-it');
-    }
-    else {
-      if (BSD.sequence && BSD.sequence.length > 0) {
-        tick(BSD.sequence[0]);
-      }
-    }
-  });
-    
-
-var progInput = jQuery('#progression');
-progInput.on('touchend',function(){ //for iOS bug
-	///alert('hey');
-	BSD.handleFirstClick();
-});
-
-//campfire.subscribe('options-loaded',function(){
-  if (BSD.options.progression) {
-    progInput.val(BSD.options.progression);
-  }
-//});
-
-
-var btnStart = jQuery('.btn-start');
-btnStart.click(function(){
-  campfire.publish('gather-inputs-and-do-it');
-});
-btnStart.on('touchend',function(){
-  BSD.handleFirstClick();
-});
-
-
-var activeStringsInput = jQuery('.active-strings');
-activeStringsInput.blur(function(){
-  campfire.publish('gather-inputs-and-do-it');
-});
-
-campfire.subscribe('stop-it',function(){
-  clearTimeout(BSD.timeout);
-});
-
-campfire.subscribe('gather-inputs-and-do-it',function(){
-  if (progInput.val().length === 0) { 
-      campfire.publish('stop-it'); 
-      return false; 
-  }
-
-  BSD.options.progression = progInput.val(); //just the text
-  storage.setItem('options',JSON.stringify(BSD.options));
-
-
-  var prog = BSD.parseProgression(progInput.val());
-  ///////campfire.publish('do-it-prog',prog);
-
-
-
-  campfire.publish('do-it',prog);    
-});
-
-
-var extraBoard, predictBoard;
-var headerHeight = jQuery('header').height();
-var delayMS = {
-
-};
-
-
-
-function distScore(a,b) {
-  var min, max, diff, dist;
-
-  if (typeof a != "number" || typeof b != "number") { return 15; }
-  /***
-  if (a !== 0 && !a) { min = b; max = b; diff = 0; }
-  if (b !== 0 && !b) { min = a; max = a; diff = 0; }
-  if (a !== 0 && b !== 0 && !a && !b) { return 0; }
-  ***/
-  min = Math.min(a,b);
-  max = Math.max(a,b);
-  diff = max - min;
-  dist = Math.min(diff,12-diff);
-  dist = Math.abs(dist);
-  return dist;
-}
-
-
-
-function outsideJudge(o,env) {
-  var hit6 = env.majorSixthAV == o.chromaticValue; 
-  var hit9 = env.ninthAV == o.chromaticValue; 
-  var hit6or9 = hit6 || hit9;
-
-  var hit11 = env.eleventhAV == o.chromaticValue;
-  var hitSharp11 = env.sharpEleventhAV == o.chromaticValue;
-
-
-  if (BSD.options.fretRange && o.fret > BSD.options.fretRange[1]) {
-    return 'fret > maxFret';
-  }
-  if (BSD.options.fretRange && o.fret < BSD.options.fretRange[0]) {
-    return 'fret < minFret';
-  }
-
-  if (BSD.options.improv.insideChord && abstractNoteValues.indexOf(o.chromaticValue) < 0) { 
-    return 'must be inside chord, yet outside chord'; 
-  }
-
-
-
-  /** THIS IS OK, NEVERMIND
-  if (hit6 && meta.hasMinor7Quality) {
-    ///console.log('NOPE!!!!',env);
-    return 'minor7 with 6th clashes (7b with 6)';
-  }
-  ***/
-
-  if (hit6 && meta.isStrongBeat) {
-    return '6th on strong beat';    
-  }
-
-  if (env.hasMinor3rd && hit11) {
-    return "OK";
-  }
-
-
-
-  /** not always fond of this..
-  if (env.hasMajor7thQuality && hitSharp11) {
-    return "OK";
-  }
-  ***/
-
-  /* sometimes this is ok, but going back to keeping chord tones strictly on strong beat 12/9
-  if (hit6or9 && meta.hasPerfectFifth) {
-    //if (hit6) { alert('hit6'); }
-    //if (hit6) { console.log('hit6',meta); }
-    //console.log('hit6or9 meta',env);
-    return 'OK';
-  }
-  ****/
-
-
-
-  //FIXME: need UI toggle to determine which combo of outside tonalityScale and outside chord will disqualify a candidate
-  //otherwise, outside chord will always further whittle down and reduce the candidates to a set smaller than the tonalityScale, making tonalityScale useless as a filter.
-
-
-  if (meta.isStrongBeat && abstractNoteValues.indexOf(o.chromaticValue) < 0) { 
-    return 'strong beat and outside chord'; 
-  }
-
-
-  if (meta.tonalityScaleAbstractValues && meta.tonalityScaleAbstractValues.indexOf(o.chromaticValue) < 0) { 
-    return 'outside of tonalityScale'; 
-  }
-  
-
-  if (o.fret > 13) { return 'too high'; }
-  if (BSD.activeStrings && !BSD.activeStrings.find(function(as) { 
-    ///console.log('as',as,'o.string',o.string);
-    return as == o.string; 
-  })) {
-    return "not active string: " + o.string;
-  }
-
-
-  return 'OK';
-}
-
-
-
-
-function tick(cursor) { 
-  if (!cursor) { return false; }
-  delayMS.even4 = BSD.tempoToMillis(BSD.options.tempo);
-  delayMS.even1 = delayMS.even4 * BSD.beatsPerMeasure; //whole notes
-  delayMS.even2 = delayMS.even4 * 2; //half notes
-  delayMS.even8 = delayMS.even4 /2; //eighth notes
-  delayMS.even16 = delayMS.even4 /4; //eighth notes
-  delayMS.swung81 = delayMS.even4 * 2/3;
-  delayMS.swung82 = delayMS.even4 * 1/3;
-  ///var midSwung81 = (swung81;////////+even8DelayMS) / 2;/////].sum() /2;
-  delayMS.midSwung81 = delayMS.swung81;
-  //var midSwung81 = (swung81+even8DelayMS) / 2;/////].sum() /2;
-  delayMS.midSwung82 = delayMS.swung82;
-  campfire.publish('tick',cursor); //that a tick happened, 
-
-  clearTimeout(BSD.timeout);
-  delayMS.next = delayMS['even' + BSD.noteResolution];
-  if (!delayMS.next) {
-    console.log('invalid delayMS.next for resolution' + BSD.noteResolution);
-  }
-  cursor = cursor.next;
-  BSD.timeout = setTimeout(function() {
-    tick(cursor); 
-  },delayMS.next);
-}
-
-
-let tickEvents = {
-    0: [],
-    1: [],
-    2: [],
-    3: []
-}
-
-
-let GAMELOOP = {
-  BARS: 2,
-  QPBAR: 4,
-  //TPQ: 6, // ticks per quarter note or PPQN (pulse per quarter note)
-  TPQ: 1,
-  BPM: 120
-}
-
-campfire.subscribe('tempo-change', bpm => {
-  GAMELOOP.BPM = bpm;
-  GAMELOOP.TPBAR = GAMELOOP.TPQ * GAMELOOP.QPBAR;
-  GAMELOOP.TPLOOP = GAMELOOP.TPBAR * GAMELOOP.BARS;
-  GAMELOOP.MSPT = Math.floor(60000 / (GAMELOOP.BPM * GAMELOOP.TPQ));
-})
-campfire.publish('tempo-change',GAMELOOP.BPM)
-
-
-for (var i = 0; i < GAMELOOP.TPLOOP; i += 1) {
-  tickEvents[i] = [];
-}
-
-function gameloop() {
-  let i = 0;//tick index
-  let MAX = GAMELOOP.TPLOOP;
-
-
-
-  function helper() {
-    
-    let noteOnChanByte = 0x90 + (BSD.options.improv.channel - 1);
-    let velocityByte = Math.floor(BSD.options.improv.volume * 127);
-    console.log('new helper');
-    for (var j = 0; j < tickEvents[i].length; j++) {
-      let eventData = tickEvents[i][j];
-      console.log('eventData',eventData);
-
-      let firstByte = eventData >> 16,
-      secondByte = (eventData & 0x00FF00) >> 8
-      thirdByte = (eventData & 0x00007F);
-      console.log(firstByte,secondByte,thirdByte);
-      /* */
-      console.log('vvv',velocityByte,eventData & 0x00007F);
-      openedMIDIOutput.send([
-        //eventData >> 16, //first byte (status)
-        noteOnChanByte,
-        (eventData & 0x00FF00) >> 8, //second byte //data
-        //(eventData & 0x00007F) // third byte       //data
-        velocityByte
-      ]) 
-
-    }
-
-    i += 1;
-    i %= MAX;
-    setTimeout(helper,GAMELOOP.MSPT);
-  }
-  
-
-  helper();
-}
-
-
-
-
-
-  BSD.noteResolution = 4;
-
-  var direction = (Math.random() > 0.5) ? 'up' : 'down'; //initial direction.
-  var nextDirection = { 'up': 'down', 'down': 'up'};
-  
-  var avgFret,
-  avgString,
-  drift3,
-  drift2,
-  candidates,
-  abstractNoteValues,
-  result,
-  idealFret,
-  lastResult,
-  lastAbstractValue,
-  lastValue,
-  lastString,
-  lastStrings,
-  lastFret,
-  lastFrets,
-  lastFretDiff,
-  lastFretDiffs,
-  lastNote,
-  meta;
-
-
-  ////var bunches = chords.map(function(o){ return o.abstractNoteValues(); });
-  var rejections = [];
-  var outsideRejections = [];
-
-  var chordIdx = 0;
-
-  var myNote = false;
-
-  var songFormPosition = jQuery('.song-form-position');
-  var songCyclePosition = jQuery('.song-cycle-position');
-  ///var songCycleIndicator = jQuery('.song-cycle-indicator');
-function initLast() {
-  meta = {};
-  avgFret = false;
-  avgString = false;
-  drift2 = false;
-  drift3 = false;
-
-  idealFret = 9; //starter...will get overriden
-  abstractNoteValues = [];
-  candidates = [];
-  lastAbstractValue = false;
-  lastValue = false; //60
-  lastDiff = false;
-  lastString = false;/////2; //5
-  lastStrings = [];///[5];
-  lastFret = false;////BSD.idealFret || 7;//3;
-  lastFrets = [];////////[3];
-  lastFretDiff = 0;
-  lastFretDiffs = [];
-  lastNote = Note(60);
-  result = false;
-  lastResult = false;
-  BSD.sequence = [];
-
-  meta.maxNoteValue = BSD.guitarData.find(function(o){
-    var result = o.string == 1 && o.fret == BSD.options.fretRange[1];
-    return result;
-  }).noteValue;
-
-  meta.minNoteValue = BSD.guitarData.find(function(o){
-    var result = o.string == 6 && o.fret == BSD.options.fretRange[0];
-    return result;
-  }).noteValue;
-
-
-}
-
-
-
-
-
-function judge(o,env) {
-  var diff = lastValue ? o.noteValue - lastValue : 0;
-  //if (Math.abs(diff) > 6) { return 'diff>6:' + diff; }
-  //if (Math.abs(diff) > 5) { return 'diff>5:' + diff; }
-  if (Math.abs(diff) > env.maxDiff) { return 'diff > ' + env.maxDiff + ': ' + diff; }
-  var idealFretDiff = Math.abs(o.fret - idealFret);
-  if (idealFretDiff > 9) { return 'idealFretDiff>9'; }      
-  if (env.chordNoteIdx > 0 && diff > 0 && direction == 'down') { return 'wrong dir, direction=' + direction + ', diff=' + diff; }
-  if (env.chordNoteIdx > 0 && diff < 0 && direction == 'up') { return 'wrong dir, direction=' + direction + ', diff=' + diff; }
-  if (lastValue && diff == 0) { return 'no diff'; }
-  var fretDiff = lastFret ? o.fret - lastFret : 0; 
-  //FIXME: can probably simplify this once my goals are better understood
-  if (drift3 && Math.abs(drift3 + fretDiff) > 4) { 
-    return 'drift3: drifting too much in one direction, drift3: ' + drift3 + ' fretDiff: ' + fretDiff; 
-  }
-  if (drift2 && Math.abs(drift2 + fretDiff) > 4) { 
-    return 'drift2: drifting too much in one direction, drift2: ' + drift2 + ' fretDiff: ' + fretDiff; 
-  }
-  if (lastFretDiff && Math.abs(lastFretDiff + fretDiff) > 4) { 
-    return 'lastFretDiff: drifting too much in one direction, lastFretDiff: ' + lastFretDiff + ' fretDiff: ' + fretDiff; 
-  }
-  var fretDistance = Math.abs(fretDiff);
-  if (fretDistance > env.maxFretDistance) { return 'fretDistance > ' + env.maxFretDistance; }
-  ///if (fretDistance > 3) { return 'fretDistance > 3'; }
-  if (lastFretDiff && Math.abs(lastFretDiff + fretDiff) > 4) { return 'lastFretDiff+fretDiff >4'; } ///if they don't cancel each other out and their total is too big
-
-  var stringDiff = lastString? Math.abs(o.string - lastString) : 0;
-  if (stringDiff > 2) { return 'stringDiff>2'; }
-
-  //now for the avg
-  var avgFretDistance = avgFret ? Math.abs(o.fret - avgFret) : 0;
-  var avgStringDiff = avgString ? Math.abs(o.string - avgString): 0;
-  if (avgFretDistance > 4) { return 'avgFretDistance>4'; }
-  ///if (avgStringDiff > 2) { return 'avgStringDiff>2'; }
-
-  return 'OK';
-}
-
-function criteria(o,env) {
-  var outsideDecision = outsideJudge(o,env);
-  if (outsideDecision !== 'OK') { 
-    outsideRejections.push({
-        candidate: o,
-        decision:outsideDecision,
-        lastResult: lastResult
-    });
-    return outsideDecision;
-  }
-  //console.log('decision',decision);
-  var judgeDecision = judge(o,env);
-
-  if (judgeDecision != 'OK') { //chordNoteIdx == 0 && 
-    rejections.push({
-        candidate: o,
-        decision: judgeDecision,
-        lastResult: lastResult
-    });
-  }
-  return judgeDecision;
-};
-
-var guru = BSD.Widgets.TonalityGuru({});
-
-var svgWrap = jQuery('.svg-wrap');
-/**
-BSD.importHTML(BSD.baseURL + '/images/C_Major_Scale_on_fretboard.svg',function(err,data){
-  if (err) { return console.log(err); }
-  svgWrap.append(data);
-  //console.log('data?',data);
-  svgBoard = Snap('.svg-wrap svg');
-});
-***/
-campfire.subscribe('do-it',function(prog){
-  BSD.pause = false;
-  initLast();
-  if (extraBoard) {
-    extraBoard.close();
-    extraBoard = null;
-  }
-  if (predictBoard) {
-    predictBoard.close();
-    predictBoard = null;
-  }
-
-
-  BSD.boards.forEach(function(board){
-    board.close();
-  });
-  BSD.boards = [];
-
-  clearTimeout(BSD.timeout);  
-  var pa = '#FF0000-#E6DF52-#FFDD17-#4699D4-#4699D4-#000000-#000000-#000000-#bbbbbb-#67AFAD-#8C64AB-#8C64AB'.split(/-/);
-
-
-  var palette = pa.map(function(o) {
-    return BSD.colorFromHex(o);
-  });
-  ///palette = BSD.randomPalette2(12,200);
-  palette.forEach(function(color,i) {
-    ///var color = palette.shift();
-    colorHash[i] = color;
-  });
-
-
-  //link up the prog
-  var last = false;
-  prog.forEach(function(o){
-    if (last) {
-      last.next = o;
-    }
-    last = o;
-  });
-  last.next = prog[0];
-
-
-prog.forEach(function(o){
-  let cursor = o;
-  let tries = 9;
-  while(tries > 0 && cursor.chord.abstractlyEqualTo(cursor.next.chord)) {
-    cursor = cursor.next;
-    tries -= 1;
-  }
-  o.nextChordChange = cursor.next.chord;
-});
-
-console.log('PROG W CHANGES?',prog);
-
-
-
-  prog.forEach(function(o){
-    var advice = guru.analyze(o);
-    console.log('advice',advice);
-    /////result.tonalityScale = advice.tonalityScale;
-    o.scaleAdvice = advice;
-  });
-
-
-  var venue = jQuery('.venue');
-
-  var venueColumn = false; 
-
-
-    var stage = DOM.div().addClass('stage extra noprint');
-    venue.append(stage);
-    extraBoard = makeFretboardOn(stage,{
-        //chord: chord,
-        activeStrings: '654321'.split('')
-    });
-    predictBoard = makeFretboardOn(stage,{
-        //chord: chord,
-        activeStrings: '654321'.split('')
+    campfire.subscribe('stop-note', function(payload) {
+      BSD.audioPlayer.stopNote(payload.note);
     });
 
-
-
-    jQuery('.stringset-name').html(BSD.options.stringSet);
-
-    var activeStrings = BSD.options.stringSet.split('');
-    BSD.activeStrings = activeStrings; //FIXME, this won't work in the long run
-    prog.forEach(function(progItem,progItemIdx){
-
-      var chord = progItem.chord;
-      if (progItemIdx % 8 == 0) {
-        venueColumn = DOM.div().addClass('column venue-column');
-        venue.append(venueColumn);
-      }
-      var stage = DOM.div().addClass('stage hidden stringset-' + BSD.options.stringSet);
-      venueColumn.append(stage);
-      var board = makeFretboardOn(stage,{
-        chord: chord,
-        activeStrings: activeStrings
-      });
-      BSD.boards.push(board);
-    });
-
-
-  campfire.publish('fret-range-updated',BSD.options.fretRange); //this affects boards..
-
-
-
-  var errors = 0;
-  var cycleRange = [];
-  for(var i = 0; i < BSD.options.progCycles; i += 1) {
-    cycleRange.push(i); 
-  }
-
-
-
-
-
-
-  cycleRange.forEach(function(cycleIdx){
-    prog.forEach(function(progItem,progItemIdx) {
-      if (errors) { return false; }
-
-
-      rejections = [];
-      outsideRejections = [];
-      ///var barIdx = Math.floor(i / BSD.noteResolution);
-      var barIdx = progItem.barIndex;
-      //var chordIdx = barIdx % chords.length;
-      var chordIdx = progItemIdx;
-      var barChordIdx = progItem.barChordIndex;
-      //var myChord = chords[chordIdx];
-      var myChord = progItem.chord;
-      ///var cycleIdx = Math.floor(barIdx / prog.length);
-      //var cycleIdx = Math.floor(barIdx / chords.length);
-      ///cycleIdx = Math.floor(cycleIdx / chords.length);
-      ////console.log('barIdx',barIdx,'chordIdx',chordIdx,'cycleIdx',cycleIdx);
-
-      if (!myChord) {
-        errors += 1;
+    //LEAD / IMPROV
+    campfire.subscribe('play-note', function(payload) {
+      if (!BSD.options.improv.enabled) {
         return false;
       }
-      abstractNoteValues = myChord.abstractNoteValues();
 
-      meta.defaults = {
-        maxDiff: 3, //max chromatic distance between notes....
-        maxFretDistance: 3,
-      };
+      if (BSD.options.improv.midi) {
+        let noteOnChannel = 143 + BSD.options.improv.channel;
+        let noteNum = payload.note.value();
+        let vel = Math.floor(127 * BSD.options.improv.volume); //[0..1] -> [0..127]
 
-
-
-      meta.rootAbstractValue = myChord.rootNote.abstractValue();
-      meta.majorSixthAV = (meta.rootAbstractValue + 9) % 12; 
-      meta.ninthAV = (meta.rootAbstractValue + 2) % 12;
-      meta.eleventhAV = (meta.rootAbstractValue + 5) % 12;
-      meta.sharpEleventhAV = (meta.rootAbstractValue + 6) % 12;
-
-
-      meta.hasPerfectFifth = myChord.hasPerfectFifthInterval(); ///move this to o itself?
-      meta.hasMinor3rd = myChord.hasMinorThirdInterval();
-      meta.hasMajor3rd = myChord.hasMajorThirdInterval();
-      meta.hasDominant7th = myChord.hasDominantSeventhInterval();
-      meta.hasMajor7thQuality = myChord.hasMajorSeventhQuality();
-      meta.hasMinor7thQuality = myChord.hasMinorSeventhQuality();
-      meta.maxFretDistance = meta.defaults.maxFretDistance;
-      meta.maxDiff = meta.defaults.maxDiff; 
-      meta.isStrongBeat = true;
-      if (progItem.scaleAdvice && progItem.scaleAdvice.advice) {
-        meta.tonalityScale = makeScale(progItem.scaleAdvice.advice);
-        meta.tonalityScaleAbstractValues = meta.tonalityScale.abstractNoteValues();        
+        openedMIDIOutput.send([noteOnChannel, noteNum, vel]);
+        return false;
       }
 
-
-      var totQuarterNoteBeats = BSD.beatsPerMeasure; //for this chord.
-      if (progItem.halfBar) {
-        if (BSD.beatsPerMeasure == 3) {
-          if (barChordIdx == 0) {
-            totQuarterNoteBeats = 2;
-          }
-          else {
-            totQuarterNoteBeats = 1;
-          }
-        }
-        else {
-          totQuarterNoteBeats = 2;
-        }
-      }
-
-      var totNoteEvents = Math.ceil(totQuarterNoteBeats * BSD.beatsPerMeasure / BSD.noteResolution); 
-      var eventRange = [];
-      for (var i = 0; i < totNoteEvents; i += 1) {
-        eventRange.push(i);
-      }
-
-      eventRange.forEach(function(o,chordNoteIdx) {
-        if (errors) { return false; }
-
-        meta.chordNoteIdx = chordNoteIdx;
+      BSD.audioPlayer.playNote(payload.note, payload.duration, payload.velocity);
+    });
 
 
-      meta.isStrongBeat = chordNoteIdx % 2 === 0;
+    //CHORD
+    campfire.subscribe('play-notes', function(notes) {
 
+      //console.log('notes??',notes);
+      var chord = makeChordFromNotes(notes);
 
-      if (Math.random() > 0.85) {
-        ///console.log('random flip!');
-        direction = nextDirection[direction];
-      }
-      if (lastValue <= 44) {//low E
-        direction = 'up';
-      }
+      ///console.log('chord??',chord);
 
-      candidates = BSD.guitarData;
-
-
-      var scale = 10;//12; //rightmost fret to idealize.
-      var tot = 256; //range.length;
-      var progress = i; //step
-      var loopsPerTotal = 1;
-
-
-      if (BSD.idealFret) {
-        idealFret = BSD.idealFret;
-      }
-      else {
-        //TODO: really undestand scaling trig unit radius circle and scaling better.
-        /**
-        idealFret = Math.round(scale * (Math.cos ((2 * Math.PI) / tot * progress * loopsPerTotal ) + 1) / 2);
-        **/
-        var start = 7; //gets blown away..
-        if (BSD.options.fretRange) {
-          start = Math.floor(BSD.options.fretRange.average());
-        }
-
-
-        var width = BSD.options.fretRange[1] - BSD.options.fretRange[0];
-        var total = BSD.options.progCycles;
-        var centerShift = 0;
-        var offset = start;
-        idealFret = offset + (Math.cos(cycleIdx/total * 2 * Math.PI) * (width/2) + centerShift);
-
-
-      }
-
-
-      ///console.log('i/idealFret',i,idealFret);
-
-      if (lastFrets.length >0) {
-        avgFret = Math.round(lastFrets.sum() / lastFrets.length);
-      }
-
-
-      if (lastStrings.length >0) {
-        avgString = Math.round(lastStrings.sum() / lastStrings.length);
-      }
-
-      if (lastFretDiffs.length >0) {
-        drift3 = lastFretDiffs.slice(-3).sum(); //sum the latest 3
-      }
-
-      if (lastFretDiffs.length >0) {
-        drift2 = lastFretDiffs.slice(-2).sum(); //sum the latest 3
-      }
-
-      rejections = [];
-      outsideRejections = [];
-      candidates = candidates.select(function(o) {
-        return criteria(o,meta) == 'OK';
+      campfire.publish('play-chord', {
+        chord: chord,
+        duration: BSD.durations.chord
       });
+    });
 
+    const MIDI_CONST = {
+      NOTE_OFF: 0x80,
+      NOTE_ON: 0x90,
+      AFTERTOUCH: 0xA0,
+      CONTROL_CHANGE: 0xB0,
+      PROGRAM_CHANGE: 0xC0,
+      CC_PAN: 10
+    };
 
-      var solutions = [
-        function() { meta.maxDiff += 1;  console.log("increased meta.maxDiff to " + meta.maxDiff); },
-        function() { meta.maxFretDistance += 1;  console.log("increased meta.maxFretDistance to " + meta.maxFretDistance); },
-        function() { direction = nextDirection[direction]; console.log("changed direction to " + direction);   },
-        //function() { idealFret -= 1; console.log('changed idealFret to '  + idealFret) }
-      ];
-
-      var retries = 0;
-      while (retries < 110 && candidates.length == 0) {
-        console.log('pre-proto uh oh retry#',retries);
-
-        var last;
-        if (BSD.sequence.length > 0) {
-          last = BSD.sequence[BSD.sequence.length-1];
-          //console.log('last barIdx',last.barIdx,'cycleIdx',last.cycleIdx,'last',last);
+    function allNotesOff() {
+      for (var channel = 1; channel <= 16; channel += 1) {
+        let noteOffWithzeroBasedChannel = 127 + channel;
+        for (let nv = 0; nv < 128; nv += 1) {
+          //openedMIDIOutput.send([noteOffWithzeroBasedChannel,nv,64])
+          openedMIDIOutput.send([MIDI_CONST.NOTE_OFF | (channel - 1), nv, 0]);
+          //openedMIDIOutput.send([MIDI_CONST.NOTE_ON | (channel-1) ,nv,0]);
         }
+      }
+    }
 
-        var solution = solutions.atRandom();
 
-        solution();
+    campfire.subscribe('play-chord', function(o) {
+      if (!BSD.options.chord.enabled) {
+        return false; //done
+      }
 
-        ///console.log('flip! (necessity)');
-        rejections = [];
-        outsideRejections = [];
-        candidates = BSD.guitarData.select(function(o) {
-          return criteria(o,meta) == 'OK';
+      var filtered = o.chord.spec.intervals
+        .select(function(n) {
+          return n > 0 && n !== 7;
+        }) //no root, no 5
+        .map(function(n) {
+          //if (n == 10) { return n - 12; }
+          return n;
+        })
+      var rootless = Chord({
+        rootNote: o.chord.rootNote,
+        intervals: filtered
+      });
+      let midiNoteValues = rootless.notes().map(n => n.value());
+
+
+      if (!BSD.options.chord.midi) {
+        BSD.audioPlayer.playChord(rootless, o.duration);
+        return false; //done
+      }
+
+      ///console.log('rooteless notes',rootless.notes());
+      if (openedMIDIOutput && openedMIDIOutput.connection == 'open') {
+
+        let vel = Math.floor(127 * BSD.options.chord.volume); //[0..1] -> [0..127]
+
+        let noteOnWithzeroBasedChannel = 143 + BSD.options.chord.channel;
+        let noteOffWithzeroBasedChannel = 127 + BSD.options.chord.channel;
+
+        midiNoteValues.map(v => {
+          openedMIDIOutput.send([noteOnWithzeroBasedChannel, v, vel]);
         });
-        retries += 1;
+
+        //schedule the NOTE OFF
+        setTimeout(function() {
+          midiNoteValues.map(v => {
+            openedMIDIOutput.send([noteOffWithzeroBasedChannel, v, vel]);
+          })
+        }, o.duration);
+
+
+      }
+
+
+    });
+
+
+
+
+    campfire.subscribe('note-hover', function(note) {
+      //console.log('note',note.name());
+      BSD.currentNote = note;
+      if (BSD.strum) {
+        BSD.audioPlayer.playNote(note, BSD.durations.note);
+      }
+
+    });
+
+
+    jQuery(document).on('keydown', function(e) {
+      var c = e.keyCode || e.which;
+
+      /* rethink */
+      let noteNumber = BSD.currentNote.value();
+      let noteOnChanByte = 0x90 + (BSD.options.improv.channel - 1);
+      let noteOffChanByte = 0x80 + (BSD.options.improv.channel - 1);
+
+      if (BSD.currentNote && c == BSD.keycodes.f) {
+        if (BSD.options.midiOnly && openedMIDIOutput) {
+          openedMIDIOutput.send([noteOnChanByte,noteNumber,0x7f]);
+          return setTimeout(function(){
+            openedMIDIOutput.send([noteOffChanByte,noteNumber,0x7f]);
+          },250);
+        }
+        BSD.audioPlayer.playNote(BSD.currentNote, BSD.durations.note);
+      }
+
+      if (BSD.currentChord && c == BSD.keycodes.f) {
+        BSD.audioPlayer.playChord(BSD.currentChord, BSD.durations.chord);
       }
 
 
 
+      if (BSD.currentNote && c == BSD.keycodes.d) {
+        BSD.strum = true;
+        ////BSD.audioPlayer.playNote(BSD.currentNote,BSD.durations.note);    
+      }
 
-      if (candidates.length == 0) {
-          errors += 1;
-          return false;
+      if (e.shiftKey) {
+        BSD.strum = true;
       }
 
 
 
-      meta.maxFretDistance = meta.defaults.maxFretDistance;
-      meta.maxDiff = meta.defaults.maxDiff      
+    });
+
+    jQuery(document).on('keyup', function(e) {
+      BSD.strum = false;
+    });
 
 
-      if (chordNoteIdx == 0) { //first note in new chord change... try to get nearest pitch to last note played.
+    BSD.importJSON(BSD.baseURL + '/data/guitar.json', function(err, data) {
+      if (err) {
+        throw err;
+        return err;
+      }
+      BSD.guitarData = data;
+    });
 
-    
-        var sorted = candidates.sort(BSD.sorter(function(o) {
-          return distScore(o.chromaticValue,lastAbstractValue);
-        }));
+    var btnToggleText = jQuery('.btn-toggle-text');
+    var hideText = false;
+    btnToggleText.click(function() {
+      hideText = !hideText;
+      hideText ? jQuery('html').addClass('hide-text') : jQuery('html').removeClass('hide-text');
+    });
 
-        console.log('remaining choices',sorted.map(function(o){ return Note(o.chromaticValue).name(); }).join(','));
 
 
-        var sortedScores = sorted.map(function(o){ 
-          return [Note(o.chromaticValue).name(),distScore(o.chromaticValue,lastAbstractValue)]; 
+
+    var btnPause = jQuery('.btn-pause');
+    btnPause.click(function() {
+
+
+      campfire.publish('first-click');
+      BSD.pause = !BSD.pause;
+      if (BSD.pause) {
+        campfire.publish('stop-it');
+      } else {
+        if (BSD.sequence && BSD.sequence.length > 0) {
+          tick(BSD.sequence[0]);
+        }
+      }
+    });
+
+
+    var progInput = jQuery('#progression');
+    progInput.on('touchend', function() { //for iOS bug
+      ///alert('hey');
+      BSD.handleFirstClick();
+    });
+
+    //campfire.subscribe('options-loaded',function(){
+    if (BSD.options.progression) {
+      progInput.val(BSD.options.progression);
+    }
+    //});
+
+
+    var btnStart = jQuery('.btn-start');
+    btnStart.click(function() {
+      campfire.publish('gather-inputs-and-do-it');
+    });
+    btnStart.on('touchend', function() {
+      BSD.handleFirstClick();
+    });
+
+
+    var activeStringsInput = jQuery('.active-strings');
+    activeStringsInput.blur(function() {
+      campfire.publish('gather-inputs-and-do-it');
+    });
+
+    campfire.subscribe('stop-it', function() {
+      clearTimeout(BSD.timeout);
+    });
+
+    campfire.subscribe('gather-inputs-and-do-it', function() {
+      if (progInput.val().length === 0) {
+        campfire.publish('stop-it');
+        return false;
+      }
+
+      BSD.options.progression = progInput.val(); //just the text
+      storage.setItem('options', JSON.stringify(BSD.options));
+
+
+      var prog = BSD.parseProgression(progInput.val());
+      ///////campfire.publish('do-it-prog',prog);
+
+
+
+      campfire.publish('do-it', prog);
+    });
+
+
+    var extraBoard, predictBoard;
+    var headerHeight = jQuery('header').height();
+    var delayMS = {
+
+    };
+
+
+
+    function distScore(a, b) {
+      var min, max, diff, dist;
+
+      if (typeof a != "number" || typeof b != "number") {
+        return 15;
+      }
+      /***
+      if (a !== 0 && !a) { min = b; max = b; diff = 0; }
+      if (b !== 0 && !b) { min = a; max = a; diff = 0; }
+      if (a !== 0 && b !== 0 && !a && !b) { return 0; }
+      ***/
+      min = Math.min(a, b);
+      max = Math.max(a, b);
+      diff = max - min;
+      dist = Math.min(diff, 12 - diff);
+      dist = Math.abs(dist);
+      return dist;
+    }
+
+
+
+    function outsideJudge(o, env) {
+      var hit6 = env.majorSixthAV == o.chromaticValue;
+      var hit9 = env.ninthAV == o.chromaticValue;
+      var hit6or9 = hit6 || hit9;
+
+      var hit11 = env.eleventhAV == o.chromaticValue;
+      var hitSharp11 = env.sharpEleventhAV == o.chromaticValue;
+
+
+      if (BSD.options.fretRange && o.fret > BSD.options.fretRange[1]) {
+        return 'fret > maxFret';
+      }
+      if (BSD.options.fretRange && o.fret < BSD.options.fretRange[0]) {
+        return 'fret < minFret';
+      }
+
+      if (BSD.options.improv.insideChord && abstractNoteValues.indexOf(o.chromaticValue) < 0) {
+        return 'must be inside chord, yet outside chord';
+      }
+
+
+
+      /** THIS IS OK, NEVERMIND
+      if (hit6 && meta.hasMinor7Quality) {
+        ///console.log('NOPE!!!!',env);
+        return 'minor7 with 6th clashes (7b with 6)';
+      }
+      ***/
+
+      if (hit6 && meta.isStrongBeat) {
+        return '6th on strong beat';
+      }
+
+      if (env.hasMinor3rd && hit11) {
+        return "OK";
+      }
+
+
+
+      /** not always fond of this..
+      if (env.hasMajor7thQuality && hitSharp11) {
+        return "OK";
+      }
+      ***/
+
+      /* sometimes this is ok, but going back to keeping chord tones strictly on strong beat 12/9
+      if (hit6or9 && meta.hasPerfectFifth) {
+        //if (hit6) { alert('hit6'); }
+        //if (hit6) { console.log('hit6',meta); }
+        //console.log('hit6or9 meta',env);
+        return 'OK';
+      }
+      ****/
+
+
+
+      //FIXME: need UI toggle to determine which combo of outside tonalityScale and outside chord will disqualify a candidate
+      //otherwise, outside chord will always further whittle down and reduce the candidates to a set smaller than the tonalityScale, making tonalityScale useless as a filter.
+
+
+      if (meta.isStrongBeat && abstractNoteValues.indexOf(o.chromaticValue) < 0) {
+        return 'strong beat and outside chord';
+      }
+
+
+      if (meta.tonalityScaleAbstractValues && meta.tonalityScaleAbstractValues.indexOf(o.chromaticValue) < 0) {
+        return 'outside of tonalityScale';
+      }
+
+
+      if (o.fret > 13) {
+        return 'too high';
+      }
+      if (BSD.activeStrings && !BSD.activeStrings.find(function(as) {
+          ///console.log('as',as,'o.string',o.string);
+          return as == o.string;
+        })) {
+        return "not active string: " + o.string;
+      }
+
+
+      return 'OK';
+    }
+
+
+
+
+    function tick(cursor) {
+      if (!cursor) {
+        return false;
+      }
+      delayMS.even4 = BSD.tempoToMillis(BSD.options.tempo);
+      delayMS.even1 = delayMS.even4 * BSD.beatsPerMeasure; //whole notes
+      delayMS.even2 = delayMS.even4 * 2; //half notes
+      delayMS.even8 = delayMS.even4 / 2; //eighth notes
+      delayMS.even16 = delayMS.even4 / 4; //eighth notes
+      delayMS.swung81 = delayMS.even4 * 2 / 3;
+      delayMS.swung82 = delayMS.even4 * 1 / 3;
+      ///var midSwung81 = (swung81;////////+even8DelayMS) / 2;/////].sum() /2;
+      delayMS.midSwung81 = delayMS.swung81;
+      //var midSwung81 = (swung81+even8DelayMS) / 2;/////].sum() /2;
+      delayMS.midSwung82 = delayMS.swung82;
+      campfire.publish('tick', cursor); //that a tick happened, 
+
+      clearTimeout(BSD.timeout);
+      delayMS.next = delayMS['even' + BSD.noteResolution];
+      if (!delayMS.next) {
+        console.log('invalid delayMS.next for resolution' + BSD.noteResolution);
+      }
+      cursor = cursor.next;
+      BSD.timeout = setTimeout(function() {
+        tick(cursor);
+      }, delayMS.next);
+    }
+
+
+
+
+
+
+    BSD.noteResolution = 4;
+
+    var direction = (Math.random() > 0.5) ? 'up' : 'down'; //initial direction.
+    var nextDirection = {
+      'up': 'down',
+      'down': 'up'
+    };
+
+    var avgFret,
+      avgString,
+      drift3,
+      drift2,
+      candidates,
+      abstractNoteValues,
+      result,
+      idealFret,
+      lastResult,
+      lastAbstractValue,
+      lastValue,
+      lastString,
+      lastStrings,
+      lastFret,
+      lastFrets,
+      lastFretDiff,
+      lastFretDiffs,
+      lastNote,
+      meta;
+
+
+    ////var bunches = chords.map(function(o){ return o.abstractNoteValues(); });
+    var rejections = [];
+    var outsideRejections = [];
+
+    var chordIdx = 0;
+
+    var myNote = false;
+
+    var songFormPosition = jQuery('.song-form-position');
+    var songCyclePosition = jQuery('.song-cycle-position');
+    ///var songCycleIndicator = jQuery('.song-cycle-indicator');
+    function initLast() {
+      meta = {};
+      avgFret = false;
+      avgString = false;
+      drift2 = false;
+      drift3 = false;
+
+      idealFret = 9; //starter...will get overriden
+      abstractNoteValues = [];
+      candidates = [];
+      lastAbstractValue = false;
+      lastValue = false; //60
+      lastDiff = false;
+      lastString = false; /////2; //5
+      lastStrings = []; ///[5];
+      lastFret = false; ////BSD.idealFret || 7;//3;
+      lastFrets = []; ////////[3];
+      lastFretDiff = 0;
+      lastFretDiffs = [];
+      lastNote = Note(60);
+      result = false;
+      lastResult = false;
+      BSD.sequence = [];
+
+      meta.maxNoteValue = BSD.guitarData.find(function(o) {
+        var result = o.string == 1 && o.fret == BSD.options.fretRange[1];
+        return result;
+      }).noteValue;
+
+      meta.minNoteValue = BSD.guitarData.find(function(o) {
+        var result = o.string == 6 && o.fret == BSD.options.fretRange[0];
+        return result;
+      }).noteValue;
+
+
+    }
+
+
+
+
+
+    function judge(o, env) {
+      var diff = lastValue ? o.noteValue - lastValue : 0;
+      //if (Math.abs(diff) > 6) { return 'diff>6:' + diff; }
+      //if (Math.abs(diff) > 5) { return 'diff>5:' + diff; }
+      if (Math.abs(diff) > env.maxDiff) {
+        return 'diff > ' + env.maxDiff + ': ' + diff;
+      }
+      var idealFretDiff = Math.abs(o.fret - idealFret);
+      if (idealFretDiff > 9) {
+        return 'idealFretDiff>9';
+      }
+      if (env.chordNoteIdx > 0 && diff > 0 && direction == 'down') {
+        return 'wrong dir, direction=' + direction + ', diff=' + diff;
+      }
+      if (env.chordNoteIdx > 0 && diff < 0 && direction == 'up') {
+        return 'wrong dir, direction=' + direction + ', diff=' + diff;
+      }
+      if (lastValue && diff == 0) {
+        return 'no diff';
+      }
+      var fretDiff = lastFret ? o.fret - lastFret : 0;
+      //FIXME: can probably simplify this once my goals are better understood
+      if (drift3 && Math.abs(drift3 + fretDiff) > 4) {
+        return 'drift3: drifting too much in one direction, drift3: ' + drift3 + ' fretDiff: ' + fretDiff;
+      }
+      if (drift2 && Math.abs(drift2 + fretDiff) > 4) {
+        return 'drift2: drifting too much in one direction, drift2: ' + drift2 + ' fretDiff: ' + fretDiff;
+      }
+      if (lastFretDiff && Math.abs(lastFretDiff + fretDiff) > 4) {
+        return 'lastFretDiff: drifting too much in one direction, lastFretDiff: ' + lastFretDiff + ' fretDiff: ' + fretDiff;
+      }
+      var fretDistance = Math.abs(fretDiff);
+      if (fretDistance > env.maxFretDistance) {
+        return 'fretDistance > ' + env.maxFretDistance;
+      }
+      ///if (fretDistance > 3) { return 'fretDistance > 3'; }
+      if (lastFretDiff && Math.abs(lastFretDiff + fretDiff) > 4) {
+        return 'lastFretDiff+fretDiff >4';
+      } ///if they don't cancel each other out and their total is too big
+
+      var stringDiff = lastString ? Math.abs(o.string - lastString) : 0;
+      if (stringDiff > 2) {
+        return 'stringDiff>2';
+      }
+
+      //now for the avg
+      var avgFretDistance = avgFret ? Math.abs(o.fret - avgFret) : 0;
+      var avgStringDiff = avgString ? Math.abs(o.string - avgString) : 0;
+      if (avgFretDistance > 4) {
+        return 'avgFretDistance>4';
+      }
+      ///if (avgStringDiff > 2) { return 'avgStringDiff>2'; }
+
+      return 'OK';
+    }
+
+    function criteria(o, env) {
+      var outsideDecision = outsideJudge(o, env);
+      if (outsideDecision !== 'OK') {
+        outsideRejections.push({
+          candidate: o,
+          decision: outsideDecision,
+          lastResult: lastResult
         });
-        console.log('sorted Scores',sortedScores);
-
-        result = sorted[0];
-        console.log('*FN* i',i,
-          myChord.fullAbbrev(),
-          'chose',Note(result.noteValue).name(),
-          'lastNote',lastNote.name(),
-          'distScore()',distScore(result.chromaticValue,lastAbstractValue),
-          'result.chromaticValue',result.chromaticValue,
-          'lastAbstractValue',lastAbstractValue
-        );
+        return outsideDecision;
       }
-      else {
-        result = candidates.atRandom();
-        console.log('i',i,
-          myChord.fullAbbrev(),
-          'chose',Note(result.noteValue).name(),
-          'lastNote',lastNote.name(),
-          'distScore()',distScore(result.chromaticValue,lastAbstractValue),
-          'result.chromaticValue',result.chromaticValue,
-          'lastAbstractValue',lastAbstractValue
-        );
+      //console.log('decision',decision);
+      var judgeDecision = judge(o, env);
+
+      if (judgeDecision != 'OK') { //chordNoteIdx == 0 && 
+        rejections.push({
+          candidate: o,
+          decision: judgeDecision,
+          lastResult: lastResult
+        });
       }
+      return judgeDecision;
+    };
 
-      result = JSON.parse(JSON.stringify(result));
-      result.barIdx = barIdx;
-      result.totQuarterNoteBeats = totQuarterNoteBeats;
-      result.totNoteEvents = totNoteEvents;
+    var guru = BSD.Widgets.TonalityGuru({});
 
-      result.direction = direction;
-      result.chordIdx = chordIdx;
-      result.board = BSD.boards[chordIdx];
-      result.chord = myChord;
-      result.chordNoteIdx = chordNoteIdx;
-      result.cycleIdx = cycleIdx;
-
-      result.idealFret = idealFret;
-      result.avgFret = avgFret;
-      ///result.idx = i;
-      result.nextChordChange = progItem.nextChordChange;
-      result.progItem = progItem;
-
-
-      console.log('result',result);
-
-
-      if (!result) {
-        errors += 1;
+    var svgWrap = jQuery('.svg-wrap');
+    /**
+    BSD.importHTML(BSD.baseURL + '/images/C_Major_Scale_on_fretboard.svg',function(err,data){
+      if (err) { return console.log(err); }
+      svgWrap.append(data);
+      //console.log('data?',data);
+      svgBoard = Snap('.svg-wrap svg');
+    });
+    ***/
+    campfire.subscribe('do-it', function(prog) {
+      BSD.pause = false;
+      initLast();
+      if (extraBoard) {
+        extraBoard.close();
+        extraBoard = null;
+      }
+      if (predictBoard) {
+        predictBoard.close();
+        predictBoard = null;
       }
 
-      BSD.sequence.push(result);
 
-      lastResult = result;
-      ///sequence[i] = result;
-      lastDiff = lastValue ? result.noteValue - lastValue : 0;
-      console.log('lastDiff',lastDiff);
-      lastValue = result.noteValue;
-      lastNote = Note(lastValue);
-      lastAbstractValue = lastNote.abstractValue();
-      lastString = result.string;
-
-      lastFretDiff = lastFret ? result.fret - lastFret : 0;
-      lastFretDiffs.push(lastFretDiff);
-
-
-      lastFret = result.fret;
-
-
-      if (lastFrets.length > 4) { lastFrets.shift(); } //having a average of 5 was too limiting in candidates.
-      lastFrets.push(lastFret);
-
-      if (lastStrings.length > 3) { lastStrings.shift(); } //having a average of 5 was too limiting in candidates.
-      lastStrings.push(lastString);
-
-      }); //eventRange
-
-    }); //prog
-
-  }); //BSD.options.progCycles
-  ///console.log('sequence',sequence);
-
-
-  if (errors) {
-    alert('Oops, I had an error. Try a few more times (5x max) before you give up on me.');
-    return false;
-  }
-
-  BSD.sequence.forEach(function(o,idx) {
-    o.idx = idx;
-    var ndx = idx+1;
-    ndx = ndx % BSD.sequence.length;
-    o.next = BSD.sequence[ndx];
-  });
-  //console.log('sequence',sequence);
-  ///BSD.sequence = sequence;
-  //////sequence.forEach(function(o){})
-  BSD.timeout = false;
-  
-  
-  campfire.publish('reset-song-form-ui')
-  
-  //initial tick
-  tick(BSD.sequence[0]); 
-});
-
-
-campfire.subscribe('reset-song-form-ui',function(){
-
-  songFormPosition.empty();
-  songCyclePosition.empty();
-
-  //renders out the songFormPosition div
-  var range = [];
-  BSD.totalBars = BSD.sequence[BSD.sequence.length-1].barIdx + 1;
-
-  for (var i = 0; i < BSD.totalBars; i += 1) {
-    range.push(i);
-  }
-  range.forEach(function(i) {
-    var div = DOM.div(i+1).addClass('bar bar-' + i);
-    songFormPosition.append(div);
-
-    div.click(function(){
-      BSD.clickedBar = i;
-      var event = BSD.sequence.find(function(o) {
-        return o.barIdx == i && o.cycleIdx == BSD.currentCycleIdx;
+      BSD.boards.forEach(function(board) {
+        board.close();
       });
-      console.log('event',event);
-      tick(event);
-    });
-  });
+      BSD.boards = [];
 
-  BSD.totalCycles = BSD.sequence[BSD.sequence.length-1].cycleIdx + 1;
-  range = [];
-  for (var i = 0; i < BSD.totalCycles; i += 1) {
-    range.push(i);
-  }
-  range.forEach(function(i) {
-    var div = DOM.div(i+1).addClass('cycle cycle-' + i);
-    songCyclePosition.append(div);
+      clearTimeout(BSD.timeout);
+      var pa = '#FF0000-#E6DF52-#FFDD17-#4699D4-#4699D4-#000000-#000000-#000000-#bbbbbb-#67AFAD-#8C64AB-#8C64AB'.split(/-/);
 
-    div.click(function(){
-      BSD.clickedCycle = i;
-      var event = BSD.sequence.find(function(o) {
-        return o.cycleIdx == i && o.barIdx == BSD.currentBarIdx;
+
+      var palette = pa.map(function(o) {
+        return BSD.colorFromHex(o);
       });
-      console.log('event',event);
-      tick(event);
+      ///palette = BSD.randomPalette2(12,200);
+      palette.forEach(function(color, i) {
+        ///var color = palette.shift();
+        colorHash[i] = color;
+      });
+
+
+      //link up the prog
+      var last = false;
+      prog.forEach(function(o) {
+        if (last) {
+          last.next = o;
+        }
+        last = o;
+      });
+      last.next = prog[0];
+
+
+      prog.forEach(function(o) {
+        let cursor = o;
+        let tries = 9;
+        while (tries > 0 && cursor.chord.abstractlyEqualTo(cursor.next.chord)) {
+          cursor = cursor.next;
+          tries -= 1;
+        }
+        o.nextChordChange = cursor.next.chord;
+      });
+
+      console.log('PROG W CHANGES?', prog);
+
+
+
+      prog.forEach(function(o) {
+        var advice = guru.analyze(o);
+        console.log('advice', advice);
+        /////result.tonalityScale = advice.tonalityScale;
+        o.scaleAdvice = advice;
+      });
+
+
+      var venue = jQuery('.venue');
+
+      var venueColumn = false;
+
+
+      var stage = DOM.div().addClass('stage extra noprint');
+      venue.append(stage);
+      extraBoard = makeFretboardOn(stage, {
+        //chord: chord,
+        activeStrings: '654321'.split('')
+      });
+      predictBoard = makeFretboardOn(stage, {
+        //chord: chord,
+        activeStrings: '654321'.split('')
+      });
+
+
+
+      jQuery('.stringset-name').html(BSD.options.stringSet);
+
+      var activeStrings = BSD.options.stringSet.split('');
+      BSD.activeStrings = activeStrings; //FIXME, this won't work in the long run
+      prog.forEach(function(progItem, progItemIdx) {
+
+        var chord = progItem.chord;
+        if (progItemIdx % 8 == 0) {
+          venueColumn = DOM.div().addClass('column venue-column');
+          venue.append(venueColumn);
+        }
+        var stage = DOM.div().addClass('stage hidden stringset-' + BSD.options.stringSet);
+        venueColumn.append(stage);
+        var board = makeFretboardOn(stage, {
+          chord: chord,
+          activeStrings: activeStrings
+        });
+        BSD.boards.push(board);
+      });
+
+
+      campfire.publish('fret-range-updated', BSD.options.fretRange); //this affects boards..
+
+
+
+      var errors = 0;
+      var cycleRange = [];
+      for (var i = 0; i < BSD.options.progCycles; i += 1) {
+        cycleRange.push(i);
+      }
+
+
+
+
+
+
+      cycleRange.forEach(function(cycleIdx) {
+        prog.forEach(function(progItem, progItemIdx) {
+          if (errors) {
+            return false;
+          }
+
+
+          rejections = [];
+          outsideRejections = [];
+          ///var barIdx = Math.floor(i / BSD.noteResolution);
+          var barIdx = progItem.barIndex;
+          //var chordIdx = barIdx % chords.length;
+          var chordIdx = progItemIdx;
+          var barChordIdx = progItem.barChordIndex;
+          //var myChord = chords[chordIdx];
+          var myChord = progItem.chord;
+          ///var cycleIdx = Math.floor(barIdx / prog.length);
+          //var cycleIdx = Math.floor(barIdx / chords.length);
+          ///cycleIdx = Math.floor(cycleIdx / chords.length);
+          ////console.log('barIdx',barIdx,'chordIdx',chordIdx,'cycleIdx',cycleIdx);
+
+          if (!myChord) {
+            errors += 1;
+            return false;
+          }
+          abstractNoteValues = myChord.abstractNoteValues();
+
+          meta.defaults = {
+            maxDiff: 3, //max chromatic distance between notes....
+            maxFretDistance: 3,
+          };
+
+
+
+          meta.rootAbstractValue = myChord.rootNote.abstractValue();
+          meta.majorSixthAV = (meta.rootAbstractValue + 9) % 12;
+          meta.ninthAV = (meta.rootAbstractValue + 2) % 12;
+          meta.eleventhAV = (meta.rootAbstractValue + 5) % 12;
+          meta.sharpEleventhAV = (meta.rootAbstractValue + 6) % 12;
+
+
+          meta.hasPerfectFifth = myChord.hasPerfectFifthInterval(); ///move this to o itself?
+          meta.hasMinor3rd = myChord.hasMinorThirdInterval();
+          meta.hasMajor3rd = myChord.hasMajorThirdInterval();
+          meta.hasDominant7th = myChord.hasDominantSeventhInterval();
+          meta.hasMajor7thQuality = myChord.hasMajorSeventhQuality();
+          meta.hasMinor7thQuality = myChord.hasMinorSeventhQuality();
+          meta.maxFretDistance = meta.defaults.maxFretDistance;
+          meta.maxDiff = meta.defaults.maxDiff;
+          meta.isStrongBeat = true;
+          if (progItem.scaleAdvice && progItem.scaleAdvice.advice) {
+            meta.tonalityScale = makeScale(progItem.scaleAdvice.advice);
+            meta.tonalityScaleAbstractValues = meta.tonalityScale.abstractNoteValues();
+          }
+
+
+          var totQuarterNoteBeats = BSD.beatsPerMeasure; //for this chord.
+          if (progItem.halfBar) {
+            if (BSD.beatsPerMeasure == 3) {
+              if (barChordIdx == 0) {
+                totQuarterNoteBeats = 2;
+              } else {
+                totQuarterNoteBeats = 1;
+              }
+            } else {
+              totQuarterNoteBeats = 2;
+            }
+          }
+
+          var totNoteEvents = Math.ceil(totQuarterNoteBeats * BSD.beatsPerMeasure / BSD.noteResolution);
+          var eventRange = [];
+          for (var i = 0; i < totNoteEvents; i += 1) {
+            eventRange.push(i);
+          }
+
+          eventRange.forEach(function(o, chordNoteIdx) {
+            if (errors) {
+              return false;
+            }
+
+            meta.chordNoteIdx = chordNoteIdx;
+
+
+            meta.isStrongBeat = chordNoteIdx % 2 === 0;
+
+
+            if (Math.random() > 0.85) {
+              ///console.log('random flip!');
+              direction = nextDirection[direction];
+            }
+            if (lastValue <= 44) { //low E
+              direction = 'up';
+            }
+
+            candidates = BSD.guitarData;
+
+
+            var scale = 10; //12; //rightmost fret to idealize.
+            var tot = 256; //range.length;
+            var progress = i; //step
+            var loopsPerTotal = 1;
+
+
+            if (BSD.idealFret) {
+              idealFret = BSD.idealFret;
+            } else {
+              //TODO: really undestand scaling trig unit radius circle and scaling better.
+              /**
+              idealFret = Math.round(scale * (Math.cos ((2 * Math.PI) / tot * progress * loopsPerTotal ) + 1) / 2);
+              **/
+              var start = 7; //gets blown away..
+              if (BSD.options.fretRange) {
+                start = Math.floor(BSD.options.fretRange.average());
+              }
+
+
+              var width = BSD.options.fretRange[1] - BSD.options.fretRange[0];
+              var total = BSD.options.progCycles;
+              var centerShift = 0;
+              var offset = start;
+              idealFret = offset + (Math.cos(cycleIdx / total * 2 * Math.PI) * (width / 2) + centerShift);
+
+
+            }
+
+
+            ///console.log('i/idealFret',i,idealFret);
+
+            if (lastFrets.length > 0) {
+              avgFret = Math.round(lastFrets.sum() / lastFrets.length);
+            }
+
+
+            if (lastStrings.length > 0) {
+              avgString = Math.round(lastStrings.sum() / lastStrings.length);
+            }
+
+            if (lastFretDiffs.length > 0) {
+              drift3 = lastFretDiffs.slice(-3).sum(); //sum the latest 3
+            }
+
+            if (lastFretDiffs.length > 0) {
+              drift2 = lastFretDiffs.slice(-2).sum(); //sum the latest 3
+            }
+
+            rejections = [];
+            outsideRejections = [];
+            candidates = candidates.select(function(o) {
+              return criteria(o, meta) == 'OK';
+            });
+
+
+            var solutions = [
+              function() {
+                meta.maxDiff += 1;
+                console.log("increased meta.maxDiff to " + meta.maxDiff);
+              },
+              function() {
+                meta.maxFretDistance += 1;
+                console.log("increased meta.maxFretDistance to " + meta.maxFretDistance);
+              },
+              function() {
+                direction = nextDirection[direction];
+                console.log("changed direction to " + direction);
+              },
+              //function() { idealFret -= 1; console.log('changed idealFret to '  + idealFret) }
+            ];
+
+            var retries = 0;
+            while (retries < 110 && candidates.length == 0) {
+              console.log('pre-proto uh oh retry#', retries);
+
+              var last;
+              if (BSD.sequence.length > 0) {
+                last = BSD.sequence[BSD.sequence.length - 1];
+                //console.log('last barIdx',last.barIdx,'cycleIdx',last.cycleIdx,'last',last);
+              }
+
+              var solution = solutions.atRandom();
+
+              solution();
+
+              ///console.log('flip! (necessity)');
+              rejections = [];
+              outsideRejections = [];
+              candidates = BSD.guitarData.select(function(o) {
+                return criteria(o, meta) == 'OK';
+              });
+              retries += 1;
+            }
+
+
+
+
+            if (candidates.length == 0) {
+              errors += 1;
+              return false;
+            }
+
+
+
+            meta.maxFretDistance = meta.defaults.maxFretDistance;
+            meta.maxDiff = meta.defaults.maxDiff
+
+
+            if (chordNoteIdx == 0) { //first note in new chord change... try to get nearest pitch to last note played.
+
+
+              var sorted = candidates.sort(BSD.sorter(function(o) {
+                return distScore(o.chromaticValue, lastAbstractValue);
+              }));
+
+              console.log('remaining choices', sorted.map(function(o) {
+                return Note(o.chromaticValue).name();
+              }).join(','));
+
+
+              var sortedScores = sorted.map(function(o) {
+                return [Note(o.chromaticValue).name(), distScore(o.chromaticValue, lastAbstractValue)];
+              });
+              console.log('sorted Scores', sortedScores);
+
+              result = sorted[0];
+              console.log('*FN* i', i,
+                myChord.fullAbbrev(),
+                'chose', Note(result.noteValue).name(),
+                'lastNote', lastNote.name(),
+                'distScore()', distScore(result.chromaticValue, lastAbstractValue),
+                'result.chromaticValue', result.chromaticValue,
+                'lastAbstractValue', lastAbstractValue
+              );
+            } else {
+              result = candidates.atRandom();
+              console.log('i', i,
+                myChord.fullAbbrev(),
+                'chose', Note(result.noteValue).name(),
+                'lastNote', lastNote.name(),
+                'distScore()', distScore(result.chromaticValue, lastAbstractValue),
+                'result.chromaticValue', result.chromaticValue,
+                'lastAbstractValue', lastAbstractValue
+              );
+            }
+
+            result = JSON.parse(JSON.stringify(result));
+            result.barIdx = barIdx;
+            result.totQuarterNoteBeats = totQuarterNoteBeats;
+            result.totNoteEvents = totNoteEvents;
+
+            result.direction = direction;
+            result.chordIdx = chordIdx;
+            result.board = BSD.boards[chordIdx];
+            result.chord = myChord;
+            result.chordNoteIdx = chordNoteIdx;
+            result.cycleIdx = cycleIdx;
+
+            result.idealFret = idealFret;
+            result.avgFret = avgFret;
+            ///result.idx = i;
+            result.nextChordChange = progItem.nextChordChange;
+            result.progItem = progItem;
+
+
+            console.log('result', result);
+
+
+            if (!result) {
+              errors += 1;
+            }
+
+            BSD.sequence.push(result);
+
+            lastResult = result;
+            ///sequence[i] = result;
+            lastDiff = lastValue ? result.noteValue - lastValue : 0;
+            console.log('lastDiff', lastDiff);
+            lastValue = result.noteValue;
+            lastNote = Note(lastValue);
+            lastAbstractValue = lastNote.abstractValue();
+            lastString = result.string;
+
+            lastFretDiff = lastFret ? result.fret - lastFret : 0;
+            lastFretDiffs.push(lastFretDiff);
+
+
+            lastFret = result.fret;
+
+
+            if (lastFrets.length > 4) {
+              lastFrets.shift();
+            } //having a average of 5 was too limiting in candidates.
+            lastFrets.push(lastFret);
+
+            if (lastStrings.length > 3) {
+              lastStrings.shift();
+            } //having a average of 5 was too limiting in candidates.
+            lastStrings.push(lastString);
+
+          }); //eventRange
+
+        }); //prog
+
+      }); //BSD.options.progCycles
+      ///console.log('sequence',sequence);
+
+
+      if (errors) {
+        alert('Oops, I had an error. Try a few more times (5x max) before you give up on me.');
+        return false;
+      }
+
+      BSD.sequence.forEach(function(o, idx) {
+        o.idx = idx;
+        var ndx = idx + 1;
+        ndx = ndx % BSD.sequence.length;
+        o.next = BSD.sequence[ndx];
+      });
+      //console.log('sequence',sequence);
+      ///BSD.sequence = sequence;
+      //////sequence.forEach(function(o){})
+      BSD.timeout = false;
+
+
+      campfire.publish('reset-song-form-ui')
+
+      //initial tick
+      tick(BSD.sequence[0]);
     });
-  });
-});
 
 
-campfire.subscribe('play-chord',function(o){
-  jQuery('.extra .chord-name').html(o.chord.fullAbbrev());
-});
+    campfire.subscribe('reset-song-form-ui', function() {
 
+      songFormPosition.empty();
+      songCyclePosition.empty();
 
-BSD.firstClick = true;
-BSD.handleFirstClick = function () {
-  if (!BSD.firstClick) { return false;}
-  BSD.firstClick = false;
-	var buffer = context.createBuffer(1, 1, 22050);
-	var source = context.createBufferSource();
-	source.buffer = buffer;
-	source.connect(context.destination);
-	if(source.play){    source.play(0);} else if(source.noteOn){    source.noteOn(0);}
-};
+      //renders out the songFormPosition div
+      var range = [];
+      BSD.totalBars = BSD.sequence[BSD.sequence.length - 1].barIdx + 1;
 
+      for (var i = 0; i < BSD.totalBars; i += 1) {
+        range.push(i);
+      }
+      range.forEach(function(i) {
+        var div = DOM.div(i + 1).addClass('bar bar-' + i);
+        songFormPosition.append(div);
 
+        div.click(function() {
+          BSD.clickedBar = i;
+          var event = BSD.sequence.find(function(o) {
+            return o.barIdx == i && o.cycleIdx == BSD.currentCycleIdx;
+          });
+          console.log('event', event);
+          tick(event);
+        });
+      });
 
-function periodicA(current,total,shift,scale,func) {
-  return (func(Math.PI*2 * current/total) + shift) * scale;
-}
+      BSD.totalCycles = BSD.sequence[BSD.sequence.length - 1].cycleIdx + 1;
+      range = [];
+      for (var i = 0; i < BSD.totalCycles; i += 1) {
+        range.push(i);
+      }
+      range.forEach(function(i) {
+        var div = DOM.div(i + 1).addClass('cycle cycle-' + i);
+        songCyclePosition.append(div);
 
-
-function periodicB(current,total,shift,scale,func) {
-  return (func(Math.PI*2 * current/total) * scale) + shift;
-}
-
-var shiftThenScale = periodicA;
-var scaleThenShift = periodicB;
-
-
-
-
-campfire.subscribe('test-periodic',function(o){
-  for (var i = 0; i < o.total; i += 1) {
-    var resA = periodicA(i,o.total,o.shift,o.scale,Math.cos);
-    console.log('A (cos) i',i,'result',resA);
-  }
-  for (var i = 0; i < o.total; i += 1) {
-    var resA = periodicA(i,o.total,o.shift,o.scale,Math.sin);
-    console.log('A (sin) i',i,'result',resA);
-  }
-
-  for (var i = 0; i < o.total; i += 1) {
-    var resB = periodicB(i,o.total,o.shift,o.scale,Math.cos);
-    console.log('B scale then shift (cos) i',i,'result',resB);
-  }
-
-  for (var i = 0; i < o.total; i += 1) {
-    var resB = periodicB(i,o.total,o.shift,o.scale,Math.sin);
-    console.log('B scale then shift (sin) i',i,'result',resB);
-  }
-
-});
-
-  campfire.subscribe('song-form-position',function(o){
-
-    songFormPosition.find('.active').removeClass('active');
-    songFormPosition.find('.bar-' + o.barIdx).addClass('active');
-    ///songCycleIndicator.html(o.cycleIdx+1);
-
-
-    songCyclePosition.find('.active').removeClass('active');
-    songCyclePosition.find('.cycle-' + o.cycleIdx).addClass('active');
-
-  });
-
-  var saveBarIdx = false;
-  BSD.currentBarIdx = false;
-  campfire.subscribe('tick',function(cursor){
-    if (cursor.barIdx != BSD.currentBarIdx || cursor.cycleIdx != BSD.currentCycleIdx) {
-      saveBarIdx = cursor.barIdx;
-      BSD.currentBarIdx = cursor.barIdx;
-      BSD.currentCycleIdx = cursor.cycleIdx;
-      campfire.publish('song-form-position',cursor);
-    }
-  });
-
-/*
-  var saveCycleIdx = false;
-  campfire.subscribe('tick',function(cursor){
-    if (cursor.cycleIdx != saveCycleIdx) {
-      saveCycleIdx = cursor.cycleIdx;
-      ///campfire.publish('song-form-position',cursor);
-    }
-  });
-*/
-
-
-campfire.subscribe('tick',function(cursor){
-  BSD.boards.forEach(function(board){
-    board.publish('unfeature-frets');
-  });
-
-  if (cursor.chordIdx > 0) {
-    let x = 123;
-  }
-  predictBoard.updateCursor(cursor);
-
-  predictBoard.publish('unfeature-frets');
-
-  if (!BSD.options.improv.enabled) {
-    cursor.board.publish('feature-fret',cursor);
-    extraBoard.publish('feature-fret',cursor);
-    predictBoard.publish('feature-fret',cursor);
-  }
-
-  fred.clearFretted();
-  getFrets({ 
-    chord: cursor.chord, 
-    fretRange: [0,24], 
-    strings: BSD.options.stringSet.split('').map(o => +o)
-  }).forEach(fret => {
-
-    //console.log('cursor',cursor,'fret',fret);
-
-    let idx = fret.chromaticValue - cursor.chord.spec.rootNote.chromaticValue();
-    if (idx < 0) { idx += 12; }
-    let fill = '#' + colorHash[idx].toHex();
-
-    let opts = {
-      fill: fill
-      //stroke: 'white',
-      //fill: 'blue'
-    }
-    opts = Object.assign({},BSD.options.defaultSVGCircleAttrs,opts);
-    fred.plotFret(fret,opts);
-
-  });
-
-
-});
-
-//BASS
-campfire.subscribe('tick',function(cursor){
-  if (!BSD.options.bass.enabled) { return false; }
-  if (cursor.chordNoteIdx == 0) {
-    var beatOneNote = [
-      cursor.chord.rootNote,
-      cursor.chord.myThird(),
-      cursor.chord.mySeventh()
-    ].filter(o => o)
-      .atRandom();
-
-    let pedal = beatOneNote.plus(-12);
-    let pedalValue = pedal.value();
-
-    if (BSD.options.bass.midi) {
-      let noteOnChannel = 143 + BSD.options.bass.channel;
-      let noteNum = pedalValue;
-      let vel = 127 * BSD.options.bass.volume; //[0..1] -> [0..127]
-      openedMIDIOutput.send([noteOnChannel,noteNum,vel]);
-    }
-    else {
-      bassist.playNote(
-        pedal,
-        BSD.durations.bass
-      );
-    }
-
-  }
-  if (cursor.totQuarterNoteBeats == 4 && BSD.noteResolution == 4 && cursor.chordNoteIdx == 2) { //3rd beat in [0,1,2,3]
-
-    let pedal5 = cursor.chord.myFifth().plus(-12);
-    let pedal5Value = pedal5.value();
-    if (BSD.options.bass.midi) {
-      let noteOnChannel = 143 + BSD.options.bass.channel;
-      let noteNum = pedal5Value;
-      let vel = 127 * BSD.options.bass.volume; //[0..1] -> [0..127]
-      openedMIDIOutput.send([noteOnChannel,noteNum,vel]);
-    }
-    else {
-        bassist.playNote(pedal5, BSD.durations.bass);
-    }
-  }
-});
-
-campfire.subscribe('tick',function(cursor){
-  if (cursor.chordNoteIdx == 0) {
-    BSD.boards.forEach(function(board){
-      board.publish('get-wrap',function(wrap){
-        BSD.options.showCurrentChordFretboadOnly ? wrap.addClass('hidden') : wrap.removeClass('hidden');
+        div.click(function() {
+          BSD.clickedCycle = i;
+          var event = BSD.sequence.find(function(o) {
+            return o.cycleIdx == i && o.barIdx == BSD.currentBarIdx;
+          });
+          console.log('event', event);
+          tick(event);
+        });
       });
     });
-    cursor.board.publish('get-wrap',function(wrap){ //just in case they were hidden...
-        wrap.removeClass('hidden');  
+
+
+    campfire.subscribe('play-chord', function(o) {
+      jQuery('.extra .chord-name').html(o.chord.fullAbbrev());
     });
-    if (BSD.options.scrollToBoard) {
-      cursor.board.publish('get-wrap',function(wrap){
-        jQuery('html, body').animate({ 
-          scrollTop: wrap.find('.chord-name').offset().top - headerHeight 
-        },200);
-      });
+
+
+    BSD.firstClick = true;
+    BSD.handleFirstClick = function() {
+      if (!BSD.firstClick) {
+        return false;
+      }
+      BSD.firstClick = false;
+      var buffer = context.createBuffer(1, 1, 22050);
+      var source = context.createBufferSource();
+      source.buffer = buffer;
+      source.connect(context.destination);
+      if (source.play) {
+        source.play(0);
+      } else if (source.noteOn) {
+        source.noteOn(0);
+      }
+    };
+
+
+
+    function periodicA(current, total, shift, scale, func) {
+      return (func(Math.PI * 2 * current / total) + shift) * scale;
     }
-  }
-});
 
-campfire.subscribe('tick',function(cursor){
-  if (BSD.options.improv.enabled) {
-    campfire.publish('play-note', { note: Note(cursor.noteValue), duration: BSD.durations.note });
-  }
-});
 
-campfire.subscribe('tick',function(cursor){
+    function periodicB(current, total, shift, scale, func) {
+      return (func(Math.PI * 2 * current / total) * scale) + shift;
+    }
+
+    var shiftThenScale = periodicA;
+    var scaleThenShift = periodicB;
+
+
+
+
+    campfire.subscribe('test-periodic', function(o) {
+      for (var i = 0; i < o.total; i += 1) {
+        var resA = periodicA(i, o.total, o.shift, o.scale, Math.cos);
+        console.log('A (cos) i', i, 'result', resA);
+      }
+      for (var i = 0; i < o.total; i += 1) {
+        var resA = periodicA(i, o.total, o.shift, o.scale, Math.sin);
+        console.log('A (sin) i', i, 'result', resA);
+      }
+
+      for (var i = 0; i < o.total; i += 1) {
+        var resB = periodicB(i, o.total, o.shift, o.scale, Math.cos);
+        console.log('B scale then shift (cos) i', i, 'result', resB);
+      }
+
+      for (var i = 0; i < o.total; i += 1) {
+        var resB = periodicB(i, o.total, o.shift, o.scale, Math.sin);
+        console.log('B scale then shift (sin) i', i, 'result', resB);
+      }
+
+    });
+
+    campfire.subscribe('song-form-position', function(o) {
+
+      songFormPosition.find('.active').removeClass('active');
+      songFormPosition.find('.bar-' + o.barIdx).addClass('active');
+      ///songCycleIndicator.html(o.cycleIdx+1);
+
+
+      songCyclePosition.find('.active').removeClass('active');
+      songCyclePosition.find('.cycle-' + o.cycleIdx).addClass('active');
+
+    });
+
+    var saveBarIdx = false;
+    BSD.currentBarIdx = false;
+    campfire.subscribe('tick', function(cursor) {
+      if (cursor.barIdx != BSD.currentBarIdx || cursor.cycleIdx != BSD.currentCycleIdx) {
+        saveBarIdx = cursor.barIdx;
+        BSD.currentBarIdx = cursor.barIdx;
+        BSD.currentCycleIdx = cursor.cycleIdx;
+        campfire.publish('song-form-position', cursor);
+      }
+    });
+
+    /*
+      var saveCycleIdx = false;
+      campfire.subscribe('tick',function(cursor){
+        if (cursor.cycleIdx != saveCycleIdx) {
+          saveCycleIdx = cursor.cycleIdx;
+          ///campfire.publish('song-form-position',cursor);
+        }
+      });
+    */
+
+
+    campfire.subscribe('tick', function(cursor) {
+      BSD.boards.forEach(function(board) {
+        board.publish('unfeature-frets');
+      });
+
+      if (cursor.chordIdx > 0) {
+        let x = 123;
+      }
+      predictBoard.updateCursor(cursor);
+
+      predictBoard.publish('unfeature-frets');
+
+      if (!BSD.options.improv.enabled) {
+        cursor.board.publish('feature-fret', cursor);
+        extraBoard.publish('feature-fret', cursor);
+        predictBoard.publish('feature-fret', cursor);
+      }
+
+      fred.clearFretted();
+      getFrets({
+        chord: cursor.chord,
+        fretRange: [0, 24],
+        strings: BSD.options.stringSet.split('').map(o => +o)
+      }).forEach(fret => {
+
+        //console.log('cursor',cursor,'fret',fret);
+
+        let idx = fret.chromaticValue - cursor.chord.spec.rootNote.chromaticValue();
+        if (idx < 0) {
+          idx += 12;
+        }
+        let fill = '#' + colorHash[idx].toHex();
+
+        let opts = {
+          fill: fill
+          //stroke: 'white',
+          //fill: 'blue'
+        }
+        opts = Object.assign({}, BSD.options.defaultSVGCircleAttrs, opts);
+        fred.plotFret(fret, opts);
+
+      });
+
+
+    });
+
+    //BASS
+    campfire.subscribe('tick', function(cursor) {
+      if (!BSD.options.bass.enabled) {
+        return false;
+      }
+      if (cursor.chordNoteIdx == 0) {
+        var beatOneNote = [
+            cursor.chord.rootNote,
+            cursor.chord.myThird(),
+            cursor.chord.mySeventh()
+          ].filter(o => o)
+          .atRandom();
+
+        let pedal = beatOneNote.plus(-12);
+        let pedalValue = pedal.value();
+
+        if (BSD.options.bass.midi) {
+          let noteOnChannel = 143 + BSD.options.bass.channel;
+          let noteNum = pedalValue;
+          let vel = Math.floor(127 * BSD.options.bass.volume); //[0..1] -> [0..127]        
+
+          openedMIDIOutput.send([noteOnChannel, noteNum, vel]);
+        } else {
+          bassist.playNote(
+            pedal,
+            BSD.durations.bass
+          );
+        }
+
+      }
+      if (cursor.totQuarterNoteBeats == 4 && BSD.noteResolution == 4 && cursor.chordNoteIdx == 2) { //3rd beat in [0,1,2,3]
+
+        let pedal5 = cursor.chord.myFifth().plus(-12);
+        let pedal5Value = pedal5.value();
+        if (BSD.options.bass.midi) {
+          let noteOnChannel = 143 + BSD.options.bass.channel;
+          let noteNum = pedal5Value;
+          let vel = Math.floor(127 * BSD.options.bass.volume); //[0..1] -> [0..127]        
+
+          openedMIDIOutput.send([noteOnChannel, noteNum, vel]);
+        } else {
+          bassist.playNote(pedal5, BSD.durations.bass);
+        }
+      }
+    });
+
+    campfire.subscribe('tick', function(cursor) {
+      if (cursor.chordNoteIdx == 0) {
+        BSD.boards.forEach(function(board) {
+          board.publish('get-wrap', function(wrap) {
+            BSD.options.showCurrentChordFretboadOnly ? wrap.addClass('hidden') : wrap.removeClass('hidden');
+          });
+        });
+        cursor.board.publish('get-wrap', function(wrap) { //just in case they were hidden...
+          wrap.removeClass('hidden');
+        });
+        if (BSD.options.scrollToBoard) {
+          cursor.board.publish('get-wrap', function(wrap) {
+            jQuery('html, body').animate({
+              scrollTop: wrap.find('.chord-name').offset().top - headerHeight
+            }, 200);
+          });
+        }
+      }
+    });
+
+    campfire.subscribe('tick', function(cursor) {
+      if (BSD.options.improv.enabled) {
+        campfire.publish('play-note', {
+          note: Note(cursor.noteValue),
+          duration: BSD.durations.note
+        });
+      }
+    });
+
+    campfire.subscribe('tick', function(cursor) {
       //var midSwung82 = (swung82+even8DelayMS) / 2;/////].sum() /2;
       var thisIdx = cursor.chordIdx;
       var node = cursor;
 
 
       for (var i = 0; i < 16 && node.chordIdx == thisIdx; i += 1) { //at most, make 16 attempts.
-          node = node.next;    
-      }
-      
-      var nextChord = node.chord;
-  
-      //LAST QUARTER NOTE OF MEASURE
-      if (BSD.noteResolution == 4 && cursor.chordNoteIdx + 1 == cursor.totQuarterNoteBeats) {
-        setTimeout(function(){
-          campfire.publish('play-chord', { chord: nextChord, duration: BSD.durations.chord });
-        },delayMS.swung81);
+        node = node.next;
       }
 
-      if (BSD.noteResolution == 2 && cursor.chordNoteIdx == 1) { 
-        setTimeout(function(){
-          campfire.publish('play-chord', { chord: nextChord, duration: BSD.durations.chord });
-        },delayMS.even4DelayMS + swung81);
+      var nextChord = node.chord;
+
+      //LAST QUARTER NOTE OF MEASURE
+      if (BSD.noteResolution == 4 && cursor.chordNoteIdx + 1 == cursor.totQuarterNoteBeats) {
+        setTimeout(function() {
+          campfire.publish('play-chord', {
+            chord: nextChord,
+            duration: BSD.durations.chord
+          });
+        }, delayMS.swung81);
+      }
+
+      if (BSD.noteResolution == 2 && cursor.chordNoteIdx == 1) {
+        setTimeout(function() {
+          campfire.publish('play-chord', {
+            chord: nextChord,
+            duration: BSD.durations.chord
+          });
+        }, delayMS.even4DelayMS + swung81);
       }
 
       if (cursor.totQuarterNoteBeats == 4) {
-        if (BSD.noteResolution == 1 && cursor.chordNoteIdx === 0) { 
-          setTimeout(function(){
-            campfire.publish('play-chord', { chord: nextChord, duration: BSD.durations.chord });
-          },delayMS.even1 - delayMS.swung82);
+        if (BSD.noteResolution == 1 && cursor.chordNoteIdx === 0) {
+          setTimeout(function() {
+            campfire.publish('play-chord', {
+              chord: nextChord,
+              duration: BSD.durations.chord
+            });
+          }, delayMS.even1 - delayMS.swung82);
         }
-        if (BSD.noteResolution == 8 && cursor.chordNoteIdx == 6) { 
+        if (BSD.noteResolution == 8 && cursor.chordNoteIdx == 6) {
           //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
-          setTimeout(function(){
-            campfire.publish('play-chord', { chord: nextChord, duration: BSD.durations.chord });
-          },delayMS.swung81);
+          setTimeout(function() {
+            campfire.publish('play-chord', {
+              chord: nextChord,
+              duration: BSD.durations.chord
+            });
+          }, delayMS.swung81);
         }
 
-        if (BSD.noteResolution == 16 && cursor.chordNoteIdx == 12) { 
+        if (BSD.noteResolution == 16 && cursor.chordNoteIdx == 12) {
           //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
-          setTimeout(function(){
-            campfire.publish('play-chord', { chord: nextChord, duration: BSD.durations.chord });
-          },delayMS.swung81);
+          setTimeout(function() {
+            campfire.publish('play-chord', {
+              chord: nextChord,
+              duration: BSD.durations.chord
+            });
+          }, delayMS.swung81);
         }
       }
 
-});
-
-campfire.subscribe('tick',function(cursor){
-  //high hat
-  if (!BSD.options.highHat.enabled) { return false; }
-  if (BSD.noteResolution == 4 && cursor.chordNoteIdx == 1) {
-    highHat();
-  }
-  if (BSD.noteResolution == 4 && cursor.chordNoteIdx + 1 == cursor.totQuarterNoteBeats) {
-    highHat();
-  }
-});
-/**
-campfire.subscribe('tick',function(cursor){
-
-});
-**/
-
-campfire.subscribe('reset-sequence-next',function(){
-
-  var last = false;
-  BSD.sequence.forEach(function(s){
-    if (last) {
-      last.next = s;
-    }
-    last = s;
-  });
-  last.next = BSD.sequence[0];
-});
-
-campfire.subscribe('tick',function(cursor){
-  BSD.barIdx = cursor.barIdx;
-});
-
-
-  var btnLoopStart = jQuery('.btn-loop-start');
-  btnLoopStart.click(function(){
-
-    if (BSD.loopEnd !== 0 && !BSD.loopEnd) {
-      BSD.loopEnd = BSD.sequence.length - 1;
-    }
-    BSD.loopStart = BSD.barIdx;
-    btnLoopStart.html('A: ' + (BSD.loopStart+1));
-
-
-    campfire.publish('reset-sequence-next');
-    BSD.loop = BSD.sequence.select(function(o){
-      //FIXME: insisting on cycleIdx == 0 for now... is there a better way?      
-      return o.cycleIdx == 0 && o.barIdx >= BSD.loopStart && o.barIdx <= BSD.loopEnd;
     });
 
-    BSD.loop[BSD.loop.length-1].next = BSD.loop[0];
-    tick(BSD.loop[0]);
-  });
-  var btnLoopEnd = jQuery('.btn-loop-end');
-  btnLoopEnd.click(function(){
-    if (BSD.loopStart !== 0 && !BSD.loopStart) {
-      BSD.loopStart = 0;
-    }
-    BSD.loopEnd = BSD.barIdx;
-    btnLoopEnd.html('B: ' + (BSD.loopEnd+1));
+    campfire.subscribe('tick', function(cursor) {
+      //high hat
+      if (!BSD.options.highHat.enabled) {
+        return false;
+      }
+      if (BSD.noteResolution == 4 && cursor.chordNoteIdx == 1) {
+        highHat();
+      }
+      if (BSD.noteResolution == 4 && cursor.chordNoteIdx + 1 == cursor.totQuarterNoteBeats) {
+        highHat();
+      }
+    });
+    /**
+    campfire.subscribe('tick',function(cursor){
 
-    campfire.publish('reset-sequence-next');
-    BSD.loop = BSD.sequence.select(function(o){
-      //FIXME: insisting on cycleIdx == 0 for now... is there a better way?
-      return o.cycleIdx == 0 && o.barIdx >= BSD.loopStart && o.barIdx <= BSD.loopEnd;
+    });
+    **/
+
+    campfire.on('opened-midi-out-port',function(port) { 
+    })
+
+
+    campfire.subscribe('reset-sequence-next', function() {
+
+      var last = false;
+      BSD.sequence.forEach(function(s) {
+        if (last) {
+          last.next = s;
+        }
+        last = s;
+      });
+      last.next = BSD.sequence[0];
     });
 
-    BSD.loop[BSD.loop.length-1].next = BSD.loop[0];
-    tick(BSD.loop[0]);
-  });
+    campfire.subscribe('tick', function(cursor) {
+      BSD.barIdx = cursor.barIdx;
+    });
+
+
+    var btnLoopStart = jQuery('.btn-loop-start');
+    btnLoopStart.click(function() {
+
+      if (BSD.loopEnd !== 0 && !BSD.loopEnd) {
+        BSD.loopEnd = BSD.sequence.length - 1;
+      }
+      BSD.loopStart = BSD.barIdx;
+      btnLoopStart.html('A: ' + (BSD.loopStart + 1));
+
+
+      campfire.publish('reset-sequence-next');
+      BSD.loop = BSD.sequence.select(function(o) {
+        //FIXME: insisting on cycleIdx == 0 for now... is there a better way?      
+        return o.cycleIdx == 0 && o.barIdx >= BSD.loopStart && o.barIdx <= BSD.loopEnd;
+      });
+
+      BSD.loop[BSD.loop.length - 1].next = BSD.loop[0];
+      tick(BSD.loop[0]);
+    });
+    var btnLoopEnd = jQuery('.btn-loop-end');
+    btnLoopEnd.click(function() {
+      if (BSD.loopStart !== 0 && !BSD.loopStart) {
+        BSD.loopStart = 0;
+      }
+      BSD.loopEnd = BSD.barIdx;
+      btnLoopEnd.html('B: ' + (BSD.loopEnd + 1));
+
+      campfire.publish('reset-sequence-next');
+      BSD.loop = BSD.sequence.select(function(o) {
+        //FIXME: insisting on cycleIdx == 0 for now... is there a better way?
+        return o.cycleIdx == 0 && o.barIdx >= BSD.loopStart && o.barIdx <= BSD.loopEnd;
+      });
+
+      BSD.loop[BSD.loop.length - 1].next = BSD.loop[0];
+      tick(BSD.loop[0]);
+    });
 
 
 
-BSD.options.highHat.volume = BSD.options.highHat.volume || 0.7;
-campfire.subscribe('bootup-high-hat',function(){
-  var bufferSize = 4096;
-  var brownNoise = (function() {
-      var lastOut = 0.0;
-      var node = context.createScriptProcessor(bufferSize, 1, 1);
-      node.onaudioprocess = function(e) {
+    BSD.options.highHat.volume = BSD.options.highHat.volume || 0.7;
+    campfire.subscribe('bootup-high-hat', function() {
+      var bufferSize = 4096;
+      var brownNoise = (function() {
+        var lastOut = 0.0;
+        var node = context.createScriptProcessor(bufferSize, 1, 1);
+        node.onaudioprocess = function(e) {
           var output = e.outputBuffer.getChannelData(0);
           for (var i = 0; i < bufferSize; i++) {
-              var white = Math.random() * 2 - 1;
-              output[i] = (lastOut + (0.02 * white)) / 1.32;
-              lastOut = output[i];
-              output[i] *= Math.PI;//3.5; // (roughly) compensate for gain
+            var white = Math.random() * 2 - 1;
+            output[i] = (lastOut + (0.02 * white)) / 1.32;
+            lastOut = output[i];
+            output[i] *= Math.PI; //3.5; // (roughly) compensate for gain
           }
+        }
+        return node;
+      })();
+
+
+      var gn = context.createGain();
+      gn.gain.value = 0;
+
+      gn.connect(common);
+      brownNoise.connect(gn);
+      campfire.subscribe('high-hat', function() {
+        gn.gain.setTargetAtTime(BSD.options.highHat.volume, context.currentTime, 0); //do it now...
+        gn.gain.linearRampToValueAtTime(0, context.currentTime + 0.015);
+      });
+    });
+
+    function highHat() {
+      if (BSD.options.highHat.midi) {
+        let noteOnChannel = 143 + BSD.options.highHat.channel;
+        let noteNum = BSD.options.highHat.noteNumber;
+        let vel = Math.floor(127 * BSD.options.highHat.volume); //[0..1] -> [0..127]        
+
+        openedMIDIOutput.send([noteOnChannel, noteNum, vel]);
+      } else {
+        campfire.publish('high-hat'); //the old synthetic brown noise hat
       }
-      return node;
-  })();
-
-
-  var gn = context.createGain();
-  gn.gain.value = 0;
-
-  gn.connect(common);
-  brownNoise.connect(gn);
-  campfire.subscribe('high-hat',function(){
-    gn.gain.setTargetAtTime(BSD.options.highHat.volume,context.currentTime,0); //do it now...
-    gn.gain.linearRampToValueAtTime(0, context.currentTime + 0.015);    
-  });
-});
-
-function highHat() {
-  if (BSD.options.highHat.midi) {
-    let noteOnChannel = 143 + BSD.options.highHat.channel;
-    let noteNum = BSD.options.highHat.noteNumber;
-    let vel = 127 * BSD.options.highHat.volume; //[0..1] -> [0..127]
-    openedMIDIOutput.send([noteOnChannel,noteNum,vel]);
-  }
-  else {
-    campfire.publish('high-hat'); //the old synthetic brown noise hat
-  }
-}
-
-// midi functions
-
-var bank = {};
-function onMIDIMessage(message) {
-    let data = message.data; // this gives us our [command/channel, note, velocity] data.
-    console.log('MIDI data', data); // MIDI data [144, 63, 73]
-
-    //data = event.data,
-    let cmd = data[0] >> 4,
-    channel = data[0] & 0xf,
-    type = data[0] & 0xf0, // channel agnostic message type. Thanks, Phil Burk.
-    note = data[1],
-    velocity = data[2];
-
-    /* 
-    128 = 0x80 = note off
-    144 = 0x90 = note on
-    160 = 0xA0 = aftertouch
-    176 = 0xB0 = control change
-    192 = 0xC0 = program change
-    */
-
-
-    console.log('type',type);
-
-    if (type == 176) {
-      //mod wheel (at least on the alesis qx49 it is)
-      return false;
-    }
-    if (type == 224) {
-      //pitch wheel
-      return false;
     }
 
-    if (type == MIDI_CONST.NOTE_ON && velocity > 0) { //note on
-      campfire.publish('play-note',{ note: Note(note), duration: null, velocity: velocity });
-      //bank[note] = keyboardist.playNote(Note(note),null,velocity);    
+    // midi functions
+
+    var bank = {};
+
+    function onMIDIMessage(message) {
+      let data = message.data; // this gives us our [command/channel, note, velocity] data.
+      console.log('MIDI data', data); // MIDI data [144, 63, 73]
+
+      //data = event.data,
+      let cmd = data[0] >> 4,
+        channel = data[0] & 0xf,
+        type = data[0] & 0xf0, // channel agnostic message type. Thanks, Phil Burk.
+        note = data[1],
+        velocity = data[2];
+
+      /* 
+      128 = 0x80 = note off
+      144 = 0x90 = note on
+      160 = 0xA0 = aftertouch
+      176 = 0xB0 = control change
+      192 = 0xC0 = program change
+      */
+
+
+      console.log('type', type);
+
+      if (type == 176) {
+        //mod wheel (at least on the alesis qx49 it is)
+        return false;
+      }
+      if (type == 224) {
+        //pitch wheel
+        return false;
+      }
+
+      if (type == MIDI_CONST.NOTE_ON && velocity > 0) { //note on
+        campfire.publish('play-note', {
+          note: Note(note),
+          duration: null,
+          velocity: velocity
+        });
+        //bank[note] = keyboardist.playNote(Note(note),null,velocity);    
+      } else if (type == MIDI_CONST.NOTE_ON && velocity == 0) { //note off
+        openedMIDIOutput.send([MIDI_CONST.NOTE_OFF | (BSD.options.improv.channel - 1), note, 0]);
+      } else if (type == MIDI_CONST.NOTE_OFF) { //note off
+        openedMIDIOutput.send([MIDI_CONST.NOTE_OFF | (BSD.options.improv.channel - 1), note, 0]);
+      } else {
+        var env = bank[note];
+        if (env) {
+          env.stop();
+        }
+      }
+
     }
-    else if (type == MIDI_CONST.NOTE_ON && velocity == 0) { //note off
-      openedMIDIOutput.send([MIDI_CONST.NOTE_OFF | (BSD.options.improv.channel - 1), note, 0]);
-    }
-    else if (type == MIDI_CONST.NOTE_OFF) { //note off
-      openedMIDIOutput.send([MIDI_CONST.NOTE_OFF | (BSD.options.improv.channel - 1), note, 0]);
-    }
-    else {
-      var env = bank[note];
-      if (env) { env.stop(); }
-    }
-
-}
 
 
-let openedMIDIOutput;
+    let openedMIDIOutput;
+    let outPort;
+    let outMonitor;
 
-function onMIDISuccess(midiAccess) {
-    // when we get a succesful response, run this code
-    midi = midiAccess; // this is our raw MIDI data, inputs, outputs, and sysex status
+    function onMIDISuccess(midiAccess) {
+      // when we get a succesful response, run this code
+      midi = midiAccess; // this is our raw MIDI data, inputs, outputs, and sysex status
 
-    midiAccess.onstatechange = function(e) {
-      // Print information about the (dis)connected MIDI controller
-      console.log(e.port.name, e.port.manufacturer, e.port.state);
-    };
+      midiAccess.onstatechange = function(e) {
+        // Print information about the (dis)connected MIDI controller
+        console.log(e.port.name, e.port.manufacturer, e.port.state);
+      };
 
 
-    var inputs = midiAccess.inputs.values();
-    
-    // loop over all available inputs and listen for any MIDI input
-    for (var input = inputs.next(); input && !input.done; input = inputs.next()) {
+      var inputs = midiAccess.inputs.values();
+
+      // loop over all available inputs and listen for any MIDI input
+      for (var input = inputs.next(); input && !input.done; input = inputs.next()) {
         // each time there is a midi message call the onMIDIMessage function
         input.value.onmidimessage = onMIDIMessage;
-    }
+      }
 
-    var outputs = midiAccess.outputs.values();
-    
-    // loop over all available output and listen for any MIDI output
-    for (var output = outputs.next(); output && !output.done; output = outputs.next()) {
+      var outputs = midiAccess.outputs.values();
+
+      // loop over all available output and listen for any MIDI output
+      for (var output = outputs.next(); output && !output.done; output = outputs.next()) {
         // each time there is a midi message call the onMIDIMessage function
-        console.log('MIDI output value',output.value)
+        console.log('MIDI output value', output.value)
         //myMIDIoutput = output;
 
         output.value.open()
-          .then( (okay,b,c) => {
-            console.log('okay',okay,b,c)
-            openedMIDIOutput = okay;
+          .then((okayPort, b, c) => {
+            console.log('okay', okayPort, b, c)
+            outPort = okayPort;
+            //campfire.publish('opened-midi-out-port',outPort);
           })
         ////input.value.onmidimessage = onMIDIMessage;
-    }
-
-}
-
-function onMIDIFailure(error) {
-    // when we get a failed response, run this code
-    console.log("No access to MIDI devices or your browser doesn't support WebMIDI API. Please use WebMIDIAPIShim " + error);
-}
-
-//var midi, data;
-// request MIDI access
-if (navigator.requestMIDIAccess) {
-    navigator.requestMIDIAccess({
-        //sysex: false
-    }).then(onMIDISuccess, onMIDIFailure)
-    .catch('error',function(e){
-      console.log('midi err',e);
-    })
-} else {
-    alert("No MIDI support in your browser.");
-}
-
-
-
-
-campfire.publish('bootup-high-hat');
-
-
-function getRandomInt(max) {
-  return Math.floor(Math.random() * Math.floor(max));
-}
-function getRandomRGBA() {
-  var rgb = [192,192,192].map(max => getRandomInt(max) + 63);
-  var a = Math.random() * (1 - 0.9) + 0.9;
-  a = Math.round(a*100) / 100;
-  return [...rgb,a];  
-}
-
-function getRandomColor() {
-  var vRGBA = getRandomRGBA();
-  var result = `rgba(${vRGBA.join(',')})`;
-  ///console.log(result);
-  return result;
-}
-
-let firstStringFrets, fps,fretStarts,fretWidths,fretHeights;
-
-fretHeights = 100/6;
-
-
-
-var fred;
-
-  setTimeout(function(){
-    firstStringFrets = BSD.guitarData.filter(o => o.string == 1);
-    fps = firstStringFrets.length;
-
-    fretStarts = [];
-    firstStringFrets.forEach(fret => {
-      let last = fretStarts.length ? fretStarts[fretStarts.length-1] : 0;
-      fretStarts.push(vlerp([last],[100],100/fps/100)[0]);
-    });
-    fretStarts = fretStarts.map(o => o * 1.56);
-    fretWidths = fretStarts.map((s,i) => {
-      var result =  i ? s - fretStarts[i-1] : s;
-      return result;
-    });
-    fretStarts.unshift(0);
-    /**
-    console.log(
-      'fretWidths',fretWidths,
-      'fretStarts',fretStarts
-    );
-    ***/
-
-    fred = BSD.Widgets.SVGFretboard({
-        foo: 'bar'
-    })
-      .on('wake-up',() => console.log('WOKE!!'))
-
-    console.log(fred,'fred?');
-
-    svgWrap.append(
-      fred.ui()
-    );
-    console.log(fred);
-    fred.plotFingerboardFrets();
-    fred.plotInlays();
-    fred.plotStrings();
-
-
-    jQuery('.color-palette-wrap').append(
-      App.ColorPalette('woo')
-      .on('color-chosen',color => {
-        BSD.chosenColor = color;
-        console.log('chosen!!',color);
-      })
-      .redraw()
-      .ui()
-    );
-
-  },2000);
-      //
-      let chords = ['D-7','G7','Cmajor7'];
-      let wheely = spinner(chords,chordName => { 
-        fred.clearFretted(); 
-        getFrets({ 
-          chord: chordName, 
-          strings: BSD.options.stringSet.split('').map(o => +o), 
-          fretRange: BSD.options.fretRange,
-        }).forEach(fret => fred.plotFret(fret,BSD.options.defaultSVGCircleAttrs)) 
-      }, 
-      5500);
-
-      var fretPlotterInput = jQuery('.fret-plotter-input');
-      var btnClear = jQuery('.btn-clear');
-
-      function plotHelper(chordOrScale) {
-
-        let myColor = BSD.chosenColors[0];
-        BSD.chosenColors.push(BSD.chosenColors.shift());
-
-        var fr = BSD.options.fretRange;
-        var strings = BSD.options.stringSet.split('').map(o => +o);
-        var hash = chordOrScale.chromaticHash();
-        var frets = getFretsByChromaticHash(hash)
-          .filter(fret => fret.fret >= fr[0] && fret.fret <= fr[1])
-          .filter(fret => strings.contains(fret.string));
-        let opts = {
-          fill: '#' + myColor.toHex(),
-      		'fill-opacity': BSD.svgAlpha
-    	};
-        fred.plotFrets(frets,opts);
       }
 
-      jQuery('.btn-chord').on('click',function() {
-        var str = fretPlotterInput.val();
-        let chordNames = str.split(/\ +|\+|,/g)
-          .filter(o => o)
-          .map(o => o.trim());
-        chordNames.forEach( (name,i) => {          
-          var chord = makeChord(name);
-          plotHelper(chord);          
+    }
+
+    function onMIDIFailure(error) {
+      // when we get a failed response, run this code
+      console.log("No access to MIDI devices or your browser doesn't support WebMIDI API. Please use WebMIDIAPIShim " + error);
+    }
+
+    //var midi, data;
+    // request MIDI access
+    if (navigator.requestMIDIAccess) {
+      navigator.requestMIDIAccess({
+          //sysex: false
+        }).then(onMIDISuccess, onMIDIFailure)
+        .catch('error', function(e) {
+          console.log('midi err', e);
         })
+    } else {
+      alert("No MIDI support in your browser.");
+    }
+
+
+
+
+    campfire.publish('bootup-high-hat');
+
+
+    function getRandomInt(max) {
+      return Math.floor(Math.random() * Math.floor(max));
+    }
+
+    function getRandomRGBA() {
+      var rgb = [192, 192, 192].map(max => getRandomInt(max) + 63);
+      var a = Math.random() * (1 - 0.9) + 0.9;
+      a = Math.round(a * 100) / 100;
+      return [...rgb, a];
+    }
+
+    function getRandomColor() {
+      var vRGBA = getRandomRGBA();
+      var result = `rgba(${vRGBA.join(',')})`;
+      ///console.log(result);
+      return result;
+    }
+
+    let firstStringFrets, fps, fretStarts, fretWidths, fretHeights;
+
+    fretHeights = 100 / 6;
+
+
+
+    var fred;
+
+    setTimeout(function() {
+      firstStringFrets = BSD.guitarData.filter(o => o.string == 1);
+      fps = firstStringFrets.length;
+
+      fretStarts = [];
+      firstStringFrets.forEach(fret => {
+        let last = fretStarts.length ? fretStarts[fretStarts.length - 1] : 0;
+        fretStarts.push(vlerp([last], [100], 100 / fps / 100)[0]);
       });
-      jQuery('.btn-scale').on('click',function() {
-        var scale = makeScale(fretPlotterInput.val());
-        plotHelper(scale);
+      fretStarts = fretStarts.map(o => o * 1.56);
+      fretWidths = fretStarts.map((s, i) => {
+        var result = i ? s - fretStarts[i - 1] : s;
+        return result;
       });
-      btnClear.on('click',() => { 
+      fretStarts.unshift(0);
+      /**
+      console.log(
+        'fretWidths',fretWidths,
+        'fretStarts',fretStarts
+      );
+      ***/
+
+      fred = BSD.Widgets.SVGFretboard({
+          foo: 'bar'
+        })
+        .on('wake-up', () => console.log('WOKE!!'))
+
+      console.log(fred, 'fred?');
+
+      svgWrap.append(
+        fred.ui()
+      );
+      console.log(fred);
+      fred.plotFingerboardFrets();
+      fred.plotInlays();
+      fred.plotStrings();
+
+
+      jQuery('.color-palette-wrap').append(
+        App.ColorPalette('woo')
+        .on('color-chosen', color => {
+          BSD.chosenColor = color;
+          console.log('chosen!!', color);
+        })
+        .redraw()
+        .ui()
+      );
+
+    }, 2000);
+    //
+    let chords = ['D-7', 'G7', 'Cmajor7'];
+    let wheely = spinner(chords, chordName => {
         fred.clearFretted();
-        //fretPlotterInput.val(null);
-      });
-      
-      BSD.svgAlpha = 0.7
-      let svgAlphaInput = jQuery('.svg-alpha');
-      svgAlphaInput.on('change',e => {
-        BSD.svgAlpha = + e.target.value;
+        getFrets({
+          chord: chordName,
+          strings: BSD.options.stringSet.split('').map(o => +o),
+          fretRange: BSD.options.fretRange,
+        }).forEach(fret => fred.plotFret(fret, BSD.options.defaultSVGCircleAttrs))
+      },
+      5500);
+
+    var fretPlotterInput = jQuery('.fret-plotter-input');
+    var btnClear = jQuery('.btn-clear');
+
+    function plotHelper(chordOrScale) {
+
+      let myColor = BSD.chosenColors[0];
+      BSD.chosenColors.push(BSD.chosenColors.shift());
+
+      var fr = BSD.options.fretRange;
+      var strings = BSD.options.stringSet.split('').map(o => +o);
+      var hash = chordOrScale.chromaticHash();
+      var frets = getFretsByChromaticHash(hash)
+        .filter(fret => fret.fret >= fr[0] && fret.fret <= fr[1])
+        .filter(fret => strings.contains(fret.string));
+      let opts = {
+        fill: '#' + myColor.toHex(),
+        'fill-opacity': BSD.svgAlpha
+      };
+      fred.plotFrets(frets, opts);
+    }
+
+    jQuery('.btn-chord').on('click', function() {
+      var str = fretPlotterInput.val();
+      let chordNames = str.split(/\ +|\+|,/g)
+        .filter(o => o)
+        .map(o => o.trim());
+      chordNames.forEach((name, i) => {
+        var chord = makeChord(name);
+        plotHelper(chord);
+      })
+    });
+    jQuery('.btn-scale').on('click', function() {
+      var scale = makeScale(fretPlotterInput.val());
+      plotHelper(scale);
+    });
+    btnClear.on('click', () => {
+      fred.clearFretted();
+      //fretPlotterInput.val(null);
+    });
+
+    BSD.svgAlpha = 0.7
+    let svgAlphaInput = jQuery('.svg-alpha');
+    svgAlphaInput.on('change', e => {
+      BSD.svgAlpha = +e.target.value;
+    });
+
+    var btnColor = jQuery('.btn-color');
+    btnColor.on('click', () => {
+      let rc = lightbox('Choose Color', function(wrap) {
+        BSD.chosenColors = []
+        btnColor.find('span')
+          .remove();
+        wrap.append(
+          App.ColorPalette()
+          .on('color-chosen', color => {
+            BSD.chosenColor = color;
+            BSD.chosenColors.push(color);
+            console.log('chosen!!', color);
+            console.log('all chosen', BSD.chosenColors);
+            btnColor.append(
+              DOM.span('&nbsp;&nbsp;')
+              .css('background-color', '#' + color.toHex())
+            )
+            //rc.hide();
+          })
+          .redraw()
+          .ui()
+        )
+      })
+    });
+
+
+    setTimeout(function() {
+
+
+      let events  = [];
+      window.events = events;
+      freak = App.FreakySeq({
+        events
       });
 
-      var btnColor =jQuery('.btn-color');
-      btnColor.on('click', () => {
-        let rc = lightbox('Choose Color',function(wrap){
-          BSD.chosenColors = []
-          btnColor.find('span')
-            .remove();
-          wrap.append(
-            App.ColorPalette()
-              .on('color-chosen', color => {
-                BSD.chosenColor = color;
-                BSD.chosenColors.push(color);
-                console.log('chosen!!',color);
-                console.log('all chosen',BSD.chosenColors);
-                btnColor.append(
-                  DOM.span('&nbsp;&nbsp;')
-                    .css('background-color','#' + color.toHex())
-                )
-                //rc.hide();
-              })
-              .redraw()
-              .ui()
-          )
-        })
+      campfire.subscribe('tempo-change', freak.tempoChange)
+      freak.tempoChange(BSD.options.tempo);
+
+
+
+      let pianoRoll = App.PianoRoll({
+        ...freak.opts,
+        events: events
+      })
+
+      openedMIDIOutput = App.MIDIOutMonitor({ port: outPort });
+      jQuery('.monitor-wrap').append(openedMIDIOutput.ui())
+
+
+      pianoRoll.on('note-hover',function(noteNumber){
+        BSD.currentNote = Note(noteNumber);
       });
+      pianoRoll.on('note-preview',function(noteNumber){
+        let noteOnChanByte = 0x90 + (BSD.options.improv.channel - 1);
+        let noteOffChanByte = 0x80 + (BSD.options.improv.channel - 1);
 
+        openedMIDIOutput.send([noteOnChanByte,noteNumber,0x7f]);
+        setTimeout(function(){
+          openedMIDIOutput.send([noteOffChanByte,noteNumber,0x7f])
+        },250)
 
-      setTimeout(function(){
-        let pianoRoll = App.PianoRoll({
-        ...GAMELOOP,
-        events: tickEvents
       })
       jQuery('.piano-roll-wrap').append(pianoRoll.ui())
 
 
 
-      },2000)
-
-
-    </script>
+    }, 2000)
+  </script>
 <?php
 });
 
