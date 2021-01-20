@@ -1072,7 +1072,7 @@ add_action('wp_footer', function () {
         ]);
       });
 
-
+    hookupJV(bassFolder,BSD.options.bass);
 
 
     let chordFolder = gui.addFolder('chord', 'Chords');
