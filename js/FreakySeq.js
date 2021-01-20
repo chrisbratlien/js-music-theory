@@ -112,6 +112,9 @@ export default function FreakySeq(props) {
     //console.log("loopMS", loopMS);
 
     function frameTick(nowMS) {
+      if (!playing) {
+        return console.log("stopped");
+      }
       nowMS = Math.floor(nowMS);
       if (!whenStartedMS) {
         whenStartedMS = nowMS;
@@ -177,6 +180,7 @@ export default function FreakySeq(props) {
     millisPerLoop,
     opts,
     play,
+    stop,
     tempoChange,
     ///tickEvents,
   };

@@ -913,7 +913,7 @@ add_action('wp_footer', function () {
       return [msb, lsb];
     }
 
-    function bankSelect(channel, msb, lsb) {
+    function bankSelect(channelFrom1, msb, lsb) {
       /*
       http://midi.teragonaudio.com/tutr/rolarc.htm
 
@@ -929,12 +929,12 @@ add_action('wp_footer', function () {
       ////let [msb, lsb] = get7bitMSBAndLSB(decimalBankNumber);
 
       openedMIDIOutput.send([
-        MIDI_CONST.CONTROL_CHANGE | (channel - 1),
+        MIDI_CONST.CONTROL_CHANGE | (channelFrom1 - 1),
         0,
         msb
       ]);
       openedMIDIOutput.send([
-        MIDI_CONST.CONTROL_CHANGE | (channel - 1),
+        MIDI_CONST.CONTROL_CHANGE | (channelFrom1 - 1),
         0x20, //32
         lsb
       ]);
@@ -980,30 +980,46 @@ add_action('wp_footer', function () {
     */
     
       let empty = { name: false }
-
-
-    function hookupJV(parentFolder,opts){
-      Object.keys(jvtool.banks).forEach((bankName,i) => {
-        let bankOpts = jvtool.banks[bankName];
-        let bankFolder = parentFolder.addFolder('bankFolder'+i,bankName);
-        bankOpts.patches.forEach(patch => {
-          let booj = {
-            doIt: function() {
+      function patchSelectorUL(opts) {
+        let ul = DOM.ul();
+        Object.keys(jvtool.banks).map((bankName,i) => {
+          let bankOpts = jvtool.banks[bankName];
+          bankOpts.patches.forEach(patch => {
+            let li = DOM.li(`${bankName} :: ${patch.name}`);
+            li.on('click',function(){
               let p = + patch.number - 1;
               console.log('opts',opts,'bankOpts',bankOpts,'patch',patch,'p',p);
               bankSelect(opts.channel,bankOpts.msb,bankOpts.lsb,p);
               openedMIDIOutput.send([
-                MIDI_CONST.PROGRAM_CHANGE | (BSD.options.improv.channel - 1),
-                p 
+                MIDI_CONST.PROGRAM_CHANGE | (opts.channel - 1),
+                p
               ]);
-            }
-
-          }
-          bankFolder.add(booj,'doIt')
-          .name(patch.name)
-        })
-      })
+          });
+          ul.append(li);
+        });        
+      });
+      opts.wrap.append(ul);
     }
+
+
+    function hookupJV(parentFolder,opts){
+
+      let goob = {
+        doIt: function() {
+          lightbox('wee',function(wrap){
+            patchSelectorUL({
+              ...opts,
+              wrap
+            });
+          });
+        }
+      }
+      parentFolder.add(goob,'doIt').name('Change Patch');
+    }
+
+
+
+
 
     hookupJV(improvFolder,BSD.options.improv);
 
@@ -1083,6 +1099,11 @@ add_action('wp_footer', function () {
           e
         ]);
       });
+
+
+      hookupJV(chordFolder,BSD.options.chord);
+
+
 
 
     let hatFolder = gui.addFolder('highHat', 'High-hat');
@@ -1337,7 +1358,7 @@ add_action('wp_footer', function () {
       }
 
       ///console.log('rooteless notes',rootless.notes());
-      if (openedMIDIOutput && openedMIDIOutput.connection == 'open') {
+      if (openedMIDIOutput && openedMIDIOutput.connection == 'open' || outPort.connection == 'open') {
 
         let vel = Math.floor(127 * BSD.options.chord.volume); //[0..1] -> [0..127]
 
