@@ -525,9 +525,9 @@ get_header(); ?>
 </div><!-- venue row -->
 <div class="venue-footer noprint clear-both">
 </div>
-<div class="piano-roll-wrap">
+<div class="piano-roll-wrap noprint">
 </div>
-<div class="monitor-wrap"></div>
+<div class="monitor-wrap noprint"></div>
 
 <h3 class="noprint">Songs</h3>
 <div class="song-list-wrap noprint">
@@ -3053,6 +3053,7 @@ add_action('wp_footer', function () {
       })
       jQuery('.piano-roll-wrap').append(pianoRoll.ui())
 
+      jQuery('.dg.ac').addClass('noprint');
 
 
     }, 2000)
