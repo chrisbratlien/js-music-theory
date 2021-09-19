@@ -1,0 +1,17 @@
+version: "2"
+services:
+  web:
+    build: .
+    container_name: js-music-theory
+    restart: always
+    volumes:
+      - ./:/var/www/html
+      - ./php-uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+    environment:
+      BLOGINFO_URL: http://localhost:${APACHE_PORT}
+      BASE_URI: /
+      XDEBUG_CONFIG: client_host=host.docker.internal
+      XDEBUG_MODE: debug
+      XDEBUG_SESSION: xdebug_session_for_RST
+    ports:
+      - ${APACHE_PORT}:80
