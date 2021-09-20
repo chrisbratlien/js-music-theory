@@ -556,9 +556,9 @@ get_header(); ?>
 
 add_action('wp_footer', function () {
 ?>
-<script>
-  let jvtool = {};
-</script>
+  <script>
+    let jvtool = {};
+  </script>
   <script src="<?php bloginfo('url'); ?>/lib/Snap.svg/dist/snap.svg.js"></script>
   <script src="<?php bloginfo('url'); ?>/lib/CodingMath/utils.js"></script>
   <script src="<?php bloginfo('url'); ?>/lib/dat.gui.js"></script>
@@ -614,11 +614,14 @@ add_action('wp_footer', function () {
         insideChord: true
       }
     };
+    BSD.options = {
+      ...defaultOptions
+    };
     storage.getItem('options', function(o) {
 
       let stored = JSON.parse(o);
       BSD.options = {
-        ...defaultOptions,
+        ...BSD.options,
         ...stored
       }
 
@@ -968,7 +971,7 @@ add_action('wp_footer', function () {
       });
 
 
-      /*
+    /*
     improvFolder.add(BSD.options.improv, 'bank')
       .min(1)
       .max(128)
@@ -978,35 +981,38 @@ add_action('wp_footer', function () {
         bankSelect(BSD.options.improv.channel, BSD.options.improv.bank);
       });
     */
-    
-      let empty = { name: false }
-      function patchSelectorUL(opts) {
-        let ul = DOM.ul();
-        Object.keys(jvtool.banks).map((bankName,i) => {
-          let bankOpts = jvtool.banks[bankName];
-          bankOpts.patches.forEach(patch => {
-            let li = DOM.li(`${bankName} :: ${patch.name}`);
-            li.on('click',function(){
-              let p = + patch.number - 1;
-              console.log('opts',opts,'bankOpts',bankOpts,'patch',patch,'p',p);
-              bankSelect(opts.channel,bankOpts.msb,bankOpts.lsb,p);
-              openedMIDIOutput.send([
-                MIDI_CONST.PROGRAM_CHANGE | (opts.channel - 1),
-                p
-              ]);
+
+    let empty = {
+      name: false
+    }
+
+    function patchSelectorUL(opts) {
+      let ul = DOM.ul();
+      Object.keys(jvtool.banks).map((bankName, i) => {
+        let bankOpts = jvtool.banks[bankName];
+        bankOpts.patches.forEach(patch => {
+          let li = DOM.li(`${bankName} :: ${patch.name}`);
+          li.on('click', function() {
+            let p = +patch.number - 1;
+            console.log('opts', opts, 'bankOpts', bankOpts, 'patch', patch, 'p', p);
+            bankSelect(opts.channel, bankOpts.msb, bankOpts.lsb, p);
+            openedMIDIOutput.send([
+              MIDI_CONST.PROGRAM_CHANGE | (opts.channel - 1),
+              p
+            ]);
           });
           ul.append(li);
-        });        
+        });
       });
       opts.wrap.append(ul);
     }
 
 
-    function hookupJV(parentFolder,opts){
+    function hookupJV(parentFolder, opts) {
 
       let goob = {
         doIt: function() {
-          lightbox('wee',function(wrap){
+          lightbox('wee', function(wrap) {
             patchSelectorUL({
               ...opts,
               wrap
@@ -1014,14 +1020,14 @@ add_action('wp_footer', function () {
           });
         }
       }
-      parentFolder.add(goob,'doIt').name('Change Patch');
+      parentFolder.add(goob, 'doIt').name('Change Patch');
     }
 
 
 
 
 
-    hookupJV(improvFolder,BSD.options.improv);
+    hookupJV(improvFolder, BSD.options.improv);
 
 
     improvFolder.add(BSD.options.improv, 'patch')
@@ -1072,7 +1078,7 @@ add_action('wp_footer', function () {
         ]);
       });
 
-    hookupJV(bassFolder,BSD.options.bass);
+    hookupJV(bassFolder, BSD.options.bass);
 
 
     let chordFolder = gui.addFolder('chord', 'Chords');
@@ -1101,7 +1107,7 @@ add_action('wp_footer', function () {
       });
 
 
-      hookupJV(chordFolder,BSD.options.chord);
+    hookupJV(chordFolder, BSD.options.chord);
 
 
 
@@ -1405,10 +1411,10 @@ add_action('wp_footer', function () {
 
       if (BSD.currentNote && c == BSD.keycodes.f) {
         if (BSD.options.midiOnly && openedMIDIOutput) {
-          openedMIDIOutput.send([noteOnChanByte,noteNumber,0x7f]);
-          return setTimeout(function(){
-            openedMIDIOutput.send([noteOffChanByte,noteNumber,0x7f]);
-          },250);
+          openedMIDIOutput.send([noteOnChanByte, noteNumber, 0x7f]);
+          return setTimeout(function() {
+            openedMIDIOutput.send([noteOffChanByte, noteNumber, 0x7f]);
+          }, 250);
         }
         BSD.audioPlayer.playNote(BSD.currentNote, BSD.durations.note);
       }
@@ -2633,8 +2639,7 @@ add_action('wp_footer', function () {
     });
     **/
 
-    campfire.on('opened-midi-out-port',function(port) { 
-    })
+    campfire.on('opened-midi-out-port', function(port) {})
 
 
     campfire.subscribe('reset-sequence-next', function() {
@@ -3018,7 +3023,7 @@ add_action('wp_footer', function () {
     setTimeout(function() {
 
 
-      let events  = [];
+      let events = [];
       window.events = events;
       freak = App.FreakySeq({
         events
@@ -3034,21 +3039,23 @@ add_action('wp_footer', function () {
         events: events
       })
 
-      openedMIDIOutput = App.MIDIOutMonitor({ port: outPort });
+      openedMIDIOutput = App.MIDIOutMonitor({
+        port: outPort
+      });
       jQuery('.monitor-wrap').append(openedMIDIOutput.ui())
 
 
-      pianoRoll.on('note-hover',function(noteNumber){
+      pianoRoll.on('note-hover', function(noteNumber) {
         BSD.currentNote = Note(noteNumber);
       });
-      pianoRoll.on('note-preview',function(noteNumber){
+      pianoRoll.on('note-preview', function(noteNumber) {
         let noteOnChanByte = 0x90 + (BSD.options.improv.channel - 1);
         let noteOffChanByte = 0x80 + (BSD.options.improv.channel - 1);
 
-        openedMIDIOutput.send([noteOnChanByte,noteNumber,0x7f]);
-        setTimeout(function(){
-          openedMIDIOutput.send([noteOffChanByte,noteNumber,0x7f])
-        },250)
+        openedMIDIOutput.send([noteOnChanByte, noteNumber, 0x7f]);
+        setTimeout(function() {
+          openedMIDIOutput.send([noteOffChanByte, noteNumber, 0x7f])
+        }, 250)
 
       })
       jQuery('.piano-roll-wrap').append(pianoRoll.ui())
