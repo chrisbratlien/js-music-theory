@@ -438,22 +438,6 @@ get_header(); ?>
   <br />
 
 
-  <div class="bsd-control">
-    <label>
-      <input class="scroll-to-board" type="checkbox">
-      Scroll to Current Chord's Fretboard
-    </label>
-  </div>
-
-
-
-  <div class="bsd-control">
-    <label>
-      <input class="show-current-chord-fretboard-only" type="checkbox">
-      See Current Chord's Fretboard Only
-    </label>
-  </div>
-
   <div class="slider-wrap bsd-control">
     <label>Min-Max Frets</label>
     <span class="fret-range-amount">0-17</span>
@@ -580,6 +564,7 @@ add_action('wp_footer', function () {
 
     let defaultOptions = {
       progCycles: 1,
+      showCurrentChordFretboardOnly: true,
       tempo: 120,
       bass: {
         enabled: true,
@@ -908,6 +893,11 @@ add_action('wp_footer', function () {
       .step(1)
       .onChange(saveOptions);
 
+    mainFolder.add(BSD.options, 'showCurrentChordFretboardOnly')
+      .onChange(saveOptions);
+    mainFolder.add(BSD.options, 'scrollToBoard')
+      .onChange(saveOptions);
+
 
     function get7bitMSBAndLSB(orig) {
       let msb = Math.floor(orig / 128);
@@ -1159,27 +1149,6 @@ add_action('wp_footer', function () {
       }
     });
 
-    /*
-        campfire.subscribe('render-tempo-control',function(){
-          jQuery( "#tempo-amount" ).text( BSD.options.tempo );
-          jQuery( "#tempo-input" ).slider({
-            orientation: "horizontal",
-            range: "min",
-            min: 0,
-            max: 250,
-            step: 1,
-            value: BSD.options.tempo,
-            slide: function( event, ui ) {
-              var n = ui.value;
-              BSD.options.tempo = n;
-              storage.setItem('options',JSON.stringify(BSD.options));
-              jQuery( "#tempo-amount" ).text( n );
-            }
-          });
-        });
-    */
-
-
 
     campfire.subscribe('render-fret-range-control', function() {
       jQuery('.fret-range-amount').text(
@@ -1246,23 +1215,6 @@ add_action('wp_footer', function () {
     }
     campfire.publish('render-fret-range-control');
 
-
-
-
-    var cbShowCurrentChordFretboadOnly = jQuery('.show-current-chord-fretboard-only');
-    cbShowCurrentChordFretboadOnly.attr('checked', BSD.options.showCurrentChordFretboadOnly);
-    cbShowCurrentChordFretboadOnly.change(function() {
-      BSD.options.showCurrentChordFretboadOnly = this.checked;
-      storage.setItem('options', JSON.stringify(BSD.options));
-    });
-
-
-    var cbScrollToBoard = jQuery('.scroll-to-board');
-    cbScrollToBoard.attr('checked', BSD.options.scrollToBoard);
-    cbScrollToBoard.change(function() {
-      BSD.options.scrollToBoard = this.checked;
-      storage.setItem('options', JSON.stringify(BSD.options));
-    });
 
 
 
@@ -2439,20 +2391,21 @@ add_action('wp_footer', function () {
 
     campfire.subscribe('tick', function(cursor) {
       BSD.boards.forEach(function(board) {
-        board.publish('unfeature-frets');
+        board.unfeatureFrets();
       });
 
       if (cursor.chordIdx > 0) {
         let x = 123;
       }
+
+
       predictBoard.updateCursor(cursor);
+      predictBoard.unfeatureFrets();
 
-      predictBoard.publish('unfeature-frets');
-
-      if (!BSD.options.improv.enabled) {
-        cursor.board.publish('feature-fret', cursor);
-        extraBoard.publish('feature-fret', cursor);
-        predictBoard.publish('feature-fret', cursor);
+      if (BSD.options.improv.enabled) {
+        cursor.board.featureFret(cursor);
+        extraBoard.featureFret(cursor);
+        predictBoard.featureFret(cursor);
       }
 
       fred.clearFretted();
@@ -2532,15 +2485,15 @@ add_action('wp_footer', function () {
     campfire.subscribe('tick', function(cursor) {
       if (cursor.chordNoteIdx == 0) {
         BSD.boards.forEach(function(board) {
-          board.publish('get-wrap', function(wrap) {
-            BSD.options.showCurrentChordFretboadOnly ? wrap.addClass('hidden') : wrap.removeClass('hidden');
+          board.getWrap(function(wrap) {
+            BSD.options.showCurrentChordFretboardOnly ? wrap.addClass('hidden') : wrap.removeClass('hidden');
           });
         });
-        cursor.board.publish('get-wrap', function(wrap) { //just in case they were hidden...
+        cursor.board.getWrap(function(wrap) { //just in case they were hidden...
           wrap.removeClass('hidden');
         });
         if (BSD.options.scrollToBoard) {
-          cursor.board.publish('get-wrap', function(wrap) {
+          cursor.board.getWrap(function(wrap) {
             jQuery('html, body').animate({
               scrollTop: wrap.find('.chord-name').offset().top - headerHeight
             }, 200);
