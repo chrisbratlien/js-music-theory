@@ -1,0 +1,43 @@
+.fixed {
+  position: fixed;
+}
+.full-width {
+  width: 100%;
+}
+.half-width,
+.one-half-width {
+  width: 50%;
+}
+.width-45pct {
+  width: 45%;
+}
+
+.one-third-width {
+  width: 33%;
+}
+.two-thirds-width {
+  width: 67%;
+}
+.one-quarter-width {
+  width: 25%;
+}
+.three-quarters-width {
+  width: 75%;
+}
+.text-align-center {
+  text-align: center;
+}
+
+.resize-both {
+  resize: both;
+}
+.overflow-auto {
+  overflow: auto;
+}
+
+@media only screen and (min-width: 992px) {
+  /* only when over the lg breakpoint */
+  .lg-half-width {
+    width: 50%;
+  }
+}

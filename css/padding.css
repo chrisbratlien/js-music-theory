@@ -1,0 +1,36 @@
+.pad0 {
+  padding: 0;
+}
+.pad0-lr {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.pad1 {
+  padding: 1px;
+}
+.pad2 {
+  padding: 2px;
+}
+.pad4 {
+  padding: 4px;
+}
+.pad8 {
+  padding: 8px;
+}
+
+.margin0 {
+  margin: 0;
+}
+.margin1 {
+  margin: 1px;
+}
+.margin2 {
+  margin: 2px;
+}
+.margin4 {
+  margin: 4px;
+}
+.margin8 {
+  margin: 8px;
+}

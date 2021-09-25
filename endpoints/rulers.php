@@ -2,27 +2,31 @@
 
 add_action('wp_head', function () {
 ?>
-
-  <!--
-    <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/bsd.pubsub.js"></script>
-    <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/dom.js"></script>
-    <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/draggy.js"></script>
-    <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/sticky-note.js"></script>
-    <script type="text/javascript" src="javascript/js-music-theory.js"></script>
-    -->
-
-
-
-
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-
   <style type="text/css">
+    * {
+      /* So 100% means 100% */
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      /* Make the body to be as tall as browser window */
+      height: 100%;
+    }
+
     #pickers {
       height: 40px;
     }
 
     #progression {
       width: 100%;
+    }
+
+    .content {
+      height: calc(100% - 70px);
+      margin-top: 70px;
+
     }
   </style>
 
@@ -34,16 +38,12 @@ add_action('wp_head', function () {
 
 get_header(); ?>
 
-<div id="content">
-  <div id="msg" class="loading-label">loading...</div>
-  <div class="pull-right">
+<div class="flex-column content">
+  <div class="flex-row">
     <button id="sticky-note-button">Sticky Note</button>
-  </div><!-- pull-right -->
+  </div>
 
-
-
-
-  <div class="pull-right">
+  <div class="flex-row">
     <label><strong>Progression</strong><br />
       <input id="progression" type="text" />
     </label>
@@ -64,31 +64,16 @@ get_header(); ?>
       <p>Use - or m for minor, ex: A- Em</p>
       <p>Use M7 for major 7, ex: CM7</p>
       <p>Use 7 for dominant 7, ex: G7</p>
-
-
-
-
-
-
     </div>
   </div><!-- pull-right -->
 
-  <div class="pull-right">
+  <div class="flex-row">
     <label><strong>Presets</strong><br />
       <div id="ruler-control-panel"></div><!-- ruler-control-panel -->
     </label>
   </div><!-- pull-right -->
 
 
-  <div class="slider-wrap">
-    Volume: <br /><span id="volume-amount"></span>
-    <div class="slider" id="volume-input"></div>
-  </div>
-  <div class="slider-wrap">
-    Detune:<br /> <span id="detune-amount"></span>
-    <div class="slider" id="detune-input"></div>
-  </div>
-  <div style="clear: both;">&nbsp;</div>
 
 
   <button id="bookmark">Bookmark these rulers</button>
@@ -137,29 +122,32 @@ add_action('wp_footer', function () {
     BSD.ChordRulerPanel = function(spec) {
       var self = BSD.PubSub({});
       var rulersWrap = jQuery('#rulers');
-      self.renderOn = function(html) {
-        spec.builders.each(function(b) {
-          /////console.log('b',b);
-          var button = DOM.button();
-          button.html(b.name);
-          button.click(function() {
-            var ruler = b.constructor({
-              ////////palette: BSD.randomPalette2(128,70),
-            });
-            ruler.subscribe('click', function(o) {
-              self.publish('click', o);
-            });
-            ruler.subscribe('play-chord', function(o) {
-              self.publish('play-chord', o);
-            });
+      self.renderOn = function(wrap) {
+        wrap.append(
+          DOM.div()
+          .addClass('btn-group')
+          .append(
+            spec.builders.map(function(b) {
+              /////console.log('b',b);
+              return DOM.button()
+                .addClass('btn btn-default btn-sm')
+                .html(b.name)
+                .on('click', function() {
+                  var ruler = b.constructor({
+                    ////////palette: BSD.randomPalette2(128,70),
+                  });
+                  ruler.subscribe('click', function(o) {
+                    self.publish('click', o);
+                  });
+                  ruler.subscribe('play-chord', function(o) {
+                    self.publish('play-chord', o);
+                  });
 
-            ruler.renderOn(rulersWrap);
-          });
-          html.append(button);
-        });
+                  ruler.renderOn(rulersWrap);
+                })
+            })))
       };
       return self;
-
     };
 
     let mixer;
@@ -406,173 +394,153 @@ add_action('wp_footer', function () {
         }
       });
 
+      /*
+            $("#detune-input").slider({
+              orientation: "vertical",
+              range: "min",
+              min: -7.0,
+              max: 7.0,
+              step: 0.25,
+              value: 0.0,
+              slide: function(event, ui) {
+                var n = ui.value;
 
+                waiter.beg(BSD.audioPlayer, 'set-detune-semis', n);
+                //////campfire.publish('set-speed-ms',n);
+                jQuery("#detune-amount").text(n);
+              }
+            });
+            */
+      var list = ['Piano'];
+      ///var chosen = list.atRandom();
+      campfire.subscribe('play-note', function(payload) {
+        BSD.audioPlayer.playNote(payload.note, payload.duration);
+      });
+      campfire.subscribe('play-chord', function(o) {
+        BSD.audioPlayer.playChord(o.chord, o.duration);
+      });
+      var rulersWrap = jQuery('#rulers');
+      var vars = getUrlVars();
+      ////console.log('vars',vars);
+      if (typeof vars.rulers != "undefined") {
+        var them = eval(vars.rulers);
+        ////console.log('them',them);
 
+        them.each(function(set) {
+          var state = BSD.allMIDIValues.map(function(tf) {
+            return false;
+          });
 
-      $("#detune-input").slider({
-        orientation: "vertical",
-        range: "min",
-        min: -7.0,
-        max: 7.0,
-        step: 0.25,
-        value: 0.0,
-        slide: function(event, ui) {
-          var n = ui.value;
-
-          waiter.beg(BSD.audioPlayer, 'set-detune-semis', n);
-          //////campfire.publish('set-speed-ms',n);
-          jQuery("#detune-amount").text(n);
-        }
+          set.each(function(mv) {
+            state[mv] = true;
+          });
+          //////console.log('state',state);
+          var ruler = BSD.Ruler({
+            items: [],
+            state: state
+          });
+          ruler.subscribe('click', function(o) {
+            campfire.publish('play-note', {
+              note: o,
+              duration: 1000
+            });
+          });
+          ruler.subscribe('play-chord', function(o) {
+            campfire.publish('play-chord', {
+              chord: o,
+              duration: 1000
+            });
+          });
+          ruler.renderOn(rulersWrap);
+          BSD.rulers.push(ruler);
+        });
+      }
+      var btnBookmark = jQuery('#bookmark');
+      btnBookmark.click(function() {
+        var sets = BSD.rulers.select(function(ruler) {
+          return !ruler.deleted;
+        }).map(function(ruler) {
+          return ruler.allMIDIValuesCurrentlyOn();
+        });
+        ////console.log('sets',JSON.stringify(sets));
+        var url = 'rulers?rulers=' + JSON.stringify(sets);
+        ////console.log(url);
+        window.location.href = url;
       });
 
 
-
-
-
-
-
-
-
-
-      ///BSD.getWaveTableNames(function(resp) {
-      //var list = eval( '(' + resp + ')');
-
-      setTimeout(function() {
-        var list = ['Piano'];
-        ///var chosen = list.atRandom();
-        campfire.subscribe('play-note', function(payload) {
-          BSD.audioPlayer.playNote(payload.note, payload.duration);
-        });
-        campfire.subscribe('play-chord', function(o) {
-          BSD.audioPlayer.playChord(o.chord, o.duration);
-        });
-        var rulersWrap = jQuery('#rulers');
-        var vars = getUrlVars();
-        ////console.log('vars',vars);
-        if (typeof vars.rulers != "undefined") {
-          var them = eval(vars.rulers);
-          ////console.log('them',them);
-
-          them.each(function(set) {
-            var state = BSD.allMIDIValues.map(function(tf) {
-              return false;
-            });
-
-            set.each(function(mv) {
-              state[mv] = true;
-            });
-            //////console.log('state',state);
-            var ruler = BSD.Ruler({
-              items: [],
-              state: state
-            });
-            ruler.subscribe('click', function(o) {
-              campfire.publish('play-note', {
-                note: o,
-                duration: 1000
-              });
-            });
-            ruler.subscribe('play-chord', function(o) {
-              campfire.publish('play-chord', {
-                chord: o,
-                duration: 1000
-              });
-            });
-            ruler.renderOn(rulersWrap);
-            BSD.rulers.push(ruler);
-          });
+      var progInput = jQuery('#progression');
+      progInput.blur(function() {
+        if (progInput.val().length == 0) {
+          return false;
         }
-        var btnBookmark = jQuery('#bookmark');
-        btnBookmark.click(function() {
-          var sets = BSD.rulers.select(function(ruler) {
-            return !ruler.deleted;
-          }).map(function(ruler) {
-            return ruler.allMIDIValuesCurrentlyOn();
-          });
-          ////console.log('sets',JSON.stringify(sets));
-          var url = 'rulers?rulers=' + JSON.stringify(sets);
-          ////console.log(url);
-          window.location.href = url;
+        //campfire.publish('new-progression', progInput.val());
+
+        var prog = BSD.parseProgression(progInput.val());
+        ///////campfire.publish('do-it-prog',prog);
+        campfire.publish('new-progression', prog);
+
+      });
+      var progClear = jQuery('#progression-clear');
+      progClear.click(function() {
+        progInput.val(null);
+        jQuery('#rulers').empty();
+        BSD.rulers = [];
+      });
+      var progHelp = jQuery('#progression-help');
+      progHelp.click(function() {
+        var lightbox = BSD.Widgets.Lightbox({
+          content: jQuery('#progression-help-content')
         });
+        lightbox.show();
+      });
 
+      //todo, replace with BSD.parseProgression??
+      campfire.subscribe('new-progression', function(progression) {
 
-        var progInput = jQuery('#progression');
-        progInput.blur(function() {
-          if (progInput.val().length == 0) {
+        let chords = progression.map(o => o.chord);
+        chords.forEach(function(chord) {
+
+          var set = chord.noteValues().map(function(val) {
+            return val - 12;
+          }); //octave down from what the js-music-theory library would use (with C=60 as middle C)"
+
+          var state = BSD.allMIDIValues.map(function(tf) {
             return false;
-          }
-          campfire.publish('new-progression', progInput.val());
-        });
-        var progClear = jQuery('#progression-clear');
-        progClear.click(function() {
-          progInput.val(null);
-          jQuery('#rulers').empty();
-          BSD.rulers = [];
-        });
-        var progHelp = jQuery('#progression-help');
-        progHelp.click(function() {
-          var lightbox = BSD.Widgets.Lightbox({
-            content: jQuery('#progression-help-content')
           });
-          lightbox.show();
-        });
-        campfire.subscribe('new-progression', function(progression) {
-          var bars = progression.split('|');
-          bars.each(function(bar) {
-            var chordNames = bar.split(/,|\ +/);
-            chordNames.each(function(name) {
-              var chord = makeChord(name);
-
-
-
-              var set = chord.noteValues().map(function(val) {
-                return val - 12;
-              }); //octave down from what the js-music-theory library would use (with C=60 as middle C)"
-
-
-
-
-
-              var state = BSD.allMIDIValues.map(function(tf) {
-                return false;
-              });
-              set.each(function(mv) {
-                state[mv] = true;
-              });
-              //////console.log('state',state);
-              var ruler = BSD.Ruler({
-                items: [],
-                state: state
-              });
-              ruler.subscribe('click', function(o) {
-                campfire.publish('play-note', {
-                  note: o,
-                  duration: 1000
-                });
-              });
-              ruler.subscribe('play-chord', function(o) {
-                campfire.publish('play-chord', {
-                  chord: o,
-                  duration: 1000
-                });
-              });
-              ruler.renderOn(rulersWrap);
-              BSD.rulers.push(ruler);
+          set.each(function(mv) {
+            state[mv] = true;
+          });
+          //////console.log('state',state);
+          var ruler = BSD.Ruler({
+            items: [],
+            state: state
+          });
+          ruler.subscribe('click', function(o) {
+            campfire.publish('play-note', {
+              note: o,
+              duration: 1000
             });
           });
+          ruler.subscribe('play-chord', function(o) {
+            campfire.publish('play-chord', {
+              chord: o,
+              duration: 1000
+            });
+          });
+          ruler.renderOn(rulersWrap);
+          BSD.rulers.push(ruler);
         });
+      });
+    });
 
 
 
-        storage.getItem('progHelpShown', function(o) {
-          if (!o) {
-            progHelp.trigger('click');
-            storage.setItem('progHelpShown', true);
-          }
-        });
-
-
-      }, 100);
+    storage.getItem('progHelpShown', function(o) {
+      if (!o) {
+        progHelp.trigger('click');
+        storage.setItem('progHelpShown', true);
+      }
     });
   </script>
 <?php
