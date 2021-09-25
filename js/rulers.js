@@ -401,7 +401,7 @@ BSD.DegreeRuler = function(spec) {
     if (typeof pattern[v-60] == "undefined") { return false; }
     return pattern[v-60].on;
   });
-  console.log('state',state);
+  //console.log('state',state);
   
   var self = BSD.Ruler({
     state: state,
@@ -412,7 +412,7 @@ BSD.DegreeRuler = function(spec) {
 };
 
 BSD.NoteRuler = function(spec) {
-  console.log('note ruler');
+  //console.log('note ruler');
   var pattern = BSD.notePattern;
   var myItems = pattern.concat(pattern).concat(pattern);
   var myRulerItems = myItems.map(function(i) { return BSD.RulerItem(i); });

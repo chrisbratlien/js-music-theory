@@ -61,7 +61,7 @@ td { border: 1px solid #eee; }
 
 .ruler div { box-sizing: initial; }
 
-#rulers { overflow: hidden; }
+#rulers { overflow-y: auto; }
 
 .ruler { position: absolute; top: 0; left: 0; background: white; border: 1px solid #ddd; }
 .ruler div { 

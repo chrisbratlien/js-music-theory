@@ -19,9 +19,6 @@ add_action('wp_head', function () {
       height: 40px;
     }
 
-    #progression {
-      width: 100%;
-    }
 
     .content {
       height: calc(100% - 70px);
@@ -43,12 +40,17 @@ get_header(); ?>
     <button id="sticky-note-button">Sticky Note</button>
   </div>
 
-  <div class="flex-row">
-    <label><strong>Progression</strong><br />
-      <input id="progression" type="text" />
-    </label>
-    <button id="progression-clear">Clear</button>
-    <button id="progression-help">Help</button>
+  <strong>Progression</strong>
+
+  <div class="flex-row align-items-center full-width">
+    <div class="prog-wrap full-width pad2">
+      <input id="progression" class="progression three-quarters-width" type="text" />
+      <div class="btn-group">
+        <button class="btn btn-sm btn-default" id="progression-clear">Clear</button>
+        <button class="btn btn-sm btn-default" id="progression-help">Help</button>
+      </div>
+
+    </div>
     <div id="progression-help-content" style="display: none;">
       <h5>Help</h5>
       <p><strong>1</strong><br /> Type in a Chord progression into the box. Separate the chords with spaces or the "|" pipe character. <br /><br /><strong>2</strong><br /> Tab out of the text box to cause those rulers to appear.
@@ -66,17 +68,18 @@ get_header(); ?>
       <p>Use 7 for dominant 7, ex: G7</p>
     </div>
   </div><!-- pull-right -->
+  <strong>Presets</strong>
 
-  <div class="flex-row">
-    <label><strong>Presets</strong><br />
-      <div id="ruler-control-panel"></div><!-- ruler-control-panel -->
-    </label>
+  <div class="flex-row full-width ">
+    <br />
+    <div id="ruler-control-panel" class="flex-row"></div><!-- ruler-control-panel -->
+    <button class="btn btn-sm btn-default" id="bookmark">Bookmark these rulers</button>
+
   </div><!-- pull-right -->
 
 
 
 
-  <button id="bookmark">Bookmark these rulers</button>
   <div id="rulers"></div>
   <!--rulers -->
 </div><!-- content -->
@@ -207,8 +210,8 @@ add_action('wp_footer', function () {
 
 
       var stickyNoteButton = jQuery('#sticky-note-button');
-      stickyNoteButton.click(function() {
-        var sticky = BSD.Widgets.StickyNote();
+      stickyNoteButton.click(function(e) {
+        var sticky = BSD.Widgets.StickyNote(e);
         sticky.renderOn(jQuery(document.body));
       });
 
@@ -502,8 +505,9 @@ add_action('wp_footer', function () {
         chords.forEach(function(chord) {
 
           var set = chord.noteValues().map(function(val) {
-            return val - 12;
-          }); //octave down from what the js-music-theory library would use (with C=60 as middle C)"
+            return val;
+            // I guess I'm happy with this now, so nevermind ///return val - 12;
+          }); //WAS: octave down from what the js-music-theory library would use (with C=60 as middle C)"
 
           var state = BSD.allMIDIValues.map(function(tf) {
             return false;

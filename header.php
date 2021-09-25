@@ -17,9 +17,9 @@
   <!-- <link href="lib/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">-->
 
 
-  <link rel="stylesheet" href="<?php bloginfo('url'); ?>/align.css?v=2.1">
-  <link rel="stylesheet" href="<?php bloginfo('url'); ?>/flex.css?v=2.1">
-  <link rel="stylesheet" href="<?php bloginfo('url'); ?>/padding.css?v=2.1">
+  <link rel="stylesheet" href="<?php bloginfo('url'); ?>/css/align.css?v=2.1">
+  <link rel="stylesheet" href="<?php bloginfo('url'); ?>/css/flex.css?v=2.1">
+  <link rel="stylesheet" href="<?php bloginfo('url'); ?>/css/padding.css?v=2.1">
 
 
   <link rel="stylesheet" href="<?php bloginfo('url'); ?>/style.css?v=2.1">

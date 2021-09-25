@@ -35,8 +35,8 @@
 
   <!-- may try out some variations on eachify -->
   <script src="<?php bloginfo('url'); ?>/js/eachify.js"></script>
-  <!-- <script src="<?php bloginfo('url'); ?>/js/draggy.js"></script>
-  <script src="<?php bloginfo('url'); ?>/js/sticky-note.js"></script>-->
+  <script src="<?php bloginfo('url'); ?>/js/draggy.js"></script>
+  <script src="<?php bloginfo('url'); ?>/js/sticky-note.js"></script>
 
   <!--<script src="lib/JavaScript-ID3-Reader/dist/id3-minimized.js"></script>-->
   <!-- <script src="lib/Kali/build/kali.js"></script>-->
