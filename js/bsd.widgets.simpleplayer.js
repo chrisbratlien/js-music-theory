@@ -12,7 +12,8 @@ BSD.Widgets.SimplePlayer = function(spec) {
 
 
 
-  self.subscribe('set-master-volume',function(magnitude) {
+  self.subscribe('set-master-volume', function (magnitude) {
+    if (!magnitude || typeof magnitude !== "number") { throw "bad magnitude" }
     //console.log('MAG BEFORE',magnitude,volume);
     ///volume = magnitude;
     self.out.gain.value = magnitude;    

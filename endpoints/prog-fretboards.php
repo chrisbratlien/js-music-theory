@@ -789,54 +789,43 @@ add_action('wp_footer', function () {
     ///var stage = jQuery('.stage');
 
 
-
-    var common = context.createGain();
-    common.gain = 1.0;
-
-    var wet = context.createGain();
-    var dry = context.createGain();
+    let mixer, bassist, keyboardist;
 
 
-    var convolver = context.createConvolver();
-    convolver.buffer = impulseResponse(1.5, 1.5, false);
-
-    wet.gain.value = 0.4;
-    wet.connect(convolver);
-    convolver.connect(context.destination);
-
-    dry.gain.value = 0.6;
-    dry.connect(context.destination);
-
-    common.connect(wet);
-    common.connect(dry);
-
-    BSD.audioPlayer = BSD.Widgets.SimplePlayer({
-      context: context,
-      destination: common,
-      polyphonyCount: 48, //polyphonyCount,
-      itemTitles: BSD.itemTitles,
-      range: [40, 128]
-    });
+    function onAppLoad() {
+      mixer = App.BSDMixer(context);
+      BSD.audioPlayer = BSD.Widgets.SimplePlayer({
+        context: context,
+        destination: mixer.common,
+        polyphonyCount: 48, //polyphonyCount,
+        itemTitles: BSD.itemTitles,
+        range: [40, 128]
+      });
 
 
-    var bassist = BSD.Widgets.SimplePlayer({
-      context: context,
-      destination: common,
-      polyphonyCount: 48, //polyphonyCount,
-      itemTitles: BSD.itemTitles, //['fundamental','octave','dominant','dominant+fourth(octave2)'],
-      range: [28, 100]
-    });
+      bassist = BSD.Widgets.SimplePlayer({
+        context: context,
+        destination: mixer.common,
+        polyphonyCount: 48, //polyphonyCount,
+        itemTitles: BSD.itemTitles, //['fundamental','octave','dominant','dominant+fourth(octave2)'],
+        range: [28, 100]
+      });
 
 
-    var keyboardist = BSD.Widgets.SimplePlayer({
-      context: context,
-      destination: common,
-      polyphonyCount: 48, //polyphonyCount,
-      itemTitles: BSD.itemTitles, //['fundamental','octave','dominant','dominant+fourth(octave2)'],
-      range: [28, 100]
-    });
+      keyboardist = BSD.Widgets.SimplePlayer({
+        context: context,
+        destination: mixer.common,
+        polyphonyCount: 48, //polyphonyCount,
+        itemTitles: BSD.itemTitles, //['fundamental','octave','dominant','dominant+fourth(octave2)'],
+        range: [28, 100]
+      });
+
+      campfire.publish('bootup-high-hat');
+      waiter.beg(campfire, 'set-master-volume', BSD.volume);
 
 
+
+    }
 
 
     var waiter = BSD.Widgets.Procrastinator({
@@ -866,7 +855,6 @@ add_action('wp_footer', function () {
       BSD.volume = parseFloat(o);
       ///waiter.beg(BSD.audioPlayer,'set-master-volume',BSD.volume);
       ////waiter.beg(bassist,'set-master-volume',BSD.volume);
-      waiter.beg(campfire, 'set-master-volume', BSD.volume);
 
       jQuery("#volume-amount").text(BSD.volume);
     });
@@ -2673,7 +2661,7 @@ add_action('wp_footer', function () {
       var gn = context.createGain();
       gn.gain.value = 0;
 
-      gn.connect(common);
+      gn.connect(mixer.common);
       brownNoise.connect(gn);
       campfire.subscribe('high-hat', function() {
         gn.gain.setTargetAtTime(BSD.options.highHat.volume, context.currentTime, 0); //do it now...
@@ -2811,7 +2799,6 @@ add_action('wp_footer', function () {
 
 
 
-    campfire.publish('bootup-high-hat');
 
 
     function getRandomInt(max) {

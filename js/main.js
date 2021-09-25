@@ -5,8 +5,10 @@ import { lerp, invlerp, remap } from "./scalar.js";
 import FreakySeq from "./FreakySeq.js";
 
 import Timer from "./Timer.js";
+import BSDMixer from "./BSDMixer.js"
 
 window.App = {
+  BSDMixer,
   ColorPalette: CP,
   FreakySeq,
   PianoRoll,
