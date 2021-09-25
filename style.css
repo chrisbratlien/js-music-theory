@@ -1,6 +1,14 @@
 body { font-family: Lucida Grande; }
 
 
+.content.seventy {
+  height: calc(100% - 70px);
+  margin-top: 70px;
+
+}
+
+
+
 .mobile-line-height {
   line-height: 40px;
 }

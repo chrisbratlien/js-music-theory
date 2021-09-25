@@ -18,13 +18,6 @@ add_action('wp_head', function () {
     #pickers {
       height: 40px;
     }
-
-
-    .content {
-      height: calc(100% - 70px);
-      margin-top: 70px;
-
-    }
   </style>
 
   <title>Rulers</title>
@@ -35,7 +28,7 @@ add_action('wp_head', function () {
 
 get_header(); ?>
 
-<div class="flex-column content">
+<div class="flex-column content seventy">
   <div class="flex-row">
     <button id="sticky-note-button">Sticky Note</button>
   </div>
