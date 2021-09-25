@@ -39,25 +39,17 @@
 </head>
 
 <body <?php body_class(); ?>>
+  <header class="navbar navbar-fixed-top navbar-inverse navbar-music-player noprint flex-row align-items-center space-between" id="top" role="banner">
+    <a class="pad8-lr" href="<?php echo bloginfo('url'); ?>">&#127968;</a>
 
+    <div class="nav-links flex-row align-items-center space-around">
+    </div>
+    <div class="container flex-row align-items-center space-evenly">
+      Volume:<div id="volume-amount" class="volume-amount">0</div>
 
-  <header class="navbar navbar-fixed-top navbar-inverse navbar-music-player noprint" id="top" role="banner">
-    <div class="container">
-      <div class="was-navbar-header">
-        <div class="current-song-info header-column">
-          <div class="title"></div>
-          <div class="artist"></div>
-          <div class="album"></div>
-        </div>
-
-        <div class="slider-wrap header-column">
-          Volume:<span id="volume-amount">0</span>
-          <div class="slider" id="volume-input"></div>
-        </div>
-
-
-
-
-      </div><!-- navbar-header -->
+      <div class="slider-wrap flex-column header-column half-width">
+        <div class="slider" id="volume-input"></div>
+      </div>
     </div><!-- end .container -->
+    <a class="pad8-lr" href="https://github.com/chrisbratlien/js-music-theory"><i class="fa fa-2x fa-github"></i></a>
   </header>

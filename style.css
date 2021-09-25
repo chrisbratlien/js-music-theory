@@ -1,5 +1,14 @@
 body { font-family: Lucida Grande; }
 
+.ui-slider .ui-slider-handle {
+  cursor: pointer;
+}
+.volume-amount {
+  min-width: 40px;
+}
+.fa-github {
+  color: white;
+}
 
 .content.seventy {
   height: calc(100% - 70px);
@@ -27,7 +36,16 @@ table { overflow: auto; }
 
 
 
+.volume-amount {
+  color: #bbb;
+}
+.home .volume-amount {
+  display: none;
+}
 
+.hide {
+  display: none;
+}
 
 
 /**** this is too far-reaching... is it really needed? use more narrow scope

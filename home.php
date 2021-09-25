@@ -6,6 +6,14 @@ add_filter('wp_title', function ($o) {
 add_action('wp_head', function () {
 });
 
+add_filter('body_class', function ($classes) {
+
+  array_push($classes, 'home');
+
+  return $classes;
+});
+
+
 get_header();
 ?>
 <div class="navbar-spacer screen-only noprint">
@@ -16,8 +24,6 @@ get_header();
   <br />
   <br />
 </div>
-<h3>Links</h3>
-<li><a href="http://github.com/chrisbratlien/js-music-theory">js-music-theory on Github</a> Fork and download the code here</li>
 
 <ul class="mobile-line-height list-style-type-none">
   <li><a href="rulers">Rulers</a> Vertical colored swatches to paint and play chords, progressions</li>
@@ -34,6 +40,7 @@ get_header();
   <li><a href="two-five">Two Five</a> Visualize and hover over random II-Vs</li>
   <li><a href="paint">Paint</a> paint onto sheet music</li>
   <li><a href="vex4">Vex4</a> VexFlow notataion from progressions sandbox</li>
+  <li><a href="http://github.com/chrisbratlien/js-music-theory">js-music-theory on Github</a></li>
 </ul>
 <?php
 
