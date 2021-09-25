@@ -2978,9 +2978,10 @@ add_action('wp_footer', function () {
 
       let events = [];
       window.events = events;
-      freak = App.FreakySeq({
+      let freak = App.FreakySeq({
         events
       });
+      window.freak = freak;
 
       campfire.subscribe('tempo-change', freak.tempoChange)
       freak.tempoChange(BSD.options.tempo);
