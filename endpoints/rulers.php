@@ -169,7 +169,7 @@ add_action('wp_footer', function () {
         range: [40, 128]
       });
       ///waiter.beg(BSD.audioPlayer, 'set-master-volume', BSD.volume);
-      BSD.audioPlayer.publish('set-master-volume', BSD.volume || 0.01);
+      BSD.audioPlayer.publish('set-master-volume', BSD.volume || 0.06);
     }
 
 
