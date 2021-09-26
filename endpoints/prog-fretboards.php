@@ -909,7 +909,9 @@ add_action('wp_footer', function () {
       */
       //return console.log('bankSelect','decimalBankNumber',decimalBankNumber,'msb',msb,'lsb',lsb);
       ////let [msb, lsb] = get7bitMSBAndLSB(decimalBankNumber);
-
+      if (!openedMIDIOutput) {
+        return console.log("bankSelect: no MIDI output currently open");
+      }
       openedMIDIOutput.send([
         MIDI_CONST.CONTROL_CHANGE | (channelFrom1 - 1),
         0,
