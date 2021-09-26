@@ -563,7 +563,8 @@ add_action('wp_footer', function () {
 
 
     let defaultOptions = {
-      progCycles: 1,
+      progCycles: 3,
+      progression: "Ab7 Db Gb- DbMaj7",
       showCurrentChordFretboardOnly: true,
       scrollToBoard: false,
       tempo: 120,
@@ -586,7 +587,7 @@ add_action('wp_footer', function () {
         midi: false,
         channel: 10,
         noteNumber: 64,
-        volume: 0.7,
+        volume: 0.2,
         pan: 64
       },
       improv: {
