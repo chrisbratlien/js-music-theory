@@ -851,7 +851,7 @@ add_action('wp_footer', function () {
 
 
 
-    BSD.volume = 0;
+    BSD.volume = 0.06;
     storage.getItem('volume', function(o) {
       BSD.volume = parseFloat(o);
       ///waiter.beg(BSD.audioPlayer,'set-master-volume',BSD.volume);
