@@ -30,9 +30,9 @@ get_header();
   <li><a href="prog-fretboards">Prog Fretboards</a>
     <ul>
       <li>Paint and play on fretboards drawn to match a chord progression</li>
-      <li>MIDI input control and output</li>
-      <li>Save and load song chord progressions</li>
-      <li>Roland JV-1010 patches</li>
+      <li>Hear your external apps/gear MIDI input synthesized in the browser</li>
+      <li>Hear your chord progression synthesized either in the browser or sent out as MIDI output to external apps/gear</li>
+      <li>Save and load chord progressions to and from a song list</li>
     </ul>
   </li>
   <li><a href="hexagon">Hexagon</a> Hexagon based input UI</li>

@@ -1233,7 +1233,7 @@ add_action('wp_footer', function () {
         return false;
       }
 
-      if (BSD.options.improv.midi) {
+      if (openedMIDIOutput && BSD.options.improv.midi) {
         let noteOnChannel = 143 + BSD.options.improv.channel;
         let noteNum = payload.note.value();
         let vel = Math.floor(127 * BSD.options.improv.volume); //[0..1] -> [0..127]
@@ -1241,7 +1241,7 @@ add_action('wp_footer', function () {
         openedMIDIOutput.send([noteOnChannel, noteNum, vel]);
         return false;
       }
-
+      // okay, currently no MIDI output, we'll use our WebAudio API synth
       BSD.audioPlayer.playNote(payload.note, payload.duration, payload.velocity);
     });
 
