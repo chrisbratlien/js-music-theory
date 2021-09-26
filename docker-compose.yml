@@ -12,6 +12,6 @@ services:
       BASE_URI: /
       XDEBUG_CONFIG: client_host=host.docker.internal
       XDEBUG_MODE: debug
-      XDEBUG_SESSION: xdebug_session_for_RST
+      XDEBUG_SESSION: xdebug_session_for_JSMT
     ports:
       - ${APACHE_PORT}:80

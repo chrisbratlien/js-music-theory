@@ -565,6 +565,7 @@ add_action('wp_footer', function () {
     let defaultOptions = {
       progCycles: 1,
       showCurrentChordFretboardOnly: true,
+      scrollToBoard: false,
       tempo: 120,
       bass: {
         enabled: true,
