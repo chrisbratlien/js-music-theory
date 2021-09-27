@@ -16,8 +16,6 @@ body { font-family: Lucida Grande; }
 
 }
 
-
-
 .mobile-line-height {
   line-height: 40px;
 }
@@ -49,6 +47,15 @@ table { overflow: auto; }
 .hide {
   display: none;
 }
+
+.piano-roll {
+  max-height: 400px;
+  overflow-y: auto;
+}
+.piano-roll table tr:hover {
+  opacity: 0.5;
+}
+
 
 #pickers { width: 100%; height: 10em; overflow: auto; }
 .color-picker { width: 2em; height: 2em; float: left; cursor: pointer;  border: 1px solid white; }

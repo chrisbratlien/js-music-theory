@@ -362,21 +362,6 @@ add_action('wp_head', function () {
 
 
 
-    /* Light mode */
-    @media (prefers-color-scheme: light) {
-      body {
-        background-color: white;
-        color: #444;
-      }
-    }
-
-    /* Dark mode */
-    @media (prefers-color-scheme: dark) {
-      body {
-        background-color: #303030;
-        color: white;
-      }
-    }
   </style>
 
 <?php
@@ -644,7 +629,7 @@ add_action('wp_footer', function () {
 
     storage.getItem('progressions', function(o) {
       ////BSD.progressions = JSON.parse(o);
-      var them = JSON.parse(o);
+      var them = o && o.length ? JSON.parse(o) : [];
       them.forEach(function(o) {
         BSD.progressions.push(o);
       });
@@ -666,7 +651,7 @@ add_action('wp_footer', function () {
 
 
     BSD.remoteStorage.getItem('progressions', function(o) {
-      var them = JSON.parse(o);
+      var them = o && o.length ? JSON.parse(o) : [];
       them.forEach(function(o) {
         BSD.progressions.push(o);
       });
@@ -763,14 +748,6 @@ add_action('wp_footer', function () {
       checkTiny();
     });
     checkTiny();
-
-    /**
-
-    "[{"title":"Blue Bossa","prog":"C-7 C-7 F-7 F-7 D-7b5 G7 C-7 C-7 Eb-7 Ab7 DbM7 DbM7 D-7b5 G7 C-7 G7"},{"prog":"C-7|C-7|F-7|F-7|D-7b5| G7 |C-7 |C-7 |Eb-7 |Ab7 |DbM7 |DbM7 |D-7b5 |G7 |C-7| D-7b5 G7","title":"Blue Bossa (again)"},{"prog":"F7|Bb7|F7|F7|Bb7|Bb7|F7|F7|G-7|C7|F7|C7","title":"F blues #1"}]"
-
-    **/
-
-
 
 
     BSD.foo = [];
@@ -945,6 +922,7 @@ add_action('wp_footer', function () {
       .max(127)
       .onChange(function(e) {
         saveOptions();
+        if (!openedMIDIOutput) { return false; }
         openedMIDIOutput.send([
           MIDI_CONST.CONTROL_CHANGE | (BSD.options.improv.channel - 1),
           MIDI_CONST.CC_PAN,
@@ -953,16 +931,6 @@ add_action('wp_footer', function () {
       });
 
 
-    /*
-    improvFolder.add(BSD.options.improv, 'bank')
-      .min(1)
-      .max(128)
-      .step(1)
-      .onChange(function(v) {
-        saveOptions();
-        bankSelect(BSD.options.improv.channel, BSD.options.improv.bank);
-      });
-    */
 
     let empty = {
       name: false
@@ -978,6 +946,7 @@ add_action('wp_footer', function () {
             let p = +patch.number - 1;
             console.log('opts', opts, 'bankOpts', bankOpts, 'patch', patch, 'p', p);
             bankSelect(opts.channel, bankOpts.msb, bankOpts.lsb, p);
+            if (!openedMIDIOutput) { return false; }
             openedMIDIOutput.send([
               MIDI_CONST.PROGRAM_CHANGE | (opts.channel - 1),
               p
@@ -1021,6 +990,7 @@ add_action('wp_footer', function () {
         //bank first
         ///bankSelect(BSD.options.improv.channel, BSD.options.improv.bank);
         //set patch (within the bank set previously)
+        if (!openedMIDIOutput) { return false; }
         openedMIDIOutput.send([
           MIDI_CONST.PROGRAM_CHANGE | (BSD.options.improv.channel - 1),
           BSD.options.improv.patch - 1
@@ -1053,6 +1023,7 @@ add_action('wp_footer', function () {
       .max(127)
       .onChange(function(e) {
         saveOptions();
+        if (!openedMIDIOutput) { return false; }
         openedMIDIOutput.send([
           MIDI_CONST.CONTROL_CHANGE | (BSD.options.bass.channel - 1),
           MIDI_CONST.CC_PAN,
@@ -1081,6 +1052,7 @@ add_action('wp_footer', function () {
       .max(127)
       .onChange(function(e) {
         saveOptions();
+        if (!openedMIDIOutput) { return false; }
         openedMIDIOutput.send([
           MIDI_CONST.CONTROL_CHANGE | (BSD.options.chord.channel - 1),
           MIDI_CONST.CC_PAN,
@@ -1116,6 +1088,7 @@ add_action('wp_footer', function () {
       .max(127)
       .onChange(function(e) {
         saveOptions();
+        if (!openedMIDIOutput) { return false; }
         openedMIDIOutput.send([
           MIDI_CONST.CONTROL_CHANGE | (BSD.options.highHat.channel - 1),
           MIDI_CONST.CC_PAN,
@@ -1235,6 +1208,9 @@ add_action('wp_footer', function () {
       }
 
       if (openedMIDIOutput && BSD.options.improv.midi) {
+        //another way to do noteOnChannel is
+        //let byte1 = 0x90 + (oneBasedChannel - 1),
+
         let noteOnChannel = 143 + BSD.options.improv.channel;
         let noteNum = payload.note.value();
         let vel = Math.floor(127 * BSD.options.improv.volume); //[0..1] -> [0..127]
@@ -2973,6 +2949,13 @@ add_action('wp_footer', function () {
         events
       });
       window.freak = freak;
+      freak.on('note-on',function(event){
+        campfire.publish('play-note', {
+          note: Note(event.noteNumber),
+          duration: BSD.durations.note
+        });
+      });
+
 
       campfire.subscribe('tempo-change', freak.tempoChange)
       freak.tempoChange(BSD.options.tempo);
@@ -2994,6 +2977,12 @@ add_action('wp_footer', function () {
         BSD.currentNote = Note(noteNumber);
       });
       pianoRoll.on('note-preview', function(noteNumber) {
+        campfire.publish('play-note',{
+          note: Note(noteNumber),
+          duration: BSD.durations.note
+        });
+
+        /*
         let noteOnChanByte = 0x90 + (BSD.options.improv.channel - 1);
         let noteOffChanByte = 0x80 + (BSD.options.improv.channel - 1);
 
@@ -3001,8 +2990,17 @@ add_action('wp_footer', function () {
         setTimeout(function() {
           openedMIDIOutput.send([noteOffChanByte, noteNumber, 0x7f])
         }, 250)
+        */
 
-      })
+      });
+      pianoRoll.on('is-playing',function(isPlaying){
+        //isPlaying shows the new going-forward wish
+        isPlaying ? freak.play() : freak.stop();
+      });
+
+
+
+
       jQuery('.piano-roll-wrap').append(pianoRoll.ui())
 
       jQuery('.dg.ac').addClass('noprint');

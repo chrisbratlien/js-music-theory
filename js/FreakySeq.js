@@ -1,5 +1,7 @@
 import { lerp, invlerp, remap } from "./scalar.js";
+import PubSub  from "./PubSub.js";
 export default function FreakySeq(props) {
+
   let opts = {
     BARS: 2, //total bars in this sequence
     QPBAR: 4, //quarter notes per bar
@@ -8,6 +10,10 @@ export default function FreakySeq(props) {
     BPM: 120,
   };
   let GAMELOOP = opts;
+
+
+  var self = PubSub();
+
 
   /*
   what's a freakyseq event?
@@ -69,30 +75,6 @@ export default function FreakySeq(props) {
     ]);
   }
 
-  function gameloop() {
-    let i = 0; //tick index
-    let MAX = GAMELOOP.TPLOOP;
-
-    let handle = false;
-
-    function helper() {
-      let noteOnChanByte = 0x90 + (BSD.options.improv.channel - 1);
-      let velocityByte = Math.floor(BSD.options.improv.volume * 127);
-      //console.log('new helper');
-      for (var j = 0; j < tickEvents[i].length; j++) {
-        let eventData = tickEvents[i][j];
-        playEventData(eventData);
-        //console.log('eventData',eventData);
-      }
-
-      i += 1;
-      i %= MAX;
-      clearTimeout(handle);
-      handle = setTimeout(helper, GAMELOOP.MSPT);
-    }
-
-    helper();
-  }
 
   function millisPerLoop(bpm, beatsPerBar, barsPerLoop) {
     let millisPerMinute = 60000;
@@ -146,6 +128,9 @@ export default function FreakySeq(props) {
         .filter((event) => event.noteOnLoopNum < currentLoop)
         .forEach((event) => {
           event.noteOnLoopNum = currentLoop;
+          ////console.log("note onnnn",event);
+          self.emit('note-on', event);
+          /*
           let noteOnChanByte = 0x90 + (BSD.options.improv.channel - 1);
           let velocityByte = Math.floor(BSD.options.improv.volume * 127);
           openedMIDIOutput.send([
@@ -153,12 +138,21 @@ export default function FreakySeq(props) {
             event.noteOnMessage[1],
             velocityByte,
           ]);
+          */
         });
       props.events
         .filter((event) => event.noteOffMillis < progressMS)
-        .filter((event) => event.noteOffLoopNum < currentLoop)
+
+
+        //forgot why this was important, but it's preventing sounds after
+        // a play->stop->play session
+        //.filter((event) => event.noteOffLoopNum < currentLoop)
+
         .forEach((event) => {
           event.noteOffLoopNum = currentLoop;
+          ///console.log("note off",event);
+          self.emit('note-off', event);
+          /*
           let noteOffChanByte = 0x80 + (BSD.options.improv.channel - 1);
           let velocityByte = Math.floor(BSD.options.improv.volume * 127);
           openedMIDIOutput.send([
@@ -166,6 +160,7 @@ export default function FreakySeq(props) {
             event.noteOffMessage[1],
             velocityByte,
           ]);
+          */
         });
 
       requestAnimationFrame(frameTick);
@@ -173,15 +168,18 @@ export default function FreakySeq(props) {
 
     requestAnimationFrame(frameTick);
   }
-
+  function stop() {
+    playing = false;
+  }
   init();
+
   return {
-    gameloop,
+    ...self,
+    props, //temporary for debugging..
     millisPerLoop,
     opts,
     play,
     stop,
     tempoChange,
-    ///tickEvents,
   };
 }

@@ -17,6 +17,9 @@ function MIDIOutMonitor(props) {
 
   self.send = function (data) {
     //textarea.append("\n" + format(data));
+    if (!port) {
+      return console.log("sorry, no port to send MIDI data to")
+    }
     port.send(data);
   };
   self.clear = function () {

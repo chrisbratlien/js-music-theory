@@ -10,11 +10,29 @@ function PianoRoll(props) {
   let self = PubSub({});
   let wrap = DOM.div().addClass("piano-roll");
 
-  let noteRange = [...Array(72).keys()].map((o) => 36 + o).reverse();
+  let lowNote = 48; //low C on 7 string guitar//36;
+  let howManyNotes = 20;
+
+  let noteRange = [...Array(howManyNotes).keys()].map((o) => lowNote + o);
+  //so that the table rows can render in order from high to low
+  let reversedNoteRange = [...noteRange].reverse();
 
   let eventRange = [...Array(props.TPLOOP).keys()].map((o) => o);
   console.log("eventRange", eventRange);
 
+  let TAU = Math.PI * 2;
+  let hueRadiansBegin = TAU/3;
+  let hueRadiansEnd = TAU;
+
+  let hueRadianRange = noteRange
+    .map((nn, i) => {
+      return remap(0, noteRange.length, hueRadiansBegin, hueRadiansEnd, i);
+    });
+  let lightnessPercentRange = noteRange
+    .map((nn, i) => {
+      return remap(0, noteRange.length, 75, 45,i);
+    })
+  //console.log('hrr', hueRadianRange);
   //  let eventRange = [...Array(props.TPLOOP).keys()];
 
   let channel = 1;
@@ -22,11 +40,34 @@ function PianoRoll(props) {
   let loopMS = millisPerLoop(props.BPM, props.QPBAR, props.BARS);
   loopMS = Math.floor(loopMS);
 
+  let noteNames = JSMT.twelveTones();
+
+  let playing = false;
+
+  let btnPlayStop, iconPlayStop;
+  let toolbar = DOM.div()
+    .addClass('btn-group')
+    .append([
+      btnPlayStop = DOM.button()
+        .addClass('btn btn-sm')
+        .append(
+          iconPlayStop = DOM.i()
+            .addClass('fa fa-play')
+      )
+        .on('click', function () {
+          playing = !playing;
+          iconPlayStop.toggleClass('fa-play fa-pause');
+          self.emit('is-playing',playing)
+        })
+    ])
+
   wrap.append(
+    toolbar,
     DOM.table().append(
-      noteRange.map((noteNumber) =>
+      reversedNoteRange.map((noteNumber,i) =>
         DOM.tr().append(
-          eventRange.map((tickIdx) => {
+          DOM.th(noteNames[noteNumber%12]),
+          ...eventRange.map((tickIdx) => {
             let state = false;
 
             let onMillis = remap(0, props.TPLOOP, 0, loopMS, tickIdx);
@@ -40,6 +81,16 @@ function PianoRoll(props) {
               .on("click", (e) => {
                 state = !state;
                 cell.toggleClass("active");
+                let bgStr = state ? `hsl(${hueRadianRange[i]}rad,50%,${lightnessPercentRange[i]}%)` :
+                  'inherit';
+                cell.css({
+                  background: bgStr
+                })
+
+                //all of this byte stuff is nice and interesting, but it shouldn't belong in the
+                // PianoRoll UI module.
+                // when I find a new home (probably play-note)
+
                 let byte1 = 0x90 + (channel - 1),
                   byte2 = noteNumber,
                   byte3 = 127;
@@ -51,10 +102,11 @@ function PianoRoll(props) {
 
                 let event = {
                   hash: eventHash,
+                  noteNumber,
                   noteOnLoopNum: 0,
                   noteOffLoopNum: 0,
-                  noteOnMessage: [byte1, byte2, byte3],
-                  noteOffMessage: [0x80 + (channel - 1), byte2, byte3],
+                  //noteOnMessage: [byte1, byte2, byte3],
+                  //noteOffMessage: [0x80 + (channel - 1), byte2, byte3],
                   noteOnMillis: onMillis,
                   noteOffMillis: offMillis,
                 };
@@ -64,7 +116,7 @@ function PianoRoll(props) {
                 } else {
                   for (let i = 0; i < props.events.length; i += 1) {
                     if (props.events[i].hash == eventHash) {
-                      props.events.splice(i, 1);
+                      props.events.splice(i, 1); //deletes it
                     }
                   }
                 }
@@ -72,7 +124,7 @@ function PianoRoll(props) {
                 if (state) {
                   self.emit("note-preview", noteNumber);
                 }
-                //events[tickIdx].push()
+                /*
                 console.log(
                   "tickIdx",
                   tickIdx,
@@ -81,6 +133,7 @@ function PianoRoll(props) {
                   "channel",
                   channel
                 );
+                */
               });
             return cell;
           })
