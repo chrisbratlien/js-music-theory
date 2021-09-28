@@ -1,5 +1,7 @@
 function MIDIRouter(props) {
-    let midi, midiAccess, outPort;
+    let midiAccess, outPort, self;
+
+    self = {};
 
     if (!navigator.requestMIDIAccess) {
         return console.log('MIDIRouter:: no navigator.requestMIDIAccess. STOPPING!');
@@ -14,9 +16,8 @@ function MIDIRouter(props) {
 
     function onMIDISuccess(aMIDIAccessObject) {
         // when we get a succesful response, run this code
-        midi = aMIDIAccessObject; // this is our raw MIDI data, inputs, outputs, and sysex status
-        midiAccess = aMIDIAccessObject;
-        midiAccess.onstatechange = function (e) {
+        self.midiAccess = aMIDIAccessObject;
+        aMIDIAccessObject.onstatechange = function (e) {
             //console.log('onstatechange e:', e);
             //console.log('onstatechange e.port:', e.port);
             
@@ -25,7 +26,7 @@ function MIDIRouter(props) {
         };
   
   
-        var inputs = midiAccess.inputs.values();
+        var inputs = aMIDIAccessObject.inputs.values();
   
         // loop over all available inputs and listen for any MIDI input
         for (var input = inputs.next(); input && !input.done; input = inputs.next()) {
@@ -34,7 +35,7 @@ function MIDIRouter(props) {
           input.value.onmidimessage = props.onMIDIMessage;
         }
   
-        var outputs = midiAccess.outputs.values();
+        var outputs = aMIDIAccessObject.outputs.values();
   
         // loop over all available output and listen for any MIDI output
         for (var output = outputs.next(); output && !output.done; output = outputs.next()) {
@@ -44,8 +45,8 @@ function MIDIRouter(props) {
   
           output.value.open()
             .then((okayPort) => {
-              ///console.log('okay', okayPort)
-              outPort = okayPort;
+              console.log('okay (output)', okayPort)
+              self.outPort = okayPort;
             })
         }
   
@@ -58,10 +59,7 @@ function MIDIRouter(props) {
           }).then(onMIDISuccess, onMIDIFailure)
           .catch('error', onRequestMIDIAccessError)
     
-    return {
-        midiAccess,
-        outPort
-    }
+    return self;
 
 }
 export default MIDIRouter;

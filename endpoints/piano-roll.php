@@ -1,5 +1,7 @@
 <?php
 
+add_filter('wp_title',function($o){ return "Piano Roll"; });
+
 add_action('wp_head',function(){
     $classes = apply_filters('body_class',[]);
 
@@ -46,14 +48,27 @@ import PianoRoll from "./js/PianoRoll.js";
 import MIDIRouter from "./js/MIDIRouter.js";
 
 
+const MIDI_MSG = {
+    NOTE_OFF: 0x80,
+    NOTE_ON: 0x90
+}
+
 let router = MIDIRouter({
     onMIDIMessage: function(e) {
-        console.log("eeeeee",e);
+        ////console.log("eeeeee",e);
+        //console.log("BSD?",BSD)
+        let [msg, noteNumber, velocity] = e.data;
+        if (msg == MIDI_MSG.NOTE_ON) {
+            campfire.publish('play-note',{ note: Note(noteNumber), duration: 1000 });
+        }
     }
 
 });
+
+//toss this variable over the module/non-module fence for now until further refactoring is done.
 window.router = router;
 
+//why is campfire visible inside the module?
 console.log('campfire?',campfire);
 
 </script>
@@ -220,7 +235,7 @@ console.log('campfire?',campfire);
         return false;
       }
 
-      if (openedMIDIOutput && BSD.options.improv.midi) {
+      if (router && router.outPort && BSD.options.improv.midi) {
         //another way to do noteOnChannel is
         //let byte1 = 0x90 + (oneBasedChannel - 1),
 
@@ -228,9 +243,13 @@ console.log('campfire?',campfire);
         let noteNum = payload.note.value();
         let vel = Math.floor(127 * BSD.options.improv.volume); //[0..1] -> [0..127]
 
-        openedMIDIOutput.send([noteOnChannel, noteNum, vel]);
+        router.outPort.send([noteOnChannel, noteNum, vel]);
         return false;
       }
+      // I suspect that user interaction on the page has to initiate the first 
+      /// WebAudio API event... Once that happens, then the MIDI input is "felt" by the WebAudio API
+
+      ///console.log('this should play, why am i not playing?',payload);
       // okay, currently no MIDI output, we'll use our WebAudio API synth
       BSD.audioPlayer.playNote(payload.note, payload.duration, payload.velocity);
     });
