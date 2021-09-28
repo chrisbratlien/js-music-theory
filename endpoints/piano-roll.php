@@ -43,8 +43,6 @@ add_action('wp_footer',function() {
 
 <script type="module">
 
-import FreakySeq from "./js/FreakySeq.js";
-import PianoRoll from "./js/PianoRoll.js";
 import MIDIRouter from "./js/MIDIRouter.js";
 
 //careful, the scope of this constant is still just within this module

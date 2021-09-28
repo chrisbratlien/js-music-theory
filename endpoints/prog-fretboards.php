@@ -542,6 +542,80 @@ add_action('wp_footer', function () {
   <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.fretboard.js"></script>
   <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.svgfretboard.js"></script>
   <script src="<?php bloginfo('url'); ?>/js/patchList.js"></script>
+  
+  
+  <script type="module">
+
+import FreakySeq from "./js/FreakySeq.js";
+import PianoRoll from "./js/PianoRoll.js";
+import MIDIRouter from "./js/MIDIRouter.js";
+
+//careful, the scope of this constant is still just within this module
+const MIDI_MSG = {
+    NOTE_OFF: 0x80,
+    NOTE_ON: 0x90,
+    MOD_WHEEL: 0xB0,
+    PITCH_BEND: 0xE0,
+}
+
+let router;
+
+function handleExternallyReceivedNoteOn(msg,noteNumber,velocity) {
+    if (router && router.outPort && BSD.options.improv.midi) {
+        let noteOnChannel = MIDI_MSG.NOTE_ON + (BSD.options.improv.channel-1);
+        return router.outPort.send([noteOnChannel, noteNumber, velocity]);
+    }
+    //okay, we'll synthesize using WekAudio LFO.
+    campfire.publish('play-note', {
+        note: Note(noteNumber),
+        duration: BSD.durations.note
+    });
+}
+function handleExternallyReceivedNoteOff(msg,noteNumber,velocity) {
+    let needToBother = router && router.outPort && BSD.options.improv.midi;
+    if (!needToBother) { return false; }
+    let noteOffChannel = MIDI_MSG.NOTE_OFF + (BSD.options.improv.channel-1);
+    return router.outPort.send([noteOffChannel, noteNumber, velocity]);
+}
+
+router = MIDIRouter({
+    onMIDIMessage: function(e) {
+        //NOTE: this comes from the external app/controller/gear input
+
+        ///console.log("eeeeee",e);
+        //console.log("BSD?",BSD)
+
+        let [msg, noteNumber, velocity] = e.data;
+        console.log('msg',msg);
+
+        if (msg == MIDI_MSG.NOTE_ON) {
+            return handleExternallyReceivedNoteOn(msg,noteNumber,velocity);
+        }
+        if (msg == MIDI_MSG.NOTE_OFF) {
+            return handleExternallyReceivedNoteOff(msg, noteNumber, velocity);
+        }
+
+        if (msg == MIDI_MSG.PITCH_BEND) {
+            //i guess i don't understand this yet. why can't I just pass it thru?
+            console.log('bend?',e.data);
+            return router.outPort.send(e.data);
+        }
+
+
+    }
+
+});
+
+//toss this variable over the module/non-module fence for now until further refactoring is done.
+window.router = router;
+
+//why is campfire visible inside the module?
+console.log('campfire?',campfire);
+
+</script>
+
+  
+  
   <script type="text/javascript">
     BSD.timeout = false;
 
@@ -567,7 +641,7 @@ add_action('wp_footer', function () {
         volume: 0.7,
         pan: 64
       },
-      highHat: {
+      hihat: {
         enabled: true,
         midi: false,
         channel: 10,
@@ -617,6 +691,7 @@ add_action('wp_footer', function () {
     BSD.durations = {
       bass: 1500,
       chord: 1000,
+      hihat: 300,
       note: 1000
     };
 
@@ -799,7 +874,7 @@ add_action('wp_footer', function () {
         range: [28, 100]
       });
 
-      campfire.publish('bootup-high-hat');
+      campfire.publish('bootup-hihat');
       waiter.beg(campfire, 'set-master-volume', BSD.volume);
 
 
@@ -887,15 +962,15 @@ add_action('wp_footer', function () {
       */
       //return console.log('bankSelect','decimalBankNumber',decimalBankNumber,'msb',msb,'lsb',lsb);
       ////let [msb, lsb] = get7bitMSBAndLSB(decimalBankNumber);
-      if (!openedMIDIOutput) {
+      if (!router || !router.outPort) {
         return console.log("bankSelect: no MIDI output currently open");
       }
-      openedMIDIOutput.send([
+      router.outPort.send([
         MIDI_CONST.CONTROL_CHANGE | (channelFrom1 - 1),
         0,
         msb
       ]);
-      openedMIDIOutput.send([
+      router.outPort.send([
         MIDI_CONST.CONTROL_CHANGE | (channelFrom1 - 1),
         0x20, //32
         lsb
@@ -922,8 +997,8 @@ add_action('wp_footer', function () {
       .max(127)
       .onChange(function(e) {
         saveOptions();
-        if (!openedMIDIOutput) { return false; }
-        openedMIDIOutput.send([
+        if (!router.outPort) { return false; }
+        router.outPort.send([
           MIDI_CONST.CONTROL_CHANGE | (BSD.options.improv.channel - 1),
           MIDI_CONST.CC_PAN,
           e
@@ -946,8 +1021,8 @@ add_action('wp_footer', function () {
             let p = +patch.number - 1;
             console.log('opts', opts, 'bankOpts', bankOpts, 'patch', patch, 'p', p);
             bankSelect(opts.channel, bankOpts.msb, bankOpts.lsb, p);
-            if (!openedMIDIOutput) { return false; }
-            openedMIDIOutput.send([
+            if (!router.outPort) { return false; }
+            router.outPort.send([
               MIDI_CONST.PROGRAM_CHANGE | (opts.channel - 1),
               p
             ]);
@@ -990,8 +1065,8 @@ add_action('wp_footer', function () {
         //bank first
         ///bankSelect(BSD.options.improv.channel, BSD.options.improv.bank);
         //set patch (within the bank set previously)
-        if (!openedMIDIOutput) { return false; }
-        openedMIDIOutput.send([
+        if (!router.outPort) { return false; }
+        router.outPort.send([
           MIDI_CONST.PROGRAM_CHANGE | (BSD.options.improv.channel - 1),
           BSD.options.improv.patch - 1
         ]);
@@ -1023,8 +1098,8 @@ add_action('wp_footer', function () {
       .max(127)
       .onChange(function(e) {
         saveOptions();
-        if (!openedMIDIOutput) { return false; }
-        openedMIDIOutput.send([
+        if (!router.outPort) { return false; }
+        router.outPort.send([
           MIDI_CONST.CONTROL_CHANGE | (BSD.options.bass.channel - 1),
           MIDI_CONST.CC_PAN,
           e
@@ -1052,8 +1127,8 @@ add_action('wp_footer', function () {
       .max(127)
       .onChange(function(e) {
         saveOptions();
-        if (!openedMIDIOutput) { return false; }
-        openedMIDIOutput.send([
+        if (!router.outPort) { return false; }
+        router.outPort.send([
           MIDI_CONST.CONTROL_CHANGE | (BSD.options.chord.channel - 1),
           MIDI_CONST.CC_PAN,
           e
@@ -1066,31 +1141,31 @@ add_action('wp_footer', function () {
 
 
 
-    let hatFolder = gui.addFolder('highHat', 'High-hat');
-    hatFolder.add(BSD.options.highHat, 'enabled').onChange(saveOptions);
-    hatFolder.add(BSD.options.highHat, 'midi').onChange(saveOptions);
-    hatFolder.add(BSD.options.highHat, 'channel')
+    let hatFolder = gui.addFolder('hihat', 'High-hat');
+    hatFolder.add(BSD.options.hihat, 'enabled').onChange(saveOptions);
+    hatFolder.add(BSD.options.hihat, 'midi').onChange(saveOptions);
+    hatFolder.add(BSD.options.hihat, 'channel')
       .min(1)
       .max(16)
       .step(1)
       .onChange(saveOptions);
-    hatFolder.add(BSD.options.highHat, 'noteNumber')
+    hatFolder.add(BSD.options.hihat, 'noteNumber')
       .min(0)
       .max(127)
       .step(1)
       .onChange(saveOptions);
-    hatFolder.add(BSD.options.highHat, 'volume')
+    hatFolder.add(BSD.options.hihat, 'volume')
       .min(0)
       .max(1)
       .onChange(saveOptions);
-    hatFolder.add(BSD.options.highHat, 'pan')
+    hatFolder.add(BSD.options.hihat, 'pan')
       .min(0)
       .max(127)
       .onChange(function(e) {
         saveOptions();
-        if (!openedMIDIOutput) { return false; }
-        openedMIDIOutput.send([
-          MIDI_CONST.CONTROL_CHANGE | (BSD.options.highHat.channel - 1),
+        if (!router.outPort) { return false; }
+        router.outPort.send([
+          MIDI_CONST.CONTROL_CHANGE | (BSD.options.hihat.channel - 1),
           MIDI_CONST.CC_PAN,
           e
         ]);
@@ -1207,16 +1282,16 @@ add_action('wp_footer', function () {
         return false;
       }
 
-      if (openedMIDIOutput && BSD.options.improv.midi) {
-        //another way to do noteOnChannel is
-        //let byte1 = 0x90 + (oneBasedChannel - 1),
-
-        let noteOnChannel = 143 + BSD.options.improv.channel;
+      if (router.outPort && BSD.options.improv.midi) {
+        let noteOnChannel = MIDI_CONST.NOTE_ON + (BSD.options.improv.channel-1);
+        let noteOffChannel = MIDI_CONST.NOTE_OFF + (BSD.options.improv.channel-1);
         let noteNum = payload.note.value();
         let vel = Math.floor(127 * BSD.options.improv.volume); //[0..1] -> [0..127]
 
-        openedMIDIOutput.send([noteOnChannel, noteNum, vel]);
-        return false;
+        router.outPort.send([noteOnChannel, noteNum, vel]);
+        return setTimeout(function(){
+          router.outPort.send([noteOffChannel, noteNum, vel]);
+        },BSD.durations.note);
       }
       // okay, currently no MIDI output, we'll use our WebAudio API synth
       BSD.audioPlayer.playNote(payload.note, payload.duration, payload.velocity);
@@ -1242,17 +1317,18 @@ add_action('wp_footer', function () {
       NOTE_ON: 0x90,
       AFTERTOUCH: 0xA0,
       CONTROL_CHANGE: 0xB0,
+      PITCH_BEND: 0xE0,
       PROGRAM_CHANGE: 0xC0,
       CC_PAN: 10
     };
+    const MIDI_MSG = MIDI_CONST;
+
 
     function allNotesOff() {
       for (var channel = 1; channel <= 16; channel += 1) {
         let noteOffWithzeroBasedChannel = 127 + channel;
         for (let nv = 0; nv < 128; nv += 1) {
-          //openedMIDIOutput.send([noteOffWithzeroBasedChannel,nv,64])
-          openedMIDIOutput.send([MIDI_CONST.NOTE_OFF | (channel - 1), nv, 0]);
-          //openedMIDIOutput.send([MIDI_CONST.NOTE_ON | (channel-1) ,nv,0]);
+          router.outPort.send([MIDI_CONST.NOTE_OFF | (channel - 1), nv, 0]);
         }
       }
     }
@@ -1284,21 +1360,22 @@ add_action('wp_footer', function () {
       }
 
       ///console.log('rooteless notes',rootless.notes());
-      if (openedMIDIOutput && openedMIDIOutput.connection == 'open' || outPort.connection == 'open') {
+      
+      if (router.outPort && router.outPort.connection == 'open') {
 
         let vel = Math.floor(127 * BSD.options.chord.volume); //[0..1] -> [0..127]
 
         let noteOnWithzeroBasedChannel = 143 + BSD.options.chord.channel;
         let noteOffWithzeroBasedChannel = 127 + BSD.options.chord.channel;
-
+        
         midiNoteValues.map(v => {
-          openedMIDIOutput.send([noteOnWithzeroBasedChannel, v, vel]);
+          router.outPort.send([noteOnWithzeroBasedChannel, v, vel]);
         });
 
         //schedule the NOTE OFF
         setTimeout(function() {
           midiNoteValues.map(v => {
-            openedMIDIOutput.send([noteOffWithzeroBasedChannel, v, vel]);
+            router.outPort.send([noteOffWithzeroBasedChannel, v, vel]);
           })
         }, o.duration);
 
@@ -1330,10 +1407,11 @@ add_action('wp_footer', function () {
       let noteOffChanByte = 0x80 + (BSD.options.improv.channel - 1);
 
       if (BSD.currentNote && c == BSD.keycodes.f) {
-        if (BSD.options.midiOnly && openedMIDIOutput) {
-          openedMIDIOutput.send([noteOnChanByte, noteNumber, 0x7f]);
+        
+        if (BSD.options.midiOnly && router.outPort) {
+          router.outPort.send([noteOnChanByte, noteNumber, 0x7f]);
           return setTimeout(function() {
-            openedMIDIOutput.send([noteOffChanByte, noteNumber, 0x7f]);
+            router.outPort.send([noteOffChanByte, noteNumber, 0x7f]);
           }, 250);
         }
         BSD.audioPlayer.playNote(BSD.currentNote, BSD.durations.note);
@@ -2421,11 +2499,19 @@ add_action('wp_footer', function () {
         let pedalValue = pedal.value();
 
         if (BSD.options.bass.midi) {
-          let noteOnChannel = 143 + BSD.options.bass.channel;
+          
+          let noteOnChannel = MIDI_CONST.NOTE_ON + (BSD.options.bass.channel-1);
+          let noteOffChannel = MIDI_CONST.NOTE_OFF + (BSD.options.bass.channel-1);
+
           let noteNum = pedalValue;
           let vel = Math.floor(127 * BSD.options.bass.volume); //[0..1] -> [0..127]        
 
-          openedMIDIOutput.send([noteOnChannel, noteNum, vel]);
+          router.outPort.send([noteOnChannel, noteNum, vel]);
+          setTimeout(function(){
+            router.outPort.send([noteOffChannel, noteNum, vel]);
+          },BSD.durations.bass);
+
+
         } else {
           bassist.playNote(
             pedal,
@@ -2439,11 +2525,18 @@ add_action('wp_footer', function () {
         let pedal5 = cursor.chord.myFifth().plus(-12);
         let pedal5Value = pedal5.value();
         if (BSD.options.bass.midi) {
-          let noteOnChannel = 143 + BSD.options.bass.channel;
+
+          let noteOnChannel = MIDI_CONST.NOTE_ON + (BSD.options.bass.channel-1);
+          let noteOffChannel = MIDI_CONST.NOTE_OFF + (BSD.options.bass.channel-1);
+
           let noteNum = pedal5Value;
           let vel = Math.floor(127 * BSD.options.bass.volume); //[0..1] -> [0..127]        
 
-          openedMIDIOutput.send([noteOnChannel, noteNum, vel]);
+          router.outPort.send([noteOnChannel, noteNum, vel]);
+          setTimeout(function(){
+            router.outPort.send([noteOffChannel, noteNum, vel]);
+          },BSD.durations.bass);
+
         } else {
           bassist.playNote(pedal5, BSD.durations.bass);
         }
@@ -2470,7 +2563,11 @@ add_action('wp_footer', function () {
       }
     });
 
+    //improv
     campfire.subscribe('tick', function(cursor) {
+
+      //FIXME: does this need midi/webAudio synth checks? 
+      // do we fully trust that protection from play-note?
       if (BSD.options.improv.enabled) {
         campfire.publish('play-note', {
           note: Note(cursor.noteValue),
@@ -2479,6 +2576,7 @@ add_action('wp_footer', function () {
       }
     });
 
+    //chord
     campfire.subscribe('tick', function(cursor) {
       //var midSwung82 = (swung82+even8DelayMS) / 2;/////].sum() /2;
       var thisIdx = cursor.chordIdx;
@@ -2543,15 +2641,15 @@ add_action('wp_footer', function () {
     });
 
     campfire.subscribe('tick', function(cursor) {
-      //high hat
-      if (!BSD.options.highHat.enabled) {
+      //hihat
+      if (!BSD.options.hihat.enabled) {
         return false;
       }
       if (BSD.noteResolution == 4 && cursor.chordNoteIdx == 1) {
-        highHat();
+        hihat();
       }
       if (BSD.noteResolution == 4 && cursor.chordNoteIdx + 1 == cursor.totQuarterNoteBeats) {
-        highHat();
+        hihat();
       }
     });
     /**
@@ -2619,8 +2717,8 @@ add_action('wp_footer', function () {
 
 
 
-    BSD.options.highHat.volume = BSD.options.highHat.volume || 0.7;
-    campfire.subscribe('bootup-high-hat', function() {
+    BSD.options.hihat.volume = BSD.options.hihat.volume || 0.7;
+    campfire.subscribe('bootup-hihat', function() {
       var bufferSize = 4096;
       var brownNoise = (function() {
         var lastOut = 0.0;
@@ -2643,29 +2741,33 @@ add_action('wp_footer', function () {
 
       gn.connect(mixer.common);
       brownNoise.connect(gn);
-      campfire.subscribe('high-hat', function() {
-        gn.gain.setTargetAtTime(BSD.options.highHat.volume, context.currentTime, 0); //do it now...
+      campfire.subscribe('hihat', function() {
+        gn.gain.setTargetAtTime(BSD.options.hihat.volume, context.currentTime, 0); //do it now...
         gn.gain.linearRampToValueAtTime(0, context.currentTime + 0.015);
       });
     });
 
-    function highHat() {
-      if (BSD.options.highHat.midi) {
-        let noteOnChannel = 143 + BSD.options.highHat.channel;
-        let noteNum = BSD.options.highHat.noteNumber;
-        let vel = Math.floor(127 * BSD.options.highHat.volume); //[0..1] -> [0..127]        
+    function hihat() {
+      if (BSD.options.hihat.midi) {
+        let noteOnChannel = MIDI_CONST.NOTE_ON + (BSD.options.hihat.channel-1);
+        let noteOffChannel = MIDI_CONST.NOTE_OFF + (BSD.options.hihat.channel-1);
+        let noteNum = BSD.options.hihat.noteNumber;
+        let vel = Math.floor(127 * BSD.options.hihat.volume); //[0..1] -> [0..127]        
 
-        openedMIDIOutput.send([noteOnChannel, noteNum, vel]);
-      } else {
-        campfire.publish('high-hat'); //the old synthetic brown noise hat
+        router.outPort.send([noteOnChannel, noteNum, vel]);
+        return setTimeout(function(){
+          router.outPort.send([noteOffChannel, noteNum, vel]);
+        },BSD.durations.hihat);
       }
+        
+      campfire.publish('hihat'); //the old synthetic brown noise hat
     }
 
     // midi functions
 
     var bank = {};
 
-    function onMIDIMessage(message) {
+    function wasOnMIDIMessageToSynthOnly(message) {
       let data = message.data; // this gives us our [command/channel, note, velocity] data.
       console.log('MIDI data', data); // MIDI data [144, 63, 73]
 
@@ -2704,9 +2806,9 @@ add_action('wp_footer', function () {
         });
         //bank[note] = keyboardist.playNote(Note(note),null,velocity);    
       } else if (type == MIDI_CONST.NOTE_ON && velocity == 0) { //note off
-        openedMIDIOutput.send([MIDI_CONST.NOTE_OFF | (BSD.options.improv.channel - 1), note, 0]);
+        router.outPort.send([MIDI_CONST.NOTE_OFF | (BSD.options.improv.channel - 1), note, 0]);
       } else if (type == MIDI_CONST.NOTE_OFF) { //note off
-        openedMIDIOutput.send([MIDI_CONST.NOTE_OFF | (BSD.options.improv.channel - 1), note, 0]);
+        router.outPort.send([MIDI_CONST.NOTE_OFF | (BSD.options.improv.channel - 1), note, 0]);
       } else {
         var env = bank[note];
         if (env) {
@@ -2717,67 +2819,7 @@ add_action('wp_footer', function () {
     }
 
 
-    let openedMIDIOutput;
-    let outPort;
     let outMonitor;
-
-    function onMIDISuccess(midiAccess) {
-      // when we get a succesful response, run this code
-      midi = midiAccess; // this is our raw MIDI data, inputs, outputs, and sysex status
-
-      midiAccess.onstatechange = function(e) {
-        // Print information about the (dis)connected MIDI controller
-        console.log(e.port.name, e.port.manufacturer, e.port.state);
-      };
-
-
-      var inputs = midiAccess.inputs.values();
-
-      // loop over all available inputs and listen for any MIDI input
-      for (var input = inputs.next(); input && !input.done; input = inputs.next()) {
-        // each time there is a midi message call the onMIDIMessage function
-        input.value.onmidimessage = onMIDIMessage;
-      }
-
-      var outputs = midiAccess.outputs.values();
-
-      // loop over all available output and listen for any MIDI output
-      for (var output = outputs.next(); output && !output.done; output = outputs.next()) {
-        // each time there is a midi message call the onMIDIMessage function
-        console.log('MIDI output value', output.value)
-        //myMIDIoutput = output;
-
-        output.value.open()
-          .then((okayPort, b, c) => {
-            console.log('okay', okayPort, b, c)
-            outPort = okayPort;
-            //campfire.publish('opened-midi-out-port',outPort);
-          })
-        ////input.value.onmidimessage = onMIDIMessage;
-      }
-
-    }
-
-    function onMIDIFailure(error) {
-      // when we get a failed response, run this code
-      console.log("No access to MIDI devices or your browser doesn't support WebMIDI API. Please use WebMIDIAPIShim " + error);
-    }
-
-    //var midi, data;
-    // request MIDI access
-    if (navigator.requestMIDIAccess) {
-      navigator.requestMIDIAccess({
-          //sysex: false
-        }).then(onMIDISuccess, onMIDIFailure)
-        .catch('error', function(e) {
-          console.log('midi err', e);
-        })
-    } else {
-      alert("No MIDI support in your browser.");
-    }
-
-
-
 
 
 
@@ -2967,10 +3009,10 @@ add_action('wp_footer', function () {
         events: events
       })
 
-      openedMIDIOutput = App.MIDIOutMonitor({
-        port: outPort
+      let midiOutMonitor = App.MIDIOutMonitor({
+        port: router.outPort
       });
-      jQuery('.monitor-wrap').append(openedMIDIOutput.ui())
+      jQuery('.monitor-wrap').append(midiOutMonitor.ui())
 
 
       pianoRoll.on('note-hover', function(noteNumber) {
