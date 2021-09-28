@@ -6,7 +6,7 @@ export default function FreakySeq(props) {
     BARS: 2, //total bars in this sequence
     QPBAR: 4, //quarter notes per bar
     //PPQ: 6, // ticks per quarter note or PPQN (pulse per quarter note)
-    PPQ: 3,
+    PPQ: 2,//3,
     BPM: 120,
   };
   let GAMELOOP = opts;
@@ -39,57 +39,51 @@ export default function FreakySeq(props) {
 
   */
 
-  let loopMS; //  = millisPerLoop(GAMELOOP.BPM, GAMELOOP.QPBAR,GAMELOOP.BARS);
+  let loopMS; //  
   let playing = false;
   function init() {
     console.log("init!!");
-    GAMELOOP.TPBAR = GAMELOOP.PPQ * GAMELOOP.QPBAR; ///ticks per bar
-    GAMELOOP.TPLOOP = GAMELOOP.TPBAR * GAMELOOP.BARS; //ticks per loop/seq
-    GAMELOOP.MSPT = Math.floor(60000 / (GAMELOOP.BPM * GAMELOOP.PPQ)); //ms per tick
+    opts.TPBAR = opts.PPQ * opts.QPBAR; ///ticks per bar
+    opts.TPLOOP = opts.TPBAR * opts.BARS; //ticks per loop/seq
+    opts.MSPT = Math.floor(60000 / (opts.BPM * opts.PPQ)); //ms per tick
 
-    loopMS = millisPerLoop(GAMELOOP.BPM, GAMELOOP.QPBAR, GAMELOOP.BARS);
+    loopMS = millisPerLoop(opts.BPM, opts.QPBAR, opts.BARS);
     loopMS = Math.floor(loopMS);
   }
 
   function tempoChange(bpm) {
-    GAMELOOP.BPM = bpm;
+    opts.BPM = bpm;
     init();
   }
-
-  function playEventData(eventData) {
-    let noteOnChanByte = 0x90 + (BSD.options.improv.channel - 1);
-    let velocityByte = Math.floor(BSD.options.improv.volume * 127);
-    //console.log('new helper');
-    let firstByte = eventData >> 16,
-      secondByte = (eventData & 0x00ff00) >> 8,
-      thirdByte = eventData & 0x00007f;
-    //console.log(firstByte,secondByte,thirdByte);
-    /* */
-    //console.log('vvv',velocityByte,eventData & 0x00007F);
-    openedMIDIOutput.send([
-      //eventData >> 16, //first byte (status)
-      noteOnChanByte,
-      (eventData & 0x00ff00) >> 8, //second byte //data
-      //(eventData & 0x00007F) // third byte       //data
-      velocityByte,
-    ]);
+  function update(newOpts) {
+    opts = {
+      ...opts,
+      ...newOpts
+    }
+    init();
   }
-
 
   function millisPerLoop(bpm, beatsPerBar, barsPerLoop) {
     let millisPerMinute = 60000;
     return (beatsPerBar * barsPerLoop * millisPerMinute) / bpm;
   }
 
+  let currentLoop = 0;
+  let saveProgressMS = 0;
+  let progressMS = 0;
+
   function play() {
     if (playing) {
       return console.log("already playing");
     }
     playing = true;
+    currentLoop = 0;
     let whenStartedMS = false;
-    let progressMS = 0;
-    let saveProgressMS = 0;
-    let currentLoop = 0;
+  
+    props.events.map(event => {
+      event.noteOnLoopNum = currentLoop;
+      event.noteOffLoopNum = currentLoop;
+    })
 
     //console.log("loopMS", loopMS);
 
@@ -109,20 +103,6 @@ export default function FreakySeq(props) {
       }
       saveProgressMS = progressMS;
 
-      /*
-      console.log(
-        "frameTick, nowMS",
-        nowMS,
-        "whenStartedMS",
-        whenStartedMS,
-        "progressMS",
-        progressMS,
-        "loopMS",
-        loopMS,
-        "currentLoop",
-        currentLoop
-      );
-      */
       props.events
         .filter((event) => event.noteOnMillis < progressMS)
         .filter((event) => event.noteOnLoopNum < currentLoop)
@@ -146,7 +126,7 @@ export default function FreakySeq(props) {
 
         //forgot why this was important, but it's preventing sounds after
         // a play->stop->play session
-        //.filter((event) => event.noteOffLoopNum < currentLoop)
+        .filter((event) => event.noteOffLoopNum < currentLoop)
 
         .forEach((event) => {
           event.noteOffLoopNum = currentLoop;
@@ -176,10 +156,12 @@ export default function FreakySeq(props) {
   return {
     ...self,
     props, //temporary for debugging..
+    currentLoop,
     millisPerLoop,
     opts,
     play,
     stop,
     tempoChange,
+    update
   };
 }

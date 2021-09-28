@@ -218,3 +218,18 @@ add_action('ws_removeItem', function ($opts) {
   remote_db_remove($data['key']);
   exit;
 });
+
+
+add_filter('body_class',function($classes){
+  $uri = clean_uri($_SERVER['REQUEST_URI']);
+  $parts = preg_split('/\//', $uri);
+  $parts = array_filter($parts,function($elem){
+    return !empty($elem);
+  });
+  array_push($classes, ...$parts);  
+  return $classes;
+});
+
+function get_stylesheet_directory_uri() {
+  return get_bloginfo('url');
+}

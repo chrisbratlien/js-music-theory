@@ -2982,15 +2982,6 @@ add_action('wp_footer', function () {
           duration: BSD.durations.note
         });
 
-        /*
-        let noteOnChanByte = 0x90 + (BSD.options.improv.channel - 1);
-        let noteOffChanByte = 0x80 + (BSD.options.improv.channel - 1);
-
-        openedMIDIOutput.send([noteOnChanByte, noteNumber, 0x7f]);
-        setTimeout(function() {
-          openedMIDIOutput.send([noteOffChanByte, noteNumber, 0x7f])
-        }, 250)
-        */
 
       });
       pianoRoll.on('is-playing',function(isPlaying){

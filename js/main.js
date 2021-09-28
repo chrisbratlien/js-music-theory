@@ -18,5 +18,3 @@ window.App = {
   remap,
   MIDIOutMonitor,
 };
-
-console.log('inside the module, what is this?', this);

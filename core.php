@@ -143,11 +143,8 @@ function apply_filters($tag, $default) {
 }
 
 function body_class() {
-  $uri = clean_uri($_SERVER['REQUEST_URI']);
-  $parts = preg_split('/\//', $uri);
-  //pp($parts,'parts');
 
-  $parts = apply_filters('body_class', $parts);
+  $parts = apply_filters('body_class', []);
   if (empty($parts)) {
     return false;
   }
