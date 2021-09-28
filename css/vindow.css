@@ -1,0 +1,23 @@
+.vindow { 
+    position: absolute; 
+    border: 1px solid #444;
+    box-shadow: 0px 0px 2px #555;
+  }
+
+  .vindow .header {
+    background: #409;
+    color: white;
+    cursor: pointer;
+    padding: 1px;
+  }
+  .vindow .header .title {
+      padding: 1px;
+  }
+  .vindow .pane {
+    padding: 10px;
+  }
+  .vindow .btn-exit {
+    border-radius: 0;
+    color: black;
+    padding: 0;
+  }

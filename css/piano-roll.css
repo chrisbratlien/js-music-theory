@@ -1,8 +1,13 @@
+
+.piano-roll {
+}
 .piano-roll table {
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     border-right: 1px solid rgba(0, 0, 0, 0.1);
-
+    max-height: 400px;
+    overflow-y: auto;
   }
+
 
 .piano-roll table td {
     border-radius: 1rem;
@@ -29,3 +34,7 @@
 
   }
 
+   .piano-roll table tr:hover {
+    opacity: 0.5;
+  }
+  

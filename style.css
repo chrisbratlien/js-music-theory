@@ -48,13 +48,6 @@ table { overflow: auto; }
   display: none;
 }
 
-.piano-roll {
-  max-height: 400px;
-  overflow-y: auto;
-}
-.piano-roll table tr:hover {
-  opacity: 0.5;
-}
 
 
 #pickers { width: 100%; height: 10em; overflow: auto; }

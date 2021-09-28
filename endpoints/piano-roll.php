@@ -22,6 +22,7 @@ add_action('wp_head',function(){
     ?>
 <style>
     @import 'css/piano-roll.css';
+    @import 'css/vindow.css';
 </style>
 <?php
 });
@@ -41,10 +42,13 @@ add_action('wp_footer',function() {
 ?>
   <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.simpleplayer.js"></script>
 
-<script type="module">
+<script type="module" onLoad="onInlineModuleLoaded">
 
 import MIDIRouter from "./js/MIDIRouter.js";
-
+import FreakySeq from "./js/FreakySeq.js";
+import PianoRoll from "./js/PianoRoll.js";
+import Vindow from "./js/Vindow.js";
+import BSDMixer from "./js/BSDMixer.js";
 //careful, the scope of this constant is still just within this module
 const MIDI_MSG = {
     NOTE_OFF: 0x80,
@@ -54,6 +58,9 @@ const MIDI_MSG = {
 }
 
 let router;
+let freak;
+
+let mixer = BSDMixer(context);
 
 function handleExternallyReceivedNoteOn(msg,noteNumber,velocity) {
     if (router && router.outPort && BSD.options.improv.midi) {
@@ -101,17 +108,20 @@ router = MIDIRouter({
 
 });
 
-//toss this variable over the module/non-module fence for now until further refactoring is done.
-window.router = router;
+
+let events = [];
+
+freak = FreakySeq({
+        noteOffDisabled: true,
+        events
+      });
+
+
 
 //why is campfire visible inside the module?
-console.log('campfire?',campfire);
+///console.log('campfire?',campfire);
 
-</script>
-<script>
-    let mixer, keyboardist;
-
-    let openedMIDIOutput;
+    let keyboardist;
 
     //TODO: consolidate these globals... They are being duplicated
     //in prog-fretboards as well.
@@ -192,11 +202,9 @@ console.log('campfire?',campfire);
       campfire.publish('options-loaded', BSD.options); //needed?
     });
 
-
-
-
-    function onAppLoad() {
-      mixer = App.BSDMixer(context);
+        //alert('got here');
+        console.log('FREAK?',freak);
+ 
       BSD.audioPlayer = BSD.Widgets.SimplePlayer({
         context: context,
         destination: mixer.common,
@@ -215,13 +223,7 @@ console.log('campfire?',campfire);
       keyboardist.publish('set-master-volume', BSD.volume);
 
 
-      let events = [];
-      window.events = events;
-      let freak = App.FreakySeq({
-        noteOffDisabled: true,
-        events
-      });
-      window.freak = freak;
+      //this freak var came from the module section of JS above...
       freak.on('note-on',function(event){
           //REMEMBER: this was sequencer-generated...not user MIDI controller created
         if (router && router.outPort && BSD.options.improv.midi) {
@@ -263,7 +265,7 @@ console.log('campfire?',campfire);
 
 
 
-      let pianoRoll = App.PianoRoll({
+      let pianoRoll = PianoRoll({
         ...freak.opts,
         events: events
       })
@@ -284,9 +286,13 @@ console.log('campfire?',campfire);
         //isPlaying shows the new going-forward wish
         isPlaying ? freak.play() : freak.stop();
       });
-      jQuery('.piano-roll-wrap').append(pianoRoll.ui())
+      //jQuery('.piano-roll-wrap').append(pianoRoll.ui())
 
-    }
+
+      let w = Vindow({ title: "Piano Roll" });
+      w.append(pianoRoll.ui())
+      w.renderOn(jQuery(document.body));
+
 
     //LEAD / IMPROV
     campfire.subscribe('play-note', function(payload) {
@@ -326,6 +332,11 @@ console.log('campfire?',campfire);
 
 
 </script>
+<script>
+function onAppLoad() {
+  //FIXME: get rid of this once the app/module refactoring is done
+}
+    </script>
 <?php    
 });
 
