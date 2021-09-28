@@ -8,38 +8,14 @@ export default function FreakySeq(props) {
     //PPQ: 6, // ticks per quarter note or PPQN (pulse per quarter note)
     PPQ: 2,//3,
     BPM: 120,
+    ...props
   };
-  let GAMELOOP = opts;
 
 
   var self = PubSub();
 
 
-  /*
-  what's a freakyseq event?
-
-  A)
-  {
-    noteOnMillis: 123,
-    noteOffMilis: 345
-
-  }
-
-  it will eventually need to yield/trigger separate MIDI events for 
-  the note on and note off
-
-  B)
-  or, will note on and note off events be separate at birth? 
-
-  how will piano roll manage removal of events that are deleted?
-  a hash?
-  an owner?
-
-  let's implement A for now
-
-  */
-
-  let loopMS; //  
+  let loopMS; //calculated
   let playing = false;
   function init() {
     console.log("init!!");
@@ -91,6 +67,7 @@ export default function FreakySeq(props) {
       if (!playing) {
         return console.log("stopped");
       }
+
       nowMS = Math.floor(nowMS);
       if (!whenStartedMS) {
         whenStartedMS = nowMS;
@@ -103,44 +80,33 @@ export default function FreakySeq(props) {
       }
       saveProgressMS = progressMS;
 
+
+      ///let onMillis = remap(0, opts.TPLOOP, 0, loopMS, tickIdx);
+      //let offMillis = remap(0, opts.TPLOOP, 0, loopMS, tickIdx + 1);
+
+      let tickIdx = remap(0, loopMS, 0, opts.TPLOOP, progressMS);
+      //console.log("tickIdx", tickIdx);
+      tickIdx = Math.floor(tickIdx);
+      //console.log("tickIdx(floor)", tickIdx);
+
       props.events
-        .filter((event) => event.noteOnMillis < progressMS)
+        //.filter((event) => event.noteOnMillis < progressMS)
+        .filter((event) => event.tickIdx == tickIdx)
         .filter((event) => event.noteOnLoopNum < currentLoop)
         .forEach((event) => {
           event.noteOnLoopNum = currentLoop;
           ////console.log("note onnnn",event);
           self.emit('note-on', event);
-          /*
-          let noteOnChanByte = 0x90 + (BSD.options.improv.channel - 1);
-          let velocityByte = Math.floor(BSD.options.improv.volume * 127);
-          openedMIDIOutput.send([
-            noteOnChanByte,
-            event.noteOnMessage[1],
-            velocityByte,
-          ]);
-          */
         });
-      props.events
-        .filter((event) => event.noteOffMillis < progressMS)
 
 
-        //forgot why this was important, but it's preventing sounds after
-        // a play->stop->play session
+      (!opts.noteOffDisabled) && props.events
+        //.filter((event) => event.noteOffMillis < progressMS)
+        .filter((event) => event.tickIdx < tickIdx || event.tickIdx == opts.TPLOOP - 1 && tickIdx == 0)
         .filter((event) => event.noteOffLoopNum < currentLoop)
-
         .forEach((event) => {
           event.noteOffLoopNum = currentLoop;
-          ///console.log("note off",event);
           self.emit('note-off', event);
-          /*
-          let noteOffChanByte = 0x80 + (BSD.options.improv.channel - 1);
-          let velocityByte = Math.floor(BSD.options.improv.volume * 127);
-          openedMIDIOutput.send([
-            noteOffChanByte,
-            event.noteOffMessage[1],
-            velocityByte,
-          ]);
-          */
         });
 
       requestAnimationFrame(frameTick);

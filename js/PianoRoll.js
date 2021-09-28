@@ -10,7 +10,7 @@ function PianoRoll(props) {
   let self = PubSub({});
   let wrap = DOM.div().addClass("piano-roll");
 
-  let lowNote = 48; //low C on 7 string guitar//36;
+  let lowNote = 54;//48;
   let howManyNotes = 20;
 
   let noteRange = [...Array(howManyNotes).keys()].map((o) => lowNote + o);
@@ -87,26 +87,15 @@ function PianoRoll(props) {
                   background: bgStr
                 })
 
-                //all of this byte stuff is nice and interesting, but it shouldn't belong in the
-                // PianoRoll UI module.
-                // when I find a new home (probably play-note)
 
-                let byte1 = 0x90 + (channel - 1),
-                  byte2 = noteNumber,
-                  byte3 = 127;
-
-                console.log("byte1", byte1, "byte2", byte2, "byte3", byte3);
-
-                let eventHash =
-                  0x100000 * tickIdx + byte1 * 0x10000 + byte2 * 0x100 + byte3;
+                let eventHash = 0x100 * tickIdx + noteNumber;
 
                 let event = {
                   hash: eventHash,
                   noteNumber,
                   noteOnLoopNum: 0,
                   noteOffLoopNum: 0,
-                  //noteOnMessage: [byte1, byte2, byte3],
-                  //noteOffMessage: [0x80 + (channel - 1), byte2, byte3],
+                  tickIdx,
                   noteOnMillis: onMillis,
                   noteOffMillis: offMillis,
                 };

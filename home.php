@@ -26,6 +26,7 @@ get_header();
 </div>
 
 <ul class="mobile-line-height list-style-type-none">
+  <li><a href="piano-roll">Piano Rolls</a> Piano Roll experiment
   <li><a href="prog-fretboards">Prog Fretboards</a>
     <ul>
       <li>Paint and play on fretboards drawn to match a chord progression</li>

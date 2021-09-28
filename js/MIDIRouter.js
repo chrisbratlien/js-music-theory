@@ -1,5 +1,5 @@
 function MIDIRouter(props) {
-    let midiAccess, outPort, self;
+    let midiAccess, self;
 
     self = {};
 
@@ -10,19 +10,23 @@ function MIDIRouter(props) {
     function onMIDIFailure(e) {
         return console.log('onMIDIFailure', e);
     }
-    function wASonMIDISuccess(e) {
-        return console.log('success',e)
-    }
 
-    function onMIDISuccess(aMIDIAccessObject) {
+  function onMIDISuccess(aMIDIAccessObject) {
+    //console.log("onMIDISuccess", aMIDIAccessObject);
         // when we get a succesful response, run this code
         self.midiAccess = aMIDIAccessObject;
         aMIDIAccessObject.onstatechange = function (e) {
             //console.log('onstatechange e:', e);
             //console.log('onstatechange e.port:', e.port);
-            
+          self.newGuyPort = e.port;
+
+          if (self.outPort.state == 'disconnected' && self.newGuyPort.state == "connected") {
+            //if ya can't beat em...
+            self.outPort = self.newGuyPort;
+          }
+
           // Print information about the (dis)connected MIDI controller
-          console.log(e.port.name, e.port.manufacturer, e.port.state);
+          console.log(e.port.name, e.port.manufacturer, e.port.state);          
         };
   
   

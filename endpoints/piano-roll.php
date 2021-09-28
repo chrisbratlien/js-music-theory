@@ -47,20 +47,58 @@ import FreakySeq from "./js/FreakySeq.js";
 import PianoRoll from "./js/PianoRoll.js";
 import MIDIRouter from "./js/MIDIRouter.js";
 
-
+//careful, the scope of this constant is still just within this module
 const MIDI_MSG = {
     NOTE_OFF: 0x80,
-    NOTE_ON: 0x90
+    NOTE_ON: 0x90,
+    MOD_WHEEL: 0xB0,
+    PITCH_BEND: 0xE0,
 }
 
-let router = MIDIRouter({
+let router;
+
+function handleExternallyReceivedNoteOn(msg,noteNumber,velocity) {
+    if (router && router.outPort && BSD.options.improv.midi) {
+        let noteOnChannel = MIDI_MSG.NOTE_ON + (BSD.options.improv.channel-1);
+        return router.outPort.send([noteOnChannel, noteNumber, velocity]);
+    }
+    //okay, we'll synthesize using WekAudio LFO.
+    campfire.publish('play-note', {
+        note: Note(noteNumber),
+        duration: BSD.durations.note
+    });
+}
+function handleExternallyReceivedNoteOff(msg,noteNumber,velocity) {
+    let needToBother = router && router.outPort && BSD.options.improv.midi;
+    if (!needToBother) { return false; }
+    let noteOffChannel = MIDI_MSG.NOTE_OFF + (BSD.options.improv.channel-1);
+    return router.outPort.send([noteOffChannel, noteNumber, velocity]);
+}
+
+router = MIDIRouter({
     onMIDIMessage: function(e) {
-        ////console.log("eeeeee",e);
+        //NOTE: this comes from the external app/controller/gear input
+
+        ///console.log("eeeeee",e);
         //console.log("BSD?",BSD)
+
         let [msg, noteNumber, velocity] = e.data;
+        console.log('msg',msg);
+
         if (msg == MIDI_MSG.NOTE_ON) {
-            campfire.publish('play-note',{ note: Note(noteNumber), duration: 1000 });
+            return handleExternallyReceivedNoteOn(msg,noteNumber,velocity);
         }
+        if (msg == MIDI_MSG.NOTE_OFF) {
+            return handleExternallyReceivedNoteOff(msg, noteNumber, velocity);
+        }
+
+        if (msg == MIDI_MSG.PITCH_BEND) {
+            //i guess i don't understand this yet. why can't I just pass it thru?
+            console.log('bend?',e.data);
+            return router.outPort.send(e.data);
+        }
+
+
     }
 
 });
@@ -182,14 +220,43 @@ console.log('campfire?',campfire);
       let events = [];
       window.events = events;
       let freak = App.FreakySeq({
+        noteOffDisabled: true,
         events
       });
       window.freak = freak;
       freak.on('note-on',function(event){
+          //REMEMBER: this was sequencer-generated...not user MIDI controller created
+        if (router && router.outPort && BSD.options.improv.midi) {
+            let noteOnChannel = 0x90 + (BSD.options.improv.channel-1);
+            let noteOffChannel = 0x80 + (BSD.options.improv.channel-1);
+            let noteNum = event.noteNumber;
+            let vel = Math.floor(127 * BSD.options.improv.volume); //[0..1] -> [0..127]
+            router.outPort.send([noteOnChannel, noteNum, vel]);
+
+            if (freak.opts.noteOffDisabled) {
+                //console.log('freak.opts.noteOffDisabled, so I have to schedule noteOff myself!!');
+                setTimeout(function() {  
+                    router.outPort.send([noteOffChannel, noteNum, vel]);
+                },BSD.durations.note);
+            }
+            return "all done";
+        }
+        //okay, we'll synthesize using WekAudio LFO.
         campfire.publish('play-note', {
           note: Note(event.noteNumber),
           duration: BSD.durations.note
         });
+      });
+      freak.on('note-off',function(event){
+        //first check if we need to bother sending out MIDI note off
+
+        let needToBother = router && router.outPort && BSD.options.improv.midi;
+        if (!needToBother) { return false; }
+        ////console.log('yes, needed to bother');
+        let noteOffChannel = 0x80 + (BSD.options.improv.channel-1);
+        let noteNum = event.noteNumber;
+        let vel = Math.floor(127 * BSD.options.improv.volume); //[0..1] -> [0..127]
+        return router.outPort.send([noteOffChannel, noteNum, vel]);
       });
 
 
@@ -203,12 +270,6 @@ console.log('campfire?',campfire);
         events: events
       })
 
-      /*
-      openedMIDIOutput = App.MIDIOutMonitor({
-        port: outPort
-      });
-      jQuery('.monitor-wrap').append(openedMIDIOutput.ui())
-      */
 
       pianoRoll.on('note-hover', function(noteNumber) {
         BSD.currentNote = Note(noteNumber);
@@ -231,6 +292,7 @@ console.log('campfire?',campfire);
 
     //LEAD / IMPROV
     campfire.subscribe('play-note', function(payload) {
+      ///console.log('play-note!!',payload);
       if (!BSD.options.improv.enabled) {
         return false;
       }
@@ -239,11 +301,17 @@ console.log('campfire?',campfire);
         //another way to do noteOnChannel is
         //let byte1 = 0x90 + (oneBasedChannel - 1),
 
-        let noteOnChannel = 143 + BSD.options.improv.channel;
+        let noteOnChannel = 0x90 + (BSD.options.improv.channel-1);
+        let noteOffChannel = 0x80 + (BSD.options.improv.channel-1);
         let noteNum = payload.note.value();
         let vel = Math.floor(127 * BSD.options.improv.volume); //[0..1] -> [0..127]
 
         router.outPort.send([noteOnChannel, noteNum, vel]);
+
+        setTimeout(function() {  
+            console.log('stopping!?!?!?!? !!!')
+            router.outPort.send([noteOffChannel, noteNum, vel]);
+        }, BSD.durations.note);
         return false;
       }
       // I suspect that user interaction on the page has to initiate the first 
