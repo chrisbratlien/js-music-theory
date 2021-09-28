@@ -26,7 +26,6 @@ get_header();
 </div>
 
 <ul class="mobile-line-height list-style-type-none">
-  <li><a href="piano-roll">Piano Rolls</a> Piano Roll experiment
   <li><a href="prog-fretboards">Prog Fretboards</a>
     <ul>
       <li>Paint and play on fretboards drawn to match a chord progression</li>
@@ -35,6 +34,7 @@ get_header();
       <li>Save and load chord progressions to and from a song list</li>
     </ul>
   </li>
+  <li><a href="piano-roll">Piano Roll</a> Piano Roll experiment
   <li><a href="rulers">Rulers</a> Vertical color swatches to paint and play chords and progressions with</li>
   <li><a href="hexagon">Hexagon</a> Hexagon based input UI</li>
   <li><a href="multiple-fretboards">Multiple Fretboards</a> paint and play on fretboards</li>
