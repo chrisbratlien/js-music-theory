@@ -20,7 +20,7 @@ function MIDIRouter(props) {
             //console.log('onstatechange e.port:', e.port);
           self.newGuyPort = e.port;
 
-          if (self.outPort.state == 'disconnected' && self.newGuyPort.state == "connected") {
+          if (self.outPort && self.outPort.state == 'disconnected' && self.newGuyPort.state == "connected") {
             //if ya can't beat em...
             self.outPort = self.newGuyPort;
           }
