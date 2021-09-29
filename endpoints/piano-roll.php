@@ -38,9 +38,6 @@ get_header();
   <div class="piano-roll-wrap flex-column full-width">
   </div>
 </section>
-<p>Work in progress. After you hit play <i class="fa fa-play"></i>,
-  the first loop through the piano roll will happen silently. But, from then on, it will play fine.
-</p>
 <?php
 
 add_action('wp_footer', function () {
