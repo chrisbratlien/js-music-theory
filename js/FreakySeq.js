@@ -80,14 +80,9 @@ export default function FreakySeq(props) {
       }
       saveProgressMS = progressMS;
 
+      let tickIdx = Math.floor(progressMS / opts.MSPT);
+      ////console.log("tickIdx", tickIdx);
 
-      ///let onMillis = remap(0, opts.TPLOOP, 0, loopMS, tickIdx);
-      //let offMillis = remap(0, opts.TPLOOP, 0, loopMS, tickIdx + 1);
-
-      let tickIdx = remap(0, loopMS, 0, opts.TPLOOP, progressMS);
-      //console.log("tickIdx", tickIdx);
-      tickIdx = Math.floor(tickIdx);
-      //console.log("tickIdx(floor)", tickIdx);
 
       props.events
         //.filter((event) => event.noteOnMillis < progressMS)
