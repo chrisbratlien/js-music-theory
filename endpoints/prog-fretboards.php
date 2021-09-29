@@ -220,6 +220,7 @@ add_action('wp_head', function () {
   
   
   .song-list {
+    padding: 0;
     list-style-type: none;
   }
   
