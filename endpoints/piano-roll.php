@@ -119,6 +119,7 @@ add_action('wp_footer', function () {
       noteOffDisabled: true,
       events
     });
+    window.freak = freak;
 
 
 
@@ -281,13 +282,15 @@ add_action('wp_footer', function () {
       BSD.currentNote = Note(noteNumber);
     });
     pianoRoll.on('note-preview', function(noteNumber) {
-      campfire.publish('play-note', {
-        note: Note(noteNumber),
-        duration: BSD.durations.note
-      });
+        campfire.publish('play-note', {
+          note: Note(noteNumber),
+          duration: BSD.durations.note
+        })
+      })
+      .on('tempo-change', function(tempo) {
+        freak.tempoChange(tempo);
+      })
 
-
-    });
     pianoRoll.on('is-playing', function(isPlaying) {
       //isPlaying shows the new going-forward wish
       isPlaying ? freak.play() : freak.stop();

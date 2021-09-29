@@ -43,9 +43,9 @@ function PianoRoll(props) {
   let noteNames = JSMT.twelveTones();
 
   let playing = false;
-  let btnPlayStop, iconPlayStop;
+  let btnPlayStop, iconPlayStop, inTempo;
   let toolbar = DOM.div()
-    .addClass('btn-group')
+    .addClass('btn-group flex-row align-items-center space-between')
     .append([
       btnPlayStop = DOM.button()
         .addClass('btn btn-sm btn-default')
@@ -57,7 +57,13 @@ function PianoRoll(props) {
           playing = !playing;
           iconPlayStop.toggleClass('fa-play fa-pause');
           self.emit('is-playing', playing)
-        })
+        }),
+      inTempo = DOM.input()
+        .addClass('tempo')
+        .attr('type', 'number')
+        .attr('min', 50)
+        .val(props.tempo || 120)
+        .on('change', (e) => self.emit('tempo-change', +e.target.value))
     ]);
  
  
@@ -71,8 +77,8 @@ function PianoRoll(props) {
           ...eventRange.map((tickIdx) => {
             let state = false;
 
-            let onMillis = remap(0, props.TPLOOP, 0, loopMS, tickIdx);
-            let offMillis = remap(0, props.TPLOOP, 0, loopMS, tickIdx + 1);
+            //let onMillis = remap(0, props.TPLOOP, 0, loopMS, tickIdx);
+            //let offMillis = remap(0, props.TPLOOP, 0, loopMS, tickIdx + 1);
 
             let cell = DOM.td()
               .addClass("piano-roll-cell")
@@ -97,8 +103,8 @@ function PianoRoll(props) {
                   noteOnLoopNum: 0,
                   noteOffLoopNum: 0,
                   tickIdx,
-                  noteOnMillis: onMillis,
-                  noteOffMillis: offMillis,
+                  //noteOnMillis: onMillis,
+                  //noteOffMillis: offMillis,
                 };
 
                 if (state) {

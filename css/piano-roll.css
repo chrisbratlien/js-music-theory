@@ -1,6 +1,10 @@
 
 .piano-roll {
 }
+
+.piano-roll .toolbar .tempo {
+  width: 60px;
+}
 .piano-roll table {
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     border-right: 1px solid rgba(0, 0, 0, 0.1);
@@ -16,7 +20,7 @@
 }
 
 .piano-roll table td {
-    border-radius: 5px;
+    border-radius: 6px;
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     border-left: 1px solid rgba(0, 0, 0, 0.1);
 
