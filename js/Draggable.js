@@ -13,16 +13,27 @@ var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
 
 function dragMouseDown(e) {
   e = e || window.event;
-  e.preventDefault();
+  //e.preventDefault();
+    e.preventDefault();
+
   pos3 = e.clientX;
   pos4 = e.clientY;
-  document.onmouseup = closeDragElement;
-  document.onmousemove = elementDrag;
+  //document.onmouseup = closeDragElement;
+  //document.onmousemove = elementDrag;
+
+
+  document.onpointermove = elementDrag;
+  document.onpointerup = closeDragElement;
+  
+
 }
 
 function elementDrag(e) {
   e = e || window.event;
-  e.preventDefault();
+  //console.log("e?", e);
+
+    e.preventDefault();
+  ///console.log('got here');
   pos1 = pos3 - e.clientX;
   pos2 = pos4 - e.clientY;
   pos3 = e.clientX;
@@ -31,12 +42,15 @@ function elementDrag(e) {
   elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
 }
 
-function closeDragElement() {
-  document.onmouseup = null;
-  document.onmousemove = null;
+  function closeDragElement() {
+  //console.log('close?')
+  document.onpointerup = null;
+  document.onpointermove = null;
 }
 
 
-dragHandle.onmousedown = dragMouseDown;
+  //dragHandle.onmousedown = dragMouseDown;
+  dragHandle.onpointerdown = dragMouseDown;
+ 
 }
 export default Draggable;
