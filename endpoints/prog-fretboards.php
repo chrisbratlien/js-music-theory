@@ -3035,76 +3035,76 @@ add_action('wp_footer', function () {
     setTimeout(function() {
 
 
-          let events = [];
-          window.events = events;
-          let freak = FreakySeq({
-            events
-          });
-          window.freak = freak;
-          freak.on('note-on', function(event) {
-            campfire.publish('play-note', {
-              note: Note(event.noteNumber),
-              duration: BSD.durations.note
-            });
-          });
+      let events = [];
+      window.events = events;
+      let freak = FreakySeq({
+        events
+      });
+      window.freak = freak;
+      freak.on('note-on', function(event) {
+        campfire.publish('play-note', {
+          note: Note(event.noteNumber),
+          duration: BSD.durations.note
+        });
+      });
 
 
-          campfire.subscribe('tempo-change', freak.tempoChange)
-          freak.tempoChange(BSD.options.tempo);
-
-
-
-          let pianoRoll = PianoRoll({
-            ...freak.opts,
-            events: events
-          })
-
-          let midiOutMonitor = MIDIOutMonitor({
-            port: router.outPort
-          });
-          jQuery('.monitor-wrap').append(midiOutMonitor.ui())
-
-
-          pianoRoll.on('note-hover', function(noteNumber) {
-            BSD.currentNote = Note(noteNumber);
-          });
-          pianoRoll.on('note-preview', function(noteNumber) {
-            campfire.publish('play-note', {
-              note: Note(noteNumber),
-              duration: BSD.durations.note
-            });
-
-
-          });
-          pianoRoll.on('is-playing', function(isPlaying) {
-            //isPlaying shows the new going-forward wish
-            isPlaying ? freak.play() : freak.stop();
-          });
+      campfire.subscribe('tempo-change', freak.tempoChange)
+      freak.tempoChange(BSD.options.tempo);
 
 
 
+      let pianoRoll = PianoRoll({
+        ...freak.opts,
+        events: events
+      })
+
+      let midiOutMonitor = MIDIOutMonitor({
+        port: router.outPort
+      });
+      jQuery('.monitor-wrap').append(midiOutMonitor.ui())
 
 
-          let w = Vindow({
-            title: "Piano Roll"
-          });
-          let [toolbar, pane] = pianoRoll.ui();
-          w.appendToToolbar(toolbar);
-          w.append(pane);
-          w.renderOn(jQuery('.piano-roll-wrap'));
+      pianoRoll.on('note-hover', function(noteNumber) {
+        BSD.currentNote = Note(noteNumber);
+      });
+      pianoRoll.on('note-preview', function(noteNumber) {
+        campfire.publish('play-note', {
+          note: Note(noteNumber),
+          duration: BSD.durations.note
+        });
+
+
+      });
+      pianoRoll.on('is-playing', function(isPlaying) {
+        //isPlaying shows the new going-forward wish
+        isPlaying ? freak.play() : freak.stop();
+      });
 
 
 
-          let datWrap = jQuery('.dg.ac');
-          datWrap.addClass('noprint');
-          Draggable(document.querySelector('.dg.ac'));
-
-          let magicHue = (Date.now() / 1000000) % (Math.PI * 2);
-          nudgeBackgroundColor('.vindow .header', Math.round(magicHue);
 
 
+      let w = Vindow({
+        title: "Piano Roll"
+      });
+      let [toolbar, pane] = pianoRoll.ui();
+      w.appendToToolbar(toolbar);
+      w.append(pane);
+      w.renderOn(jQuery('.piano-roll-wrap'));
 
-          }, 2000)
+
+
+      let datWrap = jQuery('.dg.ac');
+      datWrap.addClass('noprint');
+      Draggable(document.querySelector('.dg.ac'));
+
+      let magicHue = (Date.now() / 1000000) % (Math.PI * 2);
+      nudgeBackgroundColor('.vindow .header', magicHue);
+
+
+
+    }, 2000)
   </script>
   <script>
     function onAppLoad() {
