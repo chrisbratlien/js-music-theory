@@ -50,13 +50,7 @@ import PianoRoll from "./js/PianoRoll.js";
 import Vindow from "./js/Vindow.js";
 import BSDMixer from "./js/BSDMixer.js";
 //careful, the scope of this constant is still just within this module
-const MIDI_MSG = {
-    NOTE_OFF: 0x80,
-    NOTE_ON: 0x90,
-    MOD_WHEEL: 0xB0,
-    PITCH_BEND: 0xE0,
-}
-
+import MIDI_MSG from "./js/MIDIConstants.js";
 let router;
 let freak;
 

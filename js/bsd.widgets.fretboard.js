@@ -364,8 +364,8 @@ function makeFretboardOn(wrap, opts) {
     if (typeof hit == "number") {
       o.selected = true;
     }
-    if (colorHash[o.interval]) {
-      o.color = colorHash[o.interval];
+    if (opts.colorHash[o.interval]) {
+      o.color = opts.colorHash[o.interval];
       o.colorHex = "#" + o.color.toHex();
     }
     return o;

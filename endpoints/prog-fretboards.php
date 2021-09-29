@@ -548,15 +548,25 @@ add_action('wp_footer', function () {
 
 import FreakySeq from "./js/FreakySeq.js";
 import PianoRoll from "./js/PianoRoll.js";
+import MIDIOutMonitor from "./js/MIDIOutMonitor.js";
 import MIDIRouter from "./js/MIDIRouter.js";
+import BSDMixer from "./js/BSDMixer.js";
+import ColorPalette from "./js/ColorPalette.js";
 
-//careful, the scope of this constant is still just within this module
-const MIDI_MSG = {
-    NOTE_OFF: 0x80,
-    NOTE_ON: 0x90,
-    MOD_WHEEL: 0xB0,
-    PITCH_BEND: 0xE0,
-}
+
+const MIDI_CONST = {
+      NOTE_OFF: 0x80,
+      NOTE_ON: 0x90,
+      AFTERTOUCH: 0xA0,
+      CONTROL_CHANGE: 0xB0,
+      PITCH_BEND: 0xE0,
+      MOD_WHEEL: 0xB0,
+      PROGRAM_CHANGE: 0xC0,
+      CC_PAN: 10
+    };
+const MIDI_MSG = MIDI_CONST;
+
+
 
 let router;
 
@@ -607,17 +617,19 @@ router = MIDIRouter({
 });
 
 //toss this variable over the module/non-module fence for now until further refactoring is done.
-window.router = router;
+/////window.router = router;
 
 //why is campfire visible inside the module?
 console.log('campfire?',campfire);
 
-</script>
 
-  
-  
-  <script type="text/javascript">
-    BSD.timeout = false;
+// XXXXXXXX
+//this is where we crossed over from module to regular js.....
+// XXXXXXXX
+
+
+
+BSD.timeout = false;
 
 
 
@@ -663,6 +675,24 @@ console.log('campfire?',campfire);
     BSD.options = {
       ...defaultOptions
     };
+
+
+    var progInput = jQuery('#progression');
+    progInput.on('touchend', function() { //for iOS bug
+      ///alert('hey');
+      BSD.handleFirstClick();
+    });
+
+
+    campfire.subscribe('options-loaded',function(){
+        if (BSD.options.progression) {
+            progInput.val(BSD.options.progression);
+        }
+        loadDatGUI();
+  });
+
+
+
     storage.getItem('options', function(o) {
 
       let stored = JSON.parse(o);
@@ -672,6 +702,11 @@ console.log('campfire?',campfire);
       }
 
       campfire.publish('options-loaded', BSD.options); //needed?
+    },function(){
+      //not found, but still go with what we have...
+      //FIXME: rethink
+      campfire.publish('options-loaded', BSD.options); //needed?
+
     });
 
     ///BSD.remoteStorage.getItem('foo',function(){ alert('foo'); });
@@ -700,6 +735,8 @@ console.log('campfire?',campfire);
 
 
     BSD.tests = [];
+
+
 
 
     storage.getItem('progressions', function(o) {
@@ -846,8 +883,7 @@ console.log('campfire?',campfire);
     let mixer, bassist, keyboardist;
 
 
-    function onAppLoad() {
-      mixer = App.BSDMixer(context);
+      mixer = BSDMixer(context);
       BSD.audioPlayer = BSD.Widgets.SimplePlayer({
         context: context,
         destination: mixer.common,
@@ -875,17 +911,14 @@ console.log('campfire?',campfire);
       });
 
       campfire.publish('bootup-hihat');
-      waiter.beg(campfire, 'set-master-volume', BSD.volume);
 
 
-
-    }
 
 
     var waiter = BSD.Widgets.Procrastinator({
       timeout: 250
     });
-
+    
 
     var songlistWrap = jQuery('.song-list-wrap');
     BSD.songlist.renderOn(songlistWrap);
@@ -909,36 +942,12 @@ console.log('campfire?',campfire);
       BSD.volume = parseFloat(o);
       ///waiter.beg(BSD.audioPlayer,'set-master-volume',BSD.volume);
       ////waiter.beg(bassist,'set-master-volume',BSD.volume);
+      waiter.beg(campfire, 'set-master-volume', BSD.volume);
 
       jQuery("#volume-amount").text(BSD.volume);
     });
 
 
-    //https://stackoverflow.com/questions/18366229/is-it-possible-to-create-a-button-using-dat-gui
-    const gui = new dat.GUI();
-    gui.remember(BSD.options);
-
-
-    let mainFolder = gui.addFolder('main', 'Main');
-    mainFolder.add(window, 'allNotesOff');
-    mainFolder.add(BSD.options, 'tempo')
-      .min(50)
-      .max(250)
-      .step(1)
-      .onChange(function(bpm) {
-        saveOptions();
-        campfire.publish('tempo-change', bpm)
-      });
-    mainFolder.add(BSD.options, 'progCycles')
-      .min(1)
-      .max(64)
-      .step(1)
-      .onChange(saveOptions);
-
-    mainFolder.add(BSD.options, 'showCurrentChordFretboardOnly')
-      .onChange(saveOptions);
-    mainFolder.add(BSD.options, 'scrollToBoard')
-      .onChange(saveOptions);
 
 
     function get7bitMSBAndLSB(orig) {
@@ -977,33 +986,6 @@ console.log('campfire?',campfire);
       ]);
     }
 
-
-    let improvFolder = gui.addFolder('improv', 'Improv');
-    improvFolder.add(BSD.options.improv, 'enabled')
-      .onChange(saveOptions);
-    improvFolder.add(BSD.options.improv, 'midi')
-      .onChange(saveOptions);
-    improvFolder.add(BSD.options.improv, 'channel')
-      .min(1)
-      .max(16)
-      .step(1)
-      .onChange(saveOptions);
-    improvFolder.add(BSD.options.improv, 'volume')
-      .min(0)
-      .max(1)
-      .onChange(saveOptions);
-    improvFolder.add(BSD.options.improv, 'pan')
-      .min(0)
-      .max(127)
-      .onChange(function(e) {
-        saveOptions();
-        if (!router.outPort) { return false; }
-        router.outPort.send([
-          MIDI_CONST.CONTROL_CHANGE | (BSD.options.improv.channel - 1),
-          MIDI_CONST.CC_PAN,
-          e
-        ]);
-      });
 
 
 
@@ -1052,124 +1034,6 @@ console.log('campfire?',campfire);
 
 
 
-
-    hookupJV(improvFolder, BSD.options.improv);
-
-
-    improvFolder.add(BSD.options.improv, 'patch')
-      .min(1)
-      .max(128)
-      .step(1)
-      .onChange(function(v) {
-        saveOptions();
-        //bank first
-        ///bankSelect(BSD.options.improv.channel, BSD.options.improv.bank);
-        //set patch (within the bank set previously)
-        if (!router.outPort) { return false; }
-        router.outPort.send([
-          MIDI_CONST.PROGRAM_CHANGE | (BSD.options.improv.channel - 1),
-          BSD.options.improv.patch - 1
-        ]);
-      });
-
-
-
-
-    improvFolder.add(BSD.options.improv, 'insideChord')
-      .onChange(saveOptions);
-
-
-    let bassFolder = gui.addFolder('bass', 'Bass');
-    bassFolder.add(BSD.options.bass, 'enabled')
-      .onChange(saveOptions);
-    bassFolder.add(BSD.options.bass, 'midi')
-      .onChange(saveOptions);
-    bassFolder.add(BSD.options.bass, 'channel')
-      .min(1)
-      .max(16)
-      .step(1)
-      .onChange(saveOptions);
-    bassFolder.add(BSD.options.bass, 'volume')
-      .min(0)
-      .max(1)
-      .onChange(saveOptions);
-    bassFolder.add(BSD.options.bass, 'pan')
-      .min(0)
-      .max(127)
-      .onChange(function(e) {
-        saveOptions();
-        if (!router.outPort) { return false; }
-        router.outPort.send([
-          MIDI_CONST.CONTROL_CHANGE | (BSD.options.bass.channel - 1),
-          MIDI_CONST.CC_PAN,
-          e
-        ]);
-      });
-
-    hookupJV(bassFolder, BSD.options.bass);
-
-
-    let chordFolder = gui.addFolder('chord', 'Chords');
-
-    chordFolder.add(BSD.options.chord, 'enabled').onChange(saveOptions);
-    chordFolder.add(BSD.options.chord, 'midi').onChange(saveOptions);
-    chordFolder.add(BSD.options.chord, 'channel')
-      .min(1)
-      .max(16)
-      .step(1)
-      .onChange(saveOptions);
-    chordFolder.add(BSD.options.chord, 'volume')
-      .min(0)
-      .max(1)
-      .onChange(saveOptions);
-    chordFolder.add(BSD.options.chord, 'pan')
-      .min(0)
-      .max(127)
-      .onChange(function(e) {
-        saveOptions();
-        if (!router.outPort) { return false; }
-        router.outPort.send([
-          MIDI_CONST.CONTROL_CHANGE | (BSD.options.chord.channel - 1),
-          MIDI_CONST.CC_PAN,
-          e
-        ]);
-      });
-
-
-    hookupJV(chordFolder, BSD.options.chord);
-
-
-
-
-    let hatFolder = gui.addFolder('hihat', 'High-hat');
-    hatFolder.add(BSD.options.hihat, 'enabled').onChange(saveOptions);
-    hatFolder.add(BSD.options.hihat, 'midi').onChange(saveOptions);
-    hatFolder.add(BSD.options.hihat, 'channel')
-      .min(1)
-      .max(16)
-      .step(1)
-      .onChange(saveOptions);
-    hatFolder.add(BSD.options.hihat, 'noteNumber')
-      .min(0)
-      .max(127)
-      .step(1)
-      .onChange(saveOptions);
-    hatFolder.add(BSD.options.hihat, 'volume')
-      .min(0)
-      .max(1)
-      .onChange(saveOptions);
-    hatFolder.add(BSD.options.hihat, 'pan')
-      .min(0)
-      .max(127)
-      .onChange(function(e) {
-        saveOptions();
-        if (!router.outPort) { return false; }
-        router.outPort.send([
-          MIDI_CONST.CONTROL_CHANGE | (BSD.options.hihat.channel - 1),
-          MIDI_CONST.CC_PAN,
-          e
-        ]);
-      });
 
 
     $("#volume-input").slider({
@@ -1312,27 +1176,9 @@ console.log('campfire?',campfire);
       });
     });
 
-    const MIDI_CONST = {
-      NOTE_OFF: 0x80,
-      NOTE_ON: 0x90,
-      AFTERTOUCH: 0xA0,
-      CONTROL_CHANGE: 0xB0,
-      PITCH_BEND: 0xE0,
-      PROGRAM_CHANGE: 0xC0,
-      CC_PAN: 10
-    };
-    const MIDI_MSG = MIDI_CONST;
 
 
-    function allNotesOff() {
-      for (var channel = 1; channel <= 16; channel += 1) {
-        let noteOffWithzeroBasedChannel = 127 + channel;
-        for (let nv = 0; nv < 128; nv += 1) {
-          router.outPort.send([MIDI_CONST.NOTE_OFF | (channel - 1), nv, 0]);
-        }
-      }
-    }
-
+    //FIXME: ugly, but needed for datGUI to have a slot on an object for this function.
 
     campfire.subscribe('play-chord', function(o) {
       if (!BSD.options.chord.enabled) {
@@ -1402,7 +1248,7 @@ console.log('campfire?',campfire);
       var c = e.keyCode || e.which;
 
       /* rethink */
-      let noteNumber = BSD.currentNote.value();
+      let noteNumber = BSD.currentNote ? BSD.currentNote.value() : 60;
       let noteOnChanByte = 0x90 + (BSD.options.improv.channel - 1);
       let noteOffChanByte = 0x80 + (BSD.options.improv.channel - 1);
 
@@ -1475,17 +1321,186 @@ console.log('campfire?',campfire);
     });
 
 
-    var progInput = jQuery('#progression');
-    progInput.on('touchend', function() { //for iOS bug
-      ///alert('hey');
-      BSD.handleFirstClick();
-    });
 
-    //campfire.subscribe('options-loaded',function(){
-    if (BSD.options.progression) {
-      progInput.val(BSD.options.progression);
-    }
-    //});
+
+    function loadDatGUI() {
+      //https://stackoverflow.com/questions/18366229/is-it-possible-to-create-a-button-using-dat-gui
+      const gui = new dat.GUI();
+    gui.remember(BSD.options);
+
+
+    let mainFolder = gui.addFolder('main', 'Main');
+    mainFolder.add(router, 'allNotesOff');
+    mainFolder.add(BSD.options, 'tempo')
+      .min(50)
+      .max(250)
+      .step(1)
+      .onChange(function(bpm) {
+        saveOptions();
+        campfire.publish('tempo-change', bpm)
+      });
+    mainFolder.add(BSD.options, 'progCycles')
+      .min(1)
+      .max(64)
+      .step(1)
+      .onChange(saveOptions);
+
+    mainFolder.add(BSD.options, 'showCurrentChordFretboardOnly')
+      .onChange(saveOptions);
+    mainFolder.add(BSD.options, 'scrollToBoard')
+      .onChange(saveOptions);
+
+      let improvFolder = gui.addFolder('improv', 'Improv');
+    improvFolder.add(BSD.options.improv, 'enabled')
+      .onChange(saveOptions);
+    improvFolder.add(BSD.options.improv, 'midi')
+      .onChange(saveOptions);
+    improvFolder.add(BSD.options.improv, 'channel')
+      .min(1)
+      .max(16)
+      .step(1)
+      .onChange(saveOptions);
+    improvFolder.add(BSD.options.improv, 'volume')
+      .min(0)
+      .max(1)
+      .onChange(saveOptions);
+    improvFolder.add(BSD.options.improv, 'pan')
+      .min(0)
+      .max(127)
+      .onChange(function(e) {
+        saveOptions();
+        if (!router.outPort) { return false; }
+        router.outPort.send([
+          MIDI_CONST.CONTROL_CHANGE | (BSD.options.improv.channel - 1),
+          MIDI_CONST.CC_PAN,
+          e
+        ]);
+      });
+
+
+
+      hookupJV(improvFolder, BSD.options.improv);
+
+
+improvFolder.add(BSD.options.improv, 'patch')
+  .min(1)
+  .max(128)
+  .step(1)
+  .onChange(function(v) {
+    saveOptions();
+    //bank first
+    ///bankSelect(BSD.options.improv.channel, BSD.options.improv.bank);
+    //set patch (within the bank set previously)
+    if (!router.outPort) { return false; }
+    router.outPort.send([
+      MIDI_CONST.PROGRAM_CHANGE | (BSD.options.improv.channel - 1),
+      BSD.options.improv.patch - 1
+    ]);
+  });
+
+
+
+
+improvFolder.add(BSD.options.improv, 'insideChord')
+  .onChange(saveOptions);
+
+
+let bassFolder = gui.addFolder('bass', 'Bass');
+bassFolder.add(BSD.options.bass, 'enabled')
+  .onChange(saveOptions);
+bassFolder.add(BSD.options.bass, 'midi')
+  .onChange(saveOptions);
+bassFolder.add(BSD.options.bass, 'channel')
+  .min(1)
+  .max(16)
+  .step(1)
+  .onChange(saveOptions);
+bassFolder.add(BSD.options.bass, 'volume')
+  .min(0)
+  .max(1)
+  .onChange(saveOptions);
+bassFolder.add(BSD.options.bass, 'pan')
+  .min(0)
+  .max(127)
+  .onChange(function(e) {
+    saveOptions();
+    if (!router.outPort) { return false; }
+    router.outPort.send([
+      MIDI_CONST.CONTROL_CHANGE | (BSD.options.bass.channel - 1),
+      MIDI_CONST.CC_PAN,
+      e
+    ]);
+  });
+
+hookupJV(bassFolder, BSD.options.bass);
+
+
+let chordFolder = gui.addFolder('chord', 'Chords');
+
+chordFolder.add(BSD.options.chord, 'enabled').onChange(saveOptions);
+chordFolder.add(BSD.options.chord, 'midi').onChange(saveOptions);
+chordFolder.add(BSD.options.chord, 'channel')
+  .min(1)
+  .max(16)
+  .step(1)
+  .onChange(saveOptions);
+chordFolder.add(BSD.options.chord, 'volume')
+  .min(0)
+  .max(1)
+  .onChange(saveOptions);
+chordFolder.add(BSD.options.chord, 'pan')
+  .min(0)
+  .max(127)
+  .onChange(function(e) {
+    saveOptions();
+    if (!router.outPort) { return false; }
+    router.outPort.send([
+      MIDI_CONST.CONTROL_CHANGE | (BSD.options.chord.channel - 1),
+      MIDI_CONST.CC_PAN,
+      e
+    ]);
+  });
+
+
+hookupJV(chordFolder, BSD.options.chord);
+
+
+
+
+let hatFolder = gui.addFolder('hihat', 'High-hat');
+hatFolder.add(BSD.options.hihat, 'enabled').onChange(saveOptions);
+hatFolder.add(BSD.options.hihat, 'midi').onChange(saveOptions);
+hatFolder.add(BSD.options.hihat, 'channel')
+  .min(1)
+  .max(16)
+  .step(1)
+  .onChange(saveOptions);
+hatFolder.add(BSD.options.hihat, 'noteNumber')
+  .min(0)
+  .max(127)
+  .step(1)
+  .onChange(saveOptions);
+hatFolder.add(BSD.options.hihat, 'volume')
+  .min(0)
+  .max(1)
+  .onChange(saveOptions);
+hatFolder.add(BSD.options.hihat, 'pan')
+  .min(0)
+  .max(127)
+  .onChange(function(e) {
+    saveOptions();
+    if (!router.outPort) { return false; }
+    router.outPort.send([
+      MIDI_CONST.CONTROL_CHANGE | (BSD.options.hihat.channel - 1),
+      MIDI_CONST.CC_PAN,
+      e
+    ]);
+  });
+  
+  }
+
+
+
 
 
     var btnStart = jQuery('.btn-start');
@@ -1640,6 +1655,30 @@ console.log('campfire?',campfire);
 
 
 
+    var avgFret,
+      avgString,
+      drift3,
+      drift2,
+      candidates,
+      abstractNoteValues,
+      result,
+      idealFret,
+      lastResult,
+      lastAbstractValue,
+      lastValue,
+      lastString,
+      lastStrings,
+      lastFret,
+      lastFrets,
+      lastFretDiff,
+      lastFretDiffs,
+      lastDiff,
+      lastNote,
+      meta;
+
+
+
+
 
     function tick(cursor) {
       if (!cursor) {
@@ -1682,25 +1721,6 @@ console.log('campfire?',campfire);
       'down': 'up'
     };
 
-    var avgFret,
-      avgString,
-      drift3,
-      drift2,
-      candidates,
-      abstractNoteValues,
-      result,
-      idealFret,
-      lastResult,
-      lastAbstractValue,
-      lastValue,
-      lastString,
-      lastStrings,
-      lastFret,
-      lastFrets,
-      lastFretDiff,
-      lastFretDiffs,
-      lastNote,
-      meta;
 
 
     ////var bunches = chords.map(function(o){ return o.abstractNoteValues(); });
@@ -1918,13 +1938,15 @@ console.log('campfire?',campfire);
       var stage = DOM.div().addClass('stage extra noprint');
       venue.append(stage);
       extraBoard = makeFretboardOn(stage, {
-        //chord: chord,
+        colorHash,
         activeStrings: '654321'.split('')
       });
+      /*
       predictBoard = makeFretboardOn(stage, {
-        //chord: chord,
+        colorHash,
         activeStrings: '654321'.split('')
       });
+      **/
 
 
 
@@ -1942,7 +1964,8 @@ console.log('campfire?',campfire);
         var stage = DOM.div().addClass('stage hidden stringset-' + BSD.options.stringSet);
         venueColumn.append(stage);
         var board = makeFretboardOn(stage, {
-          chord: chord,
+          chord,
+          colorHash,
           activeStrings: activeStrings
         });
         BSD.boards.push(board);
@@ -2445,13 +2468,13 @@ console.log('campfire?',campfire);
       }
 
 
-      predictBoard.updateCursor(cursor);
-      predictBoard.unfeatureFrets();
+      predictBoard && predictBoard.updateCursor(cursor);
+      predictBoard && predictBoard.unfeatureFrets();
 
       if (BSD.options.improv.enabled) {
         cursor.board.featureFret(cursor);
         extraBoard.featureFret(cursor);
-        predictBoard.featureFret(cursor);
+        predictBoard && predictBoard.featureFret(cursor);
       }
 
       fred.clearFretted();
@@ -2850,6 +2873,8 @@ console.log('campfire?',campfire);
     var fred;
 
     setTimeout(function() {
+      //wow, I just made some globals. that's why this worked before...
+      //FIXME: cleanup these globals
       firstStringFrets = BSD.guitarData.filter(o => o.string == 1);
       fps = firstStringFrets.length;
 
@@ -2872,7 +2897,11 @@ console.log('campfire?',campfire);
       ***/
 
       fred = BSD.Widgets.SVGFretboard({
-          foo: 'bar'
+          foo: 'bar',
+          fps,
+          fretStarts,
+          fretWidths,
+          fretHeights
         })
         .on('wake-up', () => console.log('WOKE!!'))
 
@@ -2888,7 +2917,7 @@ console.log('campfire?',campfire);
 
 
       jQuery('.color-palette-wrap').append(
-        App.ColorPalette('woo')
+        ColorPalette('woo')
         .on('color-chosen', color => {
           BSD.chosenColor = color;
           console.log('chosen!!', color);
@@ -2897,7 +2926,7 @@ console.log('campfire?',campfire);
         .ui()
       );
 
-    }, 2000);
+    }, 3000);
     //
     let chords = ['D-7', 'G7', 'Cmajor7'];
     let wheely = spinner(chords, chordName => {
@@ -2963,7 +2992,7 @@ console.log('campfire?',campfire);
         btnColor.find('span')
           .remove();
         wrap.append(
-          App.ColorPalette()
+          ColorPalette()
           .on('color-chosen', color => {
             BSD.chosenColor = color;
             BSD.chosenColors.push(color);
@@ -2987,7 +3016,7 @@ console.log('campfire?',campfire);
 
       let events = [];
       window.events = events;
-      let freak = App.FreakySeq({
+      let freak = FreakySeq({
         events
       });
       window.freak = freak;
@@ -3004,12 +3033,12 @@ console.log('campfire?',campfire);
 
 
 
-      let pianoRoll = App.PianoRoll({
+      let pianoRoll = PianoRoll({
         ...freak.opts,
         events: events
       })
 
-      let midiOutMonitor = App.MIDIOutMonitor({
+      let midiOutMonitor = MIDIOutMonitor({
         port: router.outPort
       });
       jQuery('.monitor-wrap').append(midiOutMonitor.ui())
@@ -3041,6 +3070,12 @@ console.log('campfire?',campfire);
 
     }, 2000)
   </script>
+<script>
+function onAppLoad() {
+  //FIXME: get rid of this once the app/module refactoring is done
+}
+    </script>
+
 <?php
 });
 

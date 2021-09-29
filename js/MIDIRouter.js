@@ -1,3 +1,4 @@
+import { MIDI_CONST } from "./MIDIConstants.js";
 function MIDIRouter(props) {
     let midiAccess, self;
 
@@ -63,7 +64,27 @@ function MIDIRouter(props) {
           }).then(onMIDISuccess, onMIDIFailure)
           .catch('error', onRequestMIDIAccessError)
     
+  
+      ////window.allNotesOff = allNotesOff;
+  self.allNotesOff = function () {
+       if (!self.outPort) { return false; }
+        for (var channel = 1; channel <= 16; channel += 1) {
+          let noteOffWithzeroBasedChannel = 127 + channel;
+          for (let nv = 0; nv < 128; nv += 1) {
+            self.outPort.send([MIDI_CONST.NOTE_OFF | (channel - 1), nv, 0]);
+          }
+        }
+      }
+  
+  
+  
     return self;
 
 }
+
+
+
+
+
+
 export default MIDIRouter;

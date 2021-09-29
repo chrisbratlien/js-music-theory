@@ -1,7 +1,6 @@
 
 BSD.Widgets.SVGFretboard = function(spec) {
 
-
   var colors = {
     fretboard: []
   };
@@ -64,16 +63,16 @@ BSD.Widgets.SVGFretboard = function(spec) {
         //fretX = vlerp([+fretX],[100],100/22/100);
         var totW = 100;
         var h = (100 / 6);
-        let fretXCoeff = Math.pow(1 + 100/fps/100,fret.fret+1) - 1;
+        let fretXCoeff = Math.pow(1 + 100/spec.fps/100,fret.fret+1) - 1;
         //fretXCoeff *= 1.56;
         let fretX = fretXCoeff * totW;
         //console.log('fretX',fretX);
         let rectOpts = {
             class: `string-${fret.string} fret-${fret.fret}`,
             fill: 'rgba(0,0,0,0.1)',//getRandomColor(),
-            x: fretStarts[fret.fret] + '%',
-            y: (fret.string-1) * fretHeights + '%',
-            width: fretWidths[fret.fret] + '%',
+            x: spec.fretStarts[fret.fret] + '%',
+            y: (fret.string-1) * spec.fretHeights + '%',
+            width: spec.fretWidths[fret.fret] + '%',
             height: '100%'//fretHeights + '%'
           };
 
@@ -123,11 +122,11 @@ BSD.Widgets.SVGFretboard = function(spec) {
         .attr({
           fill: 'rgba(0,0,0,0.1)',
           stroke: 'none',
-          x: fretStarts[fret] + fretWidths[fret]/6 + '%',
+          x: spec.fretStarts[fret] + spec.fretWidths[fret]/6 + '%',
           y: '10%',
           rx: 5,
           //r: '1.5%',
-          width: fretWidths[fret] * 0.6 + '%',
+          width: spec.fretWidths[fret] * 0.6 + '%',
           height: 80 + '%'
         }));      
 
@@ -139,8 +138,8 @@ BSD.Widgets.SVGFretboard = function(spec) {
 
 
   self.plotFret = function(fret,opts){
-    var x = fretStarts[fret.fret] + fretWidths[fret.fret]/2;
-    var radius = utils.map(fret.fret,0,fps,1.5,0.75);
+    var x = spec.fretStarts[fret.fret] + spec.fretWidths[fret.fret]/2;
+    var radius = utils.map(fret.fret,0,spec.fps,1.5,0.75);
 
     var fill = opts.fill || 'rgba(0,0,0,0.1)';
 
@@ -149,7 +148,7 @@ BSD.Widgets.SVGFretboard = function(spec) {
     opts = Object.assign({
           //////class: 'fretted',
           cx:  x + '%',
-          cy: (fret.string-1) * fretHeights + fretHeights/2 + '%',
+          cy: (fret.string-1) * spec.fretHeights + spec.fretHeights/2 + '%',
           fill: fill,
           WASr: '1.5%',
           r: radius + '%',
