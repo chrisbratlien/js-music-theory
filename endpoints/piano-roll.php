@@ -36,6 +36,7 @@ get_header();
 <div class="piano-roll-wrap flex-column full-width">
 </div>
 </section>
+<div>stuff and stuff </div>
 <?php
     
 add_action('wp_footer',function() {

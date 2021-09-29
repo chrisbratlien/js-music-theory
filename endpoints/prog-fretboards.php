@@ -8,7 +8,10 @@ add_action('wp_head', function () {
   ?>
   
   <title>12 Fretboards</title>
-  
+  <style>
+    @import 'css/piano-roll.css';
+    @import 'css/vindow.css';
+</style>
   <style type="text/css">
   body {
     font-size: 10px;
@@ -356,9 +359,6 @@ add_action('wp_head', function () {
     top: 50px;
   }
   
-  .piano-roll-cell.active {
-    background: #409;
-  }
   
   
   
@@ -494,13 +494,18 @@ Bar
 </div><!-- venue row -->
 <div class="venue-footer noprint clear-both">
 </div>
+
+<h3 class="noprint">Songs</h3>
+
+
+<div class="song-list-wrap noprint">
+</div>
 <div class="piano-roll-wrap noprint">
 </div>
 <div class="monitor-wrap noprint"></div>
 
-<h3 class="noprint">Songs</h3>
-<div class="song-list-wrap noprint">
-</div>
+
+
 <!-- modal lightbox -->
 <div class="modal fade" id="basicModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true">
 <div class="modal-dialog">
@@ -553,7 +558,7 @@ add_action('wp_footer', function () {
   import BSDMixer from "./js/BSDMixer.js";
   import ColorPalette from "./js/ColorPalette.js";
   import { MIDI_CONST, MIDI_MSG} from "./js/MIDIConstants.js";
-  
+  import Vindow from "./js/Vindow.js";
   
   
   let router;
@@ -3051,8 +3056,18 @@ campfire.subscribe('tick', function(cursor) {
         
         
         
-        jQuery('.piano-roll-wrap').append(pianoRoll.ui());
-        
+
+        let w = Vindow({ title: "Piano Roll" });
+        let [toolbar,pane] = pianoRoll.ui();
+        w.appendToToolbar(toolbar);
+        w.append(pane);
+        w.renderOn(jQuery('.piano-roll-wrap'));
+
+
+
+
+
+
         jQuery('.dg.ac').addClass('noprint');
         
         
