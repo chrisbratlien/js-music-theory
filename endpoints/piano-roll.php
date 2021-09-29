@@ -42,7 +42,7 @@ add_action('wp_footer',function() {
 ?>
   <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.simpleplayer.js"></script>
 
-<script type="module" onLoad="onInlineModuleLoaded">
+<script type="module">
 
 import MIDIRouter from "./js/MIDIRouter.js";
 import FreakySeq from "./js/FreakySeq.js";
