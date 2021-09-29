@@ -551,7 +551,7 @@ import PianoRoll from "./js/PianoRoll.js";
 import MIDIOutMonitor from "./js/MIDIOutMonitor.js";
 import MIDIRouter from "./js/MIDIRouter.js";
 import BSDMixer from "./js/BSDMixer.js";
-import ColorPalette from "./js/NewColorPalette.js";
+import ColorPalette from "./js/ColorPalette.js";
 
 
 const MIDI_CONST = {

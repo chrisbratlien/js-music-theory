@@ -1,4 +1,4 @@
-import CP from "./NewColorPalette.js";
+import CP from "./ColorPalette.js";
 import PianoRoll from "./PianoRoll.js";
 import MIDIOutMonitor from "./MIDIOutMonitor.js";
 import { lerp, invlerp, remap } from "./scalar.js";
