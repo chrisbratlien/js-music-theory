@@ -44,6 +44,13 @@ get_header();
   <li><a href="vex4">Vex4</a> VexFlow notataion from progressions sandbox</li>
   <li><a href="http://github.com/chrisbratlien/js-music-theory">js-music-theory on Github</a></li>
 </ul>
+<script>
+function onAppLoad() {
+  //FIXME: get rid of this once the app/module refactoring is done
+}
+    </script>
+
+
 <?php
 
 get_footer();

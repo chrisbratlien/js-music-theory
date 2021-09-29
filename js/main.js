@@ -1,4 +1,4 @@
-import CP from "./ColorPalette.js";
+import ColorPalette from "./ColorPalette.js";
 import PianoRoll from "./PianoRoll.js";
 import MIDIOutMonitor from "./MIDIOutMonitor.js";
 import { lerp, invlerp, remap } from "./scalar.js";
@@ -9,7 +9,7 @@ import BSDMixer from "./BSDMixer.js"
 
 window.App = {
   BSDMixer,
-  ColorPalette: CP,
+  ColorPalette,
   FreakySeq,
   PianoRoll,
   Timer,

@@ -1,4 +1,6 @@
-let ColorPalette = function(spec) {
+import PubSub from "./PubSub.js";
+
+const ColorPalette = function (spec) {
 
 	let self = BSD.PubSub();
 
