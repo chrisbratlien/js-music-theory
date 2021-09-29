@@ -14,7 +14,7 @@ export default function FreakySeq(props) {
 
   var self = PubSub();
 
-
+  let tickIdx = 0, saveTickIdx = false;
   let loopMS; //calculated
   let playing = false;
   function init() {
@@ -80,14 +80,23 @@ export default function FreakySeq(props) {
       }
       saveProgressMS = progressMS;
 
-      let tickIdx = Math.floor(progressMS / opts.MSPT);
+      tickIdx = Math.floor(progressMS / opts.MSPT);
+
+
+      if (tickIdx === saveTickIdx) {
+        return requestAnimationFrame(frameTick); //it's not time to do anything yet. exit early.
+      }
       ////console.log("tickIdx", tickIdx);
+      //NOW it's time...
+      saveTickIdx = tickIdx;
 
-
-      props.events
+      let toTriggerNow = props.events
         //.filter((event) => event.noteOnMillis < progressMS)
         .filter((event) => event.tickIdx == tickIdx)
-        .filter((event) => event.noteOnLoopNum < currentLoop)
+        .filter((event) => event.noteOnLoopNum <= currentLoop);
+      
+      ///console.log('tickIdx', tickIdx, 'toTrigger', toTrigger, 'currentLoop', currentLoop);
+      toTriggerNow
         .forEach((event) => {
           event.noteOnLoopNum = currentLoop;
           ////console.log("note onnnn",event);
