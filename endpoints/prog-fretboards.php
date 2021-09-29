@@ -221,7 +221,6 @@ add_action('wp_head', function () {
   
   .song-list {
     list-style-type: none;
-    width: 50%;
   }
   
   .song-list li {
