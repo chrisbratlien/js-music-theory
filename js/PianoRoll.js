@@ -8,7 +8,7 @@ function millisPerLoop(bpm, beatsPerBar, barsPerLoop) {
 
 function PianoRoll(props) {
   let self = PubSub({});
-  let wrap = DOM.div().addClass("piano-roll");
+  let pane = DOM.div().addClass("piano-roll");
 
   let lowNote = 54;//48;
   let howManyNotes = 20;
@@ -43,26 +43,27 @@ function PianoRoll(props) {
   let noteNames = JSMT.twelveTones();
 
   let playing = false;
-
   let btnPlayStop, iconPlayStop;
   let toolbar = DOM.div()
     .addClass('btn-group')
     .append([
       btnPlayStop = DOM.button()
-        .addClass('btn btn-sm')
+        .addClass('btn btn-sm btn-default')
         .append(
           iconPlayStop = DOM.i()
             .addClass('fa fa-play')
-      )
+        )
         .on('click', function () {
           playing = !playing;
           iconPlayStop.toggleClass('fa-play fa-pause');
-          self.emit('is-playing',playing)
+          self.emit('is-playing', playing)
         })
-    ])
-
-  wrap.append(
-    toolbar,
+    ]);
+ 
+ 
+ 
+  pane.append(
+ 
     DOM.table().append(
       reversedNoteRange.map((noteNumber,i) =>
         DOM.tr().append(
@@ -113,16 +114,6 @@ function PianoRoll(props) {
                 if (state) {
                   self.emit("note-preview", noteNumber);
                 }
-                /*
-                console.log(
-                  "tickIdx",
-                  tickIdx,
-                  "noteNumber",
-                  noteNumber,
-                  "channel",
-                  channel
-                );
-                */
               });
             return cell;
           })
@@ -132,8 +123,9 @@ function PianoRoll(props) {
   );
 
   self.ui = function () {
-    return wrap;
+    return [toolbar, pane];
   };
+
   return self;
 }
 

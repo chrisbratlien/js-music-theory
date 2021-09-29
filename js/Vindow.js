@@ -8,7 +8,7 @@ import Draggable from "./Draggable.js";
 function Vindow(props) {
     let self = PubSub();
     self.props = props;
-    let outer, header, pane, btnExit;
+    let outer, header, toolbar, pane, btnExit;
 
     let buttons = DOM.div()
         .addClass('btn-group')
@@ -35,7 +35,10 @@ function Vindow(props) {
                         .addClass('title')
                         .append(props.title),
                     btnExit
-                ]),
+                ]), null, null,
+            toolbar = DOM.div()
+                .addClass('toolbar')
+                .css('display','none'),
             pane = DOM.div()
                 .addClass('pane')
         )
@@ -47,6 +50,11 @@ function Vindow(props) {
         // tempted to return pane, but could get confusing.
         // safer and more consistent to return self
         // even safer to not return anything for now.
+    }
+    self.appendToToolbar = function (content) {
+        toolbar
+            .append(content)
+            .show();
     }
 
     self.ui = function () {

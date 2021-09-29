@@ -3034,7 +3034,7 @@ console.log('campfire?',campfire);
 
 
 
-      jQuery('.piano-roll-wrap').append(pianoRoll.ui())
+      jQuery('.piano-roll-wrap').append(pianoRoll.ui());
 
       jQuery('.dg.ac').addClass('noprint');
 

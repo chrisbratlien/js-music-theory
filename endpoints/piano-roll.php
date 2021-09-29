@@ -290,7 +290,9 @@ freak = FreakySeq({
 
 
       let w = Vindow({ title: "Piano Roll" });
-      w.append(pianoRoll.ui())
+      let [toolbar,pane] = pianoRoll.ui();
+      w.appendToToolbar(toolbar);
+      w.append(pane);
       w.renderOn(jQuery(document.body));
 
 

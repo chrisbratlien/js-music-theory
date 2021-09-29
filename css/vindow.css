@@ -13,6 +13,10 @@
   .vindow .header .title {
       padding: 1px;
   }
+  .vindow .toolbar {
+      padding: 3px;
+      border-bottom: 1px solid #bbb;
+  }
   .vindow .pane {
     padding: 10px;
     overflow: scroll;
