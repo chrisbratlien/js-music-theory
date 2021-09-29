@@ -13,56 +13,57 @@ function Vindow(props) {
     let buttons = DOM.div()
         .addClass('btn-group')
         .append(
-        
-            btnExit = DOM.button()
-                .append(
-                    DOM.i()
-                        .addClass('fa fa-close')
-                )
-                .addClass('btn btn-exit')
-                .on('click', () => self.emit('close', self, props))
-                
 
-    )
+            btnExit = DOM.button()
+            .append(
+                DOM.i()
+                .addClass('fa fa-close')
+            )
+            .addClass('btn btn-exit')
+            .on('click', () => self.emit('close', self, props))
+
+
+        )
 
     outer = DOM.div()
         .addClass('vindow')
         .append(
             header = DOM.div()
-                .addClass('header flex-row align-items-center space-between')
-                .append([
-                    DOM.span()
-                        .addClass('title')
-                        .append(props.title),
-                    btnExit
-                ]), null, null,
+            .addClass('header flex-row align-items-center space-between')
+            .append([
+                DOM.span()
+                .addClass('title')
+                .append(props.title),
+                btnExit
+            ]),
             toolbar = DOM.div()
-                .addClass('toolbar')
-                .css('display','none'),
+            .addClass('toolbar')
+            .css('display', 'none'),
             pane = DOM.div()
-                .addClass('pane')
+            .addClass('pane')
         )
-    
-    
-    
-    self.append = function (content) {
+
+
+
+    self.append = function(content) {
         pane.append(content);
         // tempted to return pane, but could get confusing.
         // safer and more consistent to return self
         // even safer to not return anything for now.
     }
-    self.appendToToolbar = function (content) {
+    self.appendToToolbar = function(content) {
         toolbar
             .append(content)
             .show();
     }
 
-    self.ui = function () {
+    self.ui = function() {
         return outer;
     }
-    self.renderOn = function (wrap) {
+    self.pane = pane;
+    self.renderOn = function(wrap) {
         wrap.append(outer);
-        Draggable(outer.get(0), header.get(0));        
+        Draggable(outer.get(0), header.get(0));
     }
     return self;
 }

@@ -913,8 +913,15 @@ add_action('wp_footer', function () {
   });
   
   
-  var songlistWrap = jQuery('.song-list-wrap');
-  BSD.songlist.renderOn(songlistWrap);
+  var songListWrap = jQuery('.song-list-wrap');
+  //BSD.songlist.renderOn(songlistWrap);
+  let wSongList = Vindow({ title: "Song List" });
+  //let [toolbar,pane] = pianoRoll.ui();
+  ///w.appendToToolbar(toolbar);
+  wSongList.renderOn(songListWrap);
+  BSD.songlist.renderOn(wSongList.pane);
+
+
   BSD.songlist.subscribe('song-selected', function(song) {
     BSD.currentSong = song;
     songName.html(song.title);
@@ -927,7 +934,11 @@ add_action('wp_footer', function () {
     campfire.publish('do-it', prog);
   });
   
-  
+
+
+
+
+
   
   
   BSD.volume = 0.06;
