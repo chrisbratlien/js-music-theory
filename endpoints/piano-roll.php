@@ -306,43 +306,42 @@ add_action('wp_footer', function () {
     w.append(pane);
     w.renderOn(jQuery(document.body));
 
+    let magicHue = (Date.now() / 1000000) % (Math.PI * 2);
+    nudgeBackgroundColor('.vindow .header', Math.round(magicHue);
 
 
-    nudgeBackgroundColor('.vindow .header', Date.now() / 1000000);
 
+        //LEAD / IMPROV
+        campfire.subscribe('play-note', function(payload) {
+          ///console.log('play-note!!',payload);
+          if (!BSD.options.improv.enabled) {
+            return false;
+          }
 
+          if (router && router.outPort && BSD.options.improv.midi) {
+            //another way to do noteOnChannel is
+            //let byte1 = 0x90 + (oneBasedChannel - 1),
 
-    //LEAD / IMPROV
-    campfire.subscribe('play-note', function(payload) {
-      ///console.log('play-note!!',payload);
-      if (!BSD.options.improv.enabled) {
-        return false;
-      }
+            let noteOnChannel = 0x90 + (BSD.options.improv.channel - 1);
+            let noteOffChannel = 0x80 + (BSD.options.improv.channel - 1);
+            let noteNum = payload.note.value();
+            let vel = Math.floor(127 * BSD.options.improv.volume); //[0..1] -> [0..127]
 
-      if (router && router.outPort && BSD.options.improv.midi) {
-        //another way to do noteOnChannel is
-        //let byte1 = 0x90 + (oneBasedChannel - 1),
+            router.outPort.send([noteOnChannel, noteNum, vel]);
 
-        let noteOnChannel = 0x90 + (BSD.options.improv.channel - 1);
-        let noteOffChannel = 0x80 + (BSD.options.improv.channel - 1);
-        let noteNum = payload.note.value();
-        let vel = Math.floor(127 * BSD.options.improv.volume); //[0..1] -> [0..127]
+            setTimeout(function() {
+              console.log('stopping!?!?!?!? !!!')
+              router.outPort.send([noteOffChannel, noteNum, vel]);
+            }, BSD.durations.note);
+            return false;
+          }
+          // I suspect that user interaction on the page has to initiate the first 
+          /// WebAudio API event... Once that happens, then the MIDI input is "felt" by the WebAudio API
 
-        router.outPort.send([noteOnChannel, noteNum, vel]);
-
-        setTimeout(function() {
-          console.log('stopping!?!?!?!? !!!')
-          router.outPort.send([noteOffChannel, noteNum, vel]);
-        }, BSD.durations.note);
-        return false;
-      }
-      // I suspect that user interaction on the page has to initiate the first 
-      /// WebAudio API event... Once that happens, then the MIDI input is "felt" by the WebAudio API
-
-      ///console.log('this should play, why am i not playing?',payload);
-      // okay, currently no MIDI output, we'll use our WebAudio API synth
-      BSD.audioPlayer.playNote(payload.note, payload.duration, payload.velocity);
-    });
+          ///console.log('this should play, why am i not playing?',payload);
+          // okay, currently no MIDI output, we'll use our WebAudio API synth
+          BSD.audioPlayer.playNote(payload.note, payload.duration, payload.velocity);
+        });
   </script>
   <script>
     function onAppLoad() {
