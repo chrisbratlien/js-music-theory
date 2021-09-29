@@ -12,7 +12,7 @@ add_action('wp_head', function () {
     $uri_path = get_stylesheet_directory_uri() . '/css/' . $c . '.css';
     //pp([$file_path,$uri_path],'did it work?'); 
     if (file_exists($file_path)) {
-      echo sprintf('\n<link rel="stylesheet" href="%s">', $uri_path);
+      echo sprintf(PHP_EOL .  '<link rel="stylesheet" href="%s">', $uri_path);
     }
   }
   //pp($classes,'classes');

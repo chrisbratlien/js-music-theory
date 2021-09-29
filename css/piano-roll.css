@@ -6,16 +6,24 @@
     border-right: 1px solid rgba(0, 0, 0, 0.1);
     max-height: 400px;
     overflow-y: auto;
+    width: 100%;
   }
 
+.piano-roll table th {
+  max-width: 23px;
+  width: 23px;
+
+}
 
 .piano-roll table td {
-    border-radius: 1rem;
+    border-radius: 5px;
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     border-left: 1px solid rgba(0, 0, 0, 0.1);
 
+    cursor: pointer;
+
     height: 1.5em;
-    min-width: 23px;
+    min-width: 10px;  */
     padding: 0.2em;
     text-align: center;
 
@@ -30,7 +38,7 @@
     /* Internet Explorer/Edge */
     text-align: center;
     user-select: none;
-    width: 23px;
+    /* width: 23px; */
 
   }
 

@@ -24,7 +24,7 @@
 
 .vindow .pane {
     max-height: 75vh;
-    padding: 10px;
+    padding: 2px;
     overflow: scroll;
     resize: both;
 }
