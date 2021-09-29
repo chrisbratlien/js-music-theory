@@ -218,6 +218,9 @@ add_action('wp_head', function () {
     height: 400px;
   }
   
+  .vindow .pane {
+    max-height: 80vh;
+  }
   
   .song-list {
     padding: 0;
@@ -494,9 +497,6 @@ Bar
 </div><!-- venue row -->
 <div class="venue-footer noprint clear-both">
 </div>
-
-<h3 class="noprint">Songs</h3>
-
 
 <div class="song-list-wrap noprint">
 </div>
