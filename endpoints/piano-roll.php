@@ -1,120 +1,132 @@
 <?php
 
-add_filter('wp_title',function($o){ return "Piano Roll"; });
+add_filter('wp_title', function ($o) {
+  return "Piano Roll";
+});
 
-add_action('wp_head',function(){
-    $classes = apply_filters('body_class',[]);
+add_action('wp_head', function () {
+  $classes = apply_filters('body_class', []);
 
-    foreach($classes as $c) {
-        $file_path = APP_PATH . '/css/' . $c .'.css';
-        $uri_path = get_stylesheet_directory_uri() . '/css/' . $c . '.css';
-        //pp([$file_path,$uri_path],'did it work?'); 
-        if (file_exists($file_path)) {
-            echo sprintf('\n<link rel="stylesheet" href="%s">',$uri_path);
-        }
+  foreach ($classes as $c) {
+    $file_path = APP_PATH . '/css/' . $c . '.css';
+    $uri_path = get_stylesheet_directory_uri() . '/css/' . $c . '.css';
+    //pp([$file_path,$uri_path],'did it work?'); 
+    if (file_exists($file_path)) {
+      echo sprintf('\n<link rel="stylesheet" href="%s">', $uri_path);
     }
-    //pp($classes,'classes');
+  }
+  //pp($classes,'classes');
 
 
 });
 
-add_action('wp_head',function(){
-    ?>
-<style>
+add_action('wp_head', function () {
+?>
+  <style>
     @import 'css/piano-roll.css';
     @import 'css/vindow.css';
-</style>
+  </style>
 <?php
 });
 
 get_header();
 ?>
 <section>
-<br />
-<br />
-<br />
-<div class="piano-roll-wrap flex-column full-width">
-</div>
+  <br />
+  <br />
+  <br />
+  <div class="piano-roll-wrap flex-column full-width">
+  </div>
 </section>
-<div>stuff and stuff </div>
+<p>Work in progress. After you hit play <i class="fa fa-play"></i>,
+  the first loop through the piano roll will happen silently. But, from then on, it will play fine.
+</p>
 <?php
-    
-add_action('wp_footer',function() {
+
+add_action('wp_footer', function () {
 ?>
   <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.simpleplayer.js"></script>
 
-<script type="module">
+  <script type="module">
+    import MIDIRouter from "./js/MIDIRouter.js";
+    import FreakySeq from "./js/FreakySeq.js";
+    import PianoRoll from "./js/PianoRoll.js";
+    import Vindow from "./js/Vindow.js";
+    import BSDMixer from "./js/BSDMixer.js";
+    //careful, the scope of this constant is still just within this module
+    import MIDI_MSG from "./js/MIDIConstants.js";
 
-import MIDIRouter from "./js/MIDIRouter.js";
-import FreakySeq from "./js/FreakySeq.js";
-import PianoRoll from "./js/PianoRoll.js";
-import Vindow from "./js/Vindow.js";
-import BSDMixer from "./js/BSDMixer.js";
-//careful, the scope of this constant is still just within this module
-import MIDI_MSG from "./js/MIDIConstants.js";
-let router;
-let freak;
+    import {
+      nudgeBackgroundColor
+    } from "./js/Utils.js";
 
-let mixer = BSDMixer(context);
 
-function handleExternallyReceivedNoteOn(msg,noteNumber,velocity) {
-    if (router && router.outPort && BSD.options.improv.midi) {
-        let noteOnChannel = MIDI_MSG.NOTE_ON + (BSD.options.improv.channel-1);
+    let router;
+    let freak;
+
+    let mixer = BSDMixer(context);
+
+    function handleExternallyReceivedNoteOn(msg, noteNumber, velocity) {
+      if (router && router.outPort && BSD.options.improv.midi) {
+        let noteOnChannel = MIDI_MSG.NOTE_ON + (BSD.options.improv.channel - 1);
         return router.outPort.send([noteOnChannel, noteNumber, velocity]);
-    }
-    //okay, we'll synthesize using WekAudio LFO.
-    campfire.publish('play-note', {
+      }
+      //okay, we'll synthesize using WekAudio LFO.
+      campfire.publish('play-note', {
         note: Note(noteNumber),
         duration: BSD.durations.note
-    });
-}
-function handleExternallyReceivedNoteOff(msg,noteNumber,velocity) {
-    let needToBother = router && router.outPort && BSD.options.improv.midi;
-    if (!needToBother) { return false; }
-    let noteOffChannel = MIDI_MSG.NOTE_OFF + (BSD.options.improv.channel-1);
-    return router.outPort.send([noteOffChannel, noteNumber, velocity]);
-}
+      });
+    }
 
-router = MIDIRouter({
-    onMIDIMessage: function(e) {
+    function handleExternallyReceivedNoteOff(msg, noteNumber, velocity) {
+      let needToBother = router && router.outPort && BSD.options.improv.midi;
+      if (!needToBother) {
+        return false;
+      }
+      let noteOffChannel = MIDI_MSG.NOTE_OFF + (BSD.options.improv.channel - 1);
+      return router.outPort.send([noteOffChannel, noteNumber, velocity]);
+    }
+
+    router = MIDIRouter({
+      onMIDIMessage: function(e) {
         //NOTE: this comes from the external app/controller/gear input
 
         ///console.log("eeeeee",e);
         //console.log("BSD?",BSD)
 
         let [msg, noteNumber, velocity] = e.data;
-        console.log('msg',msg);
+        console.log('msg', msg);
 
         if (msg == MIDI_MSG.NOTE_ON) {
-            return handleExternallyReceivedNoteOn(msg,noteNumber,velocity);
+          return handleExternallyReceivedNoteOn(msg, noteNumber, velocity);
         }
         if (msg == MIDI_MSG.NOTE_OFF) {
-            return handleExternallyReceivedNoteOff(msg, noteNumber, velocity);
+          return handleExternallyReceivedNoteOff(msg, noteNumber, velocity);
         }
 
         if (msg == MIDI_MSG.PITCH_BEND) {
-            //i guess i don't understand this yet. why can't I just pass it thru?
-            console.log('bend?',e.data);
-            return router.outPort.send(e.data);
+          //i guess i don't understand this yet. why can't I just pass it thru?
+          console.log('bend?', e.data);
+          return router.outPort.send(e.data);
         }
 
 
-    }
+      }
 
-});
-
-
-let events = [];
-
-freak = FreakySeq({
-        noteOffDisabled: true,
-        events
-      });
+    });
 
 
+    let events = [];
 
-//why is campfire visible inside the module?
-///console.log('campfire?',campfire);
+    freak = FreakySeq({
+      noteOffDisabled: true,
+      events
+    });
+
+
+
+    //why is campfire visible inside the module?
+    ///console.log('campfire?',campfire);
 
     let keyboardist;
 
@@ -197,98 +209,107 @@ freak = FreakySeq({
       campfire.publish('options-loaded', BSD.options); //needed?
     });
 
-        //alert('got here');
-        console.log('FREAK?',freak);
- 
-      BSD.audioPlayer = BSD.Widgets.SimplePlayer({
-        context: context,
-        destination: mixer.common,
-        polyphonyCount: 48, //polyphonyCount,
-        itemTitles: BSD.itemTitles,
-        range: [40, 128]
-      });
+    //alert('got here');
+    console.log('FREAK?', freak);
 
-      keyboardist = BSD.Widgets.SimplePlayer({
-        context: context,
-        destination: mixer.common,
-        polyphonyCount: 48, //polyphonyCount,
-        itemTitles: BSD.itemTitles, //['fundamental','octave','dominant','dominant+fourth(octave2)'],
-        range: [28, 100]
-      });
-      keyboardist.publish('set-master-volume', BSD.volume);
+    BSD.audioPlayer = BSD.Widgets.SimplePlayer({
+      context: context,
+      destination: mixer.common,
+      polyphonyCount: 48, //polyphonyCount,
+      itemTitles: BSD.itemTitles,
+      range: [40, 128]
+    });
+
+    keyboardist = BSD.Widgets.SimplePlayer({
+      context: context,
+      destination: mixer.common,
+      polyphonyCount: 48, //polyphonyCount,
+      itemTitles: BSD.itemTitles, //['fundamental','octave','dominant','dominant+fourth(octave2)'],
+      range: [28, 100]
+    });
+    keyboardist.publish('set-master-volume', BSD.volume);
 
 
-      //this freak var came from the module section of JS above...
-      freak.on('note-on',function(event){
-          //REMEMBER: this was sequencer-generated...not user MIDI controller created
-        if (router && router.outPort && BSD.options.improv.midi) {
-            let noteOnChannel = 0x90 + (BSD.options.improv.channel-1);
-            let noteOffChannel = 0x80 + (BSD.options.improv.channel-1);
-            let noteNum = event.noteNumber;
-            let vel = Math.floor(127 * BSD.options.improv.volume); //[0..1] -> [0..127]
-            router.outPort.send([noteOnChannel, noteNum, vel]);
-
-            if (freak.opts.noteOffDisabled) {
-                //console.log('freak.opts.noteOffDisabled, so I have to schedule noteOff myself!!');
-                setTimeout(function() {  
-                    router.outPort.send([noteOffChannel, noteNum, vel]);
-                },BSD.durations.note);
-            }
-            return "all done";
-        }
-        //okay, we'll synthesize using WekAudio LFO.
-        campfire.publish('play-note', {
-          note: Note(event.noteNumber),
-          duration: BSD.durations.note
-        });
-      });
-      freak.on('note-off',function(event){
-        //first check if we need to bother sending out MIDI note off
-
-        let needToBother = router && router.outPort && BSD.options.improv.midi;
-        if (!needToBother) { return false; }
-        ////console.log('yes, needed to bother');
-        let noteOffChannel = 0x80 + (BSD.options.improv.channel-1);
+    //this freak var came from the module section of JS above...
+    freak.on('note-on', function(event) {
+      //REMEMBER: this was sequencer-generated...not user MIDI controller created
+      if (router && router.outPort && BSD.options.improv.midi) {
+        let noteOnChannel = 0x90 + (BSD.options.improv.channel - 1);
+        let noteOffChannel = 0x80 + (BSD.options.improv.channel - 1);
         let noteNum = event.noteNumber;
         let vel = Math.floor(127 * BSD.options.improv.volume); //[0..1] -> [0..127]
-        return router.outPort.send([noteOffChannel, noteNum, vel]);
+        router.outPort.send([noteOnChannel, noteNum, vel]);
+
+        if (freak.opts.noteOffDisabled) {
+          //console.log('freak.opts.noteOffDisabled, so I have to schedule noteOff myself!!');
+          setTimeout(function() {
+            router.outPort.send([noteOffChannel, noteNum, vel]);
+          }, BSD.durations.note);
+        }
+        return "all done";
+      }
+      //okay, we'll synthesize using WekAudio LFO.
+      campfire.publish('play-note', {
+        note: Note(event.noteNumber),
+        duration: BSD.durations.note
+      });
+    });
+    freak.on('note-off', function(event) {
+      //first check if we need to bother sending out MIDI note off
+
+      let needToBother = router && router.outPort && BSD.options.improv.midi;
+      if (!needToBother) {
+        return false;
+      }
+      ////console.log('yes, needed to bother');
+      let noteOffChannel = 0x80 + (BSD.options.improv.channel - 1);
+      let noteNum = event.noteNumber;
+      let vel = Math.floor(127 * BSD.options.improv.volume); //[0..1] -> [0..127]
+      return router.outPort.send([noteOffChannel, noteNum, vel]);
+    });
+
+
+    campfire.subscribe('tempo-change', freak.tempoChange)
+    freak.tempoChange(BSD.options.tempo);
+
+
+
+    let pianoRoll = PianoRoll({
+      ...freak.opts,
+      events: events
+    })
+
+
+    pianoRoll.on('note-hover', function(noteNumber) {
+      BSD.currentNote = Note(noteNumber);
+    });
+    pianoRoll.on('note-preview', function(noteNumber) {
+      campfire.publish('play-note', {
+        note: Note(noteNumber),
+        duration: BSD.durations.note
       });
 
 
-      campfire.subscribe('tempo-change', freak.tempoChange)
-      freak.tempoChange(BSD.options.tempo);
+    });
+    pianoRoll.on('is-playing', function(isPlaying) {
+      //isPlaying shows the new going-forward wish
+      isPlaying ? freak.play() : freak.stop();
+    });
+    //jQuery('.piano-roll-wrap').append(pianoRoll.ui())
+
+
+    let w = Vindow({
+      title: "Piano Roll"
+    });
+    let [toolbar, pane] = pianoRoll.ui();
+    w.appendToToolbar(toolbar);
+    w.append(pane);
+    w.renderOn(jQuery(document.body));
 
 
 
-      let pianoRoll = PianoRoll({
-        ...freak.opts,
-        events: events
-      })
+    nudgeBackgroundColor('.vindow .header', Date.now() / 1000000);
 
-
-      pianoRoll.on('note-hover', function(noteNumber) {
-        BSD.currentNote = Note(noteNumber);
-      });
-      pianoRoll.on('note-preview', function(noteNumber) {
-        campfire.publish('play-note',{
-          note: Note(noteNumber),
-          duration: BSD.durations.note
-        });
-
-
-      });
-      pianoRoll.on('is-playing',function(isPlaying){
-        //isPlaying shows the new going-forward wish
-        isPlaying ? freak.play() : freak.stop();
-      });
-      //jQuery('.piano-roll-wrap').append(pianoRoll.ui())
-
-
-      let w = Vindow({ title: "Piano Roll" });
-      let [toolbar,pane] = pianoRoll.ui();
-      w.appendToToolbar(toolbar);
-      w.append(pane);
-      w.renderOn(jQuery(document.body));
 
 
     //LEAD / IMPROV
@@ -302,16 +323,16 @@ freak = FreakySeq({
         //another way to do noteOnChannel is
         //let byte1 = 0x90 + (oneBasedChannel - 1),
 
-        let noteOnChannel = 0x90 + (BSD.options.improv.channel-1);
-        let noteOffChannel = 0x80 + (BSD.options.improv.channel-1);
+        let noteOnChannel = 0x90 + (BSD.options.improv.channel - 1);
+        let noteOffChannel = 0x80 + (BSD.options.improv.channel - 1);
         let noteNum = payload.note.value();
         let vel = Math.floor(127 * BSD.options.improv.volume); //[0..1] -> [0..127]
 
         router.outPort.send([noteOnChannel, noteNum, vel]);
 
-        setTimeout(function() {  
-            console.log('stopping!?!?!?!? !!!')
-            router.outPort.send([noteOffChannel, noteNum, vel]);
+        setTimeout(function() {
+          console.log('stopping!?!?!?!? !!!')
+          router.outPort.send([noteOffChannel, noteNum, vel]);
         }, BSD.durations.note);
         return false;
       }
@@ -322,19 +343,13 @@ freak = FreakySeq({
       // okay, currently no MIDI output, we'll use our WebAudio API synth
       BSD.audioPlayer.playNote(payload.note, payload.duration, payload.velocity);
     });
-
-
-
-
-
-
-</script>
-<script>
-function onAppLoad() {
-  //FIXME: get rid of this once the app/module refactoring is done
-}
-    </script>
-<?php    
+  </script>
+  <script>
+    function onAppLoad() {
+      //FIXME: get rid of this once the app/module refactoring is done
+    }
+  </script>
+<?php
 });
 
 

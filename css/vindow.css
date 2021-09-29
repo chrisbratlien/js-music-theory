@@ -6,7 +6,8 @@
 }
 
 .vindow .header {
-    background: #409;
+    /* background: #409; */
+    background: #444;
     color: white;
     cursor: pointer;
     padding: 1px;

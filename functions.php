@@ -7,6 +7,10 @@ define('REMOTE_DB_PATH', sprintf('%s/data/remote.db', APP_PATH));
 
 require_once('core.php');
 require_once('environment.php');
+require_once('functions-lerpy.php');
+
+
+
 
 if (!function_exists('pp')) { //Pretty Print
   function pp($obj, $label = '') {
@@ -220,13 +224,13 @@ add_action('ws_removeItem', function ($opts) {
 });
 
 
-add_filter('body_class',function($classes){
+add_filter('body_class', function ($classes) {
   $uri = clean_uri($_SERVER['REQUEST_URI']);
   $parts = preg_split('/\//', $uri);
-  $parts = array_filter($parts,function($elem){
+  $parts = array_filter($parts, function ($elem) {
     return !empty($elem);
   });
-  array_push($classes, ...$parts);  
+  array_push($classes, ...$parts);
   return $classes;
 });
 
