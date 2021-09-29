@@ -22,8 +22,8 @@ function dragMouseDown(e) {
   //document.onmousemove = elementDrag;
 
 
-  dragHandle.onpointermove = elementDrag;
-  dragHandle.onpointerup = closeDragElement;
+  document.onpointermove = elementDrag;
+  document.onpointerup = closeDragElement;
   
 
 }
@@ -44,8 +44,8 @@ function elementDrag(e) {
 
   function closeDragElement() {
   //console.log('close?')
-  dragHandle.onpointerup = null;
-  dragHandle.onpointermove = null;
+  document.onpointerup = null;
+  document.onpointermove = null;
 }
 
 
