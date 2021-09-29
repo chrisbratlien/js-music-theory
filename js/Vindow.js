@@ -1,4 +1,5 @@
 import PubSub from "./PubSub.js";
+import Draggable from "./Draggable.js";
 
 //fixme. refactor away from the old global dom.js so we can
 //use the DOM.js module
@@ -8,42 +9,6 @@ function Vindow(props) {
     let self = PubSub();
     self.props = props;
     let outer, header, pane, btnExit;
-
-
-    ///drag stuff from W3 schools
-
-    var elmnt, pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-
-    function dragMouseDown(e) {
-      e = e || window.event;
-      e.preventDefault();
-      pos3 = e.clientX;
-      pos4 = e.clientY;
-      document.onmouseup = closeDragElement;
-      document.onmousemove = elementDrag;
-    }
-  
-    function elementDrag(e) {
-      e = e || window.event;
-      e.preventDefault();
-      pos1 = pos3 - e.clientX;
-      pos2 = pos4 - e.clientY;
-      pos3 = e.clientX;
-      pos4 = e.clientY;
-      elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-      elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
-    }
-  
-    function closeDragElement() {
-      document.onmouseup = null;
-      document.onmousemove = null;
-    }
-  
-
-
-    ///
-
-
 
     let buttons = DOM.div()
         .addClass('btn-group')
@@ -79,25 +44,17 @@ function Vindow(props) {
     
     self.append = function (content) {
         pane.append(content);
-
-        //should this return something to enable
-        //chaining?
-        // I was tempted to return pane, but that's
-        // going to be confusing... If so, we have
-        // transformed into a jQuery object and
-        // have lost our Vindow.
-        //Safer to return self.
-        //but I'm not in a rush.. no return for now.
+        // tempted to return pane, but could get confusing.
+        // safer and more consistent to return self
+        // even safer to not return anything for now.
     }
-    
 
     self.ui = function () {
         return outer;
     }
     self.renderOn = function (wrap) {
         wrap.append(outer);
-        elmnt = outer.get(0);
-        header.get(0).onmousedown = dragMouseDown;
+        Draggable(outer.get(0), header.get(0));        
     }
     return self;
 }
