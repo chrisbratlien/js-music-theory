@@ -3097,7 +3097,7 @@ add_action('wp_footer', function () {
 
       let datWrap = jQuery('.dg.ac');
       datWrap.addClass('noprint');
-      Draggable(document.querySelector('.dg.ac'));
+
 
       let magicHue = (Date.now() / 1000000) % (Math.PI * 2);
       nudgeBackgroundColor('.vindow .header', magicHue);
