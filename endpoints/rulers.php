@@ -6,8 +6,13 @@ add_filter('wp_title', function ($o) {
 add_action('wp_head', function () {
 ?>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-  <style type="text/css">
-    * {
+  <style>
+
+    @import "css/align.css";
+    @import "css/flex.css";
+    @import "css/vindow.css";
+
+* {
       /* So 100% means 100% */
       box-sizing: border-box;
     }
@@ -21,6 +26,8 @@ add_action('wp_head', function () {
     #pickers {
       height: 40px;
     }
+
+
   </style>
 
   <title>Rulers</title>
@@ -113,7 +120,7 @@ import MIDIRouter from "./js/MIDIRouter.js";
 import DOM from "./js/DOM.js";
 import Vindow from "./js/Vindow.js";
 import BSDMixer from "./js/BSDMixer.js";
-
+import Inspector from "./js/Inspector.js";
     //careful, the scope of this constant is still just within this module
     import MIDI_MSG from "./js/MIDIConstants.js";
   import { Ruler, NullRuler, Minor7ChordRuler, MinorChordRuler, MajorChordRuler,
@@ -207,13 +214,8 @@ import BSDMixer from "./js/BSDMixer.js";
           console.log('bend?', e.data);
           return router.outPort.send(e.data);
         }
-
-
       }
-
     });
-
-
 
 
 
@@ -280,41 +282,6 @@ import BSDMixer from "./js/BSDMixer.js";
             name: 'empty',
             constructor: NullRuler
           },
-          /*
-          {
-            name: 'notes',
-            constructor: BSD.NoteRuler
-          },
-          {
-            name: 'major scale',
-            constructor: BSD.MajorScaleRuler
-          },
-          {
-            name: 'minor scale',
-            constructor: BSD.MinorScaleRuler
-          },
-          {
-            name: 'HM scale',
-            constructor: BSD.HarmonicMinorScaleRuler
-          },
-
-          {
-            name: 'MP scale',
-            constructor: BSD.MajorPentatonicScaleRuler
-          },
-          {
-            name: 'mP scale',
-            constructor: BSD.MinorPentatonicScaleRuler
-          },
-          {
-            name: 'blues scale',
-            constructor: BSD.BluesScaleRuler
-          },
-          {
-            name: 'MP Pattern',
-            constructor: BSD.MajorPentatonicPatternRuler
-          },
-          */
 
           {
             name: '-',
@@ -504,24 +471,12 @@ import BSDMixer from "./js/BSDMixer.js";
       BSD.audioPlayer.playNote(payload.note, payload.duration, payload.velocity);
     });
 
-
-
-
-
-
-
-
-
-
       campfire.subscribe('play-chord', function(o) {
         ///BSD.audioPlayer.playChord(o.chord, o.duration);
         o.chord.notes().map(n => {
           campfire.publish('play-note',{ note: n, duration: o.duration });
         });
       });
-
-
-
 
       var rulersWrap = jQuery('#rulers');
       var vars = getUrlVars();
@@ -647,6 +602,28 @@ import BSDMixer from "./js/BSDMixer.js";
         storage.setItem('progHelpShown', true);
       }
     });
+
+    let inspector = Inspector({ foo: 'bar'});
+    var vInspector = Vindow({ title: 'Inspector'});
+    let [toolbar,pre] = inspector.ui();
+    vInspector.appendToToolbar(toolbar),
+    vInspector.append(pre);
+    vInspector.renderOn(DOM.from(document.body));
+
+    router.on('statechange',function(e,outPort){
+      console.log('YAY',e,outPort);
+      if (!outPort) { return false; }
+      inspector.update({
+        manufacturer: outPort.manufacturer,
+        name: outPort.name,
+        state: outPort.state
+      });
+    })
+
+
+
+
+
   </script>
   <script>
     function onAppLoad() {
