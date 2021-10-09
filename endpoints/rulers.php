@@ -1,4 +1,7 @@
 <?php
+add_filter('wp_title', function ($o) {
+  return "Rulers";
+});
 
 add_action('wp_head', function () {
 ?>
