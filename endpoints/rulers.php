@@ -84,7 +84,7 @@ add_action('wp_footer', function () {
 ?>
   <script type="text/javascript" src="js/color.js"></script>
   <script type="text/javascript" src="js/bsd.widgets.lightbox.js"></script>
-  <script type="text/javascript" src="js/rulers.js"></script>
+  <!--<script type="text/javascript" src="js/rulers.js"></script>-->
   <!-- wavetable dependencies -->
   <script src="js/bpm-delay.js"></script>
   <script src="js/waveshaper.js"></script>
@@ -97,15 +97,6 @@ add_action('wp_footer', function () {
 
 
 
-  <!--<script src="js/bsd.widgets.baseplayer.js"></script>
-<script src="js/bsd.widgets.stringoscillator.js"></script>
-<script src="js/bsd.widgets.guitarplayer.js"></script>
-<script src="js/bsd.widgets.simpleplayer.js"></script>
-<script src="js/bsd.guitar.js"></script>
--->
-
-
-
 
   <script src="js/bsd.widgets.simpleplayer.js"></script>
   <script src="js/bsd.widgets.tonalityguru.js"></script>
@@ -113,8 +104,22 @@ add_action('wp_footer', function () {
 
   <script type="text/javascript" src="js/bsd.widgets.procrastinator.js"></script>
 
+  <script type="module">
 
-  <script type="text/javascript">
+import MIDIRouter from "./js/MIDIRouter.js";
+import DOM from "./js/DOM.js";
+import Vindow from "./js/Vindow.js";
+import BSDMixer from "./js/BSDMixer.js";
+
+    //careful, the scope of this constant is still just within this module
+    import MIDI_MSG from "./js/MIDIConstants.js";
+  import { Ruler, NullRuler, Minor7ChordRuler, MinorChordRuler, MajorChordRuler,
+    Dominant7ChordRuler, Major7ChordRuler, Minor7Flat5ChordRuler,
+    Dominant7Flat9ChordRuler, Dominant7Sharp9ChordRuler, Dominant7Flat5ChordRuler, MinorSixChordRuler,
+    MajorSixChordRuler, MajorSixNineChordRuler, Diminished7ChordRuler,
+    Dominant9ChordRuler, Minor9ChordRuler, Major9ChordRuler, Dominant13ChordRuler, Minor13ChordRuler, Major13ChordRuler
+  } from "./js/Rulers.js";
+
     BSD.ChordRulerPanel = function(spec) {
       var self = BSD.PubSub({});
       var rulersWrap = jQuery('#rulers');
@@ -146,14 +151,72 @@ add_action('wp_footer', function () {
       return self;
     };
 
-    let mixer;
     var waiter = BSD.Widgets.Procrastinator({
       timeout: 250
     });
 
 
-    function onAppLoad() {
-      mixer = App.BSDMixer(context);
+    let router;
+
+
+    let mixer = BSDMixer(context);
+
+    function handleExternallyReceivedNoteOn(msg, noteNumber, velocity) {
+      if (router && router.outPort && BSD.options.improv.midi) {
+        let noteOnChannel = MIDI_MSG.NOTE_ON + (BSD.options.improv.channel - 1);
+        return router.outPort.send([noteOnChannel, noteNumber, velocity]);
+      }
+      //okay, we'll synthesize using WekAudio LFO.
+      campfire.publish('play-note', {
+        note: Note(noteNumber),
+        duration: BSD.durations.note
+      });
+    }
+
+    function handleExternallyReceivedNoteOff(msg, noteNumber, velocity) {
+      let needToBother = router && router.outPort && BSD.options.improv.midi;
+      if (!needToBother) {
+        return false;
+      }
+      let noteOffChannel = MIDI_MSG.NOTE_OFF + (BSD.options.improv.channel - 1);
+      return router.outPort.send([noteOffChannel, noteNumber, velocity]);
+    }
+
+    router = MIDIRouter({
+      onMIDIMessage: function(e) {
+        //NOTE: this comes from the external app/controller/gear input
+
+        ///console.log("eeeeee",e);
+        //console.log("BSD?",BSD)
+
+        let [msg, noteNumber, velocity] = e.data;
+        console.log('msg', msg);
+
+        if (msg == MIDI_MSG.NOTE_ON) {
+          return handleExternallyReceivedNoteOn(msg, noteNumber, velocity);
+        }
+        if (msg == MIDI_MSG.NOTE_OFF) {
+          return handleExternallyReceivedNoteOff(msg, noteNumber, velocity);
+        }
+
+        if (msg == MIDI_MSG.PITCH_BEND) {
+          //i guess i don't understand this yet. why can't I just pass it thru?
+          console.log('bend?', e.data);
+          return router.outPort.send(e.data);
+        }
+
+
+      }
+
+    });
+
+
+
+
+
+
+
+      mixer = BSDMixer(context);
       BSD.audioPlayer = BSD.Widgets.SimplePlayer({
         context: context,
         destination: mixer.common,
@@ -163,14 +226,13 @@ add_action('wp_footer', function () {
       });
       ///waiter.beg(BSD.audioPlayer, 'set-master-volume', BSD.volume);
       BSD.audioPlayer.publish('set-master-volume', BSD.volume || 0.06);
-    }
 
 
 
     BSD.chosenColor = BSD.colorFromHex('#000000');
     BSD.ColorPicker = function(spec) {
-      var interface = {};
-      interface.renderOn = function(html) {
+      var self = {};
+      self.renderOn = function(html) {
         var square = DOM.div('').addClass('color-picker');
         square.css('background-color', '#' + spec.color.toHex());
         square.click(function() {
@@ -178,7 +240,7 @@ add_action('wp_footer', function () {
         });
         html.append(square);
       };
-      return interface;
+      return self;
     };
     BSD.grey = BSD.Color({
       r: 300,
@@ -213,7 +275,7 @@ add_action('wp_footer', function () {
       var panel = BSD.ChordRulerPanel({
         builders: [{
             name: 'empty',
-            constructor: BSD.NullRuler
+            constructor: NullRuler
           },
           /*
           {
@@ -253,85 +315,85 @@ add_action('wp_footer', function () {
 
           {
             name: '-',
-            constructor: BSD.MinorChordRuler
+            constructor: MinorChordRuler
           },
           {
             name: 'M',
-            constructor: BSD.MajorChordRuler
+            constructor: MajorChordRuler
           },
 
 
           {
             name: '7',
-            constructor: BSD.Dominant7ChordRuler
+            constructor: Dominant7ChordRuler
           },
           {
             name: '-7',
-            constructor: BSD.Minor7ChordRuler
+            constructor: Minor7ChordRuler
           },
           {
             name: 'M7',
-            constructor: BSD.Major7ChordRuler
+            constructor: Major7ChordRuler
           },
 
           {
             name: '-7b5',
-            constructor: BSD.Minor7Flat5ChordRuler
+            constructor: Minor7Flat5ChordRuler
           },
 
           {
             name: '7b9',
-            constructor: BSD.Dominant7Flat9ChordRuler
+            constructor: Dominant7Flat9ChordRuler
           },
           {
             name: '7#9',
-            constructor: BSD.Dominant7Sharp9ChordRuler
+            constructor: Dominant7Sharp9ChordRuler
           },
           {
             name: '7b5',
-            constructor: BSD.Dominant7Flat5ChordRuler
+            constructor: Dominant7Flat5ChordRuler
           },
           {
             name: '-6',
-            constructor: BSD.MinorSixChordRuler
+            constructor: MinorSixChordRuler
           },
           {
             name: '6',
-            constructor: BSD.MajorSixChordRuler
+            constructor: MajorSixChordRuler
           },
           {
             name: '6/9',
-            constructor: BSD.MajorSixNineChordRuler
+            constructor: MajorSixNineChordRuler
           },
           {
             name: 'o7',
-            constructor: BSD.Diminished7ChordRuler
+            constructor: Diminished7ChordRuler
           },
 
           {
             name: '9',
-            constructor: BSD.Dominant9ChordRuler
+            constructor: Dominant9ChordRuler
           },
           {
             name: '-9',
-            constructor: BSD.Minor9ChordRuler
+            constructor: Minor9ChordRuler
           },
           {
             name: 'M9',
-            constructor: BSD.Major9ChordRuler
+            constructor: Major9ChordRuler
           },
 
           {
             name: '13',
-            constructor: BSD.Dominant13ChordRuler
+            constructor: Dominant13ChordRuler
           },
           {
             name: '-13',
-            constructor: BSD.Minor13ChordRuler
+            constructor: Minor13ChordRuler
           },
           {
             name: 'M13',
-            constructor: BSD.Major13ChordRuler
+            constructor: Major13ChordRuler
           }
 
         ]
@@ -390,31 +452,74 @@ add_action('wp_footer', function () {
         }
       });
 
-      /*
-            $("#detune-input").slider({
-              orientation: "vertical",
-              range: "min",
-              min: -7.0,
-              max: 7.0,
-              step: 0.25,
-              value: 0.0,
-              slide: function(event, ui) {
-                var n = ui.value;
+      //FIXME: standardize options across pages.
+      BSD.options = {
+        improv: {
+          enabled: true,
+          volume: 0.5,
+          channel: 3,
+          midi: true
+        }
+      }
 
-                waiter.beg(BSD.audioPlayer, 'set-detune-semis', n);
-                //////campfire.publish('set-speed-ms',n);
-                jQuery("#detune-amount").text(n);
-              }
-            });
-            */
-      var list = ['Piano'];
-      ///var chosen = list.atRandom();
-      campfire.subscribe('play-note', function(payload) {
-        BSD.audioPlayer.playNote(payload.note, payload.duration);
-      });
+      BSD.durations = {
+      bass: 1500,
+      chord: 1000,
+      note: 1000
+    };
+
+
+    //LEAD / IMPROV
+    campfire.subscribe('play-note', function(payload) {
+      ///console.log('play-note!!',payload);
+      if (!BSD.options.improv.enabled) {
+        return false;
+      }
+
+      if (router && router.outPort && BSD.options.improv.midi) {
+        //another way to do noteOnChannel is
+        //let byte1 = 0x90 + (oneBasedChannel - 1),
+
+        let noteOnChannel = 0x90 + (BSD.options.improv.channel - 1);
+        let noteOffChannel = 0x80 + (BSD.options.improv.channel - 1);
+        let noteNum = payload.note.value();
+        let vel = Math.floor(127 * BSD.options.improv.volume); //[0..1] -> [0..127]
+
+        router.outPort.send([noteOnChannel, noteNum, vel]);
+
+        setTimeout(function() {
+          //console.log('stopping!?!?!?!? !!!')
+          router.outPort.send([noteOffChannel, noteNum, vel]);
+        }, BSD.durations.note);
+        return false;
+      }
+      // I suspect that user interaction on the page has to initiate the first
+      /// WebAudio API event... Once that happens, then the MIDI input is "felt" by the WebAudio API
+
+      ///console.log('this should play, why am i not playing?',payload);
+      // okay, currently no MIDI output, we'll use our WebAudio API synth
+      BSD.audioPlayer.playNote(payload.note, payload.duration, payload.velocity);
+    });
+
+
+
+
+
+
+
+
+
+
       campfire.subscribe('play-chord', function(o) {
-        BSD.audioPlayer.playChord(o.chord, o.duration);
+        ///BSD.audioPlayer.playChord(o.chord, o.duration);
+        o.chord.notes().map(n => {
+          campfire.publish('play-note',{ note: n, duration: o.duration });
+        });
       });
+
+
+
+
       var rulersWrap = jQuery('#rulers');
       var vars = getUrlVars();
       ////console.log('vars',vars);
@@ -431,7 +536,7 @@ add_action('wp_footer', function () {
             state[mv] = true;
           });
           //////console.log('state',state);
-          var ruler = BSD.Ruler({
+          var ruler = Ruler({
             items: [],
             state: state
           });
@@ -509,7 +614,7 @@ add_action('wp_footer', function () {
             state[mv] = true;
           });
           //////console.log('state',state);
-          var ruler = BSD.Ruler({
+          var ruler = Ruler({
             items: [],
             state: state
           });
@@ -540,6 +645,11 @@ add_action('wp_footer', function () {
       }
     });
   </script>
+  <script>
+    function onAppLoad() {
+      ///
+    }
+    </script>
 <?php
 });
 

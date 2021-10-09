@@ -23,7 +23,7 @@
   <script src="<?php bloginfo('url'); ?>/js/color.js"></script>
   <script src="<?php bloginfo('url'); ?>/js/bsd.pubsub.js"></script>
 
-  <script src="<?php bloginfo('url'); ?>/js/dom.js"></script>
+  <!--<script src="<?php bloginfo('url'); ?>/js/dom.js"></script>-->
 
 
   <script src="<?php bloginfo('url'); ?>/js/js-music-theory.js"></script>
