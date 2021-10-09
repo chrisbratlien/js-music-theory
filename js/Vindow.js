@@ -1,9 +1,13 @@
 import PubSub from "./PubSub.js";
 import Draggable from "./Draggable.js";
+import DOM from "./DOM.js";
 
-//fixme. refactor away from the old global dom.js so we can
-//use the DOM.js module
-// can't import this until refactor ready ...import DOM from "./DOM.js";
+function bringToTop(elem) {
+    document.querySelectorAll('.vindow')
+        .forEach(o => {
+            o.style.zIndex = o == elem ? 1 : 0;
+        });
+}
 
 function Vindow(props) {
     let self = PubSub();
@@ -19,11 +23,12 @@ function Vindow(props) {
                 DOM.i()
                 .addClass('fa fa-close')
             )
-            .addClass('btn btn-exit')
-            .on('click', () => self.emit('close', self, props))
-
-
-        )
+            .addClass('btn btn-exit btn-close')
+            .on('click', () => {
+                self.emit('close', self, props)
+                outer.raw.remove();
+            })
+        );
 
     outer = DOM.div()
         .addClass('vindow')
@@ -34,7 +39,7 @@ function Vindow(props) {
                 DOM.span()
                 .addClass('title')
                 .append(props.title),
-                btnExit
+                buttons
             ]),
             toolbar = DOM.div()
             .addClass('toolbar')
@@ -42,18 +47,23 @@ function Vindow(props) {
             pane = DOM.div()
             .addClass('pane')
         )
+        .on('mousedown', () => {
+            bringToTop(outer.raw)
+        })
 
 
 
-    self.append = function(content) {
-        pane.append(content);
+    self.append = function() {
+        let children = [...arguments]
+        pane.append(children);
         // tempted to return pane, but could get confusing.
         // safer and more consistent to return self
         // even safer to not return anything for now.
     }
-    self.appendToToolbar = function(content) {
+    self.appendToToolbar = function() {
+        let children = [...arguments];
         toolbar
-            .append(content)
+            .append(children)
             .show();
     }
 

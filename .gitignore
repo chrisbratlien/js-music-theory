@@ -11,3 +11,4 @@ local.php
 node_modules
 data/remote.db
 .env
+.DS_Store

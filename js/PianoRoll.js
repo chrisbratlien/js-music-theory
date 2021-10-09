@@ -1,4 +1,5 @@
 import PubSub from "./PubSub.js";
+import DOM from "./DOM.js";
 import { lerp, invlerp, remap } from "./scalar.js";
 
 function millisPerLoop(bpm, beatsPerBar, barsPerLoop) {
