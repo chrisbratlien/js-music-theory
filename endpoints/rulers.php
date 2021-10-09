@@ -94,22 +94,9 @@ add_action('wp_footer', function () {
 ?>
   <script type="text/javascript" src="js/color.js"></script>
   <script type="text/javascript" src="js/bsd.widgets.lightbox.js"></script>
-  <!--<script type="text/javascript" src="js/rulers.js"></script>-->
-  <!-- wavetable dependencies -->
-  <script src="js/bpm-delay.js"></script>
-  <script src="js/waveshaper.js"></script>
-  <script src="js/wavetable.js"></script>
-  <script src="js/fft.js"></script>
-  <script src="js/wavetableloader.js"></script>
-  <script src="js/staticaudiorouting.js"></script>
-  <script src="js/bsd.widgets.oscplayer.js"></script>
-
-
-
-
 
   <script src="js/bsd.widgets.simpleplayer.js"></script>
-  <script src="js/bsd.widgets.tonalityguru.js"></script>
+
 
 
   <script type="text/javascript" src="js/bsd.widgets.procrastinator.js"></script>
@@ -229,10 +216,8 @@ import Inspector from "./js/Inspector.js";
         itemTitles: BSD.itemTitles,
         range: [40, 128]
       });
-      ///waiter.beg(BSD.audioPlayer, 'set-master-volume', BSD.volume);
-      BSD.audioPlayer.publish('set-master-volume', BSD.volume || 0.06);
 
-
+    BSD.audioPlayer.publish('set-master-volume', BSD.volume || 0.06);
 
     BSD.chosenColor = BSD.colorFromHex('#000000');
     BSD.ColorPicker = function(spec) {
