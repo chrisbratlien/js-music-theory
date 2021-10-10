@@ -547,6 +547,7 @@ add_action('wp_footer', function () {
     import PianoRoll from "./js/PianoRoll.js";
     import MIDIOutMonitor from "./js/MIDIOutMonitor.js";
     import MIDIRouter from "./js/MIDIRouter.js";
+    import MIDIInfo from "./js/MIDIInfo.js";
     import BSDMixer from "./js/BSDMixer.js";
     import ColorPalette from "./js/ColorPalette.js";
     import {
@@ -3032,7 +3033,6 @@ add_action('wp_footer', function () {
     });
 
 
-    setTimeout(function() {
 
 
       let events = [];
@@ -3103,9 +3103,21 @@ add_action('wp_footer', function () {
       nudgeBackgroundColor('.vindow .header', magicHue);
 
 
+    let midiInfo = MIDIInfo({ 
+      router, 
+      channel: BSD.options.improv.channel, 
+      patch: BSD.options.improv.patch 
+    });
+    var vMIDIInfo = Vindow({ title: 'MIDI Info'});
+    let [miToolbar, miPane] = midiInfo.ui();
+    vMIDIInfo.appendToToolbar(miToolbar),
+    vMIDIInfo.append(miPane);
+    vMIDIInfo.renderOn(body);
 
-    }, 2000)
-  </script>
+
+
+
+</script>
   <script>
     function onAppLoad() {
       //FIXME: get rid of this once the app/module refactoring is done

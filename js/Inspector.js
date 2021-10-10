@@ -1,5 +1,18 @@
 import DOM from "./DOM.js";
 import PubSub from "./PubSub.js";
+import SimplePropertyRetriever from "./SimplePropertyRetriever.js";
+
+//https://stackoverflow.com/questions/29085197/how-do-you-json-stringify-an-es6-map
+function replacer(key, value) {
+    if (value instanceof Map) {
+        return {
+            dataType: 'Map',
+            value: Array.from(value.entries()), // or with spread: value: [...value]
+        };
+    } else {
+        return value;
+    }
+}
 
 function Inspector(props) {
     const self = PubSub();
@@ -30,7 +43,10 @@ function Inspector(props) {
 
 
     self.update = function(somethingInteresting) {
-        pre.empty().append(JSON.stringify(somethingInteresting, null, 4));
+
+        ////console.log('here we go', SimplePropertyRetriever.getOwnAndPrototypeEnumerablesAndNonenumerables(somethingInteresting));
+
+        pre.empty().append(JSON.stringify(somethingInteresting, replacer, 4));
     };
 
     return self;
