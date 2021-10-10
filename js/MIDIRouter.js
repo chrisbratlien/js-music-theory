@@ -14,6 +14,17 @@ function MIDIRouter(props) {
         return console.log('onMIDIFailure', e);
     }
 
+
+    function shouldBecomeOutPort(port) {
+        if (port.type == 'input') { return false; }
+        //FIXME: kludge for ignoring the KORG MICROKEY CTRL as output
+        if (port.name.match(/CTRL/)) { return false; }
+        if (self.outPort && self.outPort.state == 'connected') {
+            return false;
+        }
+        return port.state === "connected";
+    }
+
     function onMIDISuccess(aMIDIAccessObject) {
         //console.log("onMIDISuccess", aMIDIAccessObject);
         // when we get a succesful response, run this code
@@ -21,19 +32,23 @@ function MIDIRouter(props) {
         aMIDIAccessObject.onstatechange = function(e) {
             //console.log('onstatechange e:', e);
             //console.log('onstatechange e.port:', e.port);
-            self.newGuyPort = e.port;
 
-            if (self.outPort && self.outPort.state == 'disconnected' && self.newGuyPort.state == "connected") {
+            if (shouldBecomeOutPort(e.port)) {
                 //if ya can't beat em...
-                self.outPort = self.newGuyPort;
+                self.outPort = e.port;
             }
+            if (e.port.type == 'input' && self.inPort && self.inPort.state == 'disconnected' && e.port.state == "connected") {
+                //if ya can't beat em...
+                self.inPort = e.port;
+            }
+
 
             // Print information about the (dis)connected MIDI controller
             console.log(e.port.name, e.port.manufacturer, e.port.state);
             if (props.onstatechange) {
-                props.onstatechange(e, self.outPort);
+                props.onstatechange(e, self.outPort); //FIXME: stop sending outport as 2nd arg eventually
             }
-            self.publish('statechange', e, self.outPort);
+            self.publish('statechange', e, self.outPort); //FIXME: stop sending outport as 2nd arg eventually
         };
 
 
@@ -43,7 +58,8 @@ function MIDIRouter(props) {
         for (var input = inputs.next(); input && !input.done; input = inputs.next()) {
             // each time there is a midi message call the onMIDIMessage function
             ///console.log('input.value', input.value);
-            input.value.onmidimessage = props.onMIDIMessage;
+            self.inPort = input.value;
+            self.inPort.onmidimessage = props.onMIDIMessage;
         }
 
         var outputs = aMIDIAccessObject.outputs.values();
@@ -57,7 +73,11 @@ function MIDIRouter(props) {
             output.value.open()
                 .then((okayPort) => {
                     console.log('okay (output)', okayPort)
-                    self.outPort = okayPort;
+                    if (shouldBecomeOutPort(okayPort)) {
+                        //if ya can't beat em...
+                        self.outPort = okayPort;
+                    }
+
                 })
         }
 

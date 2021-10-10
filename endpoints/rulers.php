@@ -12,6 +12,25 @@ add_action('wp_head', function () {
     @import "css/flex.css";
     @import "css/vindow.css";
 
+
+
+    @font-face {
+    font-family: "Electronic Highway Sign";
+    src: url(font/EHSMB.eot?) format("eot"),url(font/EHSMB.ttf) format("truetype"),url(font/EHSMB.woff) format("woff"),url(font/EHSMB.svg#ElectronicHighwaySign) format("svg");
+    font-weight: 400;
+    font-style: normal
+    }
+
+    .lcd {
+      background-color: rgb(18,66,0);
+      color: rgb(233,255,0);
+      font-family: Electronic Highway Sign;
+      font-size: 20px;
+    }
+
+    .midi-info {
+      padding: 10px;
+    }
 * {
       /* So 100% means 100% */
       box-sizing: border-box;
@@ -104,10 +123,14 @@ add_action('wp_footer', function () {
   <script type="module">
 
 import MIDIRouter from "./js/MIDIRouter.js";
+import MIDIInfo from "./js/MIDIInfo.js";
 import DOM from "./js/DOM.js";
 import Vindow from "./js/Vindow.js";
 import BSDMixer from "./js/BSDMixer.js";
 import Inspector from "./js/Inspector.js";
+import SimplePropertyRetriever from "./js/SimplePropertyRetriever.js";
+
+
     //careful, the scope of this constant is still just within this module
     import MIDI_MSG from "./js/MIDIConstants.js";
   import { Ruler, NullRuler, Minor7ChordRuler, MinorChordRuler, MajorChordRuler,
@@ -116,6 +139,20 @@ import Inspector from "./js/Inspector.js";
     MajorSixChordRuler, MajorSixNineChordRuler, Diminished7ChordRuler,
     Dominant9ChordRuler, Minor9ChordRuler, Major9ChordRuler, Dominant13ChordRuler, Minor13ChordRuler, Major13ChordRuler
   } from "./js/Rulers.js";
+
+
+
+      //FIXME: standardize options across pages.
+      BSD.options = {
+        improv: {
+          enabled: true,
+          volume: 0.5,
+          channel: 3,
+          patch: 1,
+          midi: true
+        }
+      }
+
 
     BSD.ChordRulerPanel = function(spec) {
       var self = BSD.PubSub({});
@@ -187,7 +224,7 @@ import Inspector from "./js/Inspector.js";
         //console.log("BSD?",BSD)
 
         let [msg, noteNumber, velocity] = e.data;
-        console.log('msg', msg);
+        ///console.log('msg', msg);
 
         if (msg == MIDI_MSG.NOTE_ON) {
           return handleExternallyReceivedNoteOn(msg, noteNumber, velocity);
@@ -203,7 +240,7 @@ import Inspector from "./js/Inspector.js";
         }
       }
     });
-
+    window.router = router;
 
 
 
@@ -248,6 +285,22 @@ import Inspector from "./js/Inspector.js";
         BSD.penDown = !BSD.penDown;
       }
     });
+
+
+
+function makeEnumerable(something) {
+  if (typeof something !== "object") { return something; }
+  let props = SimplePropertyRetriever.getOwnAndPrototypeEnumerablesAndNonenumerables(something);
+  let conjured = props.reduce((accum,prop) => {
+    accum[prop] = something[prop];
+    return accum;
+  },{});
+  return conjured;
+}
+
+var body = DOM.from(document.body);
+
+
     jQuery(document).ready(function() {
       var campfire = BSD.PubSub({});
 
@@ -407,15 +460,6 @@ import Inspector from "./js/Inspector.js";
         }
       });
 
-      //FIXME: standardize options across pages.
-      BSD.options = {
-        improv: {
-          enabled: true,
-          volume: 0.5,
-          channel: 3,
-          midi: true
-        }
-      }
 
       BSD.durations = {
       bass: 1500,
@@ -593,20 +637,38 @@ import Inspector from "./js/Inspector.js";
     let [toolbar,pre] = inspector.ui();
     vInspector.appendToToolbar(toolbar),
     vInspector.append(pre);
-    vInspector.renderOn(DOM.from(document.body));
+    vInspector.renderOn(body);
 
     router.on('statechange',function(e,outPort){
-      console.log('YAY',e,outPort);
+      //console.log('YAY',e,outPort);
       if (!outPort) { return false; }
+
+      let props = SimplePropertyRetriever.getOwnAndPrototypeEnumerablesAndNonenumerables(outPort);
+      ///console.log('props',props);
+
+      let conjured = makeEnumerable(outPort);
+      //console.log('conjured',conjured);
+      //console.log('JSON.stringify',JSON.stringify(conjured));
+
+      let theTarget = makeEnumerable(e.target);
+
       inspector.update({
-        manufacturer: outPort.manufacturer,
-        name: outPort.name,
-        state: outPort.state
+        conjured,
+        theTarget
       });
     })
 
 
-
+    let midiInfo = MIDIInfo({ 
+      router, 
+      channel: BSD.options.improv.channel, 
+      patch: BSD.options.improv.patch 
+    });
+    var vMIDIInfo = Vindow({ title: 'MIDI Info'});
+    let [miToolbar, miPane] = midiInfo.ui();
+    vMIDIInfo.appendToToolbar(miToolbar),
+    vMIDIInfo.append(miPane);
+    vMIDIInfo.renderOn(body);
 
 
   </script>

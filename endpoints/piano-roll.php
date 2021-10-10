@@ -25,6 +25,31 @@ add_action('wp_head', function () {
   <style>
     @import 'css/piano-roll.css';
     @import 'css/vindow.css';
+
+    @import "css/align.css";
+    @import "css/flex.css";
+
+
+    @font-face {
+    font-family: "Electronic Highway Sign";
+    src: url(font/EHSMB.eot?) format("eot"),url(font/EHSMB.ttf) format("truetype"),url(font/EHSMB.woff) format("woff"),url(font/EHSMB.svg#ElectronicHighwaySign) format("svg");
+    font-weight: 400;
+    font-style: normal
+    }
+
+    .lcd {
+      background-color: rgb(18,66,0);
+      color: rgb(233,255,0);
+      font-family: Electronic Highway Sign;
+      font-size: 20px;
+    }
+
+    .midi-info {
+      padding: 10px;
+    }
+
+
+
   </style>
 <?php
 });
@@ -46,20 +71,24 @@ add_action('wp_footer', function () {
 
   <script type="module">
     import MIDIRouter from "./js/MIDIRouter.js";
+    import MIDIInfo from "./js/MIDIInfo.js";
     import FreakySeq from "./js/FreakySeq.js";
     import PianoRoll from "./js/PianoRoll.js";
     import Vindow from "./js/Vindow.js";
     import BSDMixer from "./js/BSDMixer.js";
     //careful, the scope of this constant is still just within this module
     import MIDI_MSG from "./js/MIDIConstants.js";
+    import DOM from "./js/DOM.js";
 
     import {
-      nudgeBackgroundColor
+      setBackgroundHue
     } from "./js/Utils.js";
 
 
     let router;
     let freak;
+
+    let body = DOM.from(document.body);
 
     let mixer = BSDMixer(context);
 
@@ -111,7 +140,7 @@ add_action('wp_footer', function () {
       }
 
     });
-
+    window.router = router;
 
     let events = [];
 
@@ -306,8 +335,6 @@ add_action('wp_footer', function () {
     w.append(pane);
     w.renderOn(jQuery(document.body));
 
-    let magicHue = (Date.now() / 1000000) % (Math.PI * 2);
-    nudgeBackgroundColor('.vindow .header', magicHue);
 
 
 
@@ -342,6 +369,30 @@ add_action('wp_footer', function () {
       // okay, currently no MIDI output, we'll use our WebAudio API synth
       BSD.audioPlayer.playNote(payload.note, payload.duration, payload.velocity);
     });
+
+
+    let midiInfo = MIDIInfo({ 
+      router, 
+      channel: BSD.options.improv.channel, 
+      patch: BSD.options.improv.patch 
+    });
+    var vMIDIInfo = Vindow({ title: 'MIDI Info'});
+    let [miToolbar, miPane] = midiInfo.ui();
+    vMIDIInfo.appendToToolbar(miToolbar),
+    vMIDIInfo.append(miPane);
+    vMIDIInfo.renderOn(body);
+
+
+    let TAU = Math.PI * 2;
+      let biggerIsSlower = 500_000 // 1_000_000
+      let magicHueRadians = (Date.now() / biggerIsSlower) % TAU;
+      document.querySelectorAll('.vindow .header').forEach(elem => {
+        setBackgroundHue(elem,magicHueRadians)
+      });
+
+
+
+
   </script>
   <script>
     function onAppLoad() {
