@@ -34,3 +34,15 @@
     color: black;
     padding: 0;
 }
+
+.vindow .handle {
+    background-color: red;
+    position: absolute;
+    width: 10px;
+    height: 10px;
+}
+
+.vindow .handle.sw {
+    cursor: sw-resize;
+    bottom: 0;
+}
