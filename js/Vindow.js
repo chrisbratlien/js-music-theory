@@ -9,10 +9,18 @@ function bringToTop(elem) {
         });
 }
 
+
+
+
 function Vindow(props) {
     let self = PubSub();
     self.props = props;
-    let outer, header, toolbar, pane, btnExit;
+    let outer, header, toolbar, pane, handles, btnExit;
+
+
+    let swHandle = DOM.div()
+        .addClass('handle sw')
+
 
     let buttons = DOM.div()
         .addClass('btn-group')
@@ -33,6 +41,7 @@ function Vindow(props) {
     outer = DOM.div()
         .addClass('vindow')
         .append(
+            swHandle,
             header = DOM.div()
             .addClass('header flex-row align-items-center space-between')
             .append([
@@ -73,7 +82,17 @@ function Vindow(props) {
     self.pane = pane;
     self.renderOn = function(wrap) {
         wrap.append(outer);
-        Draggable(outer.get(0), header.get(0));
+        Draggable(outer.raw, header.raw);
+        Draggable(swHandle.raw, null, {
+            onpointerup: function(e, disp) {
+                console.log("i heard disp:", disp)
+                console.log("outer", outer, outer.raw, outer.raw.style);
+                //outer.raw.clientHeight += disp.y;
+                outer.raw.style.height = outer.raw.clientHeight + disp.y + 'px';
+                outer.raw.style.width = outer.raw.clientWidth - disp.y + 'px';
+                outer.raw.style.left = parseFloat(outer.raw.style.left) + disp.x + 'px';
+            }
+        });
     }
     return self;
 }
