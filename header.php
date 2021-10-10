@@ -8,21 +8,21 @@
   <meta name="description" content="">
   <meta name="author" content="">
   <title><?php echo apply_filters('wp_title', 'JSMT'); ?></title>
-  <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">-->
-  <link rel="stylesheet" href="<?php bloginfo('url'); ?>/lib/font-awesome-4.6.3/css/font-awesome.min.css">
+  
+  <link rel="stylesheet" href="<?php  home_url();  ?>/lib/font-awesome-4.6.3/css/font-awesome.min.css">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="<?php bloginfo('url'); ?>/lib/jquery-ui.css">
-  <link href="<?php bloginfo('url'); ?>/lib/bootstrap/css/bootstrap.css" rel="stylesheet">
+  <link rel="stylesheet" href="<?php  home_url();  ?>/lib/jquery-ui.css">
+  <link href="<?php  home_url();  ?>/lib/bootstrap/css/bootstrap.css" rel="stylesheet">
   <!-- <link href="lib/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">-->
 
 
-  <link rel="stylesheet" href="<?php bloginfo('url'); ?>/css/align.css?v=2.1">
-  <link rel="stylesheet" href="<?php bloginfo('url'); ?>/css/flex.css?v=2.1">
-  <link rel="stylesheet" href="<?php bloginfo('url'); ?>/css/padding.css?v=2.1">
+  <link rel="stylesheet" href="<?php home_url();  ?>/css/align.css?v=2.1">
+  <link rel="stylesheet" href="<?php  home_url();  ?>/css/flex.css?v=2.1">
+  <link rel="stylesheet" href="<?php  home_url();  ?>/css/padding.css?v=2.1">
 
 
-  <link rel="stylesheet" href="<?php bloginfo('url'); ?>/style.css?v=2.1">
+  <link rel="stylesheet" href="<?php  home_url();  ?>/style.css?v=2.1">
 
 
 
@@ -40,7 +40,7 @@
 
 <body <?php body_class(); ?>>
   <header class="navbar navbar-fixed-top navbar-inverse navbar-music-player noprint flex-row align-items-center space-between" id="top" role="banner">
-    <a class="pad8-lr" href="<?php echo bloginfo('url'); ?>">&#127968;</a>
+    <a class="pad8-lr" href="<?php home_url();  ?>">&#127968;</a>
 
     <div class="nav-links flex-row align-items-center space-around">
     </div>

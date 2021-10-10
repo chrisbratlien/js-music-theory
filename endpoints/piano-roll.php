@@ -67,7 +67,7 @@ get_header();
 
 add_action('wp_footer', function () {
 ?>
-  <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.simpleplayer.js"></script>
+  <script src="<?php  home_url();  ?>/js/bsd.widgets.simpleplayer.js"></script>
 
   <script type="module">
     import MIDIRouter from "./js/MIDIRouter.js";
@@ -384,7 +384,7 @@ add_action('wp_footer', function () {
 
 
     let TAU = Math.PI * 2;
-      let biggerIsSlower = 500_000 // 1_000_000
+      let biggerIsSlower = 500000 // 1_000_000
       let magicHueRadians = (Date.now() / biggerIsSlower) % TAU;
       document.querySelectorAll('.vindow .header').forEach(elem => {
         setBackgroundHue(elem,magicHueRadians)

@@ -235,5 +235,5 @@ add_filter('body_class', function ($classes) {
 });
 
 function get_stylesheet_directory_uri() {
-  return get_bloginfo('url');
+  return  get_home_url(); 
 }

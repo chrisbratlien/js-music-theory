@@ -526,20 +526,20 @@ add_action('wp_footer', function () {
   <script>
     let jvtool = {};
   </script>
-  <script src="<?php bloginfo('url'); ?>/lib/Snap.svg/dist/snap.svg.js"></script>
-  <script src="<?php bloginfo('url'); ?>/lib/CodingMath/utils.js"></script>
-  <script src="<?php bloginfo('url'); ?>/lib/dat.gui.js"></script>
-  <script src="<?php bloginfo('url'); ?>/lib/la.js"></script>
-  <script src="<?php bloginfo('url'); ?>/lib/async.min.js"></script>
-  <script src="<?php bloginfo('url'); ?>/js/draggy.js"></script>
-  <script src="<?php bloginfo('url'); ?>/js/sticky-note.js"></script>
-  <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.colorpicker.js"></script>
-  <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.songlist.js"></script>
-  <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.simpleplayer.js"></script>
-  <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.tonalityguru.js"></script>
-  <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.fretboard.js"></script>
-  <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.svgfretboard.js"></script>
-  <script src="<?php bloginfo('url'); ?>/js/patchList.js"></script>
+  <script src="<?php  home_url();  ?>/lib/Snap.svg/dist/snap.svg.js"></script>
+  <script src="<?php  home_url();  ?>/lib/CodingMath/utils.js"></script>
+  <script src="<?php home_url();  ?>/lib/dat.gui.js"></script>
+  <script src="<?php  home_url();  ?>/lib/la.js"></script>
+  <script src="<?php  home_url();  ?>/lib/async.min.js"></script>
+  <script src="<?php  home_url();  ?>/js/draggy.js"></script>
+  <script src="<?php  home_url();  ?>/js/sticky-note.js"></script>
+  <script src="<?php  home_url();  ?>/js/bsd.widgets.colorpicker.js"></script>
+  <script src="<?php  home_url();  ?>/js/bsd.widgets.songlist.js"></script>
+  <script src="<?php  home_url();  ?>/js/bsd.widgets.simpleplayer.js"></script>
+  <script src="<?php  home_url();  ?>/js/bsd.widgets.tonalityguru.js"></script>
+  <script src="<?php  home_url();  ?>/js/bsd.widgets.fretboard.js"></script>
+  <script src="<?php  home_url();  ?>/js/bsd.widgets.svgfretboard.js"></script>
+  <script src="<?php  home_url();  ?>/js/patchList.js"></script>
 
 
   <script type="module">
