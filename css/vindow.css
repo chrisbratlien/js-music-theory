@@ -2,6 +2,7 @@
     background: white;
     border: 1px solid #444;
     box-shadow: 0px 0px 2px #555;
+    overflow: hidden;
     position: absolute;
 }
 
@@ -9,7 +10,7 @@
     /* background: #409; */
     background: #444;
     color: white;
-    cursor: pointer;
+    cursor: move;
     padding: 1px;
 }
 
@@ -26,7 +27,7 @@
     max-height: 75vh;
     padding: 2px;
     overflow: scroll;
-    resize: both;
+    /*resize: both;*/
 }
 
 .vindow .btn-exit {
@@ -35,14 +36,34 @@
     padding: 0;
 }
 
-.vindow .handle {
-    background-color: red;
+.vindow .resizer {
+    /*  background-color: red; */
+    background-color: transparent;
     position: absolute;
     width: 10px;
     height: 10px;
 }
 
-.vindow .handle.sw {
+.vindow .resizer.bottom-left {
     cursor: sw-resize;
     bottom: 0;
+    left: 0;
+}
+
+.vindow .resizer.top-left {
+    cursor: nw-resize;
+    top: 0;
+    left: 0;
+}
+
+.vindow .resizer.top-right {
+    cursor: ne-resize;
+    top: 0;
+    right: 0;
+}
+
+.vindow .resizer.bottom-right {
+    cursor: se-resize;
+    bottom: 0;
+    right: 0;
 }
