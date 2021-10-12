@@ -534,15 +534,14 @@ add_action('wp_footer', function () {
   <script src="<?php  home_url();  ?>/js/draggy.js"></script>
   <script src="<?php  home_url();  ?>/js/sticky-note.js"></script>
   <script src="<?php  home_url();  ?>/js/bsd.widgets.colorpicker.js"></script>
-  <script src="<?php  home_url();  ?>/js/bsd.widgets.songlist.js"></script>
   <script src="<?php  home_url();  ?>/js/bsd.widgets.simpleplayer.js"></script>
   <script src="<?php  home_url();  ?>/js/bsd.widgets.tonalityguru.js"></script>
-  <script src="<?php  home_url();  ?>/js/bsd.widgets.fretboard.js"></script>
-  <script src="<?php  home_url();  ?>/js/bsd.widgets.svgfretboard.js"></script>
+  
   <script src="<?php  home_url();  ?>/js/patchList.js"></script>
 
 
   <script type="module">
+    import DOM from "./js/DOM.js";
     import FreakySeq from "./js/FreakySeq.js";
     import PianoRoll from "./js/PianoRoll.js";
     import MIDIOutMonitor from "./js/MIDIOutMonitor.js";
@@ -558,9 +557,13 @@ add_action('wp_footer', function () {
     import Draggable from "./js/Draggable.js";
 
     import {
-      nudgeBackgroundColor
+      setBackgroundHue
     } from "./js/Utils.js";
 
+    import SongList from "./js/SongList.js";
+    import SVGFretboard from "./js/SVGFretboard.js";
+
+    import Fretboard, {makeFretboardOn} from "./js/Fretboard.js";
 
     let router;
 
@@ -827,7 +830,7 @@ add_action('wp_footer', function () {
     });
 
     var btnSaveProg = jQuery('.btn-save-prog');
-    btnSaveProg.click(function() {
+    btnSaveProg.on('click',function() {
       var title = prompt('Title');
       if (title) {
         var spec = {
@@ -851,7 +854,7 @@ add_action('wp_footer', function () {
 
 
     var btnToggleTiny = jQuery('.btn-toggle-tiny');
-    btnToggleTiny.click(function() {
+    btnToggleTiny.on('click',function() {
       BSD.options.tiny = !BSD.options.tiny;
       storage.setItem('options', JSON.stringify(BSD.options));
       checkTiny();
@@ -916,6 +919,8 @@ add_action('wp_footer', function () {
       timeout: 250
     });
 
+
+    BSD.songlist = SongList({});
 
     var songListWrap = jQuery('.song-list-wrap');
     //BSD.songlist.renderOn(songlistWrap);
@@ -1309,7 +1314,7 @@ add_action('wp_footer', function () {
 
     var btnToggleText = jQuery('.btn-toggle-text');
     var hideText = false;
-    btnToggleText.click(function() {
+    btnToggleText.on('click',function() {
       hideText = !hideText;
       hideText ? jQuery('html').addClass('hide-text') : jQuery('html').removeClass('hide-text');
     });
@@ -1318,7 +1323,7 @@ add_action('wp_footer', function () {
 
 
     var btnPause = jQuery('.btn-pause');
-    btnPause.click(function() {
+    btnPause.on('click',function() {
 
 
       campfire.publish('first-click');
@@ -1526,7 +1531,7 @@ add_action('wp_footer', function () {
 
 
     var btnStart = jQuery('.btn-start');
-    btnStart.click(function() {
+    btnStart.on('click',function() {
       campfire.publish('gather-inputs-and-do-it');
     });
     btnStart.on('touchend', function() {
@@ -2354,7 +2359,7 @@ add_action('wp_footer', function () {
         var div = DOM.div(i + 1).addClass('bar bar-' + i);
         songFormPosition.append(div);
 
-        div.click(function() {
+        div.on('click',function() {
           BSD.clickedBar = i;
           var event = BSD.sequence.find(function(o) {
             return o.barIdx == i && o.cycleIdx == BSD.currentCycleIdx;
@@ -2373,7 +2378,7 @@ add_action('wp_footer', function () {
         var div = DOM.div(i + 1).addClass('cycle cycle-' + i);
         songCyclePosition.append(div);
 
-        div.click(function() {
+        div.on('click',function() {
           BSD.clickedCycle = i;
           var event = BSD.sequence.find(function(o) {
             return o.cycleIdx == i && o.barIdx == BSD.currentBarIdx;
@@ -2448,13 +2453,19 @@ add_action('wp_footer', function () {
 
     campfire.subscribe('song-form-position', function(o) {
 
-      songFormPosition.find('.active').removeClass('active');
-      songFormPosition.find('.bar-' + o.barIdx).addClass('active');
+      let tmp;
+      
+      tmp = songFormPosition.find('.active')
+      tmp && tmp.removeClass('active');
+      tmp = songFormPosition.find('.bar-' + o.barIdx);
+      tmp && tmp.addClass('active');
       ///songCycleIndicator.html(o.cycleIdx+1);
 
 
-      songCyclePosition.find('.active').removeClass('active');
-      songCyclePosition.find('.cycle-' + o.cycleIdx).addClass('active');
+      tmp = songCyclePosition.find('.active');
+      tmp && tmp.removeClass('active');
+      tmp = songCyclePosition.find('.cycle-' + o.cycleIdx);
+      tmp && tmp.addClass('active');
 
     });
 
@@ -2724,7 +2735,7 @@ add_action('wp_footer', function () {
 
 
     var btnLoopStart = jQuery('.btn-loop-start');
-    btnLoopStart.click(function() {
+    btnLoopStart.on('click',function() {
 
       if (BSD.loopEnd !== 0 && !BSD.loopEnd) {
         BSD.loopEnd = BSD.sequence.length - 1;
@@ -2743,7 +2754,7 @@ add_action('wp_footer', function () {
       tick(BSD.loop[0]);
     });
     var btnLoopEnd = jQuery('.btn-loop-end');
-    btnLoopEnd.click(function() {
+    btnLoopEnd.on('click',function() {
       if (BSD.loopStart !== 0 && !BSD.loopStart) {
         BSD.loopStart = 0;
       }
@@ -2918,7 +2929,7 @@ add_action('wp_footer', function () {
       );
       ***/
 
-      fred = BSD.Widgets.SVGFretboard({
+      fred = SVGFretboard({
           foo: 'bar',
           fps,
           fretStarts,
@@ -3099,9 +3110,14 @@ add_action('wp_footer', function () {
       datWrap.addClass('noprint');
 
 
-      let magicHue = (Date.now() / 1000000) % (Math.PI * 2);
-      nudgeBackgroundColor('.vindow .header', magicHue);
+      let TAU = Math.PI * 2;
+      let biggerIsSlower = 500000 // 1_000_000
+      let magicHueRadians = (Date.now() / biggerIsSlower) % TAU;
+      document.querySelectorAll('.vindow .header').forEach(elem => {
+        setBackgroundHue(elem,magicHueRadians)
+      });
 
+    var body = DOM.from(document.body);
 
     let midiInfo = MIDIInfo({ 
       router, 

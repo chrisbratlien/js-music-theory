@@ -37,6 +37,9 @@ add_action('wp_head', function () {
     font-style: normal
     }
 
+    label {
+      margin: 0;
+    }
     .lcd {
       background-color: rgb(18,66,0);
       color: rgb(233,255,0);
