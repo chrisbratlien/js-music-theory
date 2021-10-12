@@ -1,0 +1,554 @@
+[
+    {
+        "chromaticValue": 4,
+        "fret": 0,
+        "noteValue": 76,
+        "string": 1
+    },
+    {
+        "chromaticValue": 5,
+        "fret": 1,
+        "noteValue": 77,
+        "string": 1
+    },
+    {
+        "chromaticValue": 6,
+        "fret": 2,
+        "noteValue": 78,
+        "string": 1
+    },
+    {
+        "chromaticValue": 7,
+        "fret": 3,
+        "noteValue": 79,
+        "string": 1
+    },
+    {
+        "chromaticValue": 8,
+        "fret": 4,
+        "noteValue": 80,
+        "string": 1
+    },
+    {
+        "chromaticValue": 9,
+        "fret": 5,
+        "noteValue": 81,
+        "string": 1
+    },
+    {
+        "chromaticValue": 10,
+        "fret": 6,
+        "noteValue": 82,
+        "string": 1
+    },
+    {
+        "chromaticValue": 11,
+        "fret": 7,
+        "noteValue": 83,
+        "string": 1
+    },
+    {
+        "chromaticValue": 0,
+        "fret": 8,
+        "noteValue": 84,
+        "string": 1
+    },
+    {
+        "chromaticValue": 1,
+        "fret": 9,
+        "noteValue": 85,
+        "string": 1
+    },
+    {
+        "chromaticValue": 2,
+        "fret": 10,
+        "noteValue": 86,
+        "string": 1
+    },
+    {
+        "chromaticValue": 3,
+        "fret": 11,
+        "noteValue": 87,
+        "string": 1
+    },
+    {
+        "chromaticValue": 4,
+        "fret": 12,
+        "noteValue": 88,
+        "string": 1
+    },
+    {
+        "chromaticValue": 5,
+        "fret": 13,
+        "noteValue": 89,
+        "string": 1
+    },
+    {
+        "chromaticValue": 6,
+        "fret": 14,
+        "noteValue": 90,
+        "string": 1
+    },
+    {
+        "chromaticValue": 7,
+        "fret": 15,
+        "noteValue": 91,
+        "string": 1
+    },
+    {
+        "chromaticValue": 8,
+        "fret": 16,
+        "noteValue": 92,
+        "string": 1
+    },
+    {
+        "chromaticValue": 9,
+        "fret": 17,
+        "noteValue": 93,
+        "string": 1
+    },
+    {
+        "chromaticValue": 10,
+        "fret": 18,
+        "noteValue": 94,
+        "string": 1
+    },
+    {
+        "chromaticValue": 11,
+        "fret": 19,
+        "noteValue": 95,
+        "string": 1
+    },
+    {
+        "chromaticValue": 0,
+        "fret": 20,
+        "noteValue": 96,
+        "string": 1
+    },
+    {
+        "chromaticValue": 1,
+        "fret": 21,
+        "noteValue": 97,
+        "string": 1
+    },
+    {
+        "chromaticValue": 2,
+        "fret": 22,
+        "noteValue": 98,
+        "string": 1
+    },
+    {
+        "chromaticValue": 9,
+        "fret": 0,
+        "noteValue": 69,
+        "string": 2
+    },
+    {
+        "chromaticValue": 10,
+        "fret": 1,
+        "noteValue": 70,
+        "string": 2
+    },
+    {
+        "chromaticValue": 11,
+        "fret": 2,
+        "noteValue": 71,
+        "string": 2
+    },
+    {
+        "chromaticValue": 0,
+        "fret": 3,
+        "noteValue": 72,
+        "string": 2
+    },
+    {
+        "chromaticValue": 1,
+        "fret": 4,
+        "noteValue": 73,
+        "string": 2
+    },
+    {
+        "chromaticValue": 2,
+        "fret": 5,
+        "noteValue": 74,
+        "string": 2
+    },
+    {
+        "chromaticValue": 3,
+        "fret": 6,
+        "noteValue": 75,
+        "string": 2
+    },
+    {
+        "chromaticValue": 4,
+        "fret": 7,
+        "noteValue": 76,
+        "string": 2
+    },
+    {
+        "chromaticValue": 5,
+        "fret": 8,
+        "noteValue": 77,
+        "string": 2
+    },
+    {
+        "chromaticValue": 6,
+        "fret": 9,
+        "noteValue": 78,
+        "string": 2
+    },
+    {
+        "chromaticValue": 7,
+        "fret": 10,
+        "noteValue": 79,
+        "string": 2
+    },
+    {
+        "chromaticValue": 8,
+        "fret": 11,
+        "noteValue": 80,
+        "string": 2
+    },
+    {
+        "chromaticValue": 9,
+        "fret": 12,
+        "noteValue": 81,
+        "string": 2
+    },
+    {
+        "chromaticValue": 10,
+        "fret": 13,
+        "noteValue": 82,
+        "string": 2
+    },
+    {
+        "chromaticValue": 11,
+        "fret": 14,
+        "noteValue": 83,
+        "string": 2
+    },
+    {
+        "chromaticValue": 0,
+        "fret": 15,
+        "noteValue": 84,
+        "string": 2
+    },
+    {
+        "chromaticValue": 1,
+        "fret": 16,
+        "noteValue": 85,
+        "string": 2
+    },
+    {
+        "chromaticValue": 2,
+        "fret": 17,
+        "noteValue": 86,
+        "string": 2
+    },
+    {
+        "chromaticValue": 3,
+        "fret": 18,
+        "noteValue": 87,
+        "string": 2
+    },
+    {
+        "chromaticValue": 4,
+        "fret": 19,
+        "noteValue": 88,
+        "string": 2
+    },
+    {
+        "chromaticValue": 5,
+        "fret": 20,
+        "noteValue": 89,
+        "string": 2
+    },
+    {
+        "chromaticValue": 6,
+        "fret": 21,
+        "noteValue": 90,
+        "string": 2
+    },
+    {
+        "chromaticValue": 7,
+        "fret": 22,
+        "noteValue": 91,
+        "string": 2
+    },
+    {
+        "chromaticValue": 2,
+        "fret": 0,
+        "noteValue": 62,
+        "string": 3
+    },
+    {
+        "chromaticValue": 3,
+        "fret": 1,
+        "noteValue": 63,
+        "string": 3
+    },
+    {
+        "chromaticValue": 4,
+        "fret": 2,
+        "noteValue": 64,
+        "string": 3
+    },
+    {
+        "chromaticValue": 5,
+        "fret": 3,
+        "noteValue": 65,
+        "string": 3
+    },
+    {
+        "chromaticValue": 6,
+        "fret": 4,
+        "noteValue": 66,
+        "string": 3
+    },
+    {
+        "chromaticValue": 7,
+        "fret": 5,
+        "noteValue": 67,
+        "string": 3
+    },
+    {
+        "chromaticValue": 8,
+        "fret": 6,
+        "noteValue": 68,
+        "string": 3
+    },
+    {
+        "chromaticValue": 9,
+        "fret": 7,
+        "noteValue": 69,
+        "string": 3
+    },
+    {
+        "chromaticValue": 10,
+        "fret": 8,
+        "noteValue": 70,
+        "string": 3
+    },
+    {
+        "chromaticValue": 11,
+        "fret": 9,
+        "noteValue": 71,
+        "string": 3
+    },
+    {
+        "chromaticValue": 0,
+        "fret": 10,
+        "noteValue": 72,
+        "string": 3
+    },
+    {
+        "chromaticValue": 1,
+        "fret": 11,
+        "noteValue": 73,
+        "string": 3
+    },
+    {
+        "chromaticValue": 2,
+        "fret": 12,
+        "noteValue": 74,
+        "string": 3
+    },
+    {
+        "chromaticValue": 3,
+        "fret": 13,
+        "noteValue": 75,
+        "string": 3
+    },
+    {
+        "chromaticValue": 4,
+        "fret": 14,
+        "noteValue": 76,
+        "string": 3
+    },
+    {
+        "chromaticValue": 5,
+        "fret": 15,
+        "noteValue": 77,
+        "string": 3
+    },
+    {
+        "chromaticValue": 6,
+        "fret": 16,
+        "noteValue": 78,
+        "string": 3
+    },
+    {
+        "chromaticValue": 7,
+        "fret": 17,
+        "noteValue": 79,
+        "string": 3
+    },
+    {
+        "chromaticValue": 8,
+        "fret": 18,
+        "noteValue": 80,
+        "string": 3
+    },
+    {
+        "chromaticValue": 9,
+        "fret": 19,
+        "noteValue": 81,
+        "string": 3
+    },
+    {
+        "chromaticValue": 10,
+        "fret": 20,
+        "noteValue": 82,
+        "string": 3
+    },
+    {
+        "chromaticValue": 11,
+        "fret": 21,
+        "noteValue": 83,
+        "string": 3
+    },
+    {
+        "chromaticValue": 0,
+        "fret": 22,
+        "noteValue": 84,
+        "string": 3
+    },
+    {
+        "chromaticValue": 7,
+        "fret": 0,
+        "noteValue": 55,
+        "string": 4
+    },
+    {
+        "chromaticValue": 8,
+        "fret": 1,
+        "noteValue": 56,
+        "string": 4
+    },
+    {
+        "chromaticValue": 9,
+        "fret": 2,
+        "noteValue": 57,
+        "string": 4
+    },
+    {
+        "chromaticValue": 10,
+        "fret": 3,
+        "noteValue": 58,
+        "string": 4
+    },
+    {
+        "chromaticValue": 11,
+        "fret": 4,
+        "noteValue": 59,
+        "string": 4
+    },
+    {
+        "chromaticValue": 0,
+        "fret": 5,
+        "noteValue": 60,
+        "string": 4
+    },
+    {
+        "chromaticValue": 1,
+        "fret": 6,
+        "noteValue": 61,
+        "string": 4
+    },
+    {
+        "chromaticValue": 2,
+        "fret": 7,
+        "noteValue": 62,
+        "string": 4
+    },
+    {
+        "chromaticValue": 3,
+        "fret": 8,
+        "noteValue": 63,
+        "string": 4
+    },
+    {
+        "chromaticValue": 4,
+        "fret": 9,
+        "noteValue": 64,
+        "string": 4
+    },
+    {
+        "chromaticValue": 5,
+        "fret": 10,
+        "noteValue": 65,
+        "string": 4
+    },
+    {
+        "chromaticValue": 6,
+        "fret": 11,
+        "noteValue": 66,
+        "string": 4
+    },
+    {
+        "chromaticValue": 7,
+        "fret": 12,
+        "noteValue": 67,
+        "string": 4
+    },
+    {
+        "chromaticValue": 8,
+        "fret": 13,
+        "noteValue": 68,
+        "string": 4
+    },
+    {
+        "chromaticValue": 9,
+        "fret": 14,
+        "noteValue": 69,
+        "string": 4
+    },
+    {
+        "chromaticValue": 10,
+        "fret": 15,
+        "noteValue": 70,
+        "string": 4
+    },
+    {
+        "chromaticValue": 11,
+        "fret": 16,
+        "noteValue": 71,
+        "string": 4
+    },
+    {
+        "chromaticValue": 0,
+        "fret": 17,
+        "noteValue": 72,
+        "string": 4
+    },
+    {
+        "chromaticValue": 1,
+        "fret": 18,
+        "noteValue": 73,
+        "string": 4
+    },
+    {
+        "chromaticValue": 2,
+        "fret": 19,
+        "noteValue": 74,
+        "string": 4
+    },
+    {
+        "chromaticValue": 3,
+        "fret": 20,
+        "noteValue": 75,
+        "string": 4
+    },
+    {
+        "chromaticValue": 4,
+        "fret": 21,
+        "noteValue": 76,
+        "string": 4
+    },
+    {
+        "chromaticValue": 5,
+        "fret": 22,
+        "noteValue": 77,
+        "string": 4
+    }
+]
