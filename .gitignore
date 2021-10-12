@@ -5,7 +5,9 @@ prototype.js
 palette.html
 *tab
 *gp5
-data
+data/*
+!data/guitar.json
+!data/mandolin.json
 local.php
 .htaccess
 node_modules
