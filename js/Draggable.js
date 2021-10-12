@@ -1,6 +1,6 @@
 // From https://www.w3schools.com/howto/howto_js_draggable.asp
 
-function Draggable(elmnt, dragHandle, opts) {
+function Draggable(elmnt, dragHandle) {
     //dragHandle could be something inside of elmnt
     if (!dragHandle) {
         //make the whole thing draggable.
@@ -14,21 +14,10 @@ function Draggable(elmnt, dragHandle, opts) {
         pos3 = 0,
         pos4 = 0;
 
-    var startPos = {
-        x: 0,
-        y: 0
-    }
-    var self;
-
-
     function dragMouseDown(e) {
         e = e || window.event;
         //e.preventDefault();
 
-        startPos = {
-            x: e.clientX,
-            y: e.clientY
-        }
         pos3 = e.clientX;
         pos4 = e.clientY;
         //document.onmouseup = closeDragElement;
@@ -55,30 +44,15 @@ function Draggable(elmnt, dragHandle, opts) {
         elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
     }
 
-    function closeDragElement(e) {
-        console.log('close?', e)
-
-        let endPos = {
-            x: e.clientX,
-            y: e.clientY
-        }
-        let disp = {
-            x: endPos.x - startPos.x,
-            y: endPos.y - startPos.y
-        };
-        console.log(startPos, endPos, disp);
-
+    function closeDragElement() {
+        //console.log('close?')
         document.onpointerup = null;
         document.onpointermove = null;
-        if (opts && opts.onpointerup) {
-            opts.onpointerup(e, disp);
-        }
     }
 
 
     //dragHandle.onmousedown = dragMouseDown;
     dragHandle.onpointerdown = dragMouseDown;
-
 
 }
 export default Draggable;
