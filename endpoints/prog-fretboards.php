@@ -349,6 +349,10 @@ add_action('wp_head', function () {
 
     .svg-wrap .bg {
       fill: blanchedalmond;
+      width: 100%;
+    }
+    .svg-wrap g.base-baord {
+      width: 100%;
     }
 
     .svg-wrap .fretted {

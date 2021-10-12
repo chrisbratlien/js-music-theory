@@ -18,32 +18,20 @@ function SVGFretboard(spec) {
     var svg = DOM.from(
         document.createElementNS("http://www.w3.org/2000/svg", "svg")
     );
-    //svg.raw.setAttribute('viewBox', '0 0 100 100');
 
     svg
         .attr({
             class: 'baz svg-board',
-            viewBox: "0 0 100 100",
             'vector-effect': "non-scaling-stroke",
-            //baseProfile: 'full',
+            preserveAspectRatio: 'xMidYMid meet',
             width: "100%",
             height: "80",
-            //xmlns: "http://www.w3.org/2000/svg" 
         })
         .append(
             DOM.rect() //bg
             .attr({
                 class: 'bg',
-                width: '100%',
-                height: '100%',
             }),
-            /**
-            DOM.text('Blahhhhhh')
-              .attr({
-                x: 50,
-                y: 50
-              }),
-            **/
             gFrets,
             gInlays,
             gStrings,
@@ -60,7 +48,11 @@ function SVGFretboard(spec) {
     };
 
     self.plotFingerboardFrets = function() {
-        gFrets.append(
+        gFrets
+            .attr({
+                class: 'gfrets base-board',
+            })
+            .append(
                 BSD.guitarData
                 .filter(fret => fret.string == 1)
                 .map(fret => {
@@ -99,10 +91,9 @@ function SVGFretboard(spec) {
                     return rect;
                 })
             )
-            .attr({
-                class: 'base-board',
-                width: '100%'
-            })
+
+
+
     };
 
     self.plotStrings = function() {
@@ -171,9 +162,8 @@ function SVGFretboard(spec) {
 
 
     self.ui = function() {
-            return svg;
-        }
-        ///self.on('wake-up', () => console.log('WOKE!'))
+        return svg;
+    }
 
     return self;
 };
