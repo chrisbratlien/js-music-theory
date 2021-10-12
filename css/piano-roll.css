@@ -1,37 +1,31 @@
-
-.piano-roll {
-}
+.piano-roll {}
 
 .piano-roll .toolbar .tempo {
-  width: 60px;
+    width: 60px;
 }
+
 .piano-roll table {
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     border-right: 1px solid rgba(0, 0, 0, 0.1);
     max-height: 400px;
     overflow-y: auto;
     width: 100%;
-  }
+}
 
 .piano-roll table th {
-  max-width: 23px;
-  width: 23px;
-
+    max-width: 23px;
+    width: 23px;
 }
 
 .piano-roll table td {
     border-radius: 6px;
     border-top: 1px solid rgba(0, 0, 0, 0.1);
     border-left: 1px solid rgba(0, 0, 0, 0.1);
-
     cursor: pointer;
-
     height: 1.5em;
-    min-width: 10px;  
+    min-width: 10px;
     padding: 0.2em;
     text-align: center;
-
-
     -webkit-user-select: none;
     /* Chrome/Safari/Opera */
     -khtml-user-select: none;
@@ -43,10 +37,8 @@
     text-align: center;
     user-select: none;
     /* width: 23px; */
+}
 
-  }
-
-   .piano-roll table tr:hover {
+.piano-roll table tr:hover {
     opacity: 0.5;
-  }
-  
+}
