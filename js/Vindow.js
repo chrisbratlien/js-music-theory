@@ -39,47 +39,56 @@ function makeResizableDiv(element, resizers) {
             window.addEventListener('mouseup', stopResize)
         })
 
+        function leftish(e) {
+            const width = original_width - (e.pageX - original_mouse_x)
+            if (width <= minimum_size) { return false; }
+            element.style.width = width + 'px'
+            element.style.left = original_x + (e.pageX - original_mouse_x) + 'px'
+        }
+
+        function rightish(e) {
+            const width = original_width + (e.pageX - original_mouse_x)
+            if (width <= minimum_size) { return false; }
+            element.style.width = width + 'px'
+        }
+
+        function bottomish(e) {
+            const height = original_height + (e.pageY - original_mouse_y)
+            if (height <= minimum_size) { return false; }
+            element.style.height = height + 'px'
+
+        }
+
+        function topish(e) {
+            const height = original_height - (e.pageY - original_mouse_y)
+            if (height <= minimum_size) { return false; }
+            element.style.height = height + 'px'
+            element.style.top = original_y + (e.pageY - original_mouse_y) + 'px'
+
+        }
+
+
         function resize(e) {
-            if (currentResizer.classList.contains('bottom-right')) {
-                const width = original_width + (e.pageX - original_mouse_x);
-                const height = original_height + (e.pageY - original_mouse_y)
-                if (width > minimum_size) {
-                    element.style.width = width + 'px'
-                }
-                if (height > minimum_size) {
-                    element.style.height = height + 'px'
-                }
-            } else if (currentResizer.classList.contains('bottom-left')) {
-                const height = original_height + (e.pageY - original_mouse_y)
-                const width = original_width - (e.pageX - original_mouse_x)
-                if (height > minimum_size) {
-                    element.style.height = height + 'px'
-                }
-                if (width > minimum_size) {
-                    element.style.width = width + 'px'
-                    element.style.left = original_x + (e.pageX - original_mouse_x) + 'px'
-                }
+            if (currentResizer.classList.contains('top')) {
+                topish(e);
             } else if (currentResizer.classList.contains('top-right')) {
-                const width = original_width + (e.pageX - original_mouse_x)
-                const height = original_height - (e.pageY - original_mouse_y)
-                if (width > minimum_size) {
-                    element.style.width = width + 'px'
-                }
-                if (height > minimum_size) {
-                    element.style.height = height + 'px'
-                    element.style.top = original_y + (e.pageY - original_mouse_y) + 'px'
-                }
-            } else {
-                const width = original_width - (e.pageX - original_mouse_x)
-                const height = original_height - (e.pageY - original_mouse_y)
-                if (width > minimum_size) {
-                    element.style.width = width + 'px'
-                    element.style.left = original_x + (e.pageX - original_mouse_x) + 'px'
-                }
-                if (height > minimum_size) {
-                    element.style.height = height + 'px'
-                    element.style.top = original_y + (e.pageY - original_mouse_y) + 'px'
-                }
+                topish(e);
+                rightish(e);
+            } else if (currentResizer.classList.contains('right')) {
+                rightish(e);
+            } else if (currentResizer.classList.contains('bottom-right')) {
+                bottomish(e);
+                rightish(e);
+            } else if (currentResizer.classList.contains('bottom')) {
+                bottomish(e);
+            } else if (currentResizer.classList.contains('bottom-left')) {
+                bottomish(e);
+                leftish(e);
+            } else if (currentResizer.classList.contains('left')) {
+                leftish(e);
+            } else if (currentResizer.classList.contains('top-left')) {
+                topish(e);
+                leftish(e);
             }
         }
 
@@ -89,13 +98,16 @@ function makeResizableDiv(element, resizers) {
     }
 }
 
-//makeResizableDiv('.resizable')
 
 let resizerSlugs = [
     'bottom-left',
     'top-left',
-    'top-right', //seems buggy. can't increase X to the right
-    'bottom-right'
+    'top-right',
+    'bottom-right',
+    'bottom',
+    'left',
+    'right',
+    'top'
 ];
 
 
