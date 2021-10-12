@@ -1,5 +1,12 @@
 export function setBackgroundHue(elem, hueRads) {
-    elem.style.backgroundColor = `hsl(${hueRads}rad,50%,50%)`;
+    //elem.style.backgroundColor = `hsl(${hueRads}rad,50%,50%)`;
+
+    elem.style.background = `linear-gradient(
+            to bottom, 
+            hsl(${hueRads}rad,50%,60%) 0%, 
+            hsl(${hueRads}rad,50%,40%) 100%
+        )`;
+
 }
 
 
