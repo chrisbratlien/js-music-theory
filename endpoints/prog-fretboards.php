@@ -3112,7 +3112,7 @@ add_action('wp_footer', function () {
 
       let datWrap = jQuery('.dg.ac');
       datWrap.addClass('noprint');
-
+      Draggable(document.querySelector('.dg.ac'));
 
       let TAU = Math.PI * 2;
       let biggerIsSlower = 500000 // 1_000_000
