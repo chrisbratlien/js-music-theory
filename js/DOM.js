@@ -83,6 +83,10 @@ function fromVanilla(raw) {
         raw.innerText = val;
         return self;
     }
+    self.focus = function() {
+        raw.focus();
+        return self;
+    }
     self.html = function(val) {
         if (arguments.length == 0) {
             //just reading
@@ -130,11 +134,7 @@ function fromVanilla(raw) {
     self.attr = function(key, value) {
         if (typeof key == 'object') {
             let props = key;
-            //Object.keys(props).forEach(prop => { raw[prop] = props[prop]; })
-            Object.keys(props).forEach(prop => {
-                //raw[prop] = props[prop]; 
-                raw.setAttribute(prop, props[prop]);
-            })
+            Object.keys(props).forEach(prop => { raw[prop] = props[prop]; })
             return self;
         }
         if (arguments.length == 1) {
