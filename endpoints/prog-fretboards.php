@@ -3058,6 +3058,7 @@ add_action('wp_footer', function () {
       ...freak.opts,
       events: events
     })
+    pianoRoll.relay('tempo-change', campfire);
 
     let midiOutMonitor = MIDIOutMonitor({
       port: router.outPort

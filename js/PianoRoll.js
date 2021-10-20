@@ -11,15 +11,15 @@ function PianoRoll(props) {
   let self = PubSub({});
   let pane = DOM.div().addClass("piano-roll");
 
-  let lowNote = 54;//48;
-  let howManyNotes = 20;
+  let lowNote = 36;//C
+  let howManyNotes = 48;
 
   let noteRange = [...Array(howManyNotes).keys()].map((o) => lowNote + o);
   //so that the table rows can render in order from high to low
   let reversedNoteRange = [...noteRange].reverse();
 
   let eventRange = [...Array(props.TPLOOP).keys()].map((o) => o);
-  console.log("eventRange", eventRange);
+  //console.log("eventRange", eventRange);
 
   let TAU = Math.PI * 2;
   let hueRadiansBegin = TAU/3;

@@ -5,8 +5,7 @@ export default function FreakySeq(props) {
   let opts = {
     BARS: 2, //total bars in this sequence
     QPBAR: 4, //quarter notes per bar
-    //PPQ: 6, // ticks per quarter note or PPQN (pulse per quarter note)
-    PPQ: 2,//3,
+    PPQ: 4,//sixteenths// ticks per quarter note or PPQN (pulse per quarter note)
     BPM: 120,
     ...props
   };
