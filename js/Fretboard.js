@@ -270,10 +270,11 @@ function Fretboard(spec) {
         inner.append(table);
         var controls = DOM.div().addClass("controls noprint");
 
-        var playAll = DOM.button('<i class="fa fa-play"></i>').addClass(
-            "btn btn-success control play-all"
-        );
-        playAll.on('click', function() {
+        var playAll = DOM.button()
+            .addClass("btn btn-success control play-all")
+            .append(
+                DOM.i().addClass('fa fa-play')
+            ).on('click', function() {
             self.publish("play-notes", self.selectedNotes());
         });
 
@@ -288,10 +289,11 @@ function Fretboard(spec) {
 
         controls.append(playAll);
 
-        var stickyNoteButton = DOM.button(
-            '<i class="fa fa-sticky-note-o"></i>'
-        ).addClass("btn btn-info");
-        stickyNoteButton.on('click', function(e) {
+        var stickyNoteButton = DOM.button()
+            .addClass("btn btn-info")
+            .append(DOM.i()
+                .addClass('fa fa-sticky-note-o'))
+            .on('click', function (e) {
             ///console.log(e,'sticky');
 
             var sticky = BSD.Widgets.StickyNote(e);
@@ -302,10 +304,11 @@ function Fretboard(spec) {
         inner.append(controls);
         inner.append(DOM.div("&nbsp;").addClass("spacer"));
 
-        var close = DOM.div('<i class="fa fa-3x fa-close"></i> ').addClass(
-            "noprint"
-        );
-        close.on('click', function() {
+        var close = DOM.div()
+            .addClass("noprint")
+            .append(
+                DOM.i().addClass('fa fa-3x fa-close'))
+            .on('click', function() {
             self.close();
         });
         controls.append(close);
