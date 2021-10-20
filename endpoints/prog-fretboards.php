@@ -10,11 +10,17 @@ add_action('wp_head', function () {
   <title>12 Fretboards</title>
   <style>
     @import 'css/piano-roll.css';
+    @import 'css/lcd.css';
     @import 'css/vindow.css';
   </style>
   <style type="text/css">
     body {
       font-size: 10px;
+    }
+
+
+    label {
+      margin: 0;
     }
 
     .clear-both {
@@ -136,6 +142,7 @@ add_action('wp_head', function () {
     .hide-text td {
       color: transparent;
     }
+
 
 
     @media print {
@@ -351,6 +358,7 @@ add_action('wp_head', function () {
       fill: blanchedalmond;
       width: 100%;
     }
+
     .svg-wrap g.base-baord {
       width: 100%;
     }
@@ -530,18 +538,18 @@ add_action('wp_footer', function () {
   <script>
     let jvtool = {};
   </script>
-  <script src="<?php  home_url();  ?>/lib/Snap.svg/dist/snap.svg.js"></script>
-  <script src="<?php  home_url();  ?>/lib/CodingMath/utils.js"></script>
+  <script src="<?php home_url();  ?>/lib/Snap.svg/dist/snap.svg.js"></script>
+  <script src="<?php home_url();  ?>/lib/CodingMath/utils.js"></script>
   <script src="<?php home_url();  ?>/lib/dat.gui.js"></script>
-  <script src="<?php  home_url();  ?>/lib/la.js"></script>
-  <script src="<?php  home_url();  ?>/lib/async.min.js"></script>
-  <script src="<?php  home_url();  ?>/js/draggy.js"></script>
-  <script src="<?php  home_url();  ?>/js/sticky-note.js"></script>
-  <script src="<?php  home_url();  ?>/js/bsd.widgets.colorpicker.js"></script>
-  <script src="<?php  home_url();  ?>/js/bsd.widgets.simpleplayer.js"></script>
-  <script src="<?php  home_url();  ?>/js/bsd.widgets.tonalityguru.js"></script>
-  
-  <script src="<?php  home_url();  ?>/js/patchList.js"></script>
+  <script src="<?php home_url();  ?>/lib/la.js"></script>
+  <script src="<?php home_url();  ?>/lib/async.min.js"></script>
+  <script src="<?php home_url();  ?>/js/draggy.js"></script>
+  <script src="<?php home_url();  ?>/js/sticky-note.js"></script>
+  <script src="<?php home_url();  ?>/js/bsd.widgets.colorpicker.js"></script>
+  <script src="<?php home_url();  ?>/js/bsd.widgets.simpleplayer.js"></script>
+  <script src="<?php home_url();  ?>/js/bsd.widgets.tonalityguru.js"></script>
+
+  <script src="<?php home_url();  ?>/js/patchList.js"></script>
 
 
   <script type="module">
@@ -567,7 +575,9 @@ add_action('wp_footer', function () {
     import SongList from "./js/SongList.js";
     import SVGFretboard from "./js/SVGFretboard.js";
 
-    import Fretboard, {makeFretboardOn} from "./js/Fretboard.js";
+    import Fretboard, {
+      makeFretboardOn
+    } from "./js/Fretboard.js";
 
     let router;
 
@@ -688,7 +698,7 @@ add_action('wp_footer', function () {
     });
 
 
-    campfire.subscribe('options-loaded', function() {
+    campfire.on('options-loaded', function() {
       if (BSD.options.progression) {
         progInput.val(BSD.options.progression);
       }
@@ -754,7 +764,7 @@ add_action('wp_footer', function () {
 
 
 
-    campfire.subscribe('progressions-loaded', function() {
+    campfire.on('progressions-loaded', function() {
       BSD.songlist.clear();
       BSD.progressions.forEach(function(progression) {
         ///console.log('whoah',progression);
@@ -779,7 +789,7 @@ add_action('wp_footer', function () {
     }
 
 
-    campfire.subscribe('save-progressions', function() {
+    campfire.on('save-progressions', function() {
       BSD.progressions = BSD.progressions.sort(BSD.sorter(function(o) {
         return o.title;
       }));
@@ -834,7 +844,7 @@ add_action('wp_footer', function () {
     });
 
     var btnSaveProg = jQuery('.btn-save-prog');
-    btnSaveProg.on('click',function() {
+    btnSaveProg.on('click', function() {
       var title = prompt('Title');
       if (title) {
         var spec = {
@@ -858,7 +868,7 @@ add_action('wp_footer', function () {
 
 
     var btnToggleTiny = jQuery('.btn-toggle-tiny');
-    btnToggleTiny.on('click',function() {
+    btnToggleTiny.on('click', function() {
       BSD.options.tiny = !BSD.options.tiny;
       storage.setItem('options', JSON.stringify(BSD.options));
       checkTiny();
@@ -937,7 +947,7 @@ add_action('wp_footer', function () {
     BSD.songlist.renderOn(wSongList.pane);
 
 
-    BSD.songlist.subscribe('song-selected', function(song) {
+    BSD.songlist.on('song-selected', function(song) {
       BSD.currentSong = song;
       songName.html(song.title);
       ////console.log('Z>>EEEEE>>>song',song);
@@ -1075,7 +1085,7 @@ add_action('wp_footer', function () {
     });
 
 
-    campfire.subscribe('render-fret-range-control', function() {
+    campfire.on('render-fret-range-control', function() {
       jQuery('.fret-range-amount').text(
         BSD.options.fretRange.toString().replace(/,/, '-')
       );
@@ -1143,26 +1153,26 @@ add_action('wp_footer', function () {
 
 
 
-    campfire.subscribe('fret-range-updated', function(o) {
+    campfire.on('fret-range-updated', function(o) {
       BSD.boards.forEach(function(board) {
         board.publish('visible-fret-range', o);
       });
     });
 
 
-    campfire.subscribe('set-master-volume', function(o) {
+    campfire.on('set-master-volume', function(o) {
       BSD.audioPlayer.publish('set-master-volume', o);
       bassist.publish('set-master-volume', o);
       keyboardist.publish('set-master-volume', o);
     });
 
 
-    campfire.subscribe('stop-note', function(payload) {
+    campfire.on('stop-note', function(payload) {
       BSD.audioPlayer.stopNote(payload.note);
     });
 
     //LEAD / IMPROV
-    campfire.subscribe('play-note', function(payload) {
+    campfire.on('play-note', function(payload) {
       if (!BSD.options.improv.enabled) {
         return false;
       }
@@ -1184,7 +1194,7 @@ add_action('wp_footer', function () {
 
 
     //CHORD
-    campfire.subscribe('play-notes', function(notes) {
+    campfire.on('play-notes', function(notes) {
 
       //console.log('notes??',notes);
       var chord = makeChordFromNotes(notes);
@@ -1201,7 +1211,7 @@ add_action('wp_footer', function () {
 
     //FIXME: ugly, but needed for datGUI to have a slot on an object for this function.
 
-    campfire.subscribe('play-chord', function(o) {
+    campfire.on('play-chord', function(o) {
       if (!BSD.options.chord.enabled) {
         return false; //done
       }
@@ -1255,7 +1265,7 @@ add_action('wp_footer', function () {
 
 
 
-    campfire.subscribe('note-hover', function(note) {
+    campfire.on('note-hover', function(note) {
       //console.log('note',note.name());
       BSD.currentNote = note;
       if (BSD.strum) {
@@ -1314,11 +1324,12 @@ add_action('wp_footer', function () {
         return err;
       }
       BSD.guitarData = data;
+      campfire.publish('guitar-data-loaded', data);
     });
 
     var btnToggleText = jQuery('.btn-toggle-text');
     var hideText = false;
-    btnToggleText.on('click',function() {
+    btnToggleText.on('click', function() {
       hideText = !hideText;
       hideText ? jQuery('html').addClass('hide-text') : jQuery('html').removeClass('hide-text');
     });
@@ -1327,7 +1338,7 @@ add_action('wp_footer', function () {
 
 
     var btnPause = jQuery('.btn-pause');
-    btnPause.on('click',function() {
+    btnPause.on('click', function() {
 
 
       campfire.publish('first-click');
@@ -1535,7 +1546,7 @@ add_action('wp_footer', function () {
 
 
     var btnStart = jQuery('.btn-start');
-    btnStart.on('click',function() {
+    btnStart.on('click', function() {
       campfire.publish('gather-inputs-and-do-it');
     });
     btnStart.on('touchend', function() {
@@ -1548,11 +1559,11 @@ add_action('wp_footer', function () {
       campfire.publish('gather-inputs-and-do-it');
     });
 
-    campfire.subscribe('stop-it', function() {
+    campfire.on('stop-it', function() {
       clearTimeout(BSD.timeout);
     });
 
-    campfire.subscribe('gather-inputs-and-do-it', function() {
+    campfire.on('gather-inputs-and-do-it', function() {
       if (progInput.val().length === 0) {
         campfire.publish('stop-it');
         return false;
@@ -1896,7 +1907,7 @@ add_action('wp_footer', function () {
       svgBoard = Snap('.svg-wrap svg');
     });
     ***/
-    campfire.subscribe('do-it', function(prog) {
+    campfire.on('do-it', function(prog) {
       BSD.pause = false;
       initLast();
       if (extraBoard) {
@@ -2347,7 +2358,7 @@ add_action('wp_footer', function () {
     });
 
 
-    campfire.subscribe('reset-song-form-ui', function() {
+    campfire.on('reset-song-form-ui', function() {
 
       songFormPosition.empty();
       songCyclePosition.empty();
@@ -2363,7 +2374,7 @@ add_action('wp_footer', function () {
         var div = DOM.div(i + 1).addClass('bar bar-' + i);
         songFormPosition.append(div);
 
-        div.on('click',function() {
+        div.on('click', function() {
           BSD.clickedBar = i;
           var event = BSD.sequence.find(function(o) {
             return o.barIdx == i && o.cycleIdx == BSD.currentCycleIdx;
@@ -2382,7 +2393,7 @@ add_action('wp_footer', function () {
         var div = DOM.div(i + 1).addClass('cycle cycle-' + i);
         songCyclePosition.append(div);
 
-        div.on('click',function() {
+        div.on('click', function() {
           BSD.clickedCycle = i;
           var event = BSD.sequence.find(function(o) {
             return o.cycleIdx == i && o.barIdx == BSD.currentBarIdx;
@@ -2394,7 +2405,7 @@ add_action('wp_footer', function () {
     });
 
 
-    campfire.subscribe('play-chord', function(o) {
+    campfire.on('play-chord', function(o) {
       jQuery('.extra .chord-name').html(o.chord.fullAbbrev());
     });
 
@@ -2433,7 +2444,7 @@ add_action('wp_footer', function () {
 
 
 
-    campfire.subscribe('test-periodic', function(o) {
+    campfire.on('test-periodic', function(o) {
       for (var i = 0; i < o.total; i += 1) {
         var resA = periodicA(i, o.total, o.shift, o.scale, Math.cos);
         console.log('A (cos) i', i, 'result', resA);
@@ -2455,10 +2466,10 @@ add_action('wp_footer', function () {
 
     });
 
-    campfire.subscribe('song-form-position', function(o) {
+    campfire.on('song-form-position', function(o) {
 
       let tmp;
-      
+
       tmp = songFormPosition.find('.active')
       tmp && tmp.removeClass('active');
       tmp = songFormPosition.find('.bar-' + o.barIdx);
@@ -2475,7 +2486,7 @@ add_action('wp_footer', function () {
 
     var saveBarIdx = false;
     BSD.currentBarIdx = false;
-    campfire.subscribe('tick', function(cursor) {
+    campfire.on('tick', function(cursor) {
       if (cursor.barIdx != BSD.currentBarIdx || cursor.cycleIdx != BSD.currentCycleIdx) {
         saveBarIdx = cursor.barIdx;
         BSD.currentBarIdx = cursor.barIdx;
@@ -2484,18 +2495,9 @@ add_action('wp_footer', function () {
       }
     });
 
-    /*
-    var saveCycleIdx = false;
-    campfire.subscribe('tick',function(cursor){
-      if (cursor.cycleIdx != saveCycleIdx) {
-        saveCycleIdx = cursor.cycleIdx;
-        ///campfire.publish('song-form-position',cursor);
-      }
-    });
-    */
 
 
-    campfire.subscribe('tick', function(cursor) {
+    campfire.on('tick', function(cursor) {
       BSD.boards.forEach(function(board) {
         board.unfeatureFrets();
       });
@@ -2543,7 +2545,7 @@ add_action('wp_footer', function () {
     });
 
     //BASS
-    campfire.subscribe('tick', function(cursor) {
+    campfire.on('tick', function(cursor) {
       if (!BSD.options.bass.enabled) {
         return false;
       }
@@ -2603,7 +2605,7 @@ add_action('wp_footer', function () {
       }
     });
 
-    campfire.subscribe('tick', function(cursor) {
+    campfire.on('tick', function(cursor) {
       if (cursor.chordNoteIdx == 0) {
         BSD.boards.forEach(function(board) {
           board.getWrap(function(wrap) {
@@ -2624,7 +2626,7 @@ add_action('wp_footer', function () {
     });
 
     //improv
-    campfire.subscribe('tick', function(cursor) {
+    campfire.on('tick', function(cursor) {
 
       //FIXME: does this need midi/webAudio synth checks? 
       // do we fully trust that protection from play-note?
@@ -2637,7 +2639,7 @@ add_action('wp_footer', function () {
     });
 
     //chord
-    campfire.subscribe('tick', function(cursor) {
+    campfire.on('tick', function(cursor) {
       //var midSwung82 = (swung82+even8DelayMS) / 2;/////].sum() /2;
       var thisIdx = cursor.chordIdx;
       var node = cursor;
@@ -2700,7 +2702,7 @@ add_action('wp_footer', function () {
 
     });
 
-    campfire.subscribe('tick', function(cursor) {
+    campfire.on('tick', function(cursor) {
       //hihat
       if (!BSD.options.hihat.enabled) {
         return false;
@@ -2712,16 +2714,11 @@ add_action('wp_footer', function () {
         hihat();
       }
     });
-    /**
-    campfire.subscribe('tick',function(cursor){
-      
-    });
-    **/
 
     campfire.on('opened-midi-out-port', function(port) {})
 
 
-    campfire.subscribe('reset-sequence-next', function() {
+    campfire.on('reset-sequence-next', function() {
 
       var last = false;
       BSD.sequence.forEach(function(s) {
@@ -2733,13 +2730,13 @@ add_action('wp_footer', function () {
       last.next = BSD.sequence[0];
     });
 
-    campfire.subscribe('tick', function(cursor) {
+    campfire.on('tick', function(cursor) {
       BSD.barIdx = cursor.barIdx;
     });
 
 
     var btnLoopStart = jQuery('.btn-loop-start');
-    btnLoopStart.on('click',function() {
+    btnLoopStart.on('click', function() {
 
       if (BSD.loopEnd !== 0 && !BSD.loopEnd) {
         BSD.loopEnd = BSD.sequence.length - 1;
@@ -2758,7 +2755,7 @@ add_action('wp_footer', function () {
       tick(BSD.loop[0]);
     });
     var btnLoopEnd = jQuery('.btn-loop-end');
-    btnLoopEnd.on('click',function() {
+    btnLoopEnd.on('click', function() {
       if (BSD.loopStart !== 0 && !BSD.loopStart) {
         BSD.loopStart = 0;
       }
@@ -2778,7 +2775,7 @@ add_action('wp_footer', function () {
 
 
     BSD.options.hihat.volume = BSD.options.hihat.volume || 0.7;
-    campfire.subscribe('bootup-hihat', function() {
+    campfire.on('bootup-hihat', function() {
       var bufferSize = 4096;
       var brownNoise = (function() {
         var lastOut = 0.0;
@@ -2801,7 +2798,7 @@ add_action('wp_footer', function () {
 
       gn.connect(mixer.common);
       brownNoise.connect(gn);
-      campfire.subscribe('hihat', function() {
+      campfire.on('hihat', function() {
         gn.gain.setTargetAtTime(BSD.options.hihat.volume, context.currentTime, 0); //do it now...
         gn.gain.linearRampToValueAtTime(0, context.currentTime + 0.015);
       });
@@ -2909,12 +2906,9 @@ add_action('wp_footer', function () {
 
     var fred;
 
-    setTimeout(function() {
-      //wow, I just made some globals. that's why this worked before...
-      //FIXME: cleanup these globals
+    campfire.on('guitar-data-loaded', function() {
       firstStringFrets = BSD.guitarData.filter(o => o.string == 1);
       fps = firstStringFrets.length;
-
       fretStarts = [];
       firstStringFrets.forEach(fret => {
         let last = fretStarts.length ? fretStarts[fretStarts.length - 1] : 0;
@@ -2926,13 +2920,6 @@ add_action('wp_footer', function () {
         return result;
       });
       fretStarts.unshift(0);
-      /**
-      console.log(
-        'fretWidths',fretWidths,
-        'fretStarts',fretStarts
-      );
-      ***/
-
       fred = SVGFretboard({
           foo: 'bar',
           fps,
@@ -2942,8 +2929,6 @@ add_action('wp_footer', function () {
         })
         .on('wake-up', () => console.log('WOKE!!'))
 
-      console.log(fred, 'fred?');
-
       svgWrap.append(
         fred.ui()
       );
@@ -2951,19 +2936,19 @@ add_action('wp_footer', function () {
       fred.plotFingerboardFrets();
       fred.plotInlays();
       fred.plotStrings();
+    });
+
+    jQuery('.color-palette-wrap').append(
+      ColorPalette('woo')
+      .on('color-chosen', color => {
+        BSD.chosenColor = color;
+        console.log('chosen!!', color);
+      })
+      .redraw()
+      .ui()
+    );
 
 
-      jQuery('.color-palette-wrap').append(
-        ColorPalette('woo')
-        .on('color-chosen', color => {
-          BSD.chosenColor = color;
-          console.log('chosen!!', color);
-        })
-        .redraw()
-        .ui()
-      );
-
-    }, 3000);
     //
     let chords = ['D-7', 'G7', 'Cmajor7'];
     let wheely = spinner(chords, chordName => {
@@ -3050,94 +3035,92 @@ add_action('wp_footer', function () {
 
 
 
-      let events = [];
-      window.events = events;
-      let freak = FreakySeq({
-        events
+    let events = [];
+    window.events = events;
+    let freak = FreakySeq({
+      events
+    });
+    window.freak = freak;
+    freak.on('note-on', function(event) {
+      campfire.publish('play-note', {
+        note: Note(event.noteNumber),
+        duration: BSD.durations.note
       });
-      window.freak = freak;
-      freak.on('note-on', function(event) {
-        campfire.publish('play-note', {
-          note: Note(event.noteNumber),
-          duration: BSD.durations.note
-        });
-      });
+    });
 
 
-      campfire.subscribe('tempo-change', freak.tempoChange)
-      freak.tempoChange(BSD.options.tempo);
+    campfire.on('tempo-change', freak.tempoChange)
+    freak.tempoChange(BSD.options.tempo);
 
 
 
-      let pianoRoll = PianoRoll({
-        ...freak.opts,
-        events: events
-      })
+    let pianoRoll = PianoRoll({
+      ...freak.opts,
+      events: events
+    })
 
-      let midiOutMonitor = MIDIOutMonitor({
-        port: router.outPort
-      });
-      jQuery('.monitor-wrap').append(midiOutMonitor.ui())
-
-
-      pianoRoll.on('note-hover', function(noteNumber) {
-        BSD.currentNote = Note(noteNumber);
-      });
-      pianoRoll.on('note-preview', function(noteNumber) {
-        campfire.publish('play-note', {
-          note: Note(noteNumber),
-          duration: BSD.durations.note
-        });
+    let midiOutMonitor = MIDIOutMonitor({
+      port: router.outPort
+    });
+    jQuery('.monitor-wrap').append(midiOutMonitor.ui())
 
 
-      });
-      pianoRoll.on('is-playing', function(isPlaying) {
-        //isPlaying shows the new going-forward wish
-        isPlaying ? freak.play() : freak.stop();
+    pianoRoll.on('note-hover', function(noteNumber) {
+      BSD.currentNote = Note(noteNumber);
+    });
+    pianoRoll.on('note-preview', function(noteNumber) {
+      campfire.publish('play-note', {
+        note: Note(noteNumber),
+        duration: BSD.durations.note
       });
 
 
+    });
+    pianoRoll.on('is-playing', function(isPlaying) {
+      //isPlaying shows the new going-forward wish
+      isPlaying ? freak.play() : freak.stop();
+    });
 
 
 
-      let w = Vindow({
-        title: "Piano Roll"
-      });
-      let [toolbar, pane] = pianoRoll.ui();
-      w.appendToToolbar(toolbar);
-      w.append(pane);
-      w.renderOn(jQuery('.piano-roll-wrap'));
+
+
+    let w = Vindow({
+      title: "Piano Roll"
+    });
+    let [toolbar, pane] = pianoRoll.ui();
+    w.appendToToolbar(toolbar);
+    w.append(pane);
+    w.renderOn(jQuery('.piano-roll-wrap'));
 
 
 
-      let datWrap = jQuery('.dg.ac');
-      datWrap.addClass('noprint');
-      Draggable(document.querySelector('.dg.ac'));
+    let datWrap = jQuery('.dg.ac');
+    datWrap.addClass('noprint');
+    Draggable(document.querySelector('.dg.ac'));
 
-      let TAU = Math.PI * 2;
-      let biggerIsSlower = 500000 // 1_000_000
-      let magicHueRadians = (Date.now() / biggerIsSlower) % TAU;
-      document.querySelectorAll('.vindow .header').forEach(elem => {
-        setBackgroundHue(elem,magicHueRadians)
-      });
+    let TAU = Math.PI * 2;
+    let biggerIsSlower = 500000 // 1_000_000
+    let magicHueRadians = (Date.now() / biggerIsSlower) % TAU;
+    document.querySelectorAll('.vindow .header').forEach(elem => {
+      setBackgroundHue(elem, magicHueRadians)
+    });
 
     var body = DOM.from(document.body);
 
-    let midiInfo = MIDIInfo({ 
-      router, 
-      channel: BSD.options.improv.channel, 
-      patch: BSD.options.improv.patch 
+    let midiInfo = MIDIInfo({
+      router,
+      channel: BSD.options.improv.channel,
+      patch: BSD.options.improv.patch
     });
-    var vMIDIInfo = Vindow({ title: 'MIDI Info'});
+    var vMIDIInfo = Vindow({
+      title: 'MIDI Info'
+    });
     let [miToolbar, miPane] = midiInfo.ui();
     vMIDIInfo.appendToToolbar(miToolbar),
-    vMIDIInfo.append(miPane);
+      vMIDIInfo.append(miPane);
     vMIDIInfo.renderOn(body);
-
-
-
-
-</script>
+  </script>
   <script>
     function onAppLoad() {
       //FIXME: get rid of this once the app/module refactoring is done

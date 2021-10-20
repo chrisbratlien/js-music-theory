@@ -24,35 +24,17 @@ add_action('wp_head', function () {
 ?>
   <style>
     @import 'css/piano-roll.css';
+    @import 'css/lcd.css';
     @import 'css/vindow.css';
 
     @import "css/align.css";
     @import "css/flex.css";
 
 
-    @font-face {
-    font-family: "Electronic Highway Sign";
-    src: url(font/EHSMB.eot?) format("eot"),url(font/EHSMB.ttf) format("truetype"),url(font/EHSMB.woff) format("woff"),url(font/EHSMB.svg#ElectronicHighwaySign) format("svg");
-    font-weight: 400;
-    font-style: normal
-    }
 
     label {
       margin: 0;
     }
-    .lcd {
-      background-color: rgb(18,66,0);
-      color: rgb(233,255,0);
-      font-family: Electronic Highway Sign;
-      font-size: 20px;
-    }
-
-    .midi-info {
-      padding: 10px;
-    }
-
-
-
   </style>
 <?php
 });
@@ -70,7 +52,7 @@ get_header();
 
 add_action('wp_footer', function () {
 ?>
-  <script src="<?php  home_url();  ?>/js/bsd.widgets.simpleplayer.js"></script>
+  <script src="<?php home_url();  ?>/js/bsd.widgets.simpleplayer.js"></script>
 
   <script type="module">
     import MIDIRouter from "./js/MIDIRouter.js";
@@ -374,28 +356,26 @@ add_action('wp_footer', function () {
     });
 
 
-    let midiInfo = MIDIInfo({ 
-      router, 
-      channel: BSD.options.improv.channel, 
-      patch: BSD.options.improv.patch 
+    let midiInfo = MIDIInfo({
+      router,
+      channel: BSD.options.improv.channel,
+      patch: BSD.options.improv.patch
     });
-    var vMIDIInfo = Vindow({ title: 'MIDI Info'});
+    var vMIDIInfo = Vindow({
+      title: 'MIDI Info'
+    });
     let [miToolbar, miPane] = midiInfo.ui();
     vMIDIInfo.appendToToolbar(miToolbar),
-    vMIDIInfo.append(miPane);
+      vMIDIInfo.append(miPane);
     vMIDIInfo.renderOn(body);
 
 
     let TAU = Math.PI * 2;
-      let biggerIsSlower = 500000 // 1_000_000
-      let magicHueRadians = (Date.now() / biggerIsSlower) % TAU;
-      document.querySelectorAll('.vindow .header').forEach(elem => {
-        setBackgroundHue(elem,magicHueRadians)
-      });
-
-
-
-
+    let biggerIsSlower = 500000 // 1_000_000
+    let magicHueRadians = (Date.now() / biggerIsSlower) % TAU;
+    document.querySelectorAll('.vindow .header').forEach(elem => {
+      setBackgroundHue(elem, magicHueRadians)
+    });
   </script>
   <script>
     function onAppLoad() {

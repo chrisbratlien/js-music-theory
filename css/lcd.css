@@ -1,0 +1,14 @@
+@font-face {
+      font-family: "Electronic Highway Sign";
+      src: url(../font/EHSMB.eot?) format("eot"),url(../font/EHSMB.ttf) format("truetype"),url(../font/EHSMB.woff) format("woff"),url(../font/EHSMB.svg#ElectronicHighwaySign) format("svg");
+      font-weight: 400;
+      font-style: normal;
+      }
+      
+
+.lcd {
+      background-color: hsla(104deg,100%,13%,1);
+      color: hsla(65deg, 100%, 50%,1); /* rgb(233,255,0);*/
+      font-family: Electronic Highway Sign;
+      padding: 3px;
+}
