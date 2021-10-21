@@ -16,6 +16,8 @@ function Draggable(elmnt, dragHandle) {
 
     function dragMouseDown(e) {
         e = e || window.event;
+
+        console.log("DOWN e?", e);
         //e.preventDefault();
 
         pos3 = e.clientX;
@@ -25,16 +27,29 @@ function Draggable(elmnt, dragHandle) {
 
 
         document.onpointermove = elementDrag;
+        document.ontouchmove = elementDrag;
+        document.onmousemove = elementDrag;
+
         document.onpointerup = closeDragElement;
+        document.ontouchend = closeDragElement;
+        document.onmouseup = closeDragElement;
+
+        dragHandle.onpointerup = closeDragElement;
+        dragHandle.ontouchend = closeDragElement;
+        dragHandle.onmouseup = closeDragElement;
 
 
     }
 
     function elementDrag(e) {
+        let origE = e;
         e = e || window.event;
-        //console.log("e?", e);
+        console.log("drag(move) e?", e);
 
-        e.preventDefault();
+        //magic touch!
+        e = e.touches && e.touches[0] || e;
+
+        
         ///console.log('got here');
         pos1 = pos3 - e.clientX;
         pos2 = pos4 - e.clientY;
@@ -42,17 +57,26 @@ function Draggable(elmnt, dragHandle) {
         pos4 = e.clientY;
         elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
         elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+        //seems to prevent drag on touchmove events ///
+
+        //origE.preventDefault();
     }
 
     function closeDragElement() {
         //console.log('close?')
         document.onpointerup = null;
+        document.onmouseup = null;
+        document.ontouchend = null;
+
         document.onpointermove = null;
+        document.onmousemove = null;
+        document.ontouchmove = null;
     }
 
 
-    //dragHandle.onmousedown = dragMouseDown;
+    dragHandle.onmousedown = dragMouseDown;
     dragHandle.onpointerdown = dragMouseDown;
+    dragHandle.ontouchstart = dragMouseDown;
 
 }
 export default Draggable;

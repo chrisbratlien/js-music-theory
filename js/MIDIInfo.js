@@ -97,7 +97,7 @@ function MIDIInfo(props) {
     pane = DOM.div()
         .addClass('midi-info lcd')
 
-    props.router.on('statechange', function(e, outPort) {
+    props.router && props.router.on('statechange', function(e, outPort) {
         if (!e.port) { return false; }
 
         let str = `${e.port.manufacturer} ${e.port.name} [${e.port.type}] ${e.port.state}`;
