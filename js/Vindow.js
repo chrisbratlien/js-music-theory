@@ -159,7 +159,7 @@ function Vindow(props) {
             pane = DOM.div()
             .addClass('pane')
         )
-        .on('mousedown', () => {
+        .on('mousedown touchstart', () => {
             bringToTop(outer.raw)
         })
 

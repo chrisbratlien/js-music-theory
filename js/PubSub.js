@@ -5,7 +5,7 @@ let PubSub = function(spec) {
 
   self.hash = Math.random().toString(36).substr(2);
 
-  self.subscribe = function(topic, callback) {
+  function subscribeToOneTopic(topic, callback) {
     if (typeof callbacks[topic] === "undefined") {
       callbacks[topic] = [];
     }
@@ -13,6 +13,16 @@ let PubSub = function(spec) {
     callbacks[topic].push(callback);
     return self; //curry/chain
   };
+
+  self.subscribe = function (topicOrTopics, callback) {
+    if (!Array.isArray(topicOrTopics)) {
+      topicOrTopics = topicOrTopics.split(/ +/).filter((t) => t && t.length);
+    }
+    topicOrTopics.forEach((topic) => {
+      subscribeToOneTopic(topic, callback);
+    });
+    return self;
+  }
 
   self.publish = function(topic, payload) {
     if (typeof callbacks.publish !== "undefined") { //SPECIAL EXTRA CASE: if there are subscribers to the topic named "publish"...
@@ -38,6 +48,19 @@ let PubSub = function(spec) {
       subscriber.publish(topic,...args);
     }); //curries/chains because of return in subscribe
   };
+
+  self.relay = (topicOrTopics, throughAnotherPubSub) => {
+    if (!Array.isArray(topicOrTopics)) {
+      topicOrTopics = topicOrTopics.split(/ +/).filter((t) => t && t.length);
+    }
+    topicOrTopics.forEach((topic) => {
+      subscribeToOneTopic(topic, (...args) => {
+        throughAnotherPubSub.publish(topic, ...args);
+      });
+    });
+    return self;
+  };
+
 
   return self;
 };
