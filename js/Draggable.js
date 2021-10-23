@@ -17,7 +17,7 @@ function Draggable(elmnt, dragHandle) {
     function dragMouseDown(e) {
         e = e || window.event;
 
-        console.log("DOWN e?", e);
+        //console.log("DOWN e?", e);
         //e.preventDefault();
 
         pos3 = e.clientX;
@@ -44,7 +44,7 @@ function Draggable(elmnt, dragHandle) {
     function elementDrag(e) {
         let origE = e;
         e = e || window.event;
-        console.log("drag(move) e?", e);
+        //console.log("drag(move) e?", e);
 
         //magic touch!
         e = e.touches && e.touches[0] || e;

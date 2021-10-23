@@ -16,8 +16,6 @@ https://medium.com/the-z/making-a-resizable-div-in-js-is-not-easy-as-you-think-b
 https://codepen.io/ZeroX-DG/pen/vjdoYe
 */
 function makeResizableDiv(element, resizers) {
-    //const element = document.querySelector(div);
-    //const resizers = document.querySelectorAll(div + ' .resizer')
     const minimum_size = 20;
     let original_width = 0;
     let original_height = 0;
@@ -27,17 +25,27 @@ function makeResizableDiv(element, resizers) {
     let original_mouse_y = 0;
     for (let i = 0; i < resizers.length; i++) {
         const currentResizer = resizers[i];
-        currentResizer.addEventListener('mousedown', function(e) {
+
+        function handleDown(e) {
             e.preventDefault()
             original_width = parseFloat(getComputedStyle(element, null).getPropertyValue('width').replace('px', ''));
             original_height = parseFloat(getComputedStyle(element, null).getPropertyValue('height').replace('px', ''));
             original_x = element.getBoundingClientRect().left;
-            original_y = element.getBoundingClientRect().top;
+
+            original_y = element.offsetTop || element.getBoundingClientRect().top;
             original_mouse_x = e.pageX;
             original_mouse_y = e.pageY;
             window.addEventListener('mousemove', resize)
+            window.addEventListener('touchmove', resize)
+            window.addEventListener('pointermove', resize)
+
             window.addEventListener('mouseup', stopResize)
-        })
+            window.addEventListener('pointerup', stopResize)
+            window.addEventListener('touchend', stopResize)
+        }
+        currentResizer.addEventListener('pointerdown', handleDown);
+        currentResizer.addEventListener('mousedown', handleDown);
+        currentResizer.addEventListener('touchstart', handleDown);
 
         function leftish(e) {
             const width = original_width - (e.pageX - original_mouse_x)
@@ -94,6 +102,8 @@ function makeResizableDiv(element, resizers) {
 
         function stopResize() {
             window.removeEventListener('mousemove', resize)
+            window.removeEventListener('touchmove', resize)
+            window.removeEventListener('pointermove', resize)
         }
     }
 }

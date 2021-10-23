@@ -1,5 +1,6 @@
 import DOM from "./DOM.js";
 import PubSub from "./PubSub.js";
+import {remap} from "./Lerpy.js";
 
 function SVGFretboard(spec) {
 
@@ -96,17 +97,36 @@ function SVGFretboard(spec) {
 
     };
 
+
+/*
+https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
+*/
+
     self.plotStrings = function() {
         [1, 2, 3, 4, 5, 6].forEach(string => {
             var stringGap = 14,
                 nudge = -2,
                 stringY = (string * stringGap) - stringGap / 2 + nudge;
             gStrings.append(
+                /**
                 DOM.path()
                 .attr({
                     d: `M 0 ${stringY} L 600 ${stringY}`,
                     stroke: 'black'
-                })
+                }),
+                ***/
+                DOM.line()
+                    .attr({
+                        x1: 0,
+                        x2: '100%',
+                        y1: stringY,
+                        y2: stringY
+                    })
+                    .css({
+                        //stroke: 'rgb(234,243,0)',
+                        stroke: 'grey',
+                        strokeWidth: remap(1,6,1,2.5,string),
+                    })
             )
         });
     }

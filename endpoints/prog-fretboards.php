@@ -356,6 +356,7 @@ add_action('wp_head', function () {
 
     .svg-wrap .bg {
       fill: blanchedalmond;
+      height: 100%;
       width: 100%;
     }
 
