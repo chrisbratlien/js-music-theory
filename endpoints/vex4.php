@@ -180,21 +180,16 @@ get_header(); ?>
 
 add_action('wp_footer', function () {
 ?>
-  <!--
-    <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/array.js"></script>
-    <script type="text/javascript" src="http://cdn.dev.bratliensoftware.com/javascript/dom.js"></script>
-    <script src="http://cdn.dev.bratliensoftware.com/javascript/color.js"></script>
-    
-    <script src="http://lucid.bratliensoftware.com/js-music-theory/javascript/js-music-theory.js"></script>
-    -->
 
   <script src="js/draggy.js"></script>
   <script src="js/sticky-note.js"></script>
-  <script src="js/bsd.widgets.songlist.js"></script>
   <script src="js/bsd.widgets.simpleplayer.js"></script>
   <script src="lib/vextab/releases/vextab-div.js"></script>
 
-  <script type="text/javascript">
+  <script type="module">
+    import PubSub from "./js/PubSub.js";
+    import DOM from "./js/DOM.js";
+    import SongList from "./js/SongList.js";
     BSD.foo = [];
     BSD.allTheNotes = [];
 
@@ -210,7 +205,7 @@ add_action('wp_footer', function () {
           BSD.chosenColor = spec.color;
         };
 
-        square.click(function() {
+        square.on('click',function() {
           self.publish('click', spec.color);
           ////handler();
           ///var newGuy = square.clone();
@@ -449,7 +444,7 @@ add_action('wp_footer', function () {
       BSD.guitarData = data;
     });
 
-    let flav = 'b';
+    let flav = '7';
 
     jQuery('#redo').click(function() {
       var myChords = [];
@@ -475,14 +470,12 @@ add_action('wp_footer', function () {
       if (progInput.val().length == 0) {
         return false;
       }
-      var bars = BSD.parseProgressionIntoBars(this.value);
-      console.log('bars', bars);
+      var barChordEvents = BSD.parseProgression(this.value);
+      console.log('b-c-e', barChordEvents);
 
-      campfire.publish('do-bars', bars);
+      campfire.publish('do-bar-chord-events', barChordEvents);
       //var myChords = prog.map(function(o){  return o.chord; });
       ///campfire.publish('do-it',myChords);
-
-
     });
 
 
@@ -521,7 +514,7 @@ add_action('wp_footer', function () {
     };
 
 
-    VEXTAB_USE_SVG = true;
+    const VEXTAB_USE_SVG = true;
 
     var stage = jQuery('#stage');
 
@@ -534,16 +527,30 @@ add_action('wp_footer', function () {
     var saveChord = false;
     var firstChord = false;
 
-    campfire.subscribe('do-bars', function(bars) {
-      console.log('bars', bars);
+
+  function closestTo(other, allowEqual) {
+    var aFunc = function(o) {
+      var dist = o.note.abstractDistanceTo(other);
+      if (dist == 0 && !allowEqual) {
+        return 13;
+      }
+      return dist;
+    };
+    return aFunc;
+  }
+
+
+    campfire.subscribe('do-bar-chord-events', function(barChordEvents) {
+
+      console.log('barChordEvents', barChordEvents);
 
       BSD.allTheNotes = [];
 
       saveChord = false;
       firstChord = false;
 
-      bars.each(function(chords) {
-        chords.each(function(chord) {
+      barChordEvents.forEach(function(barChordEvent) {
+        let chord = barChordEvent.chord;
           if (!firstChord) {
             firstChord = chord;
           }
@@ -552,7 +559,6 @@ add_action('wp_footer', function () {
             chord.prev = saveChord;
           }
           saveChord = chord;
-        });
       });
       saveChord.next = firstChord;
 
@@ -570,214 +576,155 @@ add_action('wp_footer', function () {
         4: ':16'
       };
 
-      var lines = BSD.chunkify(bars, 4);
-      lines.forEach(function(barsOfLine) {
-        console.log('barsOfLine', barsOfLine);
+      var lines = BSD.chunkify(barChordEvents, 4);
+      lines.forEach(function(barChordEventsOfLine) {
+        console.log('barChordEventsOfLine', barChordEventsOfLine);
         msg += "tabstave notation=true tablature=false\n";
 
         var textMsg = '';
         var noteMsg = "";
 
-        barsOfLine.forEach(function(bar) {
-          var chords = bar;
+        let chords = barChordEventsOfLine.map(evt => evt.chord);
+        console.log('wee chords',chords);
+
+        chords.forEach(function(chord) {
           noteMsg += 'notes ';
+        
+          var distance = 0;
+          var saveNote = chord.rootNote;
+          var saveLetter = saveNote.name().substr(0, 1);
+          var thirdIndex = nextThird.indexOf(saveLetter);
+          var preferredLetter = saveLetter;
+          var displayNotes = [];
 
+          chord.notes().forEach(function(note, i) {
+            ////console.log('note',note.name(),'saveLetter',saveLetter);
+            distance = note.value() - saveNote.value();
+            if (distance == 3 || distance == 4) {
+              var choices = [note.flatNameFromValue(note.value()), note.sharpNameFromValue(note.value())];
+              preferredLetter = nextThird[nextThird.indexOf(saveLetter) + 1];
 
-          chords.forEach(function(chord) {
+              var winner = choices.detect(function(o) {
+                return o.match(preferredLetter);
+              });
 
-            ////noteMsg += 'notes ';
+              if (!winner) {
+                winner = choices[0];
+              }
 
-            var distance = 0;
-            var saveNote = chord.rootNote;
-            var saveLetter = saveNote.name().substr(0, 1);
-            var thirdIndex = nextThird.indexOf(saveLetter);
-            var preferredLetter = saveLetter;
-            var displayNotes = [];
-
-            chord.notes().forEach(function(note, i) {
-              ////console.log('note',note.name(),'saveLetter',saveLetter);
-              distance = note.value() - saveNote.value();
-              if (distance == 3 || distance == 4) {
-                var choices = [note.flatNameFromValue(note.value()), note.sharpNameFromValue(note.value())];
-                preferredLetter = nextThird[nextThird.indexOf(saveLetter) + 1];
-
-                var winner = choices.detect(function(o) {
-                  return o.match(preferredLetter);
-                });
-
-                if (!winner) {
-                  winner = choices[0];
-                }
-
-                displayNotes.push({
-                  name: winner,
-                  note: note
-                });
-                ///console.log('choices',choices,'saveLetter',saveLetter,'preferred',preferredLetter,'winner',winner);
-              } else {
+              displayNotes.push({
+                name: winner,
+                note: note
+              });
+              ///console.log('choices',choices,'saveLetter',saveLetter,'preferred',preferredLetter,'winner',winner);
+            } else {
                 displayNotes.push({
                   name: note.name(),
                   note: note
                 });
-              }
+            }
               saveNote = note;
               saveLetter = preferredLetter;
-            });
+          }); //notes
 
-            ///console.log('displayNotes',displayNotes);
-            var nextChord = chord.next;
-
-
-
-            var m3 = chord.myThird();
-            var m7 = chord.mySeventh();
-            var onTheOne = m3 || m7;
-            var next3 = chord.next.myThird();
-            var next7 = chord.next.mySeventh();
-
-            var target = next3 || next7;
+          ///console.log('displayNotes',displayNotes);
+          var nextChord = chord.next;
 
 
-            var closestTo = function(other, allowEqual) {
-              var aFunc = function(o) {
-                var dist = o.note.abstractDistanceTo(other);
-                if (dist == 0 && !allowEqual) {
-                  return 13;
-                }
-                return dist;
-              };
-              return aFunc;
-            };
 
-            var first = displayNotes.sort(BSD.sorter(closestTo(onTheOne, true)))[0];
-            var last = displayNotes.sort(BSD.sorter(closestTo(target, false)))[0];
+          var m3 = chord.myThird();
+          var m7 = chord.mySeventh();
+          var onTheOne = m3 || m7;
+          var next3 = chord.next.myThird();
+          var next7 = chord.next.mySeventh();
 
+          var target = next3 || next7;
+          var first = displayNotes.sort(BSD.sorter(closestTo(onTheOne, true)))[0];
+          var last = displayNotes.sort(BSD.sorter(closestTo(target, false)))[0];
 
-            /****
-            var closestLast = [last.note,last.note.plus(12),last.note.plus(-12)].sort(BSD.sorter(function(o){
-              return Math.abs(o.distanceTo(target));
-            })).shift();
-            
-            last.note = closestLast;
-            
-            console.log(last.note.distanceTo(target),'target distance');
-            ****/
+          if (last.note.distanceTo(target) > 6) {
+            var diff;
+            diff = last.note.value() - target.value();
+            console.log('diff', diff, 'lastVal', last.note.value(), 'targetVal', target.value());
 
-            if (last.note.distanceTo(target) > 6) {
-              var diff;
-              diff = last.note.value() - target.value();
-              console.log('diff', diff, 'lastVal', last.note.value(), 'targetVal', target.value());
-
-              if (diff > 0) {
-                last.note = last.note.plus(-12);
-              } else {
-                last.note = last.note.plus(12);
-              }
-
-              diff = last.note.value() - target.value();
-              console.log('FIXED? diff', diff, 'lastVal', last.note.value(), 'targetVal', target.value());
-            };
-
-
-            /*
-            var placeFirstAndLast = function(nextNote) {
-              var aFunc = function(o) {
-                if (o.note.equalTo(onTheOne)) {
-                  return -145;
-                }
-                if (chord.next) {
-                  var distance = -1 * Math.abs(o.note.abstractValue() - target.abstractValue());
-                  if (distance == 0) { 
-                    return -144; 
-                  } 
-                  return distance;
-                }
-                return o.note.abstractValue();
-              };
-              return aFunc;
-            };
-            //console.log('before',displayNotes);
-            var sortedNotes = displayNotes.sort(BSD.sorter(placeFirstAndLast(target)));
-            //console.log('sorted',sortedNotes);
-            ***/
-
-            var notesToBePlayed = [];
-
-            var noteCount = 0; //4 eighth notes for this single chord
-            if (chords.length == 1) {
-              noteCount = 8; //8 eighth notes for this single chord
-            } else if (chords.length == 2) {
-              noteCount = 4;
-            } else if (chords.length == 4) {
-              noteCount = 2;
+            if (diff > 0) {
+              last.note = last.note.plus(-12);
+            } else {
+              last.note = last.note.plus(12);
             }
 
-            /////
-            /**
-            var first = sortedNotes[0];
-            var last = sortedNotes[sortedNotes.length-1];
-            ***/
+            diff = last.note.value() - target.value();
+            console.log('FIXED? diff', diff, 'lastVal', last.note.value(), 'targetVal', target.value());
+          }
 
+          var notesToBePlayed = [];
 
-            notesToBePlayed.push(first);
-            var prevPad = first;
-            while (notesToBePlayed.length < noteCount - 1) {
-              var pad = false;
+          var noteCount = 0; //4 eighth notes for this single chord
+          if (chords.length == 1) {
+            noteCount = 8; //8 eighth notes for this single chord
+          } else if (chords.length == 2) {
+            noteCount = 4;
+          } else if (chords.length == 4) {
+            noteCount = 2;
+          }
+
+          notesToBePlayed.push(first);
+          var prevPad = first;
+          while (notesToBePlayed.length < noteCount - 1) {
+            var pad = false;
+            pad = displayNotes.atRandom();
+            while (prevPad && pad.note.abstractlyEqualTo(prevPad.note)) {
               pad = displayNotes.atRandom();
-              while (prevPad && pad.note.abstractlyEqualTo(prevPad.note)) {
-                pad = displayNotes.atRandom();
-              }
-              while (notesToBePlayed.length == noteCount - 2 &&
-                (pad.note.abstractlyEqualTo(last.note) || pad.note.abstractlyEqualTo(prevPad.note))) {
-                pad = displayNotes.atRandom();
-              }
-
-              notesToBePlayed.push(pad);
-              prevPad = pad;
+            }
+            while (notesToBePlayed.length == noteCount - 2 &&
+              (pad.note.abstractlyEqualTo(last.note) || pad.note.abstractlyEqualTo(prevPad.note))) {
+              pad = displayNotes.atRandom();
             }
 
-            notesToBePlayed.push(last);
+            notesToBePlayed.push(pad);
+            prevPad = pad;
+          }
 
-            //// more stuff in here!!
-            //from scales..
+          notesToBePlayed.push(last);
 
-            ///from chord...
+          //// more stuff in here!!
+          //from scales..
 
-            ///up to 8 if less and there's 1 chord in bar. (chords.length == 1).
+          ///from chord...
 
-
-            //shore up octaves between chords
-
+          ///up to 8 if less and there's 1 chord in bar. (chords.length == 1).
 
 
-            notesToBePlayed.forEach(function(o) {
-              BSD.allTheNotes.push(o.note);
-            });
+          //shore up octaves between chords
 
-            var keys = notesToBePlayed.map(function(o) {
-              var nn = o.name.replace(/b$/, '@'); ///Case();
-              var key = nn + '/' + BSD.midiOctave(o.note);
-              return key;
-            });
 
-            //msg += ' ' + keys.join('-');
 
-            noteMsg += ' ' + ':8' + ' ' + keys.join('-');
-            ///noteMsg += ' ' + notesDurationMap[chords.length] + ' ' + keys.join('-');
+          notesToBePlayed.forEach(function(o) {
+            BSD.allTheNotes.push(o.note);
           });
+
+          var keys = notesToBePlayed.map(function(o) {
+            var nn = o.name.replace(/b$/, '@'); ///Case();
+            var key = nn + '/' + BSD.midiOctave(o.note);
+            return key;
+          });
+
+          //msg += ' ' + keys.join('-');
+
+          noteMsg += ' ' + ':8' + ' ' + keys.join('-');
+          ///noteMsg += ' ' + notesDurationMap[chords.length] + ' ' + keys.join('-');
           noteMsg += "| \n";
           //console.log('noteMsg',noteMsg);
-
           var chordNames = chords.map(function(chord) {
             return chord.fullAbbrev();
           }).join(',');
           var duration = chordDurationMap[chords.length];
           textMsg += "\ntext " + duration + ',' + chordNames + "\n";
-        });
+        }); //chords
         ///textMsg += chordNames.join(',');
         msg += "\n" + noteMsg + "\n";
         msg += "\n" + textMsg + "\n";
-      });
+      }); //lines
       jQuery('.editor').val(msg);
       jQuery('.editor').trigger('change');
     });
@@ -788,7 +735,7 @@ add_action('wp_footer', function () {
 
 
 
-
+    BSD.songlist = SongList({});
 
     var songlistWrap = jQuery('#song-list-wrap');
 
