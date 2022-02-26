@@ -925,10 +925,6 @@ add_action('wp_footer', function () {
       range: [28, 100]
     });
 
-    campfire.publish('bootup-hihat');
-
-
-
 
     var waiter = BSD.Widgets.Procrastinator({
       timeout: 250
@@ -2776,7 +2772,7 @@ add_action('wp_footer', function () {
 
 
     BSD.options.hihat.volume = BSD.options.hihat.volume || 0.7;
-    campfire.on('bootup-hihat', function() {
+   function createSyntheticHiHat() {
       var bufferSize = 4096;
       var brownNoise = (function() {
         var lastOut = 0.0;
@@ -2792,19 +2788,18 @@ add_action('wp_footer', function () {
         }
         return node;
       })();
-
-
       var gn = context.createGain();
       gn.gain.value = 0;
-
       gn.connect(mixer.common);
       brownNoise.connect(gn);
-      campfire.on('hihat', function() {
-        gn.gain.setTargetAtTime(BSD.options.hihat.volume, context.currentTime, 0); //do it now...
-        gn.gain.linearRampToValueAtTime(0, context.currentTime + 0.015);
-      });
-    });
-
+      return { 
+        play: function() {
+          gn.gain.setTargetAtTime(BSD.options.hihat.volume, context.currentTime, 0); //do it now...
+          gn.gain.linearRampToValueAtTime(0, context.currentTime + 0.015);
+        }
+      };
+    }
+    var syntheticHiHat = createSyntheticHiHat();
     function hihat() {
       if (BSD.options.hihat.midi) {
         let noteOnChannel = MIDI_CONST.NOTE_ON + (BSD.options.hihat.channel - 1);
@@ -2818,7 +2813,7 @@ add_action('wp_footer', function () {
         }, BSD.durations.hihat);
       }
 
-      campfire.publish('hihat'); //the old synthetic brown noise hat
+      syntheticHiHat.play();
     }
 
     // midi functions
