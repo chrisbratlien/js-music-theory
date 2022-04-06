@@ -14,7 +14,10 @@ add_action('wp_head',function(){
 	width: 100%;
 	height: auto;
 }
-
+.the-canvas {
+	border: 1px solid black;
+	width: 100vw;
+}
 </style>
 
 <?php
@@ -33,12 +36,14 @@ get_header();
 </div>
 <button class="btn btn-info btn-undo">Undo</button>
 <button class="btn btn-info btn-redo">Redo</button>
-
+<button class="btn btn-info btn-fill-color">Fill Color</button>
+<input class="fill-color" type="color" />
 
 IMAGE URL<input class="image-url">
 
-<div class="paint-wrap" id="wPaint">	
-</div>
+<select class="gco"></select>
+<canvas class="the-canvas">
+</canvas>
 
 
 <img class="song-img" />
@@ -48,102 +53,197 @@ IMAGE URL<input class="image-url">
 add_action('wp_footer',function(){
 ?>
 
+<script type="module">
 
+import DOM from "./js/DOM.js";
+import PubSub from "./js/PubSub.js";
 
-<!-- wColorPicker -->
-<link rel="Stylesheet" type="text/css" href="lib/wColorPicker/wColorPicker.min.css" />
-<script type="text/javascript" src="lib/wColorPicker/wColorPicker.min.js"></script>
-
-
-<link rel="Stylesheet" type="text/css" href="lib/wPaint/wPaint.min.css" />
-<script type="text/javascript" src="lib/wPaint/wPaint.min.js"></script>
-<script type="text/javascript" src="lib/wPaint/plugins/main/wPaint.menu.main.min.js"></script>
-<script type="text/javascript" src="lib/wPaint/plugins/text/wPaint.menu.text.min.js"></script>
-<script type="text/javascript" src="lib/wPaint/plugins/shapes/wPaint.menu.main.shapes.min.js"></script>
-<script type="text/javascript" src="lib/wPaint/plugins/file/wPaint.menu.main.file.min.js"></script>
-<script>
+const campfire = PubSub({});
 
 
 var songImg = document.querySelector('.song-img');
+var myCanvas = document.querySelector('.the-canvas');
+const canvasCtx = myCanvas.getContext('2d', { alpha: true });
+
+var gco = [ 'source-over','source-in','source-out','source-atop',
+            'destination-over','destination-in','destination-out','destination-atop',
+            'lighter', 'copy','xor', 'multiply', 'screen', 'overlay', 'darken',
+            'lighten', 'color-dodge', 'color-burn', 'hard-light', 'soft-light',
+            'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity'
+          ];
 
 
+/// https://developer.mozilla.org/en-US/docs/Web/API/Element/mousemove_event
+
+let isDrawing = false;
+let x = 0;
+let y = 0;
+
+myCanvas.addEventListener('mousedown', e => {
+	let pos = getMousePos(myCanvas,e);
+	x = pos.x;
+	y = pos.y;
+	isDrawing = true;
+});
+
+/*
+document.getElementById(canvasName).addEventListener('mousemove', function(evt) {
+    var xy = getMousePos(evt);
+ 
+    var position = (xy.x) + ', ' + (xy.y);
+ 
+    alert(position);
+}
+ */
+function getMousePos(canv,evt) {
+    var rect = canv.getBoundingClientRect();
+ 
+    var X = (evt.clientX - rect.left) / (canv.clientWidth / canv.width);
+    var Y = (evt.clientY - rect.top) / (canv.clientHeight / canv.height);
+    X = Math.ceil(X);
+    Y = Math.ceil(Y);
+ 
+    return {
+        x: X,
+        y: Y
+    };
+}
+
+myCanvas.addEventListener('mousemove', e => {
+  if (isDrawing === true) {
+	let pos = getMousePos(myCanvas,e);
+	drawLine(canvasCtx, x, y, pos.x, pos.y);
+	x = pos.x;
+	y = pos.y;
+	return false;
+	drawLine(canvasCtx, x, y, e.offsetX, e.offsetY);
+    x = e.offsetX;
+    y = e.offsetY;
+  }
+});
+
+window.addEventListener('mouseup', e => {
+  if (isDrawing === true) {
+	let pos = getMousePos(myCanvas,e);
+
+	drawLine(canvasCtx, x, y, pos.x, pos.y);
+	isDrawing = false;
+	return false;
+	drawLine(canvasCtx, x, y, e.offsetX, e.offsetY);
+    x = 0;
+    y = 0;
+    isDrawing = false;
+  }
+});
+
+var mode = 'highlighter';
+mode = 'marker';
+
+function drawLine(context, x1, y1, x2, y2) {
+
+	if (mode == 'highlighter') {
+		let r = canvasCtx.lineWidth;
+		let rOver2 = r/2;
+		context.fillRect(x1 - rOver2, y1 - rOver2, r, r);
+		return false;
+	}
+	context.beginPath();
+	context.moveTo(x1, y1);
+	context.lineTo(x2, y2);
+	context.stroke();
+	context.closePath();
+}
+
+var startColor = '#ffff77';
+
+function setupStyle() {
+	canvasCtx.lineCap = 'round';
+
+	///const ctx = canvas.getContext('2d', {alpha: true});
+        canvasCtx.globalAlpha = 0.2;
+        canvasCtx.fillStyle = startColor;
+        canvasCtx.strokeStyle = startColor;
+
+
+		canvasCtx.globalCompositeOperation = selectedGCO;
+	//canvasCtx.globalCompositeOperation = "multiply";
+	//canvasCtx.globalCompositeOperation = "lighten";
+	///canvasCtx.globalCompositeOperation = "lighter";
+
+	
+	//canvasCtx.strokeStyle = 'hsla(30deg,80%,80%,0.04)';
+	//canvasCtx.strokeStyle = 'rgba(255,220,220,0.01)';
+	//canvasCtx.fillStyle = 'hsla(240 100% 50% / .005)';
+	//canvasCtx.strokeStyle = 'hsla(240 100% 50% / .005)';
+
+	//canvasCtx.strokeStyle = 'rgba(255,220,200,0.1)';
+	//canvasCtx.fillStyle = 'rgba(255,220,200,0.1)';
+	///canvasCtx.fillStyle = '#ff0';
+	//canvasCtx.fillStyle = 'hsla(270deg 100% 50% / 1)';
+
+	canvasCtx.lineWidth = 60;
+}
 
 	campfire.subscribe('bootup',function(){
+	
+	});
+	campfire.subscribe('image-dimensions',({clientWidth, clientHeight}) => {
+		//console.log('dims',clientWidth,clientHeight,canvasCtx,canvas);	
+		//canvas.width = clientWidth;
+		//canvas.height = clientHeight;
+		//canvasCtx.drawImage(songImg,0,0);
+		setupStyle();
 
-		$('#wPaint').wPaint({
-		path: 'lib/wPaint/',
-		//image: 'images/all-of-me.png',
-		image: songImg.src,
-		//image: 'images/beautiful-love.png',
-		imageStretch: true, //not sure this did anything...
-		theme:           'standard classic', // set theme //unsure also...
+	});
 
-		//mode:        'pencil',  // set mode
-		mode:        'text',  // set mode
-		lineWidth:   '1',       // starting line width
-		fillStyle:   '#3399FF',//'#BB0088', // starting fill style
-		strokeStyle: '#AA0055',  // start stroke style  
+	let txtImageURL = DOM.from('.image-url');
 
-
-		fontSize: '14',    // current font size for text input
-		fontFamily: 'Arial', // active font family for text input
-		fontBold: false,   // text input bold enable/disable
-		fontItalic: false,   // text input italic enable/disable
-		fontUnderline: false,    // text input italic enable/disable
-
-		saveImg: function(o) {
-			////console.log('o',o);
-			campfire.publish('save-image',o);
-
+	const selGCO = DOM.from('select.gco');
+	var selectedGCO = 'darken';
+	canvasCtx.globalCompositeOperation = selectedGCO;
+	selGCO.append(DOM.option('choose').val(null));
+	selGCO.append(gco.map(opName => {
+		const opt = DOM.option(opName);
+		if (opName == selectedGCO) {
+			opt.attr('selected',true);
 		}
+		return opt;
+	}));
+	selGCO.on('change',function(e){
+		///alert(e.target.value);
+		selectedGCO = e.target.value;
+		canvasCtx.globalCompositeOperation = selectedGCO;
 
+	})
 
-		});
-
-		var btnUndo = jQuery('.btn-undo');
-		var btnRedo = jQuery('.btn-undo');
-
-
-		btnUndo.click(function(){
-		$('#wPaint').wPaint('undo');
-		});
-
-		btnRedo.click(function(){
-		$('#wPaint').wPaint('redo');
-		});
-
-		campfire.subscribe('save-image',function(imageData){
-			window.open(imageData);
-		});
-		jQuery(window).resize(function(){
-		//alert('resize');
-		//$("#wPaint").wPaint('resize');		
-		});
-
-
-
-
+	const inFillColor = DOM.from('.fill-color');
+	inFillColor.val(startColor);
+	inFillColor.on('change',function(e){
+		///alert(e.target.value);
+		canvasCtx.fillStyle = e.target.value;
+		canvasCtx.strokeStyle = e.target.value;
 	});
 
+	const btnFillColor = DOM.from('.btn-fill-color');
+	btnFillColor.on('click',function(){
+		inFillColor.raw.dispatchEvent(new MouseEvent('click'));
+	});
 
-	jQuery('.image-url').change(function(){
+	txtImageURL.on('change',function(){
 		songImg.src = this.value;
-		jQuery('.paint-wrap').css('width',songImg.clientWidth);
-		jQuery('.paint-wrap').css('height',songImg.clientHeight);
-
-		jQuery('#wPaint').wPaint({ image: songImg.src});
-		$('#wPaint').wPaint('image', songImg.src);
+		//campfire.publish('image-dimensions',songImg);
 	});
-
 	songImg.src = 'images/alice-in-wonderland.png';
-	setTimeout(function() {
-		jQuery('.paint-wrap').css('width',songImg.clientWidth);
-		jQuery('.paint-wrap').css('height',songImg.clientHeight);
-		campfire.publish('bootup');
 
 
-	},1000);
-
+	songImg.onload = function() {
+		console.log('onload this',this);
+		canvasCtx.canvas.width = this.width;
+		canvasCtx.canvas.height = this.height;
+		canvasCtx.drawImage(this, 0, 0, this.width, this.height);
+		campfire.publish('image-dimensions',songImg);		
+	}
+	setupStyle();
 
 
 </script>

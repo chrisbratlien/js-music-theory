@@ -418,7 +418,7 @@ get_header(); ?>
     <label>Progression</label>
     <div class="form-group">
       <button class="btn btn-info btn-start">Start</button>
-      <input type="text" id="progression" class="form-control progression" />
+      <textarea  class="form-control progression"></textarea>
     </div>
   </div>
 
@@ -692,7 +692,8 @@ add_action('wp_footer', function () {
     };
 
 
-    var progInput = jQuery('#progression');
+    var progInput = DOM.from('.progression');
+    progInput.attr('placeholder','Type a Chord Progression here... Example: C | Em | G7 | % ');
     progInput.on('touchend', function() { //for iOS bug
       ///alert('hey');
       BSD.handleFirstClick();
@@ -1542,7 +1543,7 @@ add_action('wp_footer', function () {
 
 
 
-    var btnStart = jQuery('.btn-start');
+    var btnStart = DOM.from('.btn-start');
     btnStart.on('click', function() {
       campfire.publish('gather-inputs-and-do-it');
     });

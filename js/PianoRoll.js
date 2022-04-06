@@ -10,9 +10,9 @@ function millisPerLoop(bpm, beatsPerBar, barsPerLoop) {
 function PianoRoll(props) {
   let self = PubSub({});
   let pane = DOM.div().addClass("piano-roll");
-
+  const minTempo = 10;
   let lowNote = 36;//C
-  let howManyNotes = 48;
+  let howManyNotes = 60;//48;
 
   let noteRange = [...Array(howManyNotes).keys()].map((o) => lowNote + o);
   //so that the table rows can render in order from high to low
@@ -62,7 +62,7 @@ function PianoRoll(props) {
       inTempo = DOM.input()
         .addClass('tempo')
         .attr('type', 'number')
-        .attr('min', 50)
+        .attr('min', minTempo)
         .val(props.tempo || 120)
         .on('change', (e) => self.emit('tempo-change', +e.target.value))
     ]);
