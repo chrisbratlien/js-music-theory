@@ -298,6 +298,7 @@ add_action('wp_head', function () {
     }
 
     .form-progression .progression {
+      font-family: monospace;
       width: 90%;
     }
 
@@ -579,6 +580,12 @@ add_action('wp_footer', function () {
     import Fretboard, {
       makeFretboardOn
     } from "./js/Fretboard.js";
+
+    import {lerp,invlerp, remap} from './js/Lerpy.js';
+
+    window.lerp = lerp;
+    window.invlerp = invlerp;
+    window.remap = remap;
 
     let router;
 

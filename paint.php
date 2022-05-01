@@ -42,6 +42,7 @@ get_header();
 IMAGE URL<input class="image-url">
 
 <select class="gco"></select>
+<input class="brush-size" type="range" min="1" max="60" step="1" />
 <canvas class="the-canvas">
 </canvas>
 
@@ -78,6 +79,8 @@ var gco = [ 'source-over','source-in','source-out','source-atop',
 let isDrawing = false;
 let x = 0;
 let y = 0;
+
+let brushSize = 60;
 
 myCanvas.addEventListener('mousedown', e => {
 	let pos = getMousePos(myCanvas,e);
@@ -142,7 +145,7 @@ mode = 'marker';
 function drawLine(context, x1, y1, x2, y2) {
 
 	if (mode == 'highlighter') {
-		let r = canvasCtx.lineWidth;
+		let r = brushSize; //canvasCtx.lineWidth;
 		let rOver2 = r/2;
 		context.fillRect(x1 - rOver2, y1 - rOver2, r, r);
 		return false;
@@ -181,7 +184,7 @@ function setupStyle() {
 	///canvasCtx.fillStyle = '#ff0';
 	//canvasCtx.fillStyle = 'hsla(270deg 100% 50% / 1)';
 
-	canvasCtx.lineWidth = 60;
+	canvasCtx.lineWidth = brushSize;
 }
 
 	campfire.subscribe('bootup',function(){
@@ -197,6 +200,12 @@ function setupStyle() {
 	});
 
 	let txtImageURL = DOM.from('.image-url');
+
+	let rangeBrushSize = DOM.from('.brush-size');
+	rangeBrushSize.on('change',function(e){
+		brushSize = +  e.target.value;
+		canvasCtx.lineWidth = brushSize;
+	});
 
 	const selGCO = DOM.from('select.gco');
 	var selectedGCO = 'darken';

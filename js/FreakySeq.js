@@ -35,7 +35,10 @@ export default function FreakySeq(props) {
       ...opts,
       ...newOpts
     }
+    props.events = opts.events;
     init();
+
+    return opts;
   }
 
   function millisPerLoop(bpm, beatsPerBar, barsPerLoop) {

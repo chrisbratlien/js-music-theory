@@ -105,32 +105,6 @@ JSMT.OBSOLETEgoLong = function(orig) {
   return result;
 };
 
-/*
-var NotePrimitive = function(spec) {
-  var self = {};
-  self.value = function() {
-    return spec.value || 0;
-  };
-  self.add = function(other) { 
-    if (typeof other == "number") {
-      return NotePrimitive({value: other + self.value()}); 
-    } else {
-      return NotePrimitive({value: other.value() + self.value()}); 
-    }
-  };
-
-  self.sub = function(other) { 
-    if (typeof other == "number") {
-      return NotePrimitive({value: self.value() - other}); 
-    } else {
-      return NotePrimitive({value: self.value() - other.value()}); 
-    }
-  };
-
-  return self; 
-};
-*/
-
 JSMT.twelveTones = function() {
   //return ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
   return ["C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
@@ -440,20 +414,7 @@ var Note = function(foo, accidental) {
     var result = self.nameFromValue(self.value());
 
     return JSMT.toUTF8(result);
-    ///
-
-    /***
-    
-    if (result.length == 2) {
-      if (result[1] == '#') {
-        result = result.replace(/#/,'&#9839;');
-      }
-      else {
-        result = result.replace(/b/,'&#9837;');
-      }
-    }
-    return result;
-    ****/
+  
   };
 
   self.sharpNameFromValue = function(value) {
@@ -597,20 +558,6 @@ var Note = function(foo, accidental) {
     }
   };
 
-  /*
-  self.majorScale = function() {
-    return Scale({rootNote: self, intervals: [0,2,4,5,7,9,11]});
-  };
-  self.naturalMinorScale = function() {
-    return Scale({rootNote: self, intervals: [0,2,3,5,7,8,10]});
-  };
-  self.minorScale = self.naturalMinorScale;
-  
-
-  self.harmonicMinorScale = function() {
-    return Scale({rootNote: self, intervals: [0,2,3,5,6,8,11]});
-  };
-  */
 
   self.scale = function(abbrev) {
     var spec = JSMT.scaleMap[abbrev];
@@ -640,7 +587,7 @@ var Note = function(foo, accidental) {
     });
   };
 
-  self.chord = function(abbrev) {
+  self.chord = function(abbrev,bassNote) {
     var spec = JSMT.chordMap[abbrev];
 
     if (typeof spec == "undefined") {
@@ -651,7 +598,8 @@ var Note = function(foo, accidental) {
       rootNote: self,
       intervals: spec.intervals,
       name: spec.name,
-      abbrev: abbrev,
+      abbrev,
+      bassNote
       //accidental: accidental
     });
   };
@@ -670,17 +618,20 @@ var Note = function(foo, accidental) {
 };
 
 function makeChord(name) {
-  var rootName = false;
-  var chordName = false;
+  let rootName = false;
 
-  if (name.substr(1, 1).match(/#|♯|b|♭/)) {
-    rootName = name.substr(0, 2);
-    chordName = name.substr(2);
+  let [chordName,bassNote] = name.split('/');
+  if (chordName.substr(1, 1).match(/#|♯|b|♭/)) {
+    rootName = chordName.substr(0, 2);
+    chordName = chordName.substr(2);
   } else {
-    rootName = name.substr(0, 1);
-    chordName = name.substr(1);
+    rootName = chordName.substr(0, 1);
+    chordName = chordName.substr(1);
   }
-  return Note(rootName).chord(chordName);
+
+  // adjust for bass note being the new root note?
+  // [0,4,7].map(n => (n + 5)%12 ).sort()
+  return Note(rootName).chord(chordName,bassNote);
 }
 
 function makeSpecFromValues(values) {

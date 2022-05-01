@@ -288,7 +288,7 @@ add_action('wp_footer', function () {
 
     let pianoRoll = PianoRoll({
       ...freak.opts,
-      events: events
+      events
     })
 
 
@@ -308,6 +308,15 @@ add_action('wp_footer', function () {
     pianoRoll.on('is-playing', function(isPlaying) {
       //isPlaying shows the new going-forward wish
       isPlaying ? freak.play() : freak.stop();
+    });
+    pianoRoll.on('save',function(props) {
+      //for future refactoring... pulling save logic from piano roll to here...
+      console.log('piano roll save props',props);
+    });
+    pianoRoll.on('new-loop-object',function(obj){
+      console.log('new loop object',obj);
+      let opts = freak.update(obj);
+      pianoRoll.update(opts);
     });
     //jQuery('.piano-roll-wrap').append(pianoRoll.ui())
 
