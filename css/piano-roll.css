@@ -42,3 +42,15 @@
 .piano-roll table tr:hover {
     opacity: 0.5;
 }
+
+.piano-roll .file-input {
+    display: none;
+    visibility: hidden;
+}
+
+.piano-roll .drop-area {
+    border: 2px dashed #ccc;
+    border-radius: 5px;
+    min-width: 40px;
+    min-height: 25px;
+}

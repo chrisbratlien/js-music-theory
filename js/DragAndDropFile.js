@@ -1,25 +1,34 @@
 import DOM from "./DOM.js";
 
 function DragAndDropFile(props) {
+
+  const fileInput = DOM.input()
+    .addClass('file-input')
+    .attr("type", "file")
+    .attr("id", "file-elem")
+    .attr("accept", props.accept)
+    //.attr("hidden", true)
+    .on("change", (e) => {
+      props.handleFiles(e.target.files);
+    });
+
+    const btnUpload = 
+      DOM.button()
+      .addClass("btn btn-default btn-sm btn-browse btn-upload")
+      .append([
+        DOM.i()
+          .addClass('fa fa-upload'),
+      ])
+      .on('click',function(){
+        console.log('YAAAAAY');
+        fileInput.raw.dispatchEvent(new MouseEvent('click'));
+      })
+
+
   const dropTarget = DOM.div()
     .addClass("drop-area drop-target")
-    .append([
-      DOM.label("Drag a file or"),
-      DOM.label()
-        .addClass("btn btn-primary btn-sm btn-browse")
-        .append([
-          "Browse",
-          DOM.input()
-            .attr("type", "file")
-            .attr("id", "file-elem")
-            .attr("accept", props.accept)
-            .attr("hidden", true)
-            .on("change", (e) => {
-              props.handleFiles(e.target.files);
-            }),
-        ]),
-    ]);
-  const dropTargetVanilla = dropTarget.get(0);
+
+    const dropTargetVanilla = dropTarget.get(0);
 
   function preventDefaults(e) {
     e.preventDefault();
@@ -67,7 +76,7 @@ function DragAndDropFile(props) {
   dropTargetVanilla.addEventListener("drop", handleDrop, false);
 
   self.ui = function() {
-    return dropTarget;
+    return [fileInput,btnUpload,dropTarget];
   };
   return self;
 }
