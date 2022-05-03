@@ -147,10 +147,11 @@ function PianoRoll(props) {
 
   function decorateCell(cell, state,i) {
     state ? cell.addClass('active') : cell.removeClass('active');
-    let bgStr = state ? `hsl(${hueRadianRange[i]}rad,50%,${lightnessPercentRange[i]}%)` :
-      'inherit';
+    let bgStr =  `hsl(${hueRadianRange[i]}rad,50%,${lightnessPercentRange[i]}%)`;
+
     cell.css({
-      background: bgStr
+      background: (state ? bgStr : null),
+      borderRadius: (state ? '6px' : 'none')
     })
   }
 

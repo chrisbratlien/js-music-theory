@@ -39,6 +39,12 @@
     /* width: 23px; */
 }
 
+.piano-roll table td.piano-roll-cell:nth-child(2n) {
+    background: #eee;
+    border-radius: 0;
+}
+
+
 .piano-roll table tr:hover {
     opacity: 0.5;
 }
