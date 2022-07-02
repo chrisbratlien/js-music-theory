@@ -91,6 +91,10 @@ function PianoRoll(props) {
 
   let download;
 
+  let btnToggleCollapse;
+  let iconCollapse;
+  let collapse = false;
+
   let toolbar = DOM.div()
     .addClass('btn-group flex-row align-items-center space-between')
     .append([
@@ -121,8 +125,26 @@ function PianoRoll(props) {
         }),
 
       dragFile.ui(),
-      
-
+      btnToggleCollapse = DOM.button()
+        .addClass('btn btn-sm btn-default')
+        .append(
+          iconCollapse = DOM.i()
+            .addClass('fa fa-compress')
+        )
+        .on('click',function(){
+          collapse = ! collapse;
+          if (collapse) {
+            iconCollapse
+              .removeClass('fa-compress')
+              .addClass('fa-expand')
+          }
+          else {
+            iconCollapse
+              .removeClass('fa-expand')
+              .addClass('fa-compress')
+          }
+          self.refresh();
+        }),
       btnPlayStop = DOM.button()
         .addClass('btn btn-sm btn-default')
         .append(
@@ -155,12 +177,19 @@ function PianoRoll(props) {
     })
   }
 
+  
 self.refresh = function() {
+  let row;
+
   tablePlaceholder
   .empty()
   .append(
-    reversedNoteRange.map((noteNumber,i) =>
-      DOM.tr().append(
+    reversedNoteRange.map(function (noteNumber,i) {
+
+      let rowHasEvents = props.events.find(ev => { return ev.noteNumber == noteNumber});
+      if (!rowHasEvents && collapse) { return false; }
+
+      row = DOM.tr().append(
         DOM.th(noteNames[noteNumber%12]),
         ...eventRange.map((tickIdx) => {
           let state = false;
@@ -212,13 +241,16 @@ self.refresh = function() {
               if (state) {
                 self.emit("note-preview", noteNumber);
               }
+              self.emit('events-change',props.events,props);
             });
             decorateCell(cell,state,i);
 
           return cell;
         })
       )
-    )
+      return row;
+    })
+    .filter(o => o)
   )
 }
 

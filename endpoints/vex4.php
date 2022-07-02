@@ -134,10 +134,10 @@ add_action('wp_head', function () {
       color: white;
     }
 
-    /**
-  .control.play-all { background: green; height: 50px; max-height: 50px; line-height: 50px; } 
-  .control.play-all:active { background: #0f0; }
-  **/
+    .editor {
+      font-size: 20px;
+    }
+
   </style>
 
 <?php
@@ -170,7 +170,7 @@ get_header(); ?>
 <div id="stage" class="stage"></div>
 
 
-<div class="vex-tabdiv vex-prog" width="" scale=1.0 editor="true" editor_width="680" editor_height=330>
+<div class="vex-tabdiv vex-prog full-width"  scale=1.0 editor="true" >
   tabstave notation=true tablature=false
   notes Cn-D-E/4 F#/5
 </div>
@@ -184,12 +184,15 @@ add_action('wp_footer', function () {
   <script src="js/draggy.js"></script>
   <script src="js/sticky-note.js"></script>
   <script src="js/bsd.widgets.simpleplayer.js"></script>
-  <script src="lib/vextab/releases/vextab-div.js"></script>
+<!--  <script src="lib/vextab/releases/vextab-div.js"></script>-->
 
   <script type="module">
     import PubSub from "./js/PubSub.js";
     import DOM from "./js/DOM.js";
     import SongList from "./js/SongList.js";
+    import {VexTab, Artist, Vex} from './node_modules/vextab';
+
+
     BSD.foo = [];
     BSD.allTheNotes = [];
 

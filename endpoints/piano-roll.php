@@ -24,6 +24,7 @@ add_action('wp_head', function () {
 ?>
   <style>
     @import 'css/piano-roll.css';
+    @import 'css/tablature.css';
     @import 'css/lcd.css';
     @import 'css/vindow.css';
 
@@ -59,6 +60,7 @@ add_action('wp_footer', function () {
     import MIDIInfo from "./js/MIDIInfo.js";
     import FreakySeq from "./js/FreakySeq.js";
     import PianoRoll from "./js/PianoRoll.js";
+    import Tablature from "./js/Tablature.js";
     import Vindow from "./js/Vindow.js";
     import BSDMixer from "./js/BSDMixer.js";
     //careful, the scope of this constant is still just within this module
@@ -290,6 +292,8 @@ add_action('wp_footer', function () {
       ...freak.opts,
       events
     })
+    let tablature = Tablature({});
+
 
 
     pianoRoll.on('note-hover', function(noteNumber) {
@@ -304,6 +308,10 @@ add_action('wp_footer', function () {
       .on('tempo-change', function(tempo) {
         freak.tempoChange(tempo);
       })
+      .on('events-change',function(events,props){
+        //freak already senses these
+        tablature.update(props);
+      });
 
     pianoRoll.on('is-playing', function(isPlaying) {
       //isPlaying shows the new going-forward wish
@@ -317,7 +325,10 @@ add_action('wp_footer', function () {
       console.log('new loop object',obj);
       let opts = freak.update(obj);
       pianoRoll.update(opts);
+      tablature.update(opts);
     });
+
+
     //jQuery('.piano-roll-wrap').append(pianoRoll.ui())
 
 
@@ -327,7 +338,17 @@ add_action('wp_footer', function () {
     let [toolbar, pane] = pianoRoll.ui();
     w.appendToToolbar(toolbar);
     w.append(pane);
-    w.renderOn(jQuery(document.body));
+    w.renderOn(body);
+
+
+
+    let tabWindow = Vindow({
+      title: "Tablature"
+    });
+    let [tabToolbar, tabPane] = tablature.ui();
+    tabWindow.appendToToolbar(tabToolbar);
+    tabWindow.append(tabPane);
+    tabWindow.renderOn(body);
 
 
 

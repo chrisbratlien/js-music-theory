@@ -1,0 +1,17 @@
+:root {
+    --cell-px: 18px;
+}
+.tablature-pane table td {
+    min-width: var(--cell-px);
+    min-height: var(--cell-px);
+    width: var(--cell-px);
+    height: var(--cell-px);
+}
+
+.tablature-pane textarea {
+    font-family: monospace;
+    overflow-x: scroll;
+    overflow-wrap: normal;
+    white-space: pre;
+    width: inherit;
+}
