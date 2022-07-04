@@ -7,12 +7,13 @@ function Tablature(props) {
 
     let table, tbody, debugDiv, textarea;
     const pane = DOM.div()
-        .addClass('tablature-pane')
+        .addClass('tablature-pane flex-column full-width')
         .append([
             table = DOM.table()
                 .append(tbody = DOM.tbody()),
             textarea = DOM.textarea(),
             debugDiv = DOM.div()
+                .addClass('debug')
         ]);
 
     var fromFret = 0;
@@ -122,6 +123,17 @@ function Tablature(props) {
         })
     }
 
+    function paginate(str,pageSize) {
+        const accum = [];
+        function helper(s) {
+          if (s.length <= pageSize) { return accum.push(s) }
+          accum.push(s.slice(0,pageSize));
+          helper(s.slice(pageSize))
+        }
+        helper(str)
+        return accum;
+    }
+
     self.tabString = function() {
 
         let kernel = 3;
@@ -136,19 +148,39 @@ function Tablature(props) {
         self.walkStringTime(function(evt) {
             if (!evt) { return false; }
             let start = kernel * evt.tickIdx;
-            let pop = ('---' + evt.fret).substr(-1 * kernel);
+            let pop = ('---' + evt.fret).slice(-1 * kernel);
             let stext = stringText[evt.string];
             stext = stext.slice(0,start) + pop + stext.slice(start+kernel);
             stringText[evt.string] = stext;
         });
+        var pageSize = 80;
+        var paginated = STRING_RANGE.reduce(
+            (accum,strNum) => {
+                accum[strNum] = paginate(stringText[strNum], pageSize)
+                return accum;
+            },{})
         //debug(stringText,'stringText object');
-
-        let final = Object.values(stringText)
-            .join("\n");
+        //debug(paginated, 'paginated');
+        //let final = Object.values(stringText)
+        //    .join("\n");
         //debug(final,'Final')
+        //determine pages based on first string.
+
+        const numPages = paginate(stringText[1],pageSize).length;
+        const pageRange = range(0,numPages,1);
+
+        const resultText = pageRange.map(pageNum => {
+            var pageText = STRING_RANGE.map(strNum => {
+                    return paginated[strNum][pageNum];
+                },[])
+                .join("\n");
+            return pageText;
+        })
+        .join("\n\n\n");
         textarea
             .empty()
-            .val(final)
+            //.val(final)
+            .val("\n\n" + resultText)
     }
 
     self.refresh = function() {
