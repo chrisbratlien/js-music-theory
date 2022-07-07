@@ -61,6 +61,7 @@ add_action('wp_footer', function () {
     import FreakySeq from "./js/FreakySeq.js";
     import PianoRoll from "./js/PianoRoll.js";
     import Tablature from "./js/Tablature.js";
+    import VindowInfo from "./js/VindowInfo.js";
     import Vindow from "./js/Vindow.js";
     import BSDMixer from "./js/BSDMixer.js";
     //careful, the scope of this constant is still just within this module
@@ -350,7 +351,8 @@ add_action('wp_footer', function () {
     tabWindow.append(tabPane);
     tabWindow.renderOn(body);
 
-
+    //const vinfo = VindowInfo();
+    //vinfo.renderOn(body);
 
 
     //LEAD / IMPROV

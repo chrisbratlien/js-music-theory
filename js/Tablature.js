@@ -54,7 +54,7 @@ function Tablature(props) {
     }
 
     self.ui = function() {
-        return [toolbar, pane];
+        return [null, pane];
 
     }
 
@@ -133,6 +133,9 @@ function Tablature(props) {
         helper(str)
         return accum;
     }
+    function isBarTick(tickIdx) {
+        return (tickIdx % (props.PPQ * props.QPBAR) == 0);
+    }
 
     self.tabString = function() {
 
@@ -140,20 +143,34 @@ function Tablature(props) {
 
         let stringText = STRING_RANGE.reduce(
             (accum,str)=>{
-                accum[str] = tickRange.map(o => '-------'.slice(0,kernel))
-                    .join("")
+                accum[str] = tickRange.map((o,tickIdx) => {
+                    let pop = '-------'.slice(0,kernel);
+                    if (isBarTick(tickIdx)) {
+                        pop = '|' + pop.slice(1);
+                    }        
+                    return pop;
+                })
+                .join("")
+
+
                 return accum;
             },{});
 
         self.walkStringTime(function(evt) {
             if (!evt) { return false; }
             let start = kernel * evt.tickIdx;
-            let pop = ('---' + evt.fret).slice(-1 * kernel);
+
+
+
+            let pop = ('-----' + evt.fret).slice(-1 * kernel);
+            if (isBarTick(evt.tickIdx)) {
+                pop = '|' + pop.slice(1);
+            }
             let stext = stringText[evt.string];
             stext = stext.slice(0,start) + pop + stext.slice(start+kernel);
             stringText[evt.string] = stext;
         });
-        var pageSize = 80;
+        var pageSize = kernel * props.PPQ * props.QPBAR * 2;
         var paginated = STRING_RANGE.reduce(
             (accum,strNum) => {
                 accum[strNum] = paginate(stringText[strNum], pageSize)
@@ -173,7 +190,7 @@ function Tablature(props) {
             var pageText = STRING_RANGE.map(strNum => {
                     return paginated[strNum][pageNum];
                 },[])
-                .join("\n");
+                .join("|\n") + "|\n";
             return pageText;
         })
         .join("\n\n\n");

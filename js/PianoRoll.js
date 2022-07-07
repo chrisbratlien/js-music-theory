@@ -98,6 +98,7 @@ function PianoRoll(props) {
   let toolbar = DOM.div()
     .addClass('btn-group flex-row align-items-center space-between')
     .append([
+        /**
       btnSave = DOM.button()
       .addClass('btn btn-sm btn-default')
       .append(
@@ -107,6 +108,7 @@ function PianoRoll(props) {
       .on('click',function() {
         self.emit('save',props);
       }),
+      ***/
       download = DOM.a()
         .addClass('btn btn-sm btn-default')
         .attr('href',null)
