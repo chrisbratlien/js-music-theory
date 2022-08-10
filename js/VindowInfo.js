@@ -1,28 +1,41 @@
 import DOM from './DOM.js'
 import PubSub from './PubSub.js'
-import Vindow from './Vindow.js'
+import Vindow, { getPropAsFloat } from './Vindow.js'
 
 function VindowInfo() {
 
+
+    let dimensions = DOM.span();
     let pre = DOM.pre();
     let pane = DOM.div()
-        .append(DOM.h1('Heee'),pre)
+        .append([
+            dimensions,
+            pre
+        ]);
     const self =  Vindow({
         title: 'Info'
     });
     self.append(pane);
 
     function wireUp() {
-        var p = pane.raw;
-        while (p && p != window) {
-            p.addEventListener('resize',function(e){
-                pre.append(JSON.stringify(e,null,4));
-            });    
-            p = p.parentElement;
-        }
-    }
 
-    setTimeout(wireUp,15000);
+        self.on('resize', ({ outer }) => {
+            ////console.log("OUTER",outer);
+            var w = getPropAsFloat(outer.raw,'width');
+            var h = getPropAsFloat(outer.raw,'height');
+
+            var br = outer.raw.getBoundingClientRect();
+
+
+
+
+            dimensions.text(`origin: ${br.left} x ${br.top} extent: ${w} x ${h}`);
+        });
+
+    }
+    wireUp();
+
+    ///setTimeout(wireUp,15000);
     return self;
 }
 

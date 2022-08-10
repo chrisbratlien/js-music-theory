@@ -351,8 +351,11 @@ add_action('wp_footer', function () {
     tabWindow.append(tabPane);
     tabWindow.renderOn(body);
 
-    //const vinfo = VindowInfo();
-    //vinfo.renderOn(body);
+    const vinfo = VindowInfo();
+    vinfo.renderOn(body);
+
+
+    
 
 
     //LEAD / IMPROV

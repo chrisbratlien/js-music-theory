@@ -2,14 +2,19 @@ import PubSub from "./PubSub.js";
 import Draggable from "./Draggable.js";
 import DOM from "./DOM.js";
 
-function bringToTop(elem) {
+export function bringToTop(elem) {
     document.querySelectorAll('.vindow')
         .forEach(o => {
             o.style.zIndex = o == elem ? 1 : 0;
         });
 }
 
-
+export function getPropAsFloat(elem,prop) {
+    const result = getComputedStyle(elem, null)
+        .getPropertyValue(prop)
+        .replace(/[a-z].*/,'') //NOTE: parseFloat will get rid of these too...maybe remove this?
+    return parseFloat(result);
+}
 
 /*Make resizable div by Hung Nguyen
 https://medium.com/the-z/making-a-resizable-div-in-js-is-not-easy-as-you-think-bda19a1bc53d
@@ -28,8 +33,9 @@ function makeResizableDiv(element, resizers) {
 
         function handleDown(e) {
             e.preventDefault()
-            original_width = parseFloat(getComputedStyle(element, null).getPropertyValue('width').replace('px', ''));
-            original_height = parseFloat(getComputedStyle(element, null).getPropertyValue('height').replace('px', ''));
+            original_width = getPropAsFloat(element, 'width');
+            original_height = getPropAsFloat(element, 'height');
+
             original_x = element.getBoundingClientRect().left;
 
             original_y = element.offsetTop || element.getBoundingClientRect().top;
@@ -98,6 +104,8 @@ function makeResizableDiv(element, resizers) {
                 topish(e);
                 leftish(e);
             }
+
+            element.dispatchEvent(new CustomEvent('vindow-resize'), {detail: { element } })
         }
 
         function stopResize() {
@@ -173,7 +181,10 @@ function Vindow(props) {
             bringToTop(outer.raw)
         })
 
-
+    //capture the raw element's CustomEvent emitted witin makeResizableDiv's resize function
+    outer.raw.addEventListener('vindow-resize',function(e){
+        self.emit('resize',{ self, outer, e });
+    });
 
     self.append = function() {
         let children = [...arguments]
