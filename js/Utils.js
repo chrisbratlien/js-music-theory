@@ -10,13 +10,38 @@ export function setBackgroundHue(elem, hueRads) {
 }
 
 
-export function sorter(selectorFunc) {
+
+export function ascendingSorter(selectorFunc) {
     var sortFunc = function(a, b) {
-        var sA = selectorFunc(a);
-        var sB = selectorFunc(b);
-        if (sA < sB) { return -1; }
-        if (sA > sB) { return 1; }
-        return 0;
+      var sA = selectorFunc(a);
+      var sB = selectorFunc(b);
+      if (sA < sB) {
+        return -1;
+      }
+      if (sA > sB) {
+        return 1;
+      }
+      return 0;
     };
     return sortFunc;
-};
+}
+export function descendingSorter(selectorFunc) {
+    var sortFunc = function(a, b) {
+      var sA = selectorFunc(a);
+      var sB = selectorFunc(b);
+      if (sA < sB) {
+        return 1;
+      }
+      if (sA > sB) {
+        return -1;
+      }
+      return 0;
+    };
+    return sortFunc;
+}
+  
+export function sorter(selectorFunc) {
+    return ascendingSorter(selectorFunc);
+}
+
+

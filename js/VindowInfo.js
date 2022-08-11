@@ -1,16 +1,15 @@
 import DOM from './DOM.js'
 import PubSub from './PubSub.js'
-import Vindow, { getPropAsFloat } from './Vindow.js'
+import Vindow, { autoArrange, getPropAsFloat, Point } from './Vindow.js'
+import Inspector
+ from './Inspector.js';
 
-function VindowInfo() {
 
-
-    let dimensions = DOM.span();
-    let pre = DOM.pre();
+ function VindowInfo() {
+    let inspector = Inspector();
     let pane = DOM.div()
         .append([
-            dimensions,
-            pre
+            inspector.ui()
         ]);
     const self =  Vindow({
         title: 'Info'
@@ -19,23 +18,29 @@ function VindowInfo() {
 
     function wireUp() {
 
-        self.on('resize', ({ outer }) => {
+        self.on('resize', ({ outer}) => {
             ////console.log("OUTER",outer);
-            var w = getPropAsFloat(outer.raw,'width');
-            var h = getPropAsFloat(outer.raw,'height');
+            //var w = getPropAsFloat(outer.raw,'width');
+            //var h = getPropAsFloat(outer.raw,'height');
+            //var br = outer.raw.getBoundingClientRect();
+            //dimensions.text(`origin: ${br.left} x ${br.top} extent: ${w} x ${h}`);
 
-            var br = outer.raw.getBoundingClientRect();
+            inspector.update({ 
+                origin: self.origin(), 
+                corner: self.corner(),
+                extent: self.extent(),
+                area: self.area()
+            });
 
 
-
-
-            dimensions.text(`origin: ${br.left} x ${br.top} extent: ${w} x ${h}`);
         });
 
     }
     wireUp();
 
-    ///setTimeout(wireUp,15000);
+    // setInterval(() => {
+    //     self.moveTo(Point(50,100));
+    // },10000);
     return self;
 }
 

@@ -25,15 +25,9 @@
   <link rel="stylesheet" href="<?php  home_url();  ?>/style.css?v=2.1">
 
 
-
-
-
-
   <!--[if lt IE 9]>
       <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
-
-
 
   <?php wp_head(); ?>
 </head>
@@ -44,7 +38,10 @@
 
     <div class="nav-links flex-row align-items-center space-around">
     </div>
+
+
     <div class="container flex-row align-items-center space-evenly">
+      <?php do_action('dynamic-header-content'); ?>
       Volume:<div id="volume-amount" class="volume-amount">0</div>
 
       <div class="slider-wrap flex-column header-column half-width">

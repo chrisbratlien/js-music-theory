@@ -1,12 +1,41 @@
 import PubSub from "./PubSub.js";
 import Draggable from "./Draggable.js";
 import DOM from "./DOM.js";
+import { ascendingSorter, descendingSorter } from "./Utils.js";
+
+
+export function Point(x,y) {
+    var self = { x, y };
+    self.lessThan = function(aPoint) {
+        return self.x < aPoint.x && self.y < aPoint.y;
+    }
+    self.max = function(aPoint) {
+        return {
+            x: Math.max(self.x, aPoint.x),
+            y: Math.max(self.y, aPoint.y)
+        }
+    }
+    self.min = function(aPoint) {
+        return {
+            x: Math.min(self.x, aPoint.x),
+            y: Math.min(self.y, aPoint.y)
+        }
+    }
+    return self;
+}
+
+export function allRawVindows() {
+    return document.querySelectorAll('.vindow')
+}
 
 export function bringToTop(elem) {
-    document.querySelectorAll('.vindow')
+    allRawVindows()
         .forEach(o => {
             o.style.zIndex = o == elem ? 1 : 0;
         });
+}
+export function justXY({ x, y }) {
+    return { x, y };
 }
 
 export function getPropAsFloat(elem,prop) {
@@ -14,6 +43,26 @@ export function getPropAsFloat(elem,prop) {
         .getPropertyValue(prop)
         .replace(/[a-z].*/,'') //NOTE: parseFloat will get rid of these too...maybe remove this?
     return parseFloat(result);
+}
+
+export function sortVindowsDesc(vindows) {
+    return vindows.sort(descendingSorter(v => v.area()));
+}
+
+export function autoArrange(vindows, origin, corner) {
+    var sorted = sortVindowsDesc(vindows);
+    var cursor = origin;
+    var moved = [origin.y];
+    sorted.map(function(vindow){
+        if (cursor.x + vindow.extent().x > corner.x) {
+            cursor.x = 0;
+            cursor.y = Math.max(...moved);
+        }
+        console.log({cursor});
+        vindow.moveTo(cursor);
+        cursor.x = vindow.corner().x;
+        moved.push(vindow.corner().y);
+    });
 }
 
 /*Make resizable div by Hung Nguyen
@@ -33,6 +82,8 @@ function makeResizableDiv(element, resizers) {
 
         function handleDown(e) {
             e.preventDefault()
+            bringToTop(element);
+
             original_width = getPropAsFloat(element, 'width');
             original_height = getPropAsFloat(element, 'height');
 
@@ -203,6 +254,46 @@ function Vindow(props) {
     self.ui = function() {
         return outer;
     }
+
+    self.getBoundingClientRect = function() {
+        return outer.raw.getBoundingClientRect();
+    }
+    self.origin = function() {
+        var br = self.getBoundingClientRect();
+        return Point(br.x, br.y);
+
+    }
+    self.corner = function() {
+        var br = self.getBoundingClientRect();
+        return Point(br.right, br.bottom);
+    }
+
+
+    self.extent = function() {
+        var br = self.getBoundingClientRect();
+        return Point(br.width, br.height);
+    }
+    self.area = function() {
+        var extent = self.extent();
+        return extent.x * extent.y;        
+    }
+
+    self.moveTo = function(aPoint) {
+        outer.raw.style.left = aPoint.x + 'px';
+        outer.raw.style.top = aPoint.y + 'px';
+    }
+
+
+    self.intersects = function(aVindow) {
+        const maxo = self.origin()
+            .max(aVindow.origin());
+        const minc = self.corner()
+            .min(aVindow.corner());
+        return maxo.lessThan(minc);
+    };
+
+
+
     self.pane = pane;
     self.renderOn = function(wrap) {
         wrap.append(outer);

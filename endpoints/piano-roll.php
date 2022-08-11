@@ -16,8 +16,12 @@ add_action('wp_head', function () {
     }
   }
   //pp($classes,'classes');
+});
 
-
+add_action('dynamic-header-content',function(){
+?>
+  <button class="btn-auto-arrange">Auto Arrange</button>
+<?php
 });
 
 add_action('wp_head', function () {
@@ -62,7 +66,7 @@ add_action('wp_footer', function () {
     import PianoRoll from "./js/PianoRoll.js";
     import Tablature from "./js/Tablature.js";
     import VindowInfo from "./js/VindowInfo.js";
-    import Vindow from "./js/Vindow.js";
+    import Vindow, {autoArrange, Point} from "./js/Vindow.js";
     import BSDMixer from "./js/BSDMixer.js";
     //careful, the scope of this constant is still just within this module
     import MIDI_MSG from "./js/MIDIConstants.js";
@@ -355,7 +359,7 @@ add_action('wp_footer', function () {
     vinfo.renderOn(body);
 
 
-    
+
 
 
     //LEAD / IMPROV
@@ -403,6 +407,23 @@ add_action('wp_footer', function () {
     vMIDIInfo.appendToToolbar(miToolbar),
       vMIDIInfo.append(miPane);
     vMIDIInfo.renderOn(body);
+
+
+    let vindows = [w, tabWindow, vMIDIInfo, vinfo];
+
+    function myAutoArrange() {
+      var br = document.body.getBoundingClientRect();
+      var origin = Point(0,50); //x ignored for now.
+      var corner = Point(br.right,0);//y ignored for now.
+      autoArrange(vindows, origin, corner);
+    }
+
+    //setInterval(myAutoArrange, 15000);
+    myAutoArrange();
+    var btnAutoArrange = DOM.from('.btn-auto-arrange');
+
+    btnAutoArrange.on('click',myAutoArrange);
+
 
 
     let TAU = Math.PI * 2;
