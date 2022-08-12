@@ -24,6 +24,8 @@ export function Point(x,y) {
     return self;
 }
 
+export const allVindows = [];
+
 export function allRawVindows() {
     return document.querySelectorAll('.vindow')
 }
@@ -301,6 +303,7 @@ function Vindow(props) {
         makeResizableDiv(outer.raw, resizers);
 
     }
+    allVindows.push(self);
     return self;
 }
 export default Vindow;

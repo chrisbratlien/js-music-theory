@@ -1,6 +1,7 @@
 .vindow {
     background: white;
     border: 1px solid #444;
+    border-radius: 5px;
     box-shadow: 0px 0px 2px #555;
     overflow: hidden;
     position: absolute;
@@ -15,7 +16,7 @@
 }
 
 .vindow .header .title {
-    padding: 1px;
+    padding: 1px 5px;
 }
 
 .vindow .toolbar {

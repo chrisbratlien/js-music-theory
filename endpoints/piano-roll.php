@@ -66,7 +66,7 @@ add_action('wp_footer', function () {
     import PianoRoll from "./js/PianoRoll.js";
     import Tablature from "./js/Tablature.js";
     import VindowInfo from "./js/VindowInfo.js";
-    import Vindow, {autoArrange, Point} from "./js/Vindow.js";
+    import Vindow, {autoArrange, Point, allVindows} from "./js/Vindow.js";
     import BSDMixer from "./js/BSDMixer.js";
     //careful, the scope of this constant is still just within this module
     import MIDI_MSG from "./js/MIDIConstants.js";
@@ -415,7 +415,7 @@ add_action('wp_footer', function () {
       var br = document.body.getBoundingClientRect();
       var origin = Point(0,50); //x ignored for now.
       var corner = Point(br.right,0);//y ignored for now.
-      autoArrange(vindows, origin, corner);
+      autoArrange(allVindows, origin, corner);
     }
 
     //setInterval(myAutoArrange, 15000);
@@ -432,6 +432,13 @@ add_action('wp_footer', function () {
     document.querySelectorAll('.vindow .header').forEach(elem => {
       setBackgroundHue(elem, magicHueRadians)
     });
+
+    var midiInfoLCD = DOM.from(document.querySelector('.midi-info.lcd'));
+    midiInfoLCD.css({ 
+      filter: `hue-rotate(${magicHueRadians}rad)`
+    });
+    window.midiInfoLCD = midiInfoLCD;
+
   </script>
   <script>
     function onAppLoad() {
