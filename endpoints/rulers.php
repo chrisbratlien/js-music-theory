@@ -129,6 +129,8 @@ import Vindow from "./js/Vindow.js";
 import BSDMixer from "./js/BSDMixer.js";
 import Inspector from "./js/Inspector.js";
 import SimplePropertyRetriever from "./js/SimplePropertyRetriever.js";
+import {parseProgression} from "./js/Progression.js";
+import JSMT from "./js/js-music-theory.js";
 
 
     //careful, the scope of this constant is still just within this module
@@ -564,7 +566,7 @@ var body = DOM.from(document.body);
         }
         //campfire.publish('new-progression', progInput.val());
 
-        var prog = BSD.parseProgression(progInput.val());
+        var prog = parseProgression(progInput.val());
         ///////campfire.publish('do-it-prog',prog);
         campfire.publish('new-progression', prog);
 

@@ -31,6 +31,7 @@ add_action('wp_head', function () {
     @import 'css/tablature.css';
     @import 'css/lcd.css';
     @import 'css/vindow.css';
+    @import 'css/arranger.css';
 
     @import "css/align.css";
     @import "css/flex.css";
@@ -66,11 +67,16 @@ add_action('wp_footer', function () {
     import PianoRoll from "./js/PianoRoll.js";
     import Tablature from "./js/Tablature.js";
     import VindowInfo from "./js/VindowInfo.js";
-    import Vindow, {autoArrange, Point, allVindows} from "./js/Vindow.js";
+    import Vindow, {autoArrange, allVindows} from "./js/Vindow.js";
+    import Point from "./js/Point.js";
+    import Arranger from "./js/Arranger.js";
     import BSDMixer from "./js/BSDMixer.js";
     //careful, the scope of this constant is still just within this module
     import MIDI_MSG from "./js/MIDIConstants.js";
     import DOM from "./js/DOM.js";
+    import JSMT, { Note } from "./js/js-music-theory.js";
+    
+    //import Sortable from "./lib/sortable.complete.esm.js";
 
     import {
       setBackgroundHue
@@ -409,7 +415,16 @@ add_action('wp_footer', function () {
     vMIDIInfo.renderOn(body);
 
 
-    let vindows = [w, tabWindow, vMIDIInfo, vinfo];
+
+    let arranger = Arranger();
+    arranger.renderOn(body);
+
+    let vindows = [w, tabWindow, vMIDIInfo, vinfo,arranger];
+
+
+
+
+
 
     function myAutoArrange() {
       var br = document.body.getBoundingClientRect();
@@ -424,7 +439,7 @@ add_action('wp_footer', function () {
 
     btnAutoArrange.on('click',myAutoArrange);
 
-
+    window.allVindows = allVindows;
 
     let TAU = Math.PI * 2;
     let biggerIsSlower = 500000 // 1_000_000
@@ -439,11 +454,6 @@ add_action('wp_footer', function () {
     });
     window.midiInfoLCD = midiInfoLCD;
 
-  </script>
-  <script>
-    function onAppLoad() {
-      //FIXME: get rid of this once the app/module refactoring is done
-    }
   </script>
 <?php
 });

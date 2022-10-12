@@ -555,9 +555,11 @@ add_action('wp_footer', function () {
 
 
   <script type="module">
+    import JSMT, { Note, makeChord, makeChordFromNotes, makeScale } from "./js/js-music-theory.js";
     import DOM from "./js/DOM.js";
     import FreakySeq from "./js/FreakySeq.js";
     import PianoRoll from "./js/PianoRoll.js";
+    import { parseProgression } from "./js/Progression.js";
     import MIDIOutMonitor from "./js/MIDIOutMonitor.js";
     import MIDIRouter from "./js/MIDIRouter.js";
     import MIDIInfo from "./js/MIDIInfo.js";
@@ -960,7 +962,7 @@ add_action('wp_footer', function () {
       progInput.val(song.progression);
       BSD.options.progression = song.progression;
       storage.setItem('options', JSON.stringify(BSD.options));
-      var prog = BSD.parseProgression(song.progression);
+      var prog = parseProgression(song.progression);
       campfire.publish('do-it', prog);
     });
 
@@ -1578,7 +1580,7 @@ add_action('wp_footer', function () {
       storage.setItem('options', JSON.stringify(BSD.options));
 
 
-      var prog = BSD.parseProgression(progInput.val());
+      var prog = parseProgression(progInput.val());
       ///////campfire.publish('do-it-prog',prog);
 
 
@@ -2565,7 +2567,7 @@ add_action('wp_footer', function () {
         let pedal = beatOneNote.plus(-12);
         let pedalValue = pedal.value();
 
-        if (BSD.options.bass.midi) {
+        if (router && router.outPort && BSD.options.bass.midi) {
 
           let noteOnChannel = MIDI_CONST.NOTE_ON + (BSD.options.bass.channel - 1);
           let noteOffChannel = MIDI_CONST.NOTE_OFF + (BSD.options.bass.channel - 1);
@@ -2591,7 +2593,7 @@ add_action('wp_footer', function () {
 
         let pedal5 = cursor.chord.myFifth().plus(-12);
         let pedal5Value = pedal5.value();
-        if (BSD.options.bass.midi) {
+        if (router && router.outPort && BSD.options.bass.midi) {
 
           let noteOnChannel = MIDI_CONST.NOTE_ON + (BSD.options.bass.channel - 1);
           let noteOffChannel = MIDI_CONST.NOTE_OFF + (BSD.options.bass.channel - 1);
@@ -2622,9 +2624,23 @@ add_action('wp_footer', function () {
         });
         if (BSD.options.scrollToBoard) {
           cursor.board.getWrap(function(wrap) {
+            
+            var chordEl = wrap.raw.querySelector('.chord-name');
+            
+            var headerOffset = 65;
+            var elementPosition = chordEl.getBoundingClientRect().top;
+            var offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+             
+            chordEl.scrollIntoView({ behavior: 'smooth' })
+            window.scrollTo(0,offsetPosition);
+
+
+
+            /* FIXME: REDO without jQuery
             jQuery('html, body').animate({
               scrollTop: wrap.find('.chord-name').offset().top - headerHeight
             }, 200);
+            */
           });
         }
       }
@@ -2809,7 +2825,7 @@ add_action('wp_footer', function () {
     }
     var syntheticHiHat = createSyntheticHiHat();
     function hihat() {
-      if (BSD.options.hihat.midi) {
+      if (router && router.outPort && BSD.options.hihat.midi) {
         let noteOnChannel = MIDI_CONST.NOTE_ON + (BSD.options.hihat.channel - 1);
         let noteOffChannel = MIDI_CONST.NOTE_OFF + (BSD.options.hihat.channel - 1);
         let noteNum = BSD.options.hihat.noteNumber;
@@ -3125,11 +3141,6 @@ add_action('wp_footer', function () {
     vMIDIInfo.appendToToolbar(miToolbar),
       vMIDIInfo.append(miPane);
     vMIDIInfo.renderOn(body);
-  </script>
-  <script>
-    function onAppLoad() {
-      //FIXME: get rid of this once the app/module refactoring is done
-    }
   </script>
 
 <?php

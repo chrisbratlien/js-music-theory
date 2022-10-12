@@ -2,6 +2,7 @@ import PubSub from "./PubSub.js";
 import DOM from "./DOM.js";
 import DragAndDropFile from "./DragAndDropFile.js";
 import { lerp, invlerp, remap } from "./scalar.js";
+import JSMT from "./js-music-theory.js";
 
 function millisPerLoop(bpm, beatsPerBar, barsPerLoop) {
   let millisPerMinute = 60000;
@@ -68,7 +69,7 @@ function PianoRoll(props) {
 
   let playing = false;
   let btnSave;
-  let btnPlayStop, iconPlayStop, inTempo;
+  let btnPlayStop, iconPlayStop, inTempo, inTonality;
 
 
   function handleNewLoopUpload(jsonString) {
@@ -94,21 +95,11 @@ function PianoRoll(props) {
   let btnToggleCollapse;
   let iconCollapse;
   let collapse = false;
+  let tonality = null;
 
   let toolbar = DOM.div()
     .addClass('btn-group flex-row align-items-center space-between')
     .append([
-        /**
-      btnSave = DOM.button()
-      .addClass('btn btn-sm btn-default')
-      .append(
-        iconPlayStop = DOM.i()
-          .addClass('fa fa-save')
-      )
-      .on('click',function() {
-        self.emit('save',props);
-      }),
-      ***/
       download = DOM.a()
         .addClass('btn btn-sm btn-default')
         .attr('href',null)
@@ -163,11 +154,34 @@ function PianoRoll(props) {
         .attr('type', 'number')
         .attr('min', minTempo)
         .val(props.tempo || 120)
-        .on('change', (e) => self.emit('tempo-change', +e.target.value))
-    ]);
+        .on('change', (e) => self.emit('tempo-change', +e.target.value)),
+      inTonality = DOM.input()
+        .addClass('tempo')
+        .attr('type', 'text')
+        .attr('placeholder','tonality (scale)')
+        .val(null)
+        .on('change', (e) => changeTonality(e.target.value))
+      ]);
  
  
   var tablePlaceholder = DOM.table();
+
+  function changeTonality(str) {
+    if (!str || !str.length) {
+      tonality = null;
+      return;
+    }
+    var scale = makeScale(str);
+    tonality = JSMT.noteBitmap(scale);
+    self.refresh();
+  }
+
+  function noteFitsTonality(noteNumber) {
+    if (!tonality) { return true; }
+    return tonality[noteNumber%12] === 1;
+  }
+
+
 
   function decorateCell(cell, state,i) {
     state ? cell.addClass('active') : cell.removeClass('active');
@@ -190,6 +204,9 @@ self.refresh = function() {
 
       let rowHasEvents = props.events.find(ev => { return ev.noteNumber == noteNumber});
       if (!rowHasEvents && collapse) { return false; }
+      if (!noteFitsTonality(noteNumber)) { return false; }
+
+
 
       row = DOM.tr().append(
         DOM.th(noteNames[noteNumber%12]),

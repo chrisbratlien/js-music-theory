@@ -27,228 +27,34 @@ get_header();
 
 add_action('wp_footer', function () {
 ?>
-  <!--<script src="lib/Hexagon.js/hexagon.js"></script> -->
-  <script src="<?php bloginfo('url'); ?>/js/bsd.widgets.simpleplayer.js"></script>
-
+<script>
+ var HAS_TOUCH = ('ontouchstart' in window);
+</script>
   <script src="js/hexagon.js"></script>
-  <script type="text/javascript">
-    var HAS_TOUCH = ('ontouchstart' in window);
 
-    if (typeof BSD == "undefined") {
-      var BSD = {};
-    }
-    BSD.chosenColor = BSD.colorFromHex('#888888');
-    BSD.ColorPicker = function(spec) {
-      var self = {};
-      self.renderOn = function(html) {
-        ///console.log('hello');
-        var square = DOM.div('').addClass('color-picker');
-        square.css('background-color', '#' + spec.color.toHex());
-        square.click(function() {
-          BSD.chosenColor = spec.color;
-        });
-        ////console.log('html',html);
-        html.append(square);
-      };
-      return self;
-    };
+  <script src="<?php home_url();  ?>/js/bsd.widgets.simpleplayer.js"></script>
+
+<script type="module">
 
 
-    ///context = new webkitAudioContext();
-    BSD.audioContext = context;
+var HAS_TOUCH = ('ontouchstart' in window);
 
+import MIDIRouter from "./js/MIDIRouter.js";
+    import MIDIInfo from "./js/MIDIInfo.js";
+    import FreakySeq from "./js/FreakySeq.js";
+    import PianoRoll from "./js/PianoRoll.js";
+    import Tablature from "./js/Tablature.js";
+    import VindowInfo from "./js/VindowInfo.js";
+    import Vindow, {autoArrange, allVindows} from "./js/Vindow.js";
+    import Point from "./js/Point.js";
+    import Arranger from "./js/Arranger.js";
+    import BSDMixer from "./js/BSDMixer.js";
+    //careful, the scope of this constant is still just within this module
+    import MIDI_MSG from "./js/MIDIConstants.js";
+    import DOM from "./js/DOM.js";
+    import JSMT, { Note } from "./js/js-music-theory.js";
 
-
-    //ios trick
-    var unlocked = false;
-    window.addEventListener('touchstart', function() {
-      if (unlocked) return false;
-      unlocked = true;
-      ///alert('unlocked');
-      // create empty buffer
-      var buffer = myContext.createBuffer(1, 1, 22050);
-      var source = myContext.createBufferSource();
-      source.buffer = buffer;
-
-      // connect to output (your speakers)
-      source.connect(context.destination);
-
-      // play the file
-      source.noteOn(0);
-
-    }, false);
-
-
-
-
-    BSD.currentFretDiv = false;
-
-    var pickers = jQuery('#pickers');
-
-    var morePalettes = jQuery('#more-palettes');
-
-    var palettes = [];
-
-
-
-
-
-
-    campfire.subscribe('redraw-palettes', function() {
-      pickers.empty();
-      palettes = [];
-      palettes.push(BSD.colorFromHex('000000').upTo(BSD.colorFromHex('FFFFFF'), 20));
-      palettes.push(BSD.randomPalette2(10, 60));
-      palettes.push(BSD.randomPalette2(10, 60));
-      palettes.push(BSD.randomPalette2(10, 60));
-      palettes.push(BSD.randomPalette2(10, 50));
-      palettes.push(BSD.randomPalette2(10, 40));
-      palettes.push(BSD.randomPalette2(10, 30));
-      palettes.push(BSD.randomPalette2(10, 30));
-      palettes.push(BSD.randomPalette2(10, 30));
-      palettes.push(BSD.randomPalette2(10, 30));
-      palettes.push(BSD.randomPalette2(10, 30));
-      palettes.push(BSD.randomPalette2(10, 30));
-      palettes.push(BSD.randomPalette2(10, 30));
-      palettes.push(BSD.randomPalette2(10, 30));
-      palettes.push(BSD.randomPalette2(10, 30));
-      palettes.push(BSD.randomPalette2(10, 30));
-      palettes.each(function(pal) {
-        pal.each(function(randcolor) {
-          var picker = BSD.ColorPicker({
-            color: randcolor
-          });
-          picker.renderOn(pickers);
-        });
-      });
-    });
-
-    morePalettes.click(function() {
-      campfire.publish('redraw-palettes');
-    });
-    campfire.publish('redraw-palettes');
-
-
-
-
-
-
-    BSD.parseProgression = function(progString) {
-      var barStrings = progString.split(/\ +|\|/);
-
-      barStrings = barStrings.select(function(o) {
-        return o.length > 0;
-      });
-
-
-
-      var barIndex = 0;
-      var chordIndex = 0;
-      var flat = [];
-
-      barStrings.each(function(barString) {
-        var chordNames = barString.split(/,|\ +/);
-        var halfBar = false;
-        if (chordNames.length == 2) {
-          halfBar = true;
-        }
-
-
-
-        chordNames.each(function(o) {
-          var origChord = makeChord(o);
-          var lowerChord = origChord.plus(-12);
-
-          flat.push({
-            barIndex: barIndex,
-            chordIndex: chordIndex,
-            chord: lowerChord,
-            halfBar: halfBar
-          });
-          chordIndex += 1;
-        });
-        barIndex += 1;
-      });
-
-      return flat;
-      ///wait
-      var result = eachify(flat);
-      console.log('result', result);
-      return result;
-    };
-
-    /*
-    BSD.audioPlayer = BSD.Widgets.GuitarPlayer({
-      ////gossip: campfire,
-      context: context,
-      ////name: 'Piano',//chosen, //'Piano',
-      polyphonyCount: 96, //polyphonyCount,
-      range: [-300, 128]
-    });
-    */
-
-    let mixer;
-
-
-    function onAppLoad() {
-      mixer = App.BSDMixer(context);
-      BSD.audioPlayer = BSD.Widgets.SimplePlayer({
-        context: context,
-        destination: mixer.common,
-        polyphonyCount: 48, //polyphonyCount,
-        itemTitles: BSD.itemTitles,
-        range: [40, 128]
-      });
-      waiter.beg(BSD.audioPlayer, 'set-master-volume', BSD.volume);
-
-    }
-
-
-
-
-    var waiter = BSD.Widgets.Procrastinator({
-      timeout: 250
-    });
-
-
-    BSD.volume = 0;
-    storage.getItem('volume', function(o) {
-      BSD.volume = parseFloat(o);
-      jQuery("#volume-amount").text(BSD.volume);
-    });
-
-
-    $("#volume-input").slider({
-      orientation: "horizontal",
-      range: "min",
-      min: 0,
-      max: 0.1,
-      step: 0.01,
-      value: BSD.volume,
-      slide: function(event, ui) {
-        var newVolume = ui.value;
-        waiter.beg(BSD.audioPlayer, 'set-master-volume', ui.value);
-        ////waiter.beg(BSD.chunker,'set-master-volume',ui.value);
-        jQuery("#volume-amount").text(newVolume);
-      }
-    });
-
-
-
-    jQuery(document).on('keydown', function(e) {
-      var c = e.keyCode || e.which;
-
-      if (BSD.currentNote && c == BSD.keycodes.f) {
-        BSD.audioPlayer.playNote(BSD.currentNote, 1000);
-      }
-
-    });
-
-    function getRandomArbitrary(min, max) {
-      return Math.random() * (max - min) + min;
-    }
-
-
+    let mixer = BSDMixer(context);
 
 
     var main = jQuery('#main');
@@ -266,82 +72,21 @@ add_action('wp_footer', function () {
       'M7': ['M7', '-7']
     };
 
-    ////var currentRootNote = JSMT.twelveNotes().atRandom();
-    var randColor = BSD.randomDarkColor(); ////palettes.atRandom().atRandom();
-
-
-
-    jQuery('#redo').click(function() {
-      var myChords = [];
-      var current = JSMT.twelveNotes().atRandom();
-      for (var i = 0; i < 12; i += 1) {
-        var chord = current.chord(flav);
-        myChords.push(chord);
-        current = current.fourth();
-        flav = flavorMap[flav].atRandom();
-      }
-      console.log('myChords', myChords); ////.map(function(o){ return o.utf8FullAbbrev(); }));
-      ///return false;
-
-      //////currentRootNote = 
-
-      campfire.publish('do-it', myChords);
-    });
-    campfire.publish('do-it', []);
-
-
-    campfire.subscribe('note-hover', function(note) {
-      //console.log('note',note.name());
-      BSD.currentNote = note;
-      if (BSD.strum) {
-        BSD.audioPlayer.playNote(note, 1000);
-      }
-    });
-
-
-    jQuery(document).on('keydown', function(e) {
-      var c = e.keyCode || e.which;
-
-      ///console.log(c);///'BSD.currentFretDiv',BSD.currentFretDiv);
-
-
-      /*** possibly obsolete...not 100% sure though yet..    
-      if (BSD.currentFretDiv && c == BSD.keycodes.f) {
-        BSD.currentFretDiv.trigger('click');    
-      }
-      ****/
-
-
-
-      if (BSD.currentNote && c == BSD.keycodes.f) {
-        BSD.audioPlayer.playNote(BSD.currentNote, 1000);
-      }
-
-      if (BSD.currentChord && c == BSD.keycodes.f) {
-        BSD.audioPlayer.playChord(BSD.currentChord, 1000);
-      }
-
-
-
-      if (BSD.currentNote && c == BSD.keycodes.d) {
-        BSD.strum = true;
-        ////BSD.audioPlayer.playNote(BSD.currentNote,1000);    
-      }
-
-      if (e.shiftKey) {
-        BSD.strum = true;
-      }
-
-
-
-    });
-
-    jQuery(document).on('keyup', function(e) {
-      BSD.strum = false;
-    });
-
-
     ///////////////////////
+    BSD.itemTitles = ['fundamental', 'octave', 'dominant', 'dominant+fourth(octave2)'];
+    if (BSD.iOS) {
+      BSD.itemTitles = ['fundamental'];
+    }
+
+    BSD.audioPlayer = BSD.Widgets.SimplePlayer({
+      context: context,
+      destination: mixer.common,
+      polyphonyCount: 48, //polyphonyCount,
+      itemTitles: BSD.itemTitles,
+      range: [40, 128]
+    });
+
+
 
     var radius = 35;
     var hexRows = 8;

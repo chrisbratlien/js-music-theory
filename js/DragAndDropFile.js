@@ -27,8 +27,8 @@ function DragAndDropFile(props) {
 
   const dropTarget = DOM.div()
     .addClass("drop-area drop-target")
-
-    const dropTargetVanilla = dropTarget.get(0);
+    .append('drop file')
+    const dropTargetVanilla = dropTarget.raw;
 
   function preventDefaults(e) {
     e.preventDefault();

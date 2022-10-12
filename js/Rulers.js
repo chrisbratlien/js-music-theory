@@ -1,9 +1,12 @@
 import DOM from "./DOM.js";
 import PubSub from "./PubSub.js";
+import JSMT, { Note } from "./js-music-theory.js";
+import RootNoteWithIntervals from "./RootNoteWithIntervals.js";
+
 //TODO/FIXME: lots more refactoring needed for the global BSD object
 
 
-BSD.RulerItem = function(spec) {
+const RulerItem = function(spec) {
     var self = spec;
 
 
@@ -312,7 +315,7 @@ export function Ruler(spec) {
 };
 
 
-BSD.notePattern = [
+const notePattern = [
     { name: 'A', names: ['A'], on: false },
     { name: 'Bb', names: ['A#', 'Bb'], on: false },
     { name: 'B', names: ['B'], on: false },
@@ -327,7 +330,7 @@ BSD.notePattern = [
     { name: 'Ab', names: ['G#', 'Ab'], on: false }
 ];
 
-BSD.twoOctavePattern = [
+const twoOctavePattern = [
     { name: '1', names: ['1'], on: false },
     { name: 'b2', names: ['b2'], on: false },
     { name: '2', names: ['2', ], on: false },
@@ -356,19 +359,9 @@ BSD.twoOctavePattern = [
 ];
 
 
-BSD.modifiedPattern = function(notes) {
-    var startPattern = BSD.twoOctavePattern;
+const modifiedPattern = function(notes) {
+    var startPattern = twoOctavePattern;
     ////console.log('startPattern',startPattern);
-
-
-
-    /*
-    var modified = startPattern.collect(function(item) {
-      var hit = notes.detect(function(n) { return item.name == n; });
-  
-      return { name: item.name, on: (hit == item.name) }
-    });
-    */
 
     var modified = startPattern.collect(function(item) {
         var hit = notes.detect(function(n) {
@@ -392,7 +385,7 @@ BSD.noteRulers = [];
 BSD.rulerSnapSize = 20;
 
 export function DegreeRuler(spec) {
-    var pattern = BSD.modifiedPattern((spec.degrees).split(','));
+    var pattern = modifiedPattern((spec.degrees).split(','));
     var state = BSD.allMIDIValues.map(function(v) {
         if (typeof pattern[v - 60] == "undefined") { return false; }
         return pattern[v - 60].on;
@@ -409,9 +402,9 @@ export function DegreeRuler(spec) {
 
 export function NoteRuler(spec) {
     //console.log('note ruler');
-    var pattern = BSD.notePattern;
+    var pattern = notePattern;
     var myItems = pattern.concat(pattern).concat(pattern);
-    var myRulerItems = myItems.map(function(i) { return BSD.RulerItem(i); });
+    var myRulerItems = myItems.map(function(i) { return RulerItem(i); });
 
     var self = Ruler({
         onUpdate: function() {},

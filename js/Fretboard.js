@@ -1,6 +1,6 @@
 import DOM from "./DOM.js";
 import PubSub from "./PubSub.js";
-
+import JSMT, { Note } from "./js-music-theory.js";
 function Fretboard(spec) {
     var cells = [];
     var showIntervals = false;

@@ -1,0 +1,7 @@
+
+.arranger .section {
+    background-color: white;
+    border-bottom: 1px solid #bbb;
+    cursor: pointer;
+    text-align: center;
+}

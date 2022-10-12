@@ -3,26 +3,7 @@ import Draggable from "./Draggable.js";
 import DOM from "./DOM.js";
 import { ascendingSorter, descendingSorter } from "./Utils.js";
 
-
-export function Point(x,y) {
-    var self = { x, y };
-    self.lessThan = function(aPoint) {
-        return self.x < aPoint.x && self.y < aPoint.y;
-    }
-    self.max = function(aPoint) {
-        return {
-            x: Math.max(self.x, aPoint.x),
-            y: Math.max(self.y, aPoint.y)
-        }
-    }
-    self.min = function(aPoint) {
-        return {
-            x: Math.min(self.x, aPoint.x),
-            y: Math.min(self.y, aPoint.y)
-        }
-    }
-    return self;
-}
+import Point from "./Point.js";
 
 export const allVindows = [];
 
@@ -53,17 +34,20 @@ export function sortVindowsDesc(vindows) {
 
 export function autoArrange(vindows, origin, corner) {
     var sorted = sortVindowsDesc(vindows);
-    var cursor = origin;
-    var moved = [origin.y];
+    var destinations = [origin];
     sorted.map(function(vindow){
-        if (cursor.x + vindow.extent().x > corner.x) {
-            cursor.x = 0;
-            cursor.y = Math.max(...moved);
-        }
-        console.log({cursor});
-        vindow.moveTo(cursor);
-        cursor.x = vindow.corner().x;
-        moved.push(vindow.corner().y);
+        var destination = destinations.find(d => 
+            !d.visited && d.x + vindow.extent().x <= corner.x);
+        vindow.moveTo(destination);
+        destination.visited = true;
+        var vo = vindow.origin();
+        var vc = vindow.corner();
+        //after placing, its UR and LL corners become new dests
+        destinations.push(
+            Point(vc.x, vo.y), //UR has priority
+            Point(vo.x, vc.y)  //LL
+        );
+        destinations.sort(descendingSorter(d => d.x)) //RTL
     });
 }
 
@@ -212,7 +196,7 @@ function Vindow(props) {
         );
 
     outer = DOM.div()
-        .addClass('vindow')
+        .addClass(`vindow ${props.className ? props.className : ''}`)
         .append(
             ///swHandle,
             ...resizers,

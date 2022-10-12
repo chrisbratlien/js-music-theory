@@ -31,7 +31,7 @@
 
 
 
-  <script src="<?php home_url();  ?>/js/js-music-theory.js"></script>
+  <!--<script src="<?php home_url();  ?>/js/js-music-theory.js"></script>-->
   <script src="<?php home_url();  ?>/js/bsd.widgets.baseplayer.js"></script>
   <script src="<?php home_url();  ?>/js/bsd.widgets.stringoscillator.js"></script>
   <script src="<?php home_url();  ?>/js/bsd.widgets.guitarplayer.js"></script>
