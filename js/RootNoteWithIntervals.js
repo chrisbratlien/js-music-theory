@@ -80,7 +80,7 @@ export const RootNoteWithIntervals = function(spec) {
       newSet = newSet.sort(function(a, b) {
         return a - b;
       });
-      newRoot = Note(newSet[0]);
+      var newRoot = Note(newSet[0]);
       var newIntervals = newSet.map(function(v) {
         return v - newRoot.value();
       });
