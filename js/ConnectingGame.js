@@ -141,7 +141,8 @@ export function ConnectingGameVindow(props) {
 
     
     let loops = 1;
-    let ticksPerChord = 4;
+    //let ticksPerChord = 4;
+    let ticksPerBar = 4;
     let tempo = 60;
     let fromFret = 1;
     let toFret = 5;
@@ -153,6 +154,7 @@ export function ConnectingGameVindow(props) {
 
     var tick = -1;
     var chordIdx = -1;
+    var progIdx = -1;
 
     function stopSeq() {
         clearInterval(cgHandle);
@@ -181,7 +183,8 @@ export function ConnectingGameVindow(props) {
         while (noteValue > high) { noteValue -= 12; }
         ///tick = -1;
         let saveFrets = [0,0,0,0];
-        let saveStrings = [0,0,0,0];
+        let saveStrings = [0,0,0,0];        
+        var ticksPerChord = props.prog[0].halfBar ? (ticksPerBar / 2) : ticksPerBar;
 
         const doATick = () => {
             cgHandle = setTimeout(doATick,tempoToMillis(tempo));
@@ -193,25 +196,20 @@ export function ConnectingGameVindow(props) {
                 .filter(fret => fret.fret <= toFret);
             
             if (props.chords.length == 0) {return false; }
-            tick += 1;
+            tick += 1;            
             if (tick % ticksPerChord == 0) {
-              //rulerIdx += 1;
-              chordIdx += 1; 
-              chordIdx %= props.chords.length;
-              //hueDeg = hues[chordIdx % hues.length] + 15;
-              //var deg = remap(0,3,0,360,chordIdx % 4);
-              hueDeg = remap(0,props.chords.length,0,360,chordIdx) + 15;
-              var chord = props.chords[chordIdx];
-              uiChord
-                .text(chord.fullAbbrev())
-                .css({ color: `hsl(${hueDeg}deg,50%,70%)`});
-              //ruler = BSD.rulers[rulerIdx];
-              /*
-              console.log('switch!!!',
-                'chords length',
-                props.chords.length);                
-                */
-              g.enableNoteValues(chord.noteValues());
+                progIdx += 1;
+                progIdx %= props.prog.length;
+                ticksPerChord = props.prog[progIdx].halfBar ? (ticksPerBar / 2) : ticksPerBar;
+                chordIdx += 1; 
+                chordIdx %= props.chords.length;
+                hueDeg = remap(0,props.chords.length,0,360,chordIdx) + 15;
+                ///var chord = props.chords[chordIdx];
+                var chord = props.prog[progIdx].chord;
+                uiChord
+                    .text(chord.fullAbbrev())
+                    .css({ color: `hsl(${hueDeg}deg,50%,70%)`});
+                g.enableNoteValues(chord.noteValues());
             }
             noteValue = g.tick(noteValue);
 
@@ -284,6 +282,7 @@ export function ConnectingGameVindow(props) {
         var prog = parseProgression(progStr);
         console.log("prog",prog);
         props.chords = prog.map(o => o.chord);
+        props.prog = prog;
     }
     function handleProgressionChange(e) {
         var progStr = e.target.value;
@@ -305,13 +304,13 @@ export function ConnectingGameVindow(props) {
         title: "Connecting Game",
         className: 'connecting-game'
     });
-    const inTicksPerChord = LabeledTextInput({
+    const inTicksPerBar = LabeledTextInput({
         type: 'number',
-        value: ticksPerChord,
-        label: "Ticks Per Chord",
+        value: ticksPerBar,
+        label: "Ticks Per Bar",
     })
     .on('change',function(val){
-        ticksPerChord = Number(val);
+        ticksPerBar = Number(val);
     })
     const inNumLoops = LabeledTextInput({
         type: 'number',
@@ -380,7 +379,7 @@ export function ConnectingGameVindow(props) {
         
     self.appendToToolbar([
         inNumLoops.ui(),
-        inTicksPerChord.ui(),
+        inTicksPerBar.ui(),
         inTempo.ui(),
         inFromFret.ui(),
         inToFret.ui(),
