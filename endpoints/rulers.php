@@ -12,8 +12,6 @@ add_action('wp_head', function () {
     @import "css/flex.css";
     @import "css/vindow.css";
 
-
-
     @font-face {
     font-family: "Electronic Highway Sign";
     src: url(font/EHSMB.eot?) format("eot"),url(font/EHSMB.ttf) format("truetype"),url(font/EHSMB.woff) format("woff"),url(font/EHSMB.svg#ElectronicHighwaySign) format("svg");
@@ -45,7 +43,10 @@ add_action('wp_head', function () {
     #pickers {
       height: 40px;
     }
-
+    .progression {
+      font-family: monospace;
+      width: 90%;
+    }
 
   </style>
 
@@ -66,7 +67,8 @@ get_header(); ?>
 
   <div class="flex-row align-items-center full-width">
     <div class="prog-wrap full-width pad2">
-      <input id="progression" class="progression three-quarters-width" type="text" />
+      <textarea  class="form-control progression three-quarters-width"></textarea>
+
       <div class="btn-group">
         <button class="btn btn-sm btn-default" id="progression-clear">Clear</button>
         <button class="btn btn-sm btn-default" id="progression-help">Help</button>
@@ -104,6 +106,8 @@ get_header(); ?>
 
   <div id="rulers"></div>
   <!--rulers -->
+  <div class="vindows"></div>
+  <button class="btn-auto-arrange">Auto Arrange </button>
 </div><!-- content -->
 
 
@@ -120,18 +124,20 @@ add_action('wp_footer', function () {
 
   <script type="text/javascript" src="js/bsd.widgets.procrastinator.js"></script>
 
-  <script type="module">
+  <script async type="module">
 
+import PubSub from "./js/PubSub.js";
 import MIDIRouter from "./js/MIDIRouter.js";
 import MIDIInfo from "./js/MIDIInfo.js";
 import DOM from "./js/DOM.js";
-import Vindow from "./js/Vindow.js";
+import Vindow, {autoArrange} from "./js/Vindow.js";
+import Point from "./js/Point.js";
 import BSDMixer from "./js/BSDMixer.js";
 import Inspector from "./js/Inspector.js";
 import SimplePropertyRetriever from "./js/SimplePropertyRetriever.js";
 import {parseProgression} from "./js/Progression.js";
-import JSMT from "./js/js-music-theory.js";
-
+import JSMT, { Note } from "./js/js-music-theory.js";
+///import Note from "./js/Note.js";
 
     //careful, the scope of this constant is still just within this module
     import MIDI_MSG from "./js/MIDIConstants.js";
@@ -142,7 +148,7 @@ import JSMT from "./js/js-music-theory.js";
     Dominant9ChordRuler, Minor9ChordRuler, Major9ChordRuler, Dominant13ChordRuler, Minor13ChordRuler, Major13ChordRuler
   } from "./js/Rulers.js";
 
-
+  import Tablature, {TablatureHelper} from "./js/Tablature.js";
 
       //FIXME: standardize options across pages.
       BSD.options = {
@@ -157,7 +163,7 @@ import JSMT from "./js/js-music-theory.js";
 
 
     BSD.ChordRulerPanel = function(spec) {
-      var self = BSD.PubSub({});
+      var self = PubSub({});
       var rulersWrap = jQuery('#rulers');
       self.renderOn = function(wrap) {
         wrap.append(
@@ -200,7 +206,9 @@ import JSMT from "./js/js-music-theory.js";
     function handleExternallyReceivedNoteOn(msg, noteNumber, velocity) {
       if (router && router.outPort && BSD.options.improv.midi) {
         let noteOnChannel = MIDI_MSG.NOTE_ON + (BSD.options.improv.channel - 1);
-        return router.outPort.send([noteOnChannel, noteNumber, velocity]);
+
+        let vel = Math.floor(BSD.volume * velocity); //[0..1] * [0..127] = [0..127]
+        return router.outPort.send([noteOnChannel, noteNumber, vel]);
       }
       //okay, we'll synthesize using WekAudio LFO.
       campfire.publish('play-note', {
@@ -258,35 +266,6 @@ import JSMT from "./js/js-music-theory.js";
 
     BSD.audioPlayer.publish('set-master-volume', BSD.volume || 0.06);
 
-    BSD.chosenColor = BSD.colorFromHex('#000000');
-    BSD.ColorPicker = function(spec) {
-      var self = {};
-      self.renderOn = function(html) {
-        var square = DOM.div('').addClass('color-picker');
-        square.css('background-color', '#' + spec.color.toHex());
-        square.click(function() {
-          BSD.chosenColor = spec.color;
-        });
-        html.append(square);
-      };
-      return self;
-    };
-    BSD.grey = BSD.Color({
-      r: 300,
-      g: 300,
-      b: 300
-    });
-    BSD.lightGrey = BSD.Color({
-      r: 200,
-      g: 200,
-      b: 200
-    });
-    BSD.penDown = false;
-    jQuery(document).keypress(function(e) {
-      if (e.charCode == 96) { //backtick
-        BSD.penDown = !BSD.penDown;
-      }
-    });
 
 
 
@@ -303,9 +282,12 @@ function makeEnumerable(something) {
 var body = DOM.from(document.body);
 
 
-    jQuery(document).ready(function() {
-      var campfire = BSD.PubSub({});
+var campfire = PubSub({});
+window.campfire = campfire;
 
+
+
+    //jQuery(document).ready(function() {
 
 
 
@@ -450,11 +432,12 @@ var body = DOM.from(document.body);
         orientation: "horizontal",
         range: "min",
         min: 0,
-        max: 0.1,
-        step: 0.01,
+        max: 1,
+        step: 0.05,
         value: BSD.volume,
         slide: function(event, ui) {
           var newVolume = ui.value;
+          BSD.volume = Number(newVolume);
           waiter.beg(BSD.audioPlayer, 'set-master-volume', newVolume);
           storage.setItem('volume', newVolume);
           ////waiter.beg(BSD.chunker,'set-master-volume',ui.value);
@@ -472,6 +455,7 @@ var body = DOM.from(document.body);
 
     //LEAD / IMPROV
     campfire.subscribe('play-note', function(payload) {
+
       ///console.log('play-note!!',payload);
       if (!BSD.options.improv.enabled) {
         return false;
@@ -483,8 +467,10 @@ var body = DOM.from(document.body);
 
         let noteOnChannel = 0x90 + (BSD.options.improv.channel - 1);
         let noteOffChannel = 0x80 + (BSD.options.improv.channel - 1);
-        let noteNum = payload.note.value();
-        let vel = Math.floor(127 * BSD.options.improv.volume); //[0..1] -> [0..127]
+
+        let noteNum = (typeof payload.note == "number") ? payload.note : payload.note.value();
+        let vel = BSD.options.improv.volume * BSD.volume; //[0..1] * [0..1] = [0..1]
+        vel = Math.floor(127 * vel); //[0..1] -> [0..127]
 
         router.outPort.send([noteOnChannel, noteNum, vel]);
 
@@ -541,6 +527,9 @@ var body = DOM.from(document.body);
               duration: 1000
             });
           });
+          ruler.subscribe('destroy',function(r){
+            BSD.rulers = BSD.rulers.filter(r => r !== ruler);
+          });
           ruler.renderOn(rulersWrap);
           BSD.rulers.push(ruler);
         });
@@ -559,8 +548,8 @@ var body = DOM.from(document.body);
       });
 
 
-      var progInput = jQuery('#progression');
-      progInput.blur(function() {
+      var progInput = DOM.from('.progression')
+      progInput.on('blur',function() {
         if (progInput.val().length == 0) {
           return false;
         }
@@ -585,17 +574,34 @@ var body = DOM.from(document.body);
         lightbox.show();
       });
 
+      ///var guitarData = await loadGuitarData();
+
+
+    let tablature = Tablature({});
+    let tablatureHelper = TablatureHelper(tablature);
+    let tabWindow = Vindow({
+      title: "Tablature"
+    });
+    let [tabToolbar, tabPane] = tablature.ui();
+    tabWindow.appendToToolbar(tabToolbar);
+    tabWindow.append(tabPane);
+    tabWindow.renderOn(body);
+
+      let chords = [];
+      var tick = -1;
+      var chordIdx = -1;
+      var ruler;
+      var noteValue;
+
+
       //todo, replace with BSD.parseProgression??
       campfire.subscribe('new-progression', function(progression) {
-
-        let chords = progression.map(o => o.chord);
+        chords = progression.map(o => o.chord);
         chords.forEach(function(chord) {
-
           var set = chord.noteValues().map(function(val) {
             return val;
             // I guess I'm happy with this now, so nevermind ///return val - 12;
           }); //WAS: octave down from what the js-music-theory library would use (with C=60 as middle C)"
-
           var state = BSD.allMIDIValues.map(function(tf) {
             return false;
           });
@@ -617,13 +623,16 @@ var body = DOM.from(document.body);
             campfire.publish('play-chord', {
               chord: o,
               duration: 1000
-            });
+            });            
+          });
+          ruler.on('destroy',function(r){
+            BSD.rulers = BSD.rulers.filter(r => r !== ruler);
           });
           ruler.renderOn(rulersWrap);
           BSD.rulers.push(ruler);
         });
       });
-    });
+    //}); //this closes the document.ready scope
 
 
 
@@ -633,14 +642,7 @@ var body = DOM.from(document.body);
         storage.setItem('progHelpShown', true);
       }
     });
-
-    let inspector = Inspector({ foo: 'bar'});
-    var vInspector = Vindow({ title: 'Inspector'});
-    let [toolbar,pre] = inspector.ui();
-    vInspector.appendToToolbar(toolbar),
-    vInspector.append(pre);
-    vInspector.renderOn(body);
-
+    
     router.on('statechange',function(e,outPort){
       //console.log('YAY',e,outPort);
       if (!outPort) { return false; }
@@ -654,10 +656,12 @@ var body = DOM.from(document.body);
 
       let theTarget = makeEnumerable(e.target);
 
+      /*
       inspector.update({
         conjured,
         theTarget
       });
+      */
     })
 
 
@@ -673,12 +677,18 @@ var body = DOM.from(document.body);
     vMIDIInfo.renderOn(body);
 
 
-  </script>
-  <script>
-    function onAppLoad() {
-      ///
+    var allVindows = [vMIDIInfo,tabWindow];
+    function myAutoArrange() {
+      var br = body.raw.getBoundingClientRect();
+      var origin = Point(0,150); //x ignored for now.
+      var corner = Point(br.right,150);//y ignored for now.
+      autoArrange(allVindows, origin, corner);
     }
-    </script>
+    myAutoArrange();
+    var btnAutoArrange = DOM.from('.btn-auto-arrange');
+    btnAutoArrange.on('click',myAutoArrange);
+  </script>
+
 <?php
 });
 

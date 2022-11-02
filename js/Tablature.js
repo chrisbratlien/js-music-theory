@@ -16,7 +16,7 @@ function Tablature(props) {
                 .addClass('debug')
         ]);
 
-    var fromFret = 0;
+    var fromFret = 1;
     var toFret = 5; 
     var txtFrom = DOM.input()
         .addClass('from')
@@ -81,13 +81,13 @@ function Tablature(props) {
 
     self.populateMyEvents = function() {
         myEvents = props.events.map(evt => {
-            let string = STRING_RANGE.find(str => fznn[str] <= evt.noteNumber)
+            evt.string = STRING_RANGE.find(str => fznn[str] <= evt.noteNumber)
             //debug(string,'string');
-            return {
-                ...evt,
-                string,
-                fret: evt.noteNumber - fznn[string]
+            evt.fret = evt.noteNumber - fznn[evt.string];
+            if (evt.fret < fromFret) {
+                moveToString(evt, evt.string + 1);
             }
+            return evt;
         });
         //debug(myEvents,'myEvents');
 
@@ -170,7 +170,8 @@ function Tablature(props) {
             stext = stext.slice(0,start) + pop + stext.slice(start+kernel);
             stringText[evt.string] = stext;
         });
-        var pageSize = kernel * props.PPQ * props.QPBAR * 2;
+        ///var pageSize = kernel * props.PPQ * props.QPBAR * 2;
+        var pageSize = 96;
         var paginated = STRING_RANGE.reduce(
             (accum,strNum) => {
                 accum[strNum] = paginate(stringText[strNum], pageSize)
@@ -248,7 +249,7 @@ function Tablature(props) {
 
 
     self.update = function(data) {
-        console.log('tabl',data);
+        ////console.log('tabl',data);
         props = data;
         tickRange = range(0,props.TPLOOP,1);
         self.populateMyEvents();
@@ -259,4 +260,52 @@ function Tablature(props) {
 
     return self;
 }
+
+export function TablatureHelper(tablature) {
+    var tick = -1;
+    var TPBAR = 4;
+    var tabTemplate = {
+      BARS: 16,
+      BPM: 100,
+      PPQ: 1,
+      QPBAR: 4,
+      TPBAR,
+      TPLOOP: 64,
+      events: []
+    }
+    var tabEvents = [];
+    var barIdx = 0;
+
+    function update(noteValues) {
+        if (!Array.isArray(noteValues)){
+            noteValues = [noteValues];
+        }
+        noteValues.forEach(function(noteValue){
+            tick += 1;
+            barIdx = Math.floor(tick / 4); 
+            //console.log('nv',noteValue);
+            tabEvents.push({
+              noteNumber: noteValue,
+              tickIdx: tick
+            });
+        });
+
+        var BARS = barIdx + 1;
+        var TPLOOP = BARS * TPBAR;
+        tabTemplate = {
+          ...tabTemplate,
+          BARS,
+          TPLOOP
+        }
+        tablature.update({
+          ...tabTemplate,
+          events: tabEvents
+        })
+    }
+    return {
+        update
+    }
+}
+
+
 export default Tablature;

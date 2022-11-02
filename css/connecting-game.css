@@ -1,0 +1,8 @@
+.connecting-game .chord-name {
+    font-size: 40px;
+    position: absolute;
+    bottom: 0;
+    z-index: -1;
+    color: rgba(1,1,1,0.3);
+    left: 10%;
+}

@@ -44,4 +44,9 @@ export function sorter(selectorFunc) {
     return ascendingSorter(selectorFunc);
 }
 
-
+export function tempoToMillis(bpm) {
+  var minutesPerBeat = 1 / bpm;
+  var secs = minutesPerBeat * 60;
+  var millis = secs * 1000;
+  return millis;
+}

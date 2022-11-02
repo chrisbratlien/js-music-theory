@@ -1,6 +1,36 @@
 import DOM from "./DOM.js";
 import PubSub from "./PubSub.js";
 import {remap} from "./Lerpy.js";
+import {makeChord} from "./js-music-theory.js";
+
+async function loadGuitarData() {
+    async function inner() {
+      var resp = await fetch(BSD.baseURL + '/data/guitar.json');
+      var json = await resp.json();
+      return json;
+    }
+    return await inner();
+}
+
+var guitarData = await loadGuitarData();
+
+
+function getFrets(spec) {
+    return guitarData
+    .filter(fret => {
+        let chord = typeof spec.chord == 'string' ? makeChord(spec.chord) : spec.chord;
+        return spec.strings.includes(fret.string) &&
+            fret.fret >= Math.min(...spec.fretRange) &&
+            fret.fret <= Math.max(...spec.fretRange) &&
+            chord
+            .abstractNoteValues()
+            .includes(fret.noteValue % 12)
+    });
+}
+
+
+
+
 
 function SVGFretboard(spec) {
 
@@ -54,22 +84,28 @@ function SVGFretboard(spec) {
                 class: 'gfrets base-board',
             })
             .append(
-                BSD.guitarData
+                guitarData //fixme. pass this in with context or props
                 .filter(fret => fret.string == 1)
-                .map(fret => {
+                .map( (fret,i,frets) => {
                     //fretX = vlerp([+fretX],[100],100/22/100);
                     var totW = 100;
                     var h = (100 / 6);
-                    let fretXCoeff = Math.pow(1 + 100 / spec.fps / 100, fret.fret + 1) - 1;
+                    var inverseFret = frets[frets.length-(i+1)];
+
+                    //console.log({ fret, inverseFret})
+                    let xIdx = fret.fret;
+                    //xIdx = inverseFret.fret;
+
+                    let fretXCoeff = Math.pow(1 + 100 / spec.fps / 100, xIdx + 1) - 1;
                     //fretXCoeff *= 1.56;
                     let fretX = fretXCoeff * totW;
                     //console.log('fretX',fretX);
                     let rectOpts = {
                         class: `string-${fret.string} fret-${fret.fret}`,
                         fill: 'rgba(0,0,0,0.1)', //getRandomColor(),
-                        x: spec.fretStarts[fret.fret] + '%',
+                        x: spec.fretStarts[xIdx] + '%',
                         y: (fret.string - 1) * spec.fretHeights + '%',
-                        width: spec.fretWidths[fret.fret] + '%',
+                        width: spec.fretWidths[xIdx] + '%',
                         height: '100%' //fretHeights + '%'
                     };
 
@@ -154,8 +190,8 @@ https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
 
     self.plotFret = function(fret, opts) {
         var x = spec.fretStarts[fret.fret] + spec.fretWidths[fret.fret] / 2;
-        var radius = utils.map(fret.fret, 0, spec.fps, 1.5, 0.75);
-
+        ///var radius = utils.map(fret.fret, 0, spec.fps, 1.5, 0.75);
+        var radius = remap(0, spec.fps, 1.5, 0.75,fret.fret);
         var fill = opts.fill || 'rgba(0,0,0,0.1)';
 
 

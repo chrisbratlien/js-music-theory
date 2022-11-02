@@ -193,6 +193,7 @@ export function Ruler(spec) {
 
     self.close = function() {
         rulerDiv.remove();
+        self.emit('destroy',self);
     }
 
     self.reload = function() {

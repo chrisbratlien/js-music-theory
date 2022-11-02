@@ -1,5 +1,9 @@
 body { font-family: Lucida Grande; }
 
+
+.cursor-pointer {
+  cursor: pointer;
+}
 .ui-slider .ui-slider-handle {
   cursor: pointer;
 }
@@ -71,7 +75,7 @@ table { overflow: auto; }
 
 .ruler div { box-sizing: initial; }
 
-#rulers { overflow-y: auto; }
+
 
 .ruler { position: absolute; top: 0; left: 0; background: white; border: 1px solid #ddd; }
 .ruler div { 

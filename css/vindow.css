@@ -17,6 +17,7 @@
 
 .vindow .header .title {
     padding: 1px 5px;
+    user-select: none;
 }
 
 .vindow .toolbar {

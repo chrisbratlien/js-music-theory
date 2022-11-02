@@ -36,6 +36,7 @@ get_header();
   </li>
   <li><a href="piano-roll">Piano Roll</a> Piano Roll experiment
   <li><a href="rulers">Rulers</a> Vertical color swatches to paint and play chords and progressions with</li>
+  <li><a href="connecting-game">Connecting Game</a> Arpeggiate through chord changes by switching to nearest notes</li>
   <li><a href="hexagon">Hexagon</a> Hexagon based input UI</li>
   <li><a href="multiple-fretboards">Multiple Fretboards</a> paint and play on fretboards</li>
   <li><a href="spatial">Spatial Note Fretboard</a> arpeggios inverted to play nearby notes on the guitar fretboard </li>

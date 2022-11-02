@@ -204,7 +204,7 @@ function Vindow(props) {
             .addClass('header flex-row align-items-center space-between')
             .append([
                 DOM.span()
-                .addClass('title')
+                .addClass('title noselect')
                 .append(props.title),
                 buttons
             ]),
