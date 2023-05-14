@@ -1,6 +1,6 @@
 import PubSub from "./PubSub.js";
 import DOM from "./DOM.js";
-import {sorter} from "./Utils.js";
+import {sorter, range} from "./Utils.js";
 
 function Tablature(props) {
     const self = PubSub();
@@ -30,17 +30,33 @@ function Tablature(props) {
         .attr('min',5)
         .val(toFret)
 
+
+
+    var btnClear = DOM.button()
+        .addClass('btn btn-sm btn-primary btn-clear')
+        .append([
+            DOM.i()
+                .addClass('fa fa-trash-o'),
+                ' Clear'
+        ])
+        .on('click',handleClearClick);
+
+
     var toolbar = DOM.div()
         .addClass('flex-row full-width')
         .append([
-            txtFrom,
-            txtTo
+            btnClear
+            //txtFrom,
+            //txtTo
         ]);
 
-    //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from#sequence_generator_range
-    const range = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
 
     const STRING_RANGE = range(1,6,1);
+
+
+    function handleClearClick() {
+        myEvents = [];        
+    }
 
     function debug(o,label = 'unlabeled') {
         debugDiv
@@ -54,7 +70,10 @@ function Tablature(props) {
     }
 
     self.ui = function() {
-        return [null, pane];
+        //looks like I gave up on returning the toolbar at some point.
+        //would I ever want to revisit that?
+
+        return [toolbar, pane];
 
     }
 
@@ -81,11 +100,13 @@ function Tablature(props) {
 
     self.populateMyEvents = function() {
         myEvents = props.events.map(evt => {
-            evt.string = STRING_RANGE.find(str => fznn[str] <= evt.noteNumber)
-            //debug(string,'string');
-            evt.fret = evt.noteNumber - fznn[evt.string];
-            if (evt.fret < fromFret) {
-                moveToString(evt, evt.string + 1);
+            if (!evt.string || !evt.fret) {
+                evt.string = STRING_RANGE.find(str => fznn[str] <= evt.noteNumber)
+                //debug(string,'string');
+                evt.fret = evt.noteNumber - fznn[evt.string];
+                if (evt.fret < fromFret) {
+                    moveToString(evt, evt.string + 1);
+                }    
             }
             return evt;
         });
@@ -257,6 +278,17 @@ function Tablature(props) {
         self.refresh();
     }
 
+    /* still needs more thinking...
+    self.addEvent = function(event) {
+        props.events = props.events ? props.events : [];
+        props.events.push(event);
+        ////console.log('tabl',data);
+        self.populateMyEvents();
+        debugDiv.empty()
+        self.refresh();
+    }
+    */
+
 
     return self;
 }
@@ -276,18 +308,67 @@ export function TablatureHelper(tablature) {
     var tabEvents = [];
     var barIdx = 0;
 
-    function update(noteValues) {
-        if (!Array.isArray(noteValues)){
-            noteValues = [noteValues];
+
+    var btnClear = DOM.button()
+        .addClass('btn btn-clear')
+        .append([
+            DOM.i()
+                .addClass('fa fa-trash-o'),
+                ' Clear'
+        ])
+        .on('click',handleClearClick);
+
+
+    self.ui = function() {
+        return [btnClear,null]
+    };
+
+    function handleClearClick() {
+        tabEvents = [];
+        tick = -1;
+        barIdx = 0;
+    }
+
+    function update(noteValuesOrFrets) {
+
+        //so far this assumes string and fret are unknown and that the Tablature component will need to compute those.
+        
+        //but what if we have already decided those externally? 
+
+        //we need to make it more clear whether Tablature is being asked
+        //to compute those or not.
+
+
+        //Q: does noteValues span the time domain or frequency domain?
+
+        //A: it looks like frequency domain but then it gets spread into time domain with 
+        ///tabEvents
+
+        if (!Array.isArray(noteValuesOrFrets)){
+            noteValuesOrFrets = [noteValuesOrFrets];
         }
-        noteValues.forEach(function(noteValue){
+        noteValuesOrFrets.forEach(function(noteValueOrFret){
             tick += 1;
             barIdx = Math.floor(tick / 4); 
             //console.log('nv',noteValue);
-            tabEvents.push({
-              noteNumber: noteValue,
-              tickIdx: tick
-            });
+
+            let event = {
+                tickIdx: tick
+            };
+
+            if (Number.isInteger(noteValueOrFret)) {
+                event.noteNumber = noteValueOrFret
+            }
+            else {
+                //assume noteValueOrFret it's a fret object whose noteNumber is contained in a noteValue property
+                event = {
+                    ...event,
+                    ...noteValueOrFret, //capture numeric string and numeric fret properties.
+                    noteNumber: noteValueOrFret.noteValue
+                }
+            }
+
+            tabEvents.push(event);
         });
 
         var BARS = barIdx + 1;
@@ -297,13 +378,16 @@ export function TablatureHelper(tablature) {
           BARS,
           TPLOOP
         }
+
         tablature.update({
           ...tabTemplate,
           events: tabEvents
         })
+  
     }
     return {
-        update
+        update,
+        ui
     }
 }
 

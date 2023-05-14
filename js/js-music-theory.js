@@ -387,7 +387,7 @@ export const Note = function(foo, accidental) {
     var result = self.nameFromValue(self.value());
 
     return JSMT.toUTF8(result);
-  
+
   };
 
   self.sharpNameFromValue = function(value) {
@@ -560,7 +560,7 @@ export const Note = function(foo, accidental) {
     });
   };
 
-  self.chord = function(abbrev,bassNote) {
+  self.chord = function(abbrev, bassNote) {
     var spec = JSMT.chordMap[abbrev];
 
     if (typeof spec == "undefined") {
@@ -593,7 +593,7 @@ export const Note = function(foo, accidental) {
 export function makeChord(name) {
   let rootName = false;
 
-  let [chordName,bassNote] = name.split('/');
+  let [chordName, bassNote] = name.split('/');
   if (chordName.substr(1, 1).match(/#|♯|b|♭/)) {
     rootName = chordName.substr(0, 2);
     chordName = chordName.substr(2);
@@ -604,7 +604,7 @@ export function makeChord(name) {
 
   // adjust for bass note being the new root note?
   // [0,4,7].map(n => (n + 5)%12 ).sort()
-  return Note(rootName).chord(chordName,bassNote);
+  return Note(rootName).chord(chordName, bassNote);
 }
 
 function makeSpecFromValues(values) {
@@ -670,7 +670,7 @@ JSMT.rnwiFromNoteValues = function(noteValues) {
   return result;
 };
 
-JSMT.twelveBitMask = [
+export const twelveBitMask = [
   0x800,
   0x400,
   0x200,
@@ -684,6 +684,7 @@ JSMT.twelveBitMask = [
   0x2,
   0x1,
 ];
+JSMT.twelveBitMask = twelveBitMask;
 
 JSMT.twelveBitHash = function(ary) {
   return ary.reduce((accum, val) => JSMT.twelveBitMask[val] | accum, 0);

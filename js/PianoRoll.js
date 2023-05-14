@@ -2,7 +2,7 @@ import PubSub from "./PubSub.js";
 import DOM from "./DOM.js";
 import DragAndDropFile from "./DragAndDropFile.js";
 import { lerp, invlerp, remap } from "./scalar.js";
-import JSMT from "./js-music-theory.js";
+import JSMT, { makeScale } from "./js-music-theory.js";
 
 function millisPerLoop(bpm, beatsPerBar, barsPerLoop) {
   let millisPerMinute = 60000;
@@ -12,12 +12,12 @@ function millisPerLoop(bpm, beatsPerBar, barsPerLoop) {
 var textFile;
 function makeTextFile(text, type) {
   var data = new Blob([text], {
-      type: type
+    type: type
   });
   // If we are replacing a previously generated file we need to
   // manually revoke the object URL to avoid memory leaks.
   if (textFile !== null) {
-      window.URL.revokeObjectURL(textFile);
+    window.URL.revokeObjectURL(textFile);
   }
   textFile = window.URL.createObjectURL(data);
   // returns a URL you can use as a href
@@ -39,7 +39,7 @@ function PianoRoll(props) {
   //console.log("eventRange", eventRange);
 
   let TAU = Math.PI * 2;
-  let hueRadiansBegin = TAU/3;
+  let hueRadiansBegin = TAU / 3;
   let hueRadiansEnd = TAU;
 
   let hueRadianRange = noteRange
@@ -48,7 +48,7 @@ function PianoRoll(props) {
     });
   let lightnessPercentRange = noteRange
     .map((nn, i) => {
-      return remap(0, noteRange.length, 75, 45,i);
+      return remap(0, noteRange.length, 75, 45, i);
     })
   //console.log('hrr', hueRadianRange);
   //  let eventRange = [...Array(props.TPLOOP).keys()];
@@ -60,7 +60,7 @@ function PianoRoll(props) {
     console.log('PR INIT');
     eventRange = [...Array(props.TPLOOP).keys()].map((o) => o);
     loopMS = millisPerLoop(props.BPM, props.QPBAR, props.BARS);
-    loopMS = Math.floor(loopMS);    
+    loopMS = Math.floor(loopMS);
   }
   init();
 
@@ -74,21 +74,22 @@ function PianoRoll(props) {
 
   function handleNewLoopUpload(jsonString) {
     var obj = JSON.parse(jsonString);
-    self.emit('new-loop-object',obj);
+    self.emit('new-loop-object', obj);
   }
 
   let dragFile = DragAndDropFile({
     accept: '*',
     handleFiles: function(files, b, c) {
-        [...files].forEach(file => {
-                window.file = file;
-                //console.log('file?', file);
-                file.text()
-                    .then(jsonString => {
-                        handleNewLoopUpload(jsonString) 
-                    });  
-            })
-  }});
+      [...files].forEach(file => {
+        window.file = file;
+        //console.log('file?', file);
+        file.text()
+          .then(jsonString => {
+            handleNewLoopUpload(jsonString)
+          });
+      })
+    }
+  });
 
   let download;
 
@@ -102,19 +103,19 @@ function PianoRoll(props) {
     .append([
       download = DOM.a()
         .addClass('btn btn-sm btn-default')
-        .attr('href',null)
-        .attr('download','loop.json')
+        .attr('href', null)
+        .attr('download', 'loop.json')
         .append(
           DOM.i()
             .addClass('fa fa-download')
         )
-        .on('click',function(e) {
+        .on('click', function(e) {
           let now = Date.now();
           let filename = `piano-roll-${now}.json`;
-          download.attr('download',filename);
-          let dataString = JSON.stringify(props,null,4);
+          download.attr('download', filename);
+          let dataString = JSON.stringify(props, null, 4);
           const dataURI = makeTextFile(dataString, 'application/json');
-          download.attr('href',dataURI);
+          download.attr('href', dataURI);
         }),
 
       dragFile.ui(),
@@ -124,8 +125,8 @@ function PianoRoll(props) {
           iconCollapse = DOM.i()
             .addClass('fa fa-compress')
         )
-        .on('click',function(){
-          collapse = ! collapse;
+        .on('click', function() {
+          collapse = !collapse;
           if (collapse) {
             iconCollapse
               .removeClass('fa-compress')
@@ -144,7 +145,7 @@ function PianoRoll(props) {
           iconPlayStop = DOM.i()
             .addClass('fa fa-play')
         )
-        .on('click', function () {
+        .on('click', function() {
           playing = !playing;
           iconPlayStop.toggleClass('fa-play fa-pause');
           self.emit('is-playing', playing)
@@ -158,12 +159,12 @@ function PianoRoll(props) {
       inTonality = DOM.input()
         .addClass('tempo')
         .attr('type', 'text')
-        .attr('placeholder','tonality (scale)')
+        .attr('placeholder', 'tonality (scale)')
         .val(null)
         .on('change', (e) => changeTonality(e.target.value))
-      ]);
- 
- 
+    ]);
+
+
   var tablePlaceholder = DOM.table();
 
   function changeTonality(str) {
@@ -178,14 +179,14 @@ function PianoRoll(props) {
 
   function noteFitsTonality(noteNumber) {
     if (!tonality) { return true; }
-    return tonality[noteNumber%12] === 1;
+    return tonality[noteNumber % 12] === 1;
   }
 
 
 
-  function decorateCell(cell, state,i) {
+  function decorateCell(cell, state, i) {
     state ? cell.addClass('active') : cell.removeClass('active');
-    let bgStr =  `hsl(${hueRadianRange[i]}rad,50%,${lightnessPercentRange[i]}%)`;
+    let bgStr = `hsl(${hueRadianRange[i]}rad,50%,${lightnessPercentRange[i]}%)`;
 
     cell.css({
       background: (state ? bgStr : null),
@@ -193,85 +194,85 @@ function PianoRoll(props) {
     })
   }
 
-  
-self.refresh = function() {
-  let row;
 
-  tablePlaceholder
-  .empty()
-  .append(
-    reversedNoteRange.map(function (noteNumber,i) {
+  self.refresh = function() {
+    let row;
 
-      let rowHasEvents = props.events.find(ev => { return ev.noteNumber == noteNumber});
-      if (!rowHasEvents && collapse) { return false; }
-      if (!noteFitsTonality(noteNumber)) { return false; }
+    tablePlaceholder
+      .empty()
+      .append(
+        reversedNoteRange.map(function(noteNumber, i) {
+
+          let rowHasEvents = props.events.find(ev => { return ev.noteNumber == noteNumber });
+          if (!rowHasEvents && collapse) { return false; }
+          if (!noteFitsTonality(noteNumber)) { return false; }
 
 
 
-      row = DOM.tr().append(
-        DOM.th(noteNames[noteNumber%12]),
-        ...eventRange.map((tickIdx) => {
-          let state = false;
+          row = DOM.tr().append(
+            DOM.th(noteNames[noteNumber % 12]),
+            ...eventRange.map((tickIdx) => {
+              let state = false;
 
-          //let onMillis = remap(0, props.TPLOOP, 0, loopMS, tickIdx);
-          //let offMillis = remap(0, props.TPLOOP, 0, loopMS, tickIdx + 1);
+              //let onMillis = remap(0, props.TPLOOP, 0, loopMS, tickIdx);
+              //let offMillis = remap(0, props.TPLOOP, 0, loopMS, tickIdx + 1);
 
-          let found = props.events.find(ev => {
-            return ev.noteNumber == noteNumber && ev.tickIdx == tickIdx;
-          })
-          if (found) {
-            state = true;
-          }
+              let found = props.events.find(ev => {
+                return ev.noteNumber == noteNumber && ev.tickIdx == tickIdx;
+              })
+              if (found) {
+                state = true;
+              }
 
-          let initialClass = `piano-roll-cell ${state ? "active" : "" }`;
+              let initialClass = `piano-roll-cell ${state ? "active" : ""}`;
 
-          let cell = DOM.td()            
-            .addClass(initialClass)
-            .on("mouseover", (e) => {
-              self.emit("note-hover", noteNumber);
-            })
-            .on("click", (e) => {
-              state = !state;
-              decorateCell(cell,state,i);
+              let cell = DOM.td()
+                .addClass(initialClass)
+                .on("mouseover", (e) => {
+                  self.emit("note-hover", noteNumber);
+                })
+                .on("click", (e) => {
+                  state = !state;
+                  decorateCell(cell, state, i);
 
-              let eventHash = 0x100 * tickIdx + noteNumber;
+                  let eventHash = 0x100 * tickIdx + noteNumber;
 
-              let event = {
-                hash: eventHash,
-                noteNumber,
-                noteOnLoopNum: 0,
-                noteOffLoopNum: 0,
-                tickIdx,
-                //noteOnMillis: onMillis,
-                //noteOffMillis: offMillis,
-                ///...found // if found
-              };
+                  let event = {
+                    hash: eventHash,
+                    noteNumber,
+                    noteOnLoopNum: 0,
+                    noteOffLoopNum: 0,
+                    tickIdx,
+                    //noteOnMillis: onMillis,
+                    //noteOffMillis: offMillis,
+                    ///...found // if found
+                  };
 
-              if (state) {
-                props.events.push(event);
-              } else {
-                for (let i = 0; i < props.events.length; i += 1) {
-                  if (props.events[i].hash == eventHash) {
-                    props.events.splice(i, 1); //deletes it
+                  if (state) {
+                    props.events.push(event);
+                  } else {
+                    for (let i = 0; i < props.events.length; i += 1) {
+                      if (props.events[i].hash == eventHash) {
+                        props.events.splice(i, 1); //deletes it
+                      }
+                    }
                   }
-                }
-              }
 
-              if (state) {
-                self.emit("note-preview", noteNumber);
-              }
-              self.emit('events-change',props.events,props);
-            });
-            decorateCell(cell,state,i);
+                  if (state) {
+                    self.emit("note-preview", noteNumber);
+                  }
+                  self.emit('events-change', props.events, props);
+                });
+              decorateCell(cell, state, i);
 
-          return cell;
+              return cell;
+            })
+          )
+          return row;
         })
+          .filter(o => o)
       )
-      return row;
-    })
-    .filter(o => o)
-  )
-}
+  }
 
   self.refresh();
 
@@ -282,11 +283,11 @@ self.refresh = function() {
   self.update = function(opts) {
     props = opts;
     init();
-    self.refresh();  
+    self.refresh();
   }
 
 
-  self.ui = function () {
+  self.ui = function() {
     return [toolbar, pane];
   };
 

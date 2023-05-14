@@ -577,7 +577,7 @@ add_action('wp_footer', function () {
     } from "./js/Utils.js";
 
     import SongList from "./js/SongList.js";
-    import SVGFretboard from "./js/SVGFretboard.js";
+    import SVGFretboard, {getFretsByChromaticHash} from "./js/SVGFretboard.js";
 
     import Fretboard, {
       makeFretboardOn

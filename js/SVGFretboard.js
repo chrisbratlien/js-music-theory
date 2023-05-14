@@ -1,7 +1,7 @@
 import DOM from "./DOM.js";
 import PubSub from "./PubSub.js";
 import {remap} from "./Lerpy.js";
-import {makeChord} from "./js-music-theory.js";
+import {makeChord, twelveBitMask} from "./js-music-theory.js";
 
 async function loadGuitarData() {
     async function inner() {
@@ -14,6 +14,13 @@ async function loadGuitarData() {
 
 var guitarData = await loadGuitarData();
 
+export function getFretsByChromaticHash(selectHash)  { 
+    return BSD.guitarData
+        .filter(fret => {
+        let fretHash = twelveBitMask[fret.chromaticValue];
+        return (fretHash & selectHash) == fretHash;
+    });
+}
 
 function getFrets(spec) {
     return guitarData

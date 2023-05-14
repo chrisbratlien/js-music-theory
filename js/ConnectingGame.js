@@ -2,10 +2,11 @@ import Vindow from "./Vindow.js";
 import DOM from "./DOM.js";
 import PubSub from "./PubSub.js";
 import Note from "./js-music-theory.js";
-import { ascendingSorter, tempoToMillis } from "./Utils.js";
+import { ascending, tempoToMillis, fretDistance } from "./Utils.js";
 import SVGFretboard from "./SVGFretboard.js";
 import { remap } from "./Lerpy.js";
 import {parseProgression} from "./Progression.js";
+import { StringSetChooser } from "./StringSetChooser.js";
 
 //REFACTOR THIS
 const vscale = (v,factor) => v.map(n => n * factor)
@@ -156,6 +157,8 @@ export function ConnectingGameVindow(props) {
     var chordIdx = -1;
     var progIdx = -1;
 
+    let stringSet = new Set([6,5,4,3,2,1]);
+
     function stopSeq() {
         clearInterval(cgHandle);
         playing = false;
@@ -173,7 +176,8 @@ export function ConnectingGameVindow(props) {
 
         let fretsWithinFromTo = guitarData            
             .filter(fret => fret.fret >= fromFret)
-            .filter(fret => fret.fret <= toFret);
+            .filter(fret => fret.fret <= toFret)
+            .filter(fret => stringSet.has(fret.string));
         let noteValuesWithinFrets = fretsWithinFromTo
             .map(fret => fret.noteValue)
         let low = Math.min(...noteValuesWithinFrets)
@@ -191,9 +195,14 @@ export function ConnectingGameVindow(props) {
 
             var fretAvg = saveFrets.reduce((accum,n) => { return accum + n; },0) / saveFrets.length;
             var stringAvg = saveStrings.reduce((accum,n) => { return accum + n; },0) / saveStrings.length;
+
+            var virtAvgFret = { fret: fretAvg, string: stringAvg };
+
+
             fretsWithinFromTo = guitarData
                 .filter(fret => fret.fret >= fromFret)
-                .filter(fret => fret.fret <= toFret);
+                .filter(fret => fret.fret <= toFret)
+                .filter(fret => stringSet.has(fret.string));
             
             if (props.chords.length == 0) {return false; }
             tick += 1;            
@@ -226,27 +235,28 @@ export function ConnectingGameVindow(props) {
 
             //
             var stopHere = false;
+
+            var lastFretObj = {
+                fret: saveFrets[saveFrets.length-1],
+                string: saveStrings[saveStrings.length-1]
+            };
             frets.forEach(fret => { 
                 var score;
                 if (fret.noteValue == 60) {
                     stopHere = true;
                 }
                 let actualFretDist = Math.abs(fret.fret - saveFrets[saveFrets.length-1]);
-                let actualStringDist = Math.abs(fret.string - saveStrings[saveStrings.length-1]);
+                let actualStringDist = Math.abs(fret.string - saveStrings[saveStrings.length-1]);                
                 if (actualFretDist == 0) { 
                     fret.score = -1; //prefer same fret to same string...slight advantage
                     return score; 
                 }
-                if (actualStringDist == 0) { 
-                    fret.score = 0;
-                    return score; 
-                 }
-                let fretDist = Math.abs(fret.fret - fretAvg);
-                let stringDist = Math.abs(fret.string - stringAvg);
-                fret.score = stringDist + fretDist;
-                //return fret.score;
+                var avgDist = fretDistance(fret,virtAvgFret);
+                fret.score = avgDist;
+
+                return fret.score;
             });
-            let sorted = frets.sort(ascendingSorter(fret => fret.score));
+            let sorted = frets.sort(ascending(fret => fret.score));
             let chosenFret = sorted[0];
             if (stopHere) {
                 var x = 3;
@@ -269,12 +279,12 @@ export function ConnectingGameVindow(props) {
             saveStrings.shift();
             saveStrings.push(chosenFret.string);
 
-            ///props.tablatureHelper.update(noteValue)
-          };
-          doATick();
+            tabEnabled && props.tablatureHelper && props.tablatureHelper.update(chosenFret)
+        };
+        doATick();
     }
 
-    const progressionHistory = [];        
+    const progressionHistory = [];
     var phUI = DOM.div()
         .addClass('flex-row cursor-pointer');
 
@@ -348,17 +358,24 @@ export function ConnectingGameVindow(props) {
         toFret = Number(val);
     })
 
+    let tabEnabled = false;
+
+    const inStringSet = StringSetChooser();
+    inStringSet.on('change',(stringNumbers) => { stringSet = new Set(stringNumbers) })
+
 
     function handleTabItClick(){
         if (!props.chords || props.chords.length == 0) {
             alert('no chords!!');
         }
+        tabEnabled = !tabEnabled;
+        btnTabIt.val(tabEnabled ? "Stop Tab" : "Start Tab")
     }
 
 
     const btnTabIt = DOM.input()
         .attr('type','button')
-        .val('Tab It')
+        .val('Start Tab')
         .on('click',handleTabItClick)
 
     var playing = false;
@@ -372,6 +389,19 @@ export function ConnectingGameVindow(props) {
 
         });
 
+        const btnNudgeTickForward = DOM.button()
+            .addClass('btn btn-sm')
+            .append(DOM.i().addClass('fa fa-plus'))
+            .on('click',() => { 
+                tick += 1;
+            });
+        const btnNudgeTickBackward = DOM.button()
+            .addClass('btn btn-sm')
+            .append(DOM.i().addClass('fa fa-minus'))
+            .on('click',() => { 
+                tick -= 1;
+            });
+
     const txtProgression = DOM.textarea()
         .addClass('progression full-width')
         .on('change',handleProgressionChange);
@@ -383,8 +413,11 @@ export function ConnectingGameVindow(props) {
         inTempo.ui(),
         inFromFret.ui(),
         inToFret.ui(),
+        inStringSet.ui(),
         btnTabIt,
         btnStartStop,
+        btnNudgeTickBackward,
+        btnNudgeTickForward,
         txtProgression,
         phUI
         //btnStop
@@ -396,15 +429,15 @@ export function ConnectingGameVindow(props) {
     var fps = firstStringFrets.length;
     var fretStarts = [];
     firstStringFrets.forEach(fret => {
-      let last = fretStarts.length ? fretStarts[fretStarts.length - 1] : 0;
-      fretStarts.push(vlerp([last], [100], 100 / fps / 100)[0]);
+      let prevStart = fretStarts.length ? fretStarts[fretStarts.length - 1] : 0;
+      fretStarts.push(vlerp([prevStart], [100], 100 / fps / 100)[0]);
     });
     fretStarts = fretStarts.map(o => o * 1.56);
-    var fretWidths = fretStarts.map((s, i) => {
-      var result = i ? s - fretStarts[i - 1] : s;
+    var fretWidths = fretStarts.map((start, i) => {
+      var result = i ? start - fretStarts[i - 1] : start;
       return result;
     });
-    fretStarts.unshift(0);
+    fretStarts.unshift(0);//add 0 to front of array
     var svgFretboard =  SVGFretboard({
         foo: 'bar',
         fps,

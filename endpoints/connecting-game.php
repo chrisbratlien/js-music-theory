@@ -12,6 +12,7 @@ add_action('wp_head', function () {
     @import "css/flex.css";
     @import "css/vindow.css";
     @import "css/connecting-game.css";
+    @import "css/tablature.css";
 
 
 
@@ -298,10 +299,13 @@ storage.getItem('volume', function(err,volStr) {
     let tablature = Tablature({});
     let tablatureHelper = TablatureHelper(tablature);
     let tabWindow = Vindow({
-      title: "Tablature"
+      title: "Tablature",
+      className: 'tablature'
     });
-    let [tabToolbar, tabPane] = tablature.ui();
-    tabWindow.appendToToolbar(tabToolbar);
+    let [tabToolbarIgnore, tabPane] = tablature.ui();
+    let [tabHelperToolbar, thPaneIgnore] = tablatureHelper.ui();
+
+    tabWindow.appendToToolbar(tabHelperToolbar);
     tabWindow.append(tabPane);
     tabWindow.renderOn(body);
 
@@ -333,7 +337,8 @@ storage.getItem('volume', function(err,volStr) {
       console.log('them',them);  
       var first = them[0];
       if (first) {
-        cgVindow.update
+        //wtf, I guess i didn't finish this...
+        //cgVindow.update
       }
     }
     function onProgressionLoadError(data) {
