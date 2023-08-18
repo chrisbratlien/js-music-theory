@@ -14,7 +14,9 @@
     color: #888;
    }
 
-  .venue {
+
+/*
+   .venue {
     float: left;
   }
 
@@ -30,12 +32,16 @@
     margin: 0; 
     width: 70%; 
   }
-  
+  */
+
+
   .inner { 
     font-size: 10px; 
     margin-left: 2%; 
+    /*
     width: 50%; 
     float: left;
+    */
   }
 
 
@@ -95,6 +101,13 @@
 
     .inner { page-break-inside: avoid; }
 
+    .fretboard-table {
+      margin-bottom: 0;
+    }
+    .chord-name {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
 
     .featured { 
       color: red !important; 

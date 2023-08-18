@@ -9,6 +9,7 @@ add_action('wp_head', function () {
 
   <title>12 Fretboards</title>
   <style>
+    @import 'css/prog-fretboards.css';
     @import 'css/piano-roll.css';
     @import 'css/lcd.css';
     @import 'css/vindow.css';
@@ -45,29 +46,14 @@ add_action('wp_head', function () {
       color: #888;
     }
 
-    .venue {
-      float: left;
-      min-width: 70%;
-    }
-
-    .venue-column {
-      float: left;
-      width: 33%;
-    }
-
-
-
-    .stage {
-      float: left;
-      margin: 0;
-      width: 70%;
-    }
 
     .inner {
       font-size: 10px;
       margin-left: 2%;
+      /*
       width: 50%;
       float: left;
+      */
     }
 
 
@@ -540,7 +526,6 @@ add_action('wp_footer', function () {
   <script>
     let jvtool = {};
   </script>
-  <script src="<?php home_url();  ?>/lib/Snap.svg/dist/snap.svg.js"></script>
   <script src="<?php home_url();  ?>/lib/CodingMath/utils.js"></script>
   <script src="<?php home_url();  ?>/lib/dat.gui.js"></script>
   <script src="<?php home_url();  ?>/lib/la.js"></script>
@@ -557,6 +542,8 @@ add_action('wp_footer', function () {
   <script type="module">
     import JSMT, { Note, makeChord, makeChordFromNotes, makeScale } from "./js/js-music-theory.js";
     import DOM from "./js/DOM.js";
+    import Chord from "./js/Chord.js";
+
     import FreakySeq from "./js/FreakySeq.js";
     import PianoRoll from "./js/PianoRoll.js";
     import { parseProgression } from "./js/Progression.js";
@@ -577,7 +564,7 @@ add_action('wp_footer', function () {
     } from "./js/Utils.js";
 
     import SongList from "./js/SongList.js";
-    import SVGFretboard, {getFretsByChromaticHash} from "./js/SVGFretboard.js";
+    import SVGFretboard, {getFretsByChromaticHash, getIntervalFill} from "./js/SVGFretboard.js";
 
     import Fretboard, {
       makeFretboardOn
@@ -1906,14 +1893,6 @@ add_action('wp_footer', function () {
     var guru = BSD.Widgets.TonalityGuru({});
 
     var svgWrap = jQuery('.svg-wrap');
-    /**
-    BSD.importHTML(BSD.baseURL + '/images/C_Major_Scale_on_fretboard.svg',function(err,data){
-      if (err) { return console.log(err); }
-      svgWrap.append(data);
-      //console.log('data?',data);
-      svgBoard = Snap('.svg-wrap svg');
-    });
-    ***/
     campfire.on('do-it', function(prog) {
       BSD.pause = false;
       initLast();
@@ -2018,6 +1997,29 @@ add_action('wp_footer', function () {
           activeStrings: activeStrings
         });
         BSD.boards.push(board);
+
+        var thisFred = SVGFretboard({
+          fps,
+          fretStarts,
+          fretWidths,
+          fretHeights
+        })
+        .on('wake-up', () => console.log('WOKE!!'))
+
+        stage.append(
+          thisFred.ui()
+        );
+        thisFred.plotFingerboardFrets();
+        thisFred.plotInlays();
+        thisFred.plotStrings();
+        svgPlotHelper(chord, thisFred, {
+          maxCircleRadiusPercent: 0.8,
+          minCircleRadiusPercent: 0.5
+        });
+        //thisFred.plotFrets(chord, BSD.defaultSVGCircleAttrs);
+
+
+
       });
 
 
@@ -2504,6 +2506,7 @@ add_action('wp_footer', function () {
 
 
 
+
     campfire.on('tick', function(cursor) {
       BSD.boards.forEach(function(board) {
         board.unfeatureFrets();
@@ -2532,14 +2535,11 @@ add_action('wp_footer', function () {
 
         //console.log('cursor',cursor,'fret',fret);
 
-        let idx = fret.chromaticValue - cursor.chord.spec.rootNote.chromaticValue();
-        if (idx < 0) {
-          idx += 12;
-        }
-        let fill = '#' + colorHash[idx].toHex();
+        let idx = fret.chromaticValue - cursor.chord.spec.rootNote.chromaticValue();        
+        let fill = getIntervalFill(idx);
 
         let opts = {
-          fill: fill
+          fill,
           //stroke: 'white',
           //fill: 'blue'
         }
@@ -2844,58 +2844,6 @@ add_action('wp_footer', function () {
 
     var bank = {};
 
-    function wasOnMIDIMessageToSynthOnly(message) {
-      let data = message.data; // this gives us our [command/channel, note, velocity] data.
-      console.log('MIDI data', data); // MIDI data [144, 63, 73]
-
-      //data = event.data,
-      let cmd = data[0] >> 4,
-        channel = data[0] & 0xf,
-        type = data[0] & 0xf0, // channel agnostic message type. Thanks, Phil Burk.
-        note = data[1],
-        velocity = data[2];
-
-      /* 
-      128 = 0x80 = note off
-      144 = 0x90 = note on
-      160 = 0xA0 = aftertouch
-      176 = 0xB0 = control change
-      192 = 0xC0 = program change
-      */
-
-
-      console.log('type', type);
-
-      if (type == 176) {
-        //mod wheel (at least on the alesis qx49 it is)
-        return false;
-      }
-      if (type == 224) {
-        //pitch wheel
-        return false;
-      }
-
-      if (type == MIDI_CONST.NOTE_ON && velocity > 0) { //note on
-        campfire.publish('play-note', {
-          note: Note(note),
-          duration: null,
-          velocity: velocity
-        });
-        //bank[note] = keyboardist.playNote(Note(note),null,velocity);    
-      } else if (type == MIDI_CONST.NOTE_ON && velocity == 0) { //note off
-        router.outPort.send([MIDI_CONST.NOTE_OFF | (BSD.options.improv.channel - 1), note, 0]);
-      } else if (type == MIDI_CONST.NOTE_OFF) { //note off
-        router.outPort.send([MIDI_CONST.NOTE_OFF | (BSD.options.improv.channel - 1), note, 0]);
-      } else {
-        var env = bank[note];
-        if (env) {
-          env.stop();
-        }
-      }
-
-    }
-
-
     let outMonitor;
 
 
@@ -2984,7 +2932,8 @@ add_action('wp_footer', function () {
     var fretPlotterInput = jQuery('.fret-plotter-input');
     var btnClear = jQuery('.btn-clear');
 
-    function plotHelper(chordOrScale) {
+
+    function svgPlotHelper(chordOrScale, svgFB, opts) {
 
       let myColor = BSD.chosenColors[0];
       BSD.chosenColors.push(BSD.chosenColors.shift());
@@ -2994,12 +2943,21 @@ add_action('wp_footer', function () {
       var hash = chordOrScale.chromaticHash();
       var frets = getFretsByChromaticHash(hash)
         .filter(fret => fret.fret >= fr[0] && fret.fret <= fr[1])
-        .filter(fret => strings.contains(fret.string));
-      let opts = {
+        .filter(fret => strings.contains(fret.string))
+        .map(fret => {
+          var interval = fret.chromaticValue - chordOrScale.rootNote.chromaticValue();
+          return {
+            ...fret,
+            interval
+          };
+        });
+      
+      opts = opts || {};
+      opts = {...opts,
         fill: '#' + myColor.toHex(),
-        'fill-opacity': BSD.svgAlpha
-      };
-      fred.plotFrets(frets, opts);
+        'fill-opacity': BSD.svgAlpha      
+      }
+      svgFB.plotFrets(frets, opts);
     }
 
     jQuery('.btn-chord').on('click', function() {
@@ -3009,12 +2967,12 @@ add_action('wp_footer', function () {
         .map(o => o.trim());
       chordNames.forEach((name, i) => {
         var chord = makeChord(name);
-        plotHelper(chord);
+        svgPlotHelper(chord, fred);
       })
     });
     jQuery('.btn-scale').on('click', function() {
       var scale = makeScale(fretPlotterInput.val());
-      plotHelper(scale);
+      svgPlotHelper(scale, fred);
     });
     btnClear.on('click', () => {
       fred.clearFretted();

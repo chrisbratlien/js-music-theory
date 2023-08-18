@@ -5,33 +5,20 @@
 Array.prototype.collect = Array.prototype.map;
 Array.prototype.each = Array.prototype.forEach;
 Array.prototype.select = Array.prototype.filter;
+Array.prototype.detect = Array.prototype.find;
 
 
+Array.prototype.tee = function(callback) { callback(this); return this; };
 
 Array.prototype.reject = function(test) {
 	return this.select(function(element) { return !test(element); });
 	
 }
 
-
-
-//detect returns the first element which passes the test, or false. aka "find"
-Array.prototype.detect = function (test) {
-	for (var i = 0; i < this.length; i += 1) {
-		if (test(this[i])) {
-			return this[i];
-		}
-	}
-	
-	return false;
-};
-
-
 Array.prototype.contains = function (x) { //does the array contain x?
 	var result = this.detect(function (n) { return n == x; });
 	return (result !== false);
 };
-
 
 Array.prototype.inject = function (acc, fn) {
 	var result = acc;

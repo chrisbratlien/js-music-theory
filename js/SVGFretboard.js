@@ -3,6 +3,9 @@ import PubSub from "./PubSub.js";
 import {remap} from "./Lerpy.js";
 import {makeChord, twelveBitMask} from "./js-music-theory.js";
 
+const STRING_GAP = 14; //probably not percent?
+
+
 async function loadGuitarData() {
     async function inner() {
       var resp = await fetch(BSD.baseURL + '/data/guitar.json');
@@ -21,6 +24,20 @@ export function getFretsByChromaticHash(selectHash)  {
         return (fretHash & selectHash) == fretHash;
     });
 }
+
+export function getIntervalFill(idx) {
+    let colorHash =  '#FF0000-#E6DF52-#FFDD17-#4699D4-#4699D4-#FFAAAA-#000000-#000000-#bbbbbb-#67AFAD-#8C64AB-#8C64AB'.split(/-/);
+    if (idx < 0) {
+      idx += 12;
+    }
+    if (idx == 4) {
+        var x = 111;
+    }
+
+    let fill = colorHash[idx];
+    return fill;
+}
+
 
 function getFrets(spec) {
     return guitarData
@@ -64,6 +81,7 @@ function SVGFretboard(spec) {
             preserveAspectRatio: 'xMidYMid meet',
             width: "100%",
             height: "80",
+            xmlns: "http://www.w3.org/2000/svg"
         })
         .append(
             DOM.rect() //bg
@@ -147,7 +165,7 @@ https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
 
     self.plotStrings = function() {
         [1, 2, 3, 4, 5, 6].forEach(string => {
-            var stringGap = 14,
+            var stringGap = STRING_GAP,
                 nudge = -2,
                 stringY = (string * stringGap) - stringGap / 2 + nudge;
             gStrings.append(
@@ -198,24 +216,45 @@ https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
     self.plotFret = function(fret, opts) {
         var x = spec.fretStarts[fret.fret] + spec.fretWidths[fret.fret] / 2;
         ///var radius = utils.map(fret.fret, 0, spec.fps, 1.5, 0.75);
-        var radius = remap(0, spec.fps, 1.5, 0.75,fret.fret);
-        var fill = opts.fill || 'rgba(0,0,0,0.1)';
+
+        var maxCircleRadiusPercent = opts.maxCircleRadiusPercent || 1.25;
+        var minCircleRadiusPercent = opts.minCircleRadiusPercent || 0.75;
+
+        var radius = remap(
+            0, spec.fps, 
+            maxCircleRadiusPercent, 
+            minCircleRadiusPercent,
+            fret.fret, 
+            true);
+
+        var ry = remap(
+            0,spec.fps,
+            7, //% radius compared to height when frets are low
+            3, //% radius compared to height when frets are high
+            fret.fret
+        );
+
+        var fillFromInterval = (fret.interval || fret.interval === 0) ? getIntervalFill(fret.interval) : false;
+        var fill = fillFromInterval ? fillFromInterval : opts.fill;
+        fill = fill ? fill : 'rgba(0,0,0,0.1)';
 
 
-
-        opts = Object.assign({
+        opts = {
             //////class: 'fretted',
             cx: x + '%',
             cy: (fret.string - 1) * spec.fretHeights + spec.fretHeights / 2 + '%',
-            fill: fill,
-            WASr: '1.5%',
-            r: radius + '%',
+            ///WASr: '1.5%',
+            //rx: 'auto',
+            ry: ry + '%',
             'stroke-width': 0.5,
-            'stroke': 'black'
-        }, opts);
+            'stroke': 'black',
+            ...opts,
+            fill: fill,
+        };
+
         opts.class = 'fretted ' + (opts.class || '');
 
-        gFretted.append(DOM.circle()
+        gFretted.append(DOM.ellipse()
             .attr(opts));
     };
     self.clearFretted = function() {
