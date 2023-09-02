@@ -103,10 +103,6 @@ BSD.importHTML = function(url, callback) {
 
 var campfire = BSD.PubSub({});
 var storage = BSD.Storage('JSMT::');
-BSD.remoteStorage = BSD.RemoteStorage({
-    prefix: 'JSMT::',
-    url: BSD.baseURL + '/ws'
-});
 
 
 function getUrlVars() {

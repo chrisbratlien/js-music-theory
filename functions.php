@@ -8,8 +8,8 @@ define('REMOTE_DB_PATH', sprintf('%s/data/remote.db', APP_PATH));
 require_once('core.php');
 require_once('environment.php');
 require_once('functions-lerpy.php');
-
-
+require_once('functions-router.php');
+require_once('functions-routes.php');
 
 
 if (!function_exists('pp')) { //Pretty Print
@@ -205,23 +205,6 @@ function remote_db_remove($key) {
     print "Error!: " . $e->getMessage() . "</br>";
   }
 }
-
-add_action('ws_setItem', function ($opts) {
-  $data = $opts['data'];
-  remote_db_set($data['key'], $data['value']);
-  exit;
-});
-add_action('ws_getItem', function ($opts) {
-  $data = $opts['data'];
-  $value = remote_db_get($data['key']);
-  echo $value;
-  exit;
-});
-add_action('ws_removeItem', function ($opts) {
-  $data = $opts['data'];
-  remote_db_remove($data['key']);
-  exit;
-});
 
 
 add_filter('body_class', function ($classes) {

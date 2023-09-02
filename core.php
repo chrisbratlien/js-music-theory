@@ -16,63 +16,6 @@ function clean_uri($uri) {
 }
 
 
-function route($uri) {
-
-
-  $uri = clean_uri($uri);
-
-  //print_r($uri);
-  //exit;
-
-
-  if ($uri == base_uri()) {
-    ////echo "HOME!!!";
-    require_once('home.php');
-    return null;
-  }
-
-  //pp('URI: ' . $uri);  
-  //pp('base_uri: ' . base_uri());
-  $path = substr($uri, strlen(base_uri()));
-  /////pp('path: ' . $path);
-  //pp('dirname: ' . dirname(__FILE__));
-
-  $path = ltrim($path, '/');
-
-  $tests = array();
-
-  array_push($tests, sprintf('%s/endpoints/%s/index.php', APP_PATH, $path));
-  array_push($tests, sprintf('%s/endpoints/page-%s.php', APP_PATH, $path));
-  array_push($tests, sprintf('%s/endpoints/%s.php', APP_PATH, $path));
-
-  array_push($tests, sprintf('%s/%s/index.php', APP_PATH, $path));
-  array_push($tests, sprintf('%s/page-%s.php', APP_PATH, $path));
-  array_push($tests, sprintf('%s/%s.php', APP_PATH, $path));
-
-
-  /**  
-  $tests[] = dirname(__FILE__) . $path . '/index.php';
-  $tests[] = dirname(__FILE__) . $path . '.php';
-  $tests[] = dirname(__FILE__) . $path . '.php';
-   ***/
-
-
-  foreach ($tests as $test) {
-
-    //print_r($test);
-    //print "<br/>";
-
-    if (file_exists($test)) {
-      ///pp('it exists!!!');
-      include_once($test);
-      return null;
-      ///break;
-    }
-  }
-  require_once('404.php');
-}
-
-
 
 
 function get_header() {
@@ -152,4 +95,13 @@ function body_class() {
   $class_str = trim(join(' ', $parts));
   //pp($class_str,'class_str');
   echo sprintf('class="%s"', $class_str);
+}
+
+
+function error_header($code, $msg = 'Error unspecified') {
+  header("HTTP/1.0 $code $msg");
+  die($msg);
+}
+function error_404() {
+  return error_header(404,'Not Found');
 }

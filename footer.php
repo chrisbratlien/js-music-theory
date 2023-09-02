@@ -47,7 +47,6 @@
   <!-- <script src="lib/Kali/build/kali.js"></script>-->
 
   <script src="<?php home_url();  ?>/js/bsd.storage.js"></script>
-  <script src="<?php home_url();  ?>/js/bsd.remotestorage.js"></script>
   <script src="<?php home_url();  ?>/js/bsd.widgets.procrastinator.js"></script>
   <script src="<?php home_url();  ?>/js/main.js" type="module"></script>
   <script src="<?php home_url();  ?>/js/bootup.js?v=22"></script>

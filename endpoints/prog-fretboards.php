@@ -572,6 +572,8 @@ add_action('wp_footer', function () {
 
     import {lerp,invlerp, remap} from './js/Lerpy.js';
 
+    import {RemoteStorage} from "./js/RemoteStorage.js";
+
     window.lerp = lerp;
     window.invlerp = invlerp;
     window.remap = remap;
@@ -749,10 +751,14 @@ add_action('wp_footer', function () {
     BSD.tests = [];
 
 
+    var remoteStorage = RemoteStorage({
+      prefix: 'JSMT::',
+      url: BSD.baseURL + '/remote-storage'
+    });
 
 
-    storage.getItem('progressions', function(o) {
-      ////BSD.progressions = JSON.parse(o);
+    remoteStorage.getItem('progressions', function(err,o) {
+      if (err) { throw err; }
       var them = o && o.length ? JSON.parse(o) : [];
       them.forEach(function(o) {
         BSD.progressions.push(o);
@@ -774,7 +780,7 @@ add_action('wp_footer', function () {
     });
 
 
-    BSD.remoteStorage.getItem('progressions', function(o) {
+    remoteStorage.getItem('progressions', function(o) {
       var them = o && o.length ? JSON.parse(o) : [];
       them.forEach(function(o) {
         BSD.progressions.push(o);
@@ -836,8 +842,8 @@ add_action('wp_footer', function () {
       storage.setItem('progressions', data);
       storage.setItem('progressions-' + backupDate, data);
 
-      BSD.remoteStorage.setItem('progressions', data);
-      BSD.remoteStorage.setItem('progressions-' + backupDate, data);
+      remoteStorage.setItem('progressions', data);
+      remoteStorage.setItem('progressions-' + backupDate, data);
 
     });
 
