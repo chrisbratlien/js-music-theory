@@ -262,7 +262,8 @@ add_action('wp_footer', function () {
         let noteOnChannel = 0x90 + (BSD.options.improv.channel - 1);
         let noteOffChannel = 0x80 + (BSD.options.improv.channel - 1);
         let noteNum = event.noteNumber;
-        let vel = Math.floor(127 * BSD.options.improv.volume); //[0..1] -> [0..127]
+        let vel = BSD.options.improv.volume * BSD.volume; 
+        vel = Math.floor(127 * vel);////[0..1] -> [0..127]
         router.outPort.send([noteOnChannel, noteNum, vel]);
 
         if (freak.opts.noteOffDisabled) {
@@ -289,7 +290,9 @@ add_action('wp_footer', function () {
       ////console.log('yes, needed to bother');
       let noteOffChannel = 0x80 + (BSD.options.improv.channel - 1);
       let noteNum = event.noteNumber;
-      let vel = Math.floor(127 * BSD.options.improv.volume); //[0..1] -> [0..127]
+      let vel = BSD.options.improv.volume * BSD.volume; 
+      vel = Math.floor(127 * vel);////[0..1] -> [0..127]
+
       return router.outPort.send([noteOffChannel, noteNum, vel]);
     });
 
@@ -382,8 +385,8 @@ add_action('wp_footer', function () {
         let noteOnChannel = 0x90 + (BSD.options.improv.channel - 1);
         let noteOffChannel = 0x80 + (BSD.options.improv.channel - 1);
         let noteNum = payload.note.value();
-        let vel = Math.floor(127 * BSD.options.improv.volume); //[0..1] -> [0..127]
-
+        let vel = BSD.options.improv.volume * BSD.volume; 
+        vel = Math.floor(127 * vel);////[0..1] -> [0..127]
         router.outPort.send([noteOnChannel, noteNum, vel]);
 
         setTimeout(function() {

@@ -6,7 +6,7 @@ BSD.Widgets.SimplePlayer = function(spec) {
   self.spec = spec;
 
   var out = context.createGain();
-  out.gain.value = 0.08;
+  out.gain.value = 0.0008;
   out.connect(spec.destination);
   self.out = out;
 

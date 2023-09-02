@@ -1066,7 +1066,7 @@ add_action('wp_footer', function () {
       range: "min",
       min: 0,
       max: 0.1,
-      step: 0.001,
+      step: 0.01,
       value: BSD.volume,
       slide: function(event, ui) {
         var newVolume = ui.value;
@@ -1175,7 +1175,8 @@ add_action('wp_footer', function () {
         let noteOnChannel = MIDI_CONST.NOTE_ON + (BSD.options.improv.channel - 1);
         let noteOffChannel = MIDI_CONST.NOTE_OFF + (BSD.options.improv.channel - 1);
         let noteNum = payload.note.value();
-        let vel = Math.floor(127 * BSD.options.improv.volume); //[0..1] -> [0..127]
+        let vel = BSD.options.improv.volume * BSD.volume; 
+        vel = Math.floor(127 * vel);////[0..1] -> [0..127]
 
         router.outPort.send([noteOnChannel, noteNum, vel]);
         return setTimeout(function() {
@@ -1234,7 +1235,8 @@ add_action('wp_footer', function () {
 
       if (router.outPort && router.outPort.connection == 'open') {
 
-        let vel = Math.floor(127 * BSD.options.chord.volume); //[0..1] -> [0..127]
+        let vel = BSD.options.chord.volume * BSD.volume; 
+        vel = Math.floor(127 * vel);////[0..1] -> [0..127]
 
         let noteOnWithzeroBasedChannel = 143 + BSD.options.chord.channel;
         let noteOffWithzeroBasedChannel = 127 + BSD.options.chord.channel;
@@ -2573,7 +2575,8 @@ add_action('wp_footer', function () {
           let noteOffChannel = MIDI_CONST.NOTE_OFF + (BSD.options.bass.channel - 1);
 
           let noteNum = pedalValue;
-          let vel = Math.floor(127 * BSD.options.bass.volume); //[0..1] -> [0..127]        
+          let vel = BSD.options.bass.volume * BSD.volume; 
+          vel = Math.floor(127 * vel);////[0..1] -> [0..127]
 
           router.outPort.send([noteOnChannel, noteNum, vel]);
           setTimeout(function() {
@@ -2599,7 +2602,8 @@ add_action('wp_footer', function () {
           let noteOffChannel = MIDI_CONST.NOTE_OFF + (BSD.options.bass.channel - 1);
 
           let noteNum = pedal5Value;
-          let vel = Math.floor(127 * BSD.options.bass.volume); //[0..1] -> [0..127]        
+          let vel = BSD.options.bass.volume * BSD.volume; 
+          vel = Math.floor(127 * vel);////[0..1] -> [0..127]
 
           router.outPort.send([noteOnChannel, noteNum, vel]);
           setTimeout(function() {
@@ -2829,7 +2833,8 @@ add_action('wp_footer', function () {
         let noteOnChannel = MIDI_CONST.NOTE_ON + (BSD.options.hihat.channel - 1);
         let noteOffChannel = MIDI_CONST.NOTE_OFF + (BSD.options.hihat.channel - 1);
         let noteNum = BSD.options.hihat.noteNumber;
-        let vel = Math.floor(127 * BSD.options.hihat.volume); //[0..1] -> [0..127]        
+        let vel = BSD.options.hihat.volume * BSD.volume; 
+        vel = Math.floor(127 * vel);////[0..1] -> [0..127]
 
         router.outPort.send([noteOnChannel, noteNum, vel]);
         return setTimeout(function() {
