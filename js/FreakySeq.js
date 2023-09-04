@@ -88,6 +88,7 @@ export default function FreakySeq(props) {
       if (tickIdx === saveTickIdx) {
         return requestAnimationFrame(frameTick); //it's not time to do anything yet. exit early.
       }
+      self.emit('tick',tickIdx);
       ////console.log("tickIdx", tickIdx);
       //NOW it's time...
       saveTickIdx = tickIdx;

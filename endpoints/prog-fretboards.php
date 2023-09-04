@@ -1998,12 +1998,7 @@ add_action('wp_footer', function () {
         });
         BSD.boards.push(board);
 
-        var thisFred = SVGFretboard({
-          fps,
-          fretStarts,
-          fretWidths,
-          fretHeights
-        })
+        var thisFred = SVGFretboard()
         .on('wake-up', () => console.log('WOKE!!'))
 
         var svgStage = DOM.div().addClass("stage svg-stage margin4");
@@ -2015,9 +2010,15 @@ add_action('wp_footer', function () {
         thisFred.plotFingerboardFrets();
         thisFred.plotInlays();
         thisFred.plotStrings();
-        svgPlotHelper(chord, thisFred, {
-          maxCircleRadiusPercent: 0.8,
-          minCircleRadiusPercent: 0.5
+        thisFred.plotHelper({
+          chordOrScale: chord, 
+          svgAlpha: BSD.svgAlpha,
+          stringSet: BSD.options.stringSet,
+          fretRange: BSD.options.fretRange, 
+          opts: {
+            maxCircleRadiusPercent: 0.8,
+            minCircleRadiusPercent: 0.5
+          }
         });
         //thisFred.plotFrets(chord, BSD.defaultSVGCircleAttrs);
 
@@ -2865,40 +2866,16 @@ add_action('wp_footer', function () {
       return result;
     }
 
-    let firstStringFrets, fps, fretStarts, fretWidths, fretHeights;
-
-    fretHeights = 100 / 6;
-
-
-
     var fred;
 
     campfire.on('guitar-data-loaded', function() {
-      firstStringFrets = BSD.guitarData.filter(o => o.string == 1);
-      fps = firstStringFrets.length;
-      fretStarts = [];
-      firstStringFrets.forEach(fret => {
-        let last = fretStarts.length ? fretStarts[fretStarts.length - 1] : 0;
-        fretStarts.push(vlerp([last], [100], 100 / fps / 100)[0]);
-      });
-      fretStarts = fretStarts.map(o => o * 1.56);
-      fretWidths = fretStarts.map((s, i) => {
-        var result = i ? s - fretStarts[i - 1] : s;
-        return result;
-      });
-      fretStarts.unshift(0);
-      fred = SVGFretboard({
-          fps,
-          fretStarts,
-          fretWidths,
-          fretHeights
-        })
+      fred = SVGFretboard()
         .on('wake-up', () => console.log('WOKE!!'))
 
       svgWrap.append(
         fred.ui()
       );
-      console.log(fred);
+      ///console.log(fred);
       fred.plotFingerboardFrets();
       fred.plotInlays();
       fred.plotStrings();
@@ -2930,36 +2907,6 @@ add_action('wp_footer', function () {
     var fretPlotterInput = jQuery('.fret-plotter-input');
     var btnClear = jQuery('.btn-clear');
 
-
-    function svgPlotHelper(chordOrScale, svgFB, opts) {
-
-      let myColor = BSD.chosenColors[0];
-      BSD.chosenColors.push(BSD.chosenColors.shift());
-
-      console.log('BSD.options',BSD.options);
-
-      var fr = BSD.options.fretRange;
-      var strings = BSD.options.stringSet.split('').map(o => +o);
-      var hash = chordOrScale.chromaticHash();
-      var frets = getFretsByChromaticHash(hash)
-        .filter(fret => fret.fret >= fr[0] && fret.fret <= fr[1])
-        .filter(fret => strings.includes(fret.string))
-        .map(fret => {
-          var interval = fret.chromaticValue - chordOrScale.rootNote.chromaticValue();
-          return {
-            ...fret,
-            interval
-          };
-        });
-      
-      opts = opts || {};
-      opts = {...opts,
-        fill: '#' + myColor.toHex(),
-        'fill-opacity': BSD.svgAlpha      
-      }
-      svgFB.plotFrets(frets, opts);
-    }
-
     jQuery('.btn-chord').on('click', function() {
       var str = fretPlotterInput.val();
       let chordNames = str.split(/\ +|\+|,/g)
@@ -2967,12 +2914,24 @@ add_action('wp_footer', function () {
         .map(o => o.trim());
       chordNames.forEach((name, i) => {
         var chord = makeChord(name);
-        svgPlotHelper(chord, fred);
+        fred.plotHelper(
+          {
+            svgAlpha: BSD.svgAlpha,
+            chordOrScale: chord,
+            stringSet: BSD.options.stringSet,
+            fretRange: BSD.options.fretRange
+          }
+        );
       })
     });
     jQuery('.btn-scale').on('click', function() {
       var scale = makeScale(fretPlotterInput.val());
-      svgPlotHelper(scale, fred);
+      fred.plotHelper({
+        chordOrScale: scale,
+        svgAlpha: BSD.svgAlpha,
+        stringSet: BSD.options.stringSet,
+        fretRange: BSD.options.fretRange
+      });
     });
     btnClear.on('click', () => {
       fred.clearFretted();

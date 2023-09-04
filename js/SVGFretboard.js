@@ -2,6 +2,9 @@ import DOM from "./DOM.js";
 import PubSub from "./PubSub.js";
 import {remap} from "./Lerpy.js";
 import {makeChord, twelveBitMask} from "./js-music-theory.js";
+import {vlerp} from "./VectorLerpy.js";
+
+//FIXME/NOTE: vlerp is external from js/la.js
 
 const STRING_GAP = 14; //probably not percent?
 
@@ -15,10 +18,31 @@ async function loadGuitarData() {
     return await inner();
 }
 
-var guitarData = await loadGuitarData();
+//NOTE: this happens immediately before usage elsewhere
+const guitarData = await loadGuitarData();
+
+
+let firstStringFrets, fps, fretStarts, fretWidths, fretHeights;
+fretHeights = 100 / 6;
+firstStringFrets = guitarData
+    .filter(o => o.string == 1);
+fps = firstStringFrets.length;
+fretStarts = [];
+firstStringFrets.forEach(fret => {
+    let last = fretStarts.length ? fretStarts[fretStarts.length - 1] : 0;
+    fretStarts.push(vlerp([last], [100], 100 / fps / 100)[0]);
+});
+
+fretStarts = fretStarts.map(o => o * 1.56);
+fretWidths = fretStarts.map((s, i) => {
+    var result = i ? s - fretStarts[i - 1] : s;
+    return result;
+});
+fretStarts.unshift(0);//put 0 as the first
+
 
 export function getFretsByChromaticHash(selectHash)  { 
-    return BSD.guitarData
+    return guitarData
         .filter(fret => {
         let fretHash = twelveBitMask[fret.chromaticValue];
         return (fretHash & selectHash) == fretHash;
@@ -121,16 +145,16 @@ function SVGFretboard(spec) {
                     let xIdx = fret.fret;
                     //xIdx = inverseFret.fret;
 
-                    let fretXCoeff = Math.pow(1 + 100 / spec.fps / 100, xIdx + 1) - 1;
+                    let fretXCoeff = Math.pow(1 + 100 / fps / 100, xIdx + 1) - 1;
                     //fretXCoeff *= 1.56;
                     let fretX = fretXCoeff * totW;
                     //console.log('fretX',fretX);
                     let rectOpts = {
                         class: `string-${fret.string} fret-${fret.fret}`,
                         fill: 'rgba(0,0,0,0.1)', //getRandomColor(),
-                        x: spec.fretStarts[xIdx] + '%',
-                        y: (fret.string - 1) * spec.fretHeights + '%',
-                        width: spec.fretWidths[xIdx] + '%',
+                        x: fretStarts[xIdx] + '%',
+                        y: (fret.string - 1) * fretHeights + '%',
+                        width: fretWidths[xIdx] + '%',
                         height: '100%' //fretHeights + '%'
                     };
 
@@ -198,11 +222,11 @@ https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
                 .attr({
                     fill: 'rgba(0,0,0,0.1)',
                     stroke: 'none',
-                    x: spec.fretStarts[fret] + spec.fretWidths[fret] / 6 + '%',
+                    x: fretStarts[fret] + fretWidths[fret] / 6 + '%',
                     y: '10%',
                     rx: 5,
                     //r: '1.5%',
-                    width: spec.fretWidths[fret] * 0.6 + '%',
+                    width: fretWidths[fret] * 0.6 + '%',
                     height: 80 + '%'
                 }));
 
@@ -214,21 +238,21 @@ https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
 
 
     self.plotFret = function(fret, opts) {
-        var x = spec.fretStarts[fret.fret] + spec.fretWidths[fret.fret] / 2;
-        ///var radius = utils.map(fret.fret, 0, spec.fps, 1.5, 0.75);
+        var x = fretStarts[fret.fret] + fretWidths[fret.fret] / 2;
+        ///var radius = utils.map(fret.fret, 0, fps, 1.5, 0.75);
 
         var maxCircleRadiusPercent = opts.maxCircleRadiusPercent || 1.25;
         var minCircleRadiusPercent = opts.minCircleRadiusPercent || 0.75;
 
         var radius = remap(
-            0, spec.fps, 
+            0, fps, 
             maxCircleRadiusPercent, 
             minCircleRadiusPercent,
             fret.fret, 
             true);
 
         var ry = remap(
-            0,spec.fps,
+            0,fps,
             7, //% radius compared to height when frets are low
             3, //% radius compared to height when frets are high
             fret.fret
@@ -242,7 +266,7 @@ https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
         opts = {
             //////class: 'fretted',
             cx: x + '%',
-            cy: (fret.string - 1) * spec.fretHeights + spec.fretHeights / 2 + '%',
+            cy: (fret.string - 1) * fretHeights + fretHeights / 2 + '%',
             ///WASr: '1.5%',
             //rx: 'auto',
             ry: ry + '%',
@@ -261,6 +285,42 @@ https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
         gFretted.empty();
         return self;
     }
+
+
+
+    self.plotHelper = function({ chordOrScale, opts, fretRange, stringSet, svgAlpha }) {
+
+        //let myColor = BSD.chosenColors[0];
+        //BSD.chosenColors.push(BSD.chosenColors.shift());
+  
+        //console.log('BSD.options',BSD.options);
+  
+        //var fr = BSD.options.fretRange;
+        const fr = fretRange;
+        //const strings = stringSet;
+        const strings = stringSet.split('').map(o => +o);
+        var hash = chordOrScale.chromaticHash();
+        var frets = getFretsByChromaticHash(hash)
+          .filter(fret => fret.fret >= fr[0] && fret.fret <= fr[1])
+          .filter(fret => strings.includes(fret.string))
+          .map(fret => {
+            var interval = fret.chromaticValue - chordOrScale.rootNote.chromaticValue();
+            return {
+              ...fret,
+              interval
+            };
+          });
+        
+        opts = opts || {};
+        opts = {...opts,
+          //fill: '#' + myColor.toHex(),
+          'fill-opacity': svgAlpha      
+        }
+        self.plotFrets(frets, opts);
+      }
+  
+
+
 
 
     self.ui = function() {

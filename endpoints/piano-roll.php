@@ -77,7 +77,8 @@ add_action('wp_footer', function () {
     import JSMT, { Note } from "./js/js-music-theory.js";
     import Procrastinator from "./js/Procrastinator.js";
     import PubSub from "./js/PubSub.js";
-
+    import RootNoteWithIntervals from "./js/RootNoteWithIntervals.js";
+    import SVGFretboard from "./js/SVGFretboard.js";
     //import Sortable from "./lib/sortable.complete.esm.js";
 
     import {
@@ -371,6 +372,17 @@ add_action('wp_footer', function () {
     w.renderOn(body);
 
 
+    let svgFB = SVGFretboard();
+    svgFB.plotFingerboardFrets();
+    svgFB.plotInlays();
+    svgFB.plotStrings();
+    let fbWin = Vindow({
+      title: 'Fretboard'
+    });
+    fbWin.renderOn(body);
+    fbWin.append(svgFB.ui())
+
+
 
     let tabWindow = Vindow({
       title: "Tablature"
@@ -383,12 +395,43 @@ add_action('wp_footer', function () {
     const vinfo = VindowInfo();
     vinfo.renderOn(body);
 
+    let saveTick = -1;
 
+    freak.on('note-on', function(event) {
+      if (event.tickIdx != saveTick) {
+        svgFB.clearFretted();
+        saveTick = event.tickIdx;
+      }
+      console.log('note-on',event);
+      campfire.emit('plot-svg-note', Note(event.noteNumber));
+    });
 
+    campfire.on('play-note',function(payload){
+      //grab the UI interaction on the piano roll
+      campfire.emit('plot-svg-note',payload.note)
+    });
+
+    campfire.on('plot-svg-note',function(note){
+
+      const rwi = RootNoteWithIntervals({
+        rootNote: note,
+        intervals: [0]
+      });
+      svgFB.plotHelper({
+        chordOrScale: rwi, 
+          svgAlpha: BSD.svgAlpha,
+          stringSet: BSD.options.stringSet,
+          fretRange: BSD.options.fretRange, 
+          opts: {
+            maxCircleRadiusPercent: 0.8,
+            minCircleRadiusPercent: 0.5
+          }
+      })
+    })
 
 
     //LEAD / IMPROV
-    campfire.subscribe('play-note', function(payload) {
+    campfire.on('play-note', function(payload) {
       ///console.log('play-note!!',payload);
       if (!BSD.options.improv.enabled) {
         return false;
