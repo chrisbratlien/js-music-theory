@@ -45,7 +45,9 @@
       Volume:<div id="volume-amount" class="volume-amount">0</div>
 
       <div class="slider-wrap flex-column header-column half-width">
-        <div class="slider" id="volume-input"></div>
+        <input type="range" min="0" max="1" step="0.01" 
+          class="slider volume-input" 
+          id="volume-input" />
       </div>
     </div><!-- end .container -->
     <a class="pad8-lr" href="https://github.com/chrisbratlien/js-music-theory"><i class="fa fa-2x fa-github"></i></a>

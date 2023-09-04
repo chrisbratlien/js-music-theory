@@ -5,7 +5,7 @@ BSD.Guitar = function(spec) {
 
 
     var palette = BSD.randomPalette2(11,200);
-    var table = DOM.table().addClass('fretboard-table');
+    var table = DOM.table().addClass('js-bsd-guitar fretboard-table');
 
 
   var fromFret = 0;

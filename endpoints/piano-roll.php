@@ -75,7 +75,9 @@ add_action('wp_footer', function () {
     import MIDI_MSG from "./js/MIDIConstants.js";
     import DOM from "./js/DOM.js";
     import JSMT, { Note } from "./js/js-music-theory.js";
-    
+    import Procrastinator from "./js/Procrastinator.js";
+    import PubSub from "./js/PubSub.js";
+
     //import Sortable from "./lib/sortable.complete.esm.js";
 
     import {
@@ -89,6 +91,10 @@ add_action('wp_footer', function () {
     let body = DOM.from(document.body);
 
     let mixer = BSDMixer(context);
+    const debounce = Procrastinator();
+    
+    const campfire = PubSub();
+
 
     function handleExternallyReceivedNoteOn(msg, noteNumber, velocity) {
       if (router && router.outPort && BSD.options.improv.midi) {
@@ -171,14 +177,24 @@ add_action('wp_footer', function () {
     }
 
     BSD.volume = 0.06;
-    storage.getItem('volume', function(o) {
-      BSD.volume = parseFloat(o);
-      ///waiter.beg(BSD.audioPlayer,'set-master-volume',BSD.volume);
-      ////waiter.beg(bassist,'set-master-volume',BSD.volume);
 
-      jQuery("#volume-amount").text(BSD.volume);
+    var volumeInput = DOM.from('.volume-input');
+    var volumeAmount = DOM.from('.volume-amount');
+    volumeInput.on('change',function(e){
+      var newVolume = parseFloat(e.target.value);
+      BSD.volume = newVolume;
+      debounce('set-master-volume',
+        () => {
+          campfire.emit('set-master-volume', newVolume);
+          storage.setItem('volume', newVolume);        
+      },250);
+      volumeAmount.text(newVolume);
     });
 
+    storage.getItem('volume', function(o) {
+      BSD.volume = parseFloat(o);
+      volumeAmount.text(BSD.volume);
+    });
 
 
     let defaultOptions = {

@@ -486,7 +486,6 @@ get_header(); ?>
     <ul class="song-form-position noprint">
     </ul>
   </div>
-  <div class="stage noprint"></div>
 </div><!-- venue row -->
 <div class="venue-footer noprint clear-both">
 </div>
@@ -573,12 +572,20 @@ add_action('wp_footer', function () {
     import {lerp,invlerp, remap} from './js/Lerpy.js';
 
     import {RemoteStorage} from "./js/RemoteStorage.js";
+    import Procrastinator from "./js/Procrastinator.js";
+    import PubSub from "./js/PubSub.js";
+
+
 
     window.lerp = lerp;
     window.invlerp = invlerp;
     window.remap = remap;
 
     let router;
+
+
+    const campfire = PubSub();
+
 
     function handleExternallyReceivedNoteOn(msg, noteNumber, velocity) {
       if (router && router.outPort && BSD.options.improv.midi) {
@@ -929,10 +936,9 @@ add_action('wp_footer', function () {
     });
 
 
-    var waiter = BSD.Widgets.Procrastinator({
-      timeout: 250
-    });
+    const debounce = Procrastinator();
 
+    
 
     BSD.songlist = SongList({});
 
@@ -966,15 +972,6 @@ add_action('wp_footer', function () {
 
 
 
-    BSD.volume = 0.06;
-    storage.getItem('volume', function(o) {
-      BSD.volume = parseFloat(o);
-      ///waiter.beg(BSD.audioPlayer,'set-master-volume',BSD.volume);
-      ////waiter.beg(bassist,'set-master-volume',BSD.volume);
-      waiter.beg(campfire, 'set-master-volume', BSD.volume);
-
-      jQuery("#volume-amount").text(BSD.volume);
-    });
 
 
 
@@ -1064,25 +1061,26 @@ add_action('wp_footer', function () {
 
 
 
-
-
-
-    $("#volume-input").slider({
-      orientation: "horizontal",
-      range: "min",
-      min: 0,
-      max: 0.1,
-      step: 0.01,
-      value: BSD.volume,
-      slide: function(event, ui) {
-        var newVolume = ui.value;
-        BSD.volume = newVolume;
-        waiter.beg(campfire, 'set-master-volume', BSD.volume);
-        storage.setItem('volume', newVolume);
-        ////waiter.beg(BSD.chunker,'set-master-volume',ui.value);
-        jQuery("#volume-amount").text(newVolume);
-      }
+    var volumeInput = DOM.from('.volume-input');
+    var volumeAmount = DOM.from('.volume-amount');
+    volumeInput.on('change',function(e){
+      var newVolume = parseFloat(e.target.value);
+      BSD.volume = newVolume;
+      debounce('set-master-volume',
+        () => {
+          campfire.emit('set-master-volume', newVolume);
+          storage.setItem('volume', newVolume);        
+      },250);
+      volumeAmount.text(newVolume);
     });
+
+    BSD.volume = 0.06;
+    storage.getItem('volume', function(o) {
+      BSD.volume = parseFloat(o);
+      campfire.emit('set-master-volume',BSD.volume);
+      volumeAmount.text(BSD.volume);
+    });
+
 
 
     campfire.on('render-fret-range-control', function() {
@@ -1977,13 +1975,6 @@ add_action('wp_footer', function () {
         colorHash,
         activeStrings: '654321'.split('')
       });
-      /*
-      predictBoard = makeFretboardOn(stage, {
-        colorHash,
-        activeStrings: '654321'.split('')
-      });
-      **/
-
 
 
       jQuery('.stringset-name').html(BSD.options.stringSet);
@@ -1997,9 +1988,10 @@ add_action('wp_footer', function () {
           venueColumn = DOM.div().addClass('column venue-column');
           venue.append(venueColumn);
         }
-        var stage = DOM.div().addClass('stage hidden stringset-' + BSD.options.stringSet);
-        venueColumn.append(stage);
-        var board = makeFretboardOn(stage, {
+        var tableStage = DOM.div()
+          .addClass('stage table-stage hidden noprint stringset-' + BSD.options.stringSet);
+        venueColumn.append(tableStage);
+        var board = makeFretboardOn(tableStage, {
           chord,
           colorHash,
           activeStrings: activeStrings
@@ -2014,7 +2006,10 @@ add_action('wp_footer', function () {
         })
         .on('wake-up', () => console.log('WOKE!!'))
 
-        stage.append(
+        var svgStage = DOM.div().addClass("stage svg-stage margin4");
+        venueColumn.append(svgStage);
+
+        svgStage.append(
           thisFred.ui()
         );
         thisFred.plotFingerboardFrets();
@@ -2644,13 +2639,6 @@ add_action('wp_footer', function () {
             chordEl.scrollIntoView({ behavior: 'smooth' })
             window.scrollTo(0,offsetPosition);
 
-
-
-            /* FIXME: REDO without jQuery
-            jQuery('html, body').animate({
-              scrollTop: wrap.find('.chord-name').offset().top - headerHeight
-            }, 200);
-            */
           });
         }
       }
@@ -2900,7 +2888,6 @@ add_action('wp_footer', function () {
       });
       fretStarts.unshift(0);
       fred = SVGFretboard({
-          foo: 'bar',
           fps,
           fretStarts,
           fretWidths,
@@ -2949,12 +2936,14 @@ add_action('wp_footer', function () {
       let myColor = BSD.chosenColors[0];
       BSD.chosenColors.push(BSD.chosenColors.shift());
 
+      console.log('BSD.options',BSD.options);
+
       var fr = BSD.options.fretRange;
       var strings = BSD.options.stringSet.split('').map(o => +o);
       var hash = chordOrScale.chromaticHash();
       var frets = getFretsByChromaticHash(hash)
         .filter(fret => fret.fret >= fr[0] && fret.fret <= fr[1])
-        .filter(fret => strings.contains(fret.string))
+        .filter(fret => strings.includes(fret.string))
         .map(fret => {
           var interval = fret.chromaticValue - chordOrScale.rootNote.chromaticValue();
           return {

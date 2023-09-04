@@ -143,7 +143,7 @@ function Fretboard(spec) {
     self.renderOn = function(wrap) {
         myWrap = wrap;
         var inner = DOM.div().addClass("inner");
-        var table = DOM.table().addClass("fretboard-table");
+        var table = DOM.table().addClass("fretboard-js fretboard-table");
         table.attr("cellspacing", 0);
         table.attr("cellpadding", 0);
 

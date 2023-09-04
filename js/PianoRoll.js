@@ -3,6 +3,10 @@ import DOM from "./DOM.js";
 import DragAndDropFile from "./DragAndDropFile.js";
 import { lerp, invlerp, remap } from "./scalar.js";
 import JSMT, { makeScale } from "./js-music-theory.js";
+import { getTimestmap, pad } from "./Utils.js";
+
+window.getTimestamp = getTimestmap;
+window.pad = pad;
 
 function millisPerLoop(bpm, beatsPerBar, barsPerLoop) {
   let millisPerMinute = 60000;
@@ -111,7 +115,12 @@ function PianoRoll(props) {
         )
         .on('click', function(e) {
           let now = Date.now();
-          let filename = `piano-roll-${now}.json`;
+
+          let defaultFilename = `${getTimestmap()}-piano-roll.json`;
+
+          var filename = prompt('Save to file',defaultFilename);
+          if (!filename) { return; }
+
           download.attr('download', filename);
           let dataString = JSON.stringify(props, null, 4);
           const dataURI = makeTextFile(dataString, 'application/json');

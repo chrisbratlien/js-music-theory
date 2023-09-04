@@ -62,6 +62,28 @@ export function fretDistance(fret, other) {
   return capped;
 }
 
+export function pad(str, len = 2, padWith = '0') {
+  str = str.toString();
+  if (str.length >= len) { 
+    return str;
+  }
+  return pad(padWith + str, len, padWith);
+}
+
+export function getTimestmap() {
+  var now = new Date();
+
+  let [yr,mon,day,hr,min,sec] = [
+    now.getFullYear(),
+    pad(now.getMonth() + 1, 2, '0'),
+    pad(now.getDate(), 2, '0'),
+    pad(now.getHours(), 2, '0'),
+    pad(now.getMinutes(), 2, '0'),
+    pad(now.getSeconds(), 2, '0')
+  ];
+  return `${yr}${mon}${day}_${hr}${min}${sec}`;
+}
+
 
     //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from#sequence_generator_range
 export  const range = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
