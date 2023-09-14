@@ -33,6 +33,7 @@ add_action('wp_head', function () {
     @import 'css/vindow.css';
     @import 'css/arranger.css';
 
+    @import 'css/svg-fretboard.css';
     @import "css/align.css";
     @import "css/flex.css";
 
@@ -126,7 +127,7 @@ add_action('wp_footer', function () {
         //console.log("BSD?",BSD)
 
         let [msg, noteNumber, velocity] = e.data;
-        console.log('msg', msg);
+        ///console.log('msg', msg);
 
         if (msg == MIDI_MSG.NOTE_ON) {
           return handleExternallyReceivedNoteOn(msg, noteNumber, velocity);
@@ -402,7 +403,7 @@ add_action('wp_footer', function () {
         svgFB.clearFretted();
         saveTick = event.tickIdx;
       }
-      console.log('note-on',event);
+      //console.log('note-on',event);
       campfire.emit('plot-svg-note', Note(event.noteNumber));
     });
 

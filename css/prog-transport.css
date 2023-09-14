@@ -1,0 +1,64 @@
+
+.song-form-position {
+    width: 100%;
+  }
+
+  .song-form-position .bar,
+  .song-cycle-position .cycle {
+    background: #d5cbe2;
+    color: white;
+    cursor: pointer;
+    float: left;
+    font-size: 1.2rem;
+    height: 45px;
+    line-height: 45px;
+    text-align: center;
+    width: 25%;
+  }
+
+  .song-form-position .active,
+  .song-cycle-position .active {
+    background: yellow;
+    color: black;
+  }
+
+
+  .bar-16,
+  .bar-17,
+  .bar-18,
+  .bar-19 {
+    margin-top: 10px;
+  }
+
+  .bar-32,
+  .bar-33,
+  .bar-34,
+  .bar-35 {
+    margin-top: 10px;
+  }
+
+  .bar-48,
+  .bar-49,
+  .bar-50,
+  .bar-51 {
+    margin-top: 10px;
+  }
+
+
+  .form-progression .form-group {
+    width: 100%;
+  }
+
+  .form-progression .progression {
+    font-family: monospace;
+    width: 90%;
+  }
+
+  .form-progression .btn-start {
+    width: 8%;
+  }
+
+  .song-cycle-position {
+    width: 100%;
+  }
+

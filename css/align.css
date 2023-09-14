@@ -28,6 +28,20 @@
   text-align: center;
 }
 
+.one-eighth-width {
+  width: 12.5%;
+}
+.seven-eigthths-width {
+  width: 87.5%;
+}
+.one-tenth-width {
+  width: 10%;
+}
+.nine-tenths-width {
+  width: 90%;
+}
+
+
 .resize-both {
   resize: both;
 }

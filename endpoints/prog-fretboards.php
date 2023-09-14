@@ -13,6 +13,9 @@ add_action('wp_head', function () {
     @import 'css/piano-roll.css';
     @import 'css/lcd.css';
     @import 'css/vindow.css';
+    @import 'css/svg-fretboard.css';
+    @import 'css/prog-transport.css';
+
   </style>
   <style type="text/css">
     body {
@@ -229,76 +232,10 @@ add_action('wp_head', function () {
     }
 
 
-    .song-form-position-wrap {
-      float: right;
-      width: 30%;
-    }
 
-    .song-form-position {
-      width: 100%;
-    }
-
-    .song-form-position .bar,
-    .song-cycle-position .cycle {
-      background: #d5cbe2;
-      color: white;
-      cursor: pointer;
-      float: left;
-      font-size: 1.2rem;
-      height: 45px;
-      line-height: 45px;
-      text-align: center;
-      width: 25%;
-    }
-
-    .song-form-position-wrap .active {
-      background: yellow;
-      color: black;
-    }
-
-
-    .bar-16,
-    .bar-17,
-    .bar-18,
-    .bar-19 {
-      margin-top: 10px;
-    }
-
-    .bar-32,
-    .bar-33,
-    .bar-34,
-    .bar-35 {
-      margin-top: 10px;
-    }
-
-    .bar-48,
-    .bar-49,
-    .bar-50,
-    .bar-51 {
-      margin-top: 10px;
-    }
-
-
-    .form-progression .form-group {
-      width: 100%;
-    }
-
-    .form-progression .progression {
-      font-family: monospace;
-      width: 90%;
-    }
-
-    .form-progression .btn-start {
-      width: 8%;
-    }
-
-    .song-cycle-position {
-      width: 100%;
-    }
-
-
-
-
+.chord-name {
+  font-size: 2rem;
+}
 
 
     .tiny td {
@@ -315,6 +252,9 @@ add_action('wp_head', function () {
     .tiny .spacer {
       display: none;
     }
+
+
+
 
     .tiny .chord-name {
       font-size: 10px;
@@ -335,25 +275,6 @@ add_action('wp_head', function () {
     }
 
 
-    .svg-wrap {
-      min-width: 50%;
-      margin: 0 auto;
-      width: 50%;
-    }
-
-    .svg-wrap .bg {
-      fill: blanchedalmond;
-      height: 100%;
-      width: 100%;
-    }
-
-    .svg-wrap g.base-baord {
-      width: 100%;
-    }
-
-    .svg-wrap .fretted {
-      /* fill: cornsilk; **/
-    }
 
     div.dg.ac {
       top: 50px;
@@ -416,6 +337,7 @@ get_header(); ?>
   <button class="btn btn-info btn-toggle-text noprint">Toggle Text</button>
   <button class="btn btn-info btn-save-prog"><i class="fa fa-save"></i> Save Prog</button>
   <button class="btn btn-info btn-toggle-tiny">Tiny</button>
+  <button class="btn btn-info btn-toggle-tables">Tables</button>
   <br />
 
 
@@ -460,7 +382,7 @@ get_header(); ?>
 
 <div class="svg-wrap">
 </div>
-<div class="svg-controls">
+<div class="svg-controls noprint">
   <div class="btn-group svg-buttons">
     <button class="btn btn-sm btn-primary btn-chord">chord</button>
     <button class="btn btn-sm btn-primary btn-scale">scale</button>
@@ -474,21 +396,9 @@ get_header(); ?>
 <div class="venue">
   <h3 class="song-name"></h3>
   <h5 class="stringset-name"></h5>
-
-  <div class="song-form-position-wrap noprint">
-    Cycle
-    <div class="song-cycle-position noprint"></div>
-    <div class="clear-both"></div>
-    <div class="btn btn-default btn-loop-start noprint">A</div>
-    <div class="btn  btn-default btn-loop-end noprint">B</div>
-    <div class="clear-both"></div>
-    Bar
-    <ul class="song-form-position noprint">
-    </ul>
-  </div>
-</div><!-- venue row -->
-<div class="venue-footer noprint clear-both">
 </div>
+<div class="venue-footer"></div>
+
 
 <div class="song-list-wrap noprint">
 </div>
@@ -574,7 +484,7 @@ add_action('wp_footer', function () {
     import {RemoteStorage} from "./js/RemoteStorage.js";
     import Procrastinator from "./js/Procrastinator.js";
     import PubSub from "./js/PubSub.js";
-
+    import ProgTransport from "./js/ProgTransport.js";
 
 
     window.lerp = lerp;
@@ -646,6 +556,7 @@ add_action('wp_footer', function () {
     // XXXXXXXX
     //this is where we crossed over from module to regular js.....
     // XXXXXXXX
+    var body = DOM.from(document.body);
 
 
 
@@ -874,17 +785,40 @@ add_action('wp_footer', function () {
       BSD.options.tiny ? btnToggleTiny.html('Big') : btnToggleTiny.html('Tiny');
     }
 
+
+    function checkTables() {
+
+      var show = BSD.options.showTables;
+      var them = DOM.from('.table-stage, .fretboard-table');
+      show ? them.removeClass('hidden') : them.addClass('hidden')
+
+
+
+      show ? btnToggleTables.html('No Tables') : btnToggleTables.html('Tables');
+    }
+
     var venue = jQuery('.venue');
     var songName = jQuery('.song-name');
 
 
-    var btnToggleTiny = jQuery('.btn-toggle-tiny');
+    var btnToggleTiny = DOM.from('.btn-toggle-tiny');
     btnToggleTiny.on('click', function() {
       BSD.options.tiny = !BSD.options.tiny;
       storage.setItem('options', JSON.stringify(BSD.options));
       checkTiny();
     });
     checkTiny();
+
+    var btnToggleTables = DOM.from('.btn-toggle-tables');
+    btnToggleTables.on('click', function() {
+      BSD.options.showTables = !BSD.options.showTables;
+      storage.setItem('options', JSON.stringify(BSD.options));
+      checkTables();
+    });
+    checkTables();
+
+
+
 
 
     BSD.foo = [];
@@ -1773,8 +1707,18 @@ add_action('wp_footer', function () {
 
     var myNote = false;
 
-    var songFormPosition = jQuery('.song-form-position');
-    var songCyclePosition = jQuery('.song-cycle-position');
+    var songFormPosition = DOM.from('.song-form-position');
+    var songCyclePosition = DOM.from('.song-cycle-position');
+
+    let progTransport = ProgTransport();
+    let transportVindow = Vindow({
+      title: 'Transport',
+      className: 'noprint'
+    });
+    transportVindow.append(progTransport.ui());
+    transportVindow.renderOn(body);
+
+
     ///var songCycleIndicator = jQuery('.song-cycle-indicator');
     function initLast() {
       meta = {};
@@ -1985,7 +1929,8 @@ add_action('wp_footer', function () {
 
         var chord = progItem.chord;
         if (progItemIdx % 8 == 0) {
-          venueColumn = DOM.div().addClass('column venue-column');
+          venueColumn = DOM.div()
+            .addClass('column venue-column flex-column')
           venue.append(venueColumn);
         }
         var tableStage = DOM.div()
@@ -2001,12 +1946,15 @@ add_action('wp_footer', function () {
         var thisFred = SVGFretboard()
         .on('wake-up', () => console.log('WOKE!!'))
 
-        var svgStage = DOM.div().addClass("stage svg-stage margin4");
+        var svgStage = DOM.div().addClass("stage svg-stage margin4 flex-row");
         venueColumn.append(svgStage);
 
-        svgStage.append(
+        svgStage.append([
+          DOM.div()
+            .addClass('chord-name pad4 one-tenth-width')
+            .append(DOM.span(chord.fullAbbrev())),
           thisFred.ui()
-        );
+        ]);
         thisFred.plotFingerboardFrets();
         thisFred.plotInlays();
         thisFred.plotStrings();
@@ -2371,50 +2319,11 @@ add_action('wp_footer', function () {
     });
 
 
+    progTransport.on('tick',tick);
+
     campfire.on('reset-song-form-ui', function() {
-
-      songFormPosition.empty();
-      songCyclePosition.empty();
-
-      //renders out the songFormPosition div
-      var range = [];
       BSD.totalBars = BSD.sequence[BSD.sequence.length - 1].barIdx + 1;
-
-      for (var i = 0; i < BSD.totalBars; i += 1) {
-        range.push(i);
-      }
-      range.forEach(function(i) {
-        var div = DOM.div(i + 1).addClass('bar bar-' + i);
-        songFormPosition.append(div);
-
-        div.on('click', function() {
-          BSD.clickedBar = i;
-          var event = BSD.sequence.find(function(o) {
-            return o.barIdx == i && o.cycleIdx == BSD.currentCycleIdx;
-          });
-          console.log('event', event);
-          tick(event);
-        });
-      });
-
-      BSD.totalCycles = BSD.sequence[BSD.sequence.length - 1].cycleIdx + 1;
-      range = [];
-      for (var i = 0; i < BSD.totalCycles; i += 1) {
-        range.push(i);
-      }
-      range.forEach(function(i) {
-        var div = DOM.div(i + 1).addClass('cycle cycle-' + i);
-        songCyclePosition.append(div);
-
-        div.on('click', function() {
-          BSD.clickedCycle = i;
-          var event = BSD.sequence.find(function(o) {
-            return o.cycleIdx == i && o.barIdx == BSD.currentBarIdx;
-          });
-          console.log('event', event);
-          tick(event);
-        });
-      });
+      progTransport.reset({ totalBars: BSD.totalBars })
     });
 
 
@@ -2479,22 +2388,8 @@ add_action('wp_footer', function () {
 
     });
 
-    campfire.on('song-form-position', function(o) {
-
-      let tmp;
-
-      tmp = songFormPosition.find('.active')
-      tmp && tmp.removeClass('active');
-      tmp = songFormPosition.find('.bar-' + o.barIdx);
-      tmp && tmp.addClass('active');
-      ///songCycleIndicator.html(o.cycleIdx+1);
-
-
-      tmp = songCyclePosition.find('.active');
-      tmp && tmp.removeClass('active');
-      tmp = songCyclePosition.find('.cycle-' + o.cycleIdx);
-      tmp && tmp.addClass('active');
-
+    campfire.on('song-form-position', function(event) {
+      progTransport.updatePosition(event);
     });
 
     var saveBarIdx = false;
@@ -3022,9 +2917,9 @@ add_action('wp_footer', function () {
 
 
 
-
     let w = Vindow({
-      title: "Piano Roll"
+      title: "Piano Roll",
+      className: 'noprint'
     });
     let [toolbar, pane] = pianoRoll.ui();
     w.appendToToolbar(toolbar);
@@ -3044,7 +2939,10 @@ add_action('wp_footer', function () {
       setBackgroundHue(elem, magicHueRadians)
     });
 
-    var body = DOM.from(document.body);
+
+
+
+
 
     let midiInfo = MIDIInfo({
       router,
@@ -3052,7 +2950,8 @@ add_action('wp_footer', function () {
       patch: BSD.options.improv.patch
     });
     var vMIDIInfo = Vindow({
-      title: 'MIDI Info'
+      title: 'MIDI Info',
+      className: 'noprint'
     });
     let [miToolbar, miPane] = midiInfo.ui();
     vMIDIInfo.appendToToolbar(miToolbar),

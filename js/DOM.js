@@ -3,6 +3,8 @@ var DOM = window.DOM || {
     svgTagString: 'circle,ellipse,g,line,path,polygon,polyline,rect,svg,text'
 };
 
+
+
 DOM.regularTags = DOM.regularTagString
     .split(',')
     .filter(function(o) { return o; });
@@ -11,8 +13,27 @@ DOM.svgTags = DOM.svgTagString
     .filter(function(o) { return o; });
 
 
-function fromVanilla(raw) {
+
+function fromVanilla(targetListOrRawObject) {
     let self = {};
+    let raw, targets;
+    //TODO: multi-support...
+    if (NodeList.prototype.isPrototypeOf(targetListOrRawObject)) {
+        targets = Array.from(targetListOrRawObject);
+        raw = targets[0]; //TODO: improve...
+    }
+    else {
+        targets = [targetListOrRawObject]
+        raw = targetListOrRawObject;
+    }
+
+    function foreachTarget(cb) {
+        return targets.map(cb);
+    }
+
+
+    //todo: handle multiples better
+    self.targets = targets;
     self.raw = raw;
     self[0] = raw;
 
@@ -23,21 +44,28 @@ function fromVanilla(raw) {
     self.on = function(eventNames, callback) {
         eventNames = eventNames.split(/ +/)
             .filter(o => o)
-        eventNames.map(eventName => raw.addEventListener(eventName, callback));
+
+        foreachTarget(tgt => eventNames.map(eventName => tgt.addEventListener(eventName, callback)));
+        
         return self;
     }
     self.addClass = function(classes) {
         classes = classes
             .split(/ +/)
             .filter(o => o);
-        raw.classList.add(...classes);
+
+        //multi-support
+        foreachTarget(tgt => tgt.classList.add(...classes))
+        ///raw.classList.add(...classes);
         return self;
     }
     self.removeClass = function(classes) {
         classes = classes
             .split(/ +/)
             .filter(o => o);
-        raw.classList.remove(...classes);
+        //multi-support
+        foreachTarget(tgt => tgt.classList.remove(...classes))
+        ///raw.classList.remove(...classes);
         return self;
     }
     self.toggleClass = function(classes) {
@@ -80,7 +108,10 @@ function fromVanilla(raw) {
             //just reading
             return raw.innerText
         }
-        raw.innerText = val;
+        //multi-support
+        foreachTarget(tgt => { tgt.innerText = val; })
+
+        ///raw.innerText = val;
         return self;
     }
     self.focus = function() {
@@ -92,7 +123,9 @@ function fromVanilla(raw) {
             //just reading
             return raw.innerHTML
         }
-        raw.innerHTML = val;
+        //multi-support
+        foreachTarget(tgt => { tgt.innerHTML = val; })
+        ///raw.innerHTML = val;
         return self;
     }
     self.val = function(val) {
@@ -152,7 +185,9 @@ function fromVanilla(raw) {
     self.css = function(key, value) {
         if (typeof key == 'object') {
             let props = key;
-            Object.keys(props).forEach(prop => { raw.style[prop] = props[prop]; })
+            Object.keys(props).forEach(prop => { 
+                foreachTarget(tgt => { tgt.style[prop] = props[prop]; });
+            })
             return self;
         }
         if (arguments.length == 1) {
@@ -221,7 +256,7 @@ combined.forEach(function(tag) {
 
 DOM.from = function(vanillaOrSelector) {
     if (typeof vanillaOrSelector == 'string') {
-        return fromVanilla(document.querySelector(vanillaOrSelector));
+        return fromVanilla(document.querySelectorAll(vanillaOrSelector));
     }
     return fromVanilla(vanillaOrSelector);
 }

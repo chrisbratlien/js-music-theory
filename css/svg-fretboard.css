@@ -1,0 +1,21 @@
+.svg-wrap {
+    min-width: 50%;
+    margin: 0 auto;
+    width: 50%;
+  }
+
+  .svg-board .bg {
+    fill: blanchedalmond;
+    height: 100%;
+    width: 100%;
+}
+  .svg-wrap g.base-baord {
+    width: 100%;
+  }
+
+  .svg-wrap .fretted {
+    /* fill: cornsilk; **/
+  }
+
+
+
