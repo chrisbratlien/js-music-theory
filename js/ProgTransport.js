@@ -6,20 +6,32 @@ let songCyclePosition, songFormPosition;
 
 export default function ProgTransport() {
     const self = PubSub();
+
+
+    var cycleWrap = DOM.div()
+      .addClass('flex-column')
+      .append([
+        'Cycle',
+        DOM.div()
+          .addClass('flex-row')
+          .append([
+            DOM.div('A')
+            .addClass('btn btn-default btn-loop-start'),
+            DOM.div('B')
+            .addClass('btn btn-default btn-loop-end'),
+          ]),
+        songCyclePosition = DOM.div()
+            .addClass('song-cycle-position flex-row'),
+      ]);
+
     const wrap =
         DOM.div()
             .addClass('song-form-position-wrap noprint')
             .append([
+                cycleWrap,
                 DOM.div()
-                    .addClass('song-form-position-wrap')
+                    .addClass('song-form-position-wrap flex-column')
                     .append([
-                        'Cycle',
-                        DOM.div('A')
-                            .addClass('btn btn-default btn-loop-start'),
-                        DOM.div('B')
-                            .addClass('btn btn-default btn-loop-end'),
-                        songCyclePosition = DOM.div()
-                            .addClass('song-cycle-position'),
                         'Bar',
                         songFormPosition = DOM.div()
                             .addClass('song-form-position')

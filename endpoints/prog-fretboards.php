@@ -797,8 +797,8 @@ add_action('wp_footer', function () {
       show ? btnToggleTables.html('No Tables') : btnToggleTables.html('Tables');
     }
 
-    var venue = jQuery('.venue');
-    var songName = jQuery('.song-name');
+    var venue = DOM.from('.venue');
+    var songName = DOM.from('.song-name');
 
 
     var btnToggleTiny = DOM.from('.btn-toggle-tiny');
@@ -876,7 +876,7 @@ add_action('wp_footer', function () {
 
     BSD.songlist = SongList({});
 
-    var songListWrap = jQuery('.song-list-wrap');
+    var songListWrap = DOM.from('.song-list-wrap');
     //BSD.songlist.renderOn(songlistWrap);
     let wSongList = Vindow({
       title: "Song List"
@@ -1018,7 +1018,7 @@ add_action('wp_footer', function () {
 
 
     campfire.on('render-fret-range-control', function() {
-      jQuery('.fret-range-amount').text(
+      DOM.from('.fret-range-amount').text(
         BSD.options.fretRange.toString().replace(/,/, '-')
       );
       jQuery('.fret-range-input').slider({
@@ -1033,7 +1033,7 @@ add_action('wp_footer', function () {
           BSD.options.fretRange = n;
           storage.setItem('options', JSON.stringify(BSD.options));
           console.log('n', n);
-          jQuery('.fret-range-amount').text(
+          DOM.from('.fret-range-amount').text(
             n.toString().replace(/,/, '-')
           );
           campfire.publish('fret-range-updated', BSD.options.fretRange);
@@ -1078,7 +1078,7 @@ add_action('wp_footer', function () {
 
 
     if (!BSD.options.fretRange) {
-      BSD.options.fretRange = [0, 15];
+      BSD.options.fretRange = [0, 18];
     }
     campfire.publish('render-fret-range-control');
 
@@ -1261,7 +1261,7 @@ add_action('wp_footer', function () {
       campfire.publish('guitar-data-loaded', data);
     });
 
-    var btnToggleText = jQuery('.btn-toggle-text');
+    var btnToggleText = DOM.from('.btn-toggle-text');
     var hideText = false;
     btnToggleText.on('click', function() {
       hideText = !hideText;
@@ -1271,7 +1271,7 @@ add_action('wp_footer', function () {
 
 
 
-    var btnPause = jQuery('.btn-pause');
+    var btnPause = DOM.from('.btn-pause');
     btnPause.on('click', function() {
 
 
@@ -1843,6 +1843,11 @@ add_action('wp_footer', function () {
     var guru = BSD.Widgets.TonalityGuru({});
 
     var svgWrap = jQuery('.svg-wrap');
+
+
+
+    var venue = jQuery('.venue');
+
     campfire.on('do-it', function(prog) {
       BSD.pause = false;
       initLast();
@@ -1908,12 +1913,14 @@ add_action('wp_footer', function () {
       });
 
 
-      var venue = jQuery('.venue');
 
       var venueColumn = false;
 
 
       var stage = DOM.div().addClass('stage extra noprint');
+
+      venue.empty();
+
       venue.append(stage);
       extraBoard = makeFretboardOn(stage, {
         colorHash,
@@ -2513,32 +2520,32 @@ add_action('wp_footer', function () {
       }
     });
 
-    campfire.on('tick', function(cursor) {
-      if (cursor.chordNoteIdx == 0) {
-        BSD.boards.forEach(function(board) {
-          board.getWrap(function(wrap) {
-            BSD.options.showCurrentChordFretboardOnly ? wrap.addClass('hidden') : wrap.removeClass('hidden');
-          });
-        });
-        cursor.board.getWrap(function(wrap) { //just in case they were hidden...
-          wrap.removeClass('hidden');
-        });
-        if (BSD.options.scrollToBoard) {
-          cursor.board.getWrap(function(wrap) {
+    // campfire.on('tick', function(cursor) {
+    //   if (cursor.chordNoteIdx == 0) {
+    //     BSD.boards.forEach(function(board) {
+    //       board.getWrap(function(wrap) {
+    //         BSD.options.showCurrentChordFretboardOnly ? wrap.addClass('hidden') : wrap.removeClass('hidden');
+    //       });
+    //     });
+    //     cursor.board.getWrap(function(wrap) { //just in case they were hidden...
+    //       wrap.removeClass('hidden');
+    //     });
+    //     if (BSD.options.scrollToBoard) {
+    //       cursor.board.getWrap(function(wrap) {
             
-            var chordEl = wrap.raw.querySelector('.chord-name');
+    //         var chordEl = wrap.raw.querySelector('.chord-name');
             
-            var headerOffset = 65;
-            var elementPosition = chordEl.getBoundingClientRect().top;
-            var offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+    //         var headerOffset = 65;
+    //         var elementPosition = chordEl.getBoundingClientRect().top;
+    //         var offsetPosition = elementPosition + window.pageYOffset - headerOffset;
              
-            chordEl.scrollIntoView({ behavior: 'smooth' })
-            window.scrollTo(0,offsetPosition);
+    //         chordEl.scrollIntoView({ behavior: 'smooth' })
+    //         window.scrollTo(0,offsetPosition);
 
-          });
-        }
-      }
-    });
+    //       });
+    //     }
+    //   }
+    // });
 
     //improv
     campfire.on('tick', function(cursor) {
