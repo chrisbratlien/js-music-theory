@@ -2434,27 +2434,58 @@ add_action('wp_footer', function () {
       }
 
       fred.clearFretted();
-      getFrets({
+
+      let currOpts = {
         chord: cursor.chord,
         fretRange: [0, 24],
         strings: BSD.options.stringSet.split('').map(o => +o)
-      }).forEach(fret => {
+      };
 
-        //console.log('cursor',cursor,'fret',fret);
+      //send a scout ahead to find a chord with a different root.
+      // FIXME: it should check the quality too. but this is WIP/POC
+      let scout = cursor;
+      while (scout.chord.rootNote.chromaticValue() == cursor.chord.rootNote.chromaticValue()) {
+        scout = scout.next;
+      }
 
-        let idx = fret.chromaticValue - cursor.chord.spec.rootNote.chromaticValue();        
+
+      
+
+      let nextOpts = {
+        ...currOpts,
+        chord: scout.chord
+      };
+
+      getFrets(currOpts).forEach(fret => {
+        let idx = fret.chromaticValue - currOpts.chord.spec.rootNote.chromaticValue();        
         let fill = getIntervalFill(idx);
-
-        let opts = {
-          fill,
-          //stroke: 'white',
-          //fill: 'blue'
+        let plotOpts = {
+          ...BSD.options.defaultSVGCircleAttrs,
+          fill
         }
-        opts = Object.assign({}, BSD.options.defaultSVGCircleAttrs, opts);
-        fred.plotFret(fret, opts);
-
+        //opts = Object.assign({}, BSD.options.defaultSVGCircleAttrs, opts);
+        fred.plotFret(fret, plotOpts);
       });
 
+      let currentCVSet = new Set(cursor.chord.chromaticNoteValues());
+
+      getFrets(nextOpts)
+      .filter(fret => !currentCVSet.has(fret.chromaticValue))
+      .forEach(fret => {
+        let idx = fret.chromaticValue - nextOpts.chord.spec.rootNote.chromaticValue();        
+        let fill = 'rgba(0,0,0,0.2)'
+        let stroke = 'rgba(0,0,0,0.1)'
+        let plotOpts = {
+          ...BSD.options.defaultSVGCircleAttrs,
+          fill,
+          stroke
+        }
+        //opts = Object.assign({}, BSD.options.defaultSVGCircleAttrs, opts);
+        fred.plotFret(fret, plotOpts);
+      });
+
+
+      //fred.swapGroups();
 
     });
 

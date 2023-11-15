@@ -91,6 +91,7 @@ function SVGFretboard(spec) {
     var gFrets = DOM.g().attr({ class: 'frets' });
     var gStrings = DOM.g().attr({ class: 'strings' });
     var gFretted = DOM.g().attr({ class: 'fretted' });
+    var gWillFret = DOM.g().attr({ class: 'will-fret' });   
     var gInlays = DOM.g().attr({ class: 'inlays' });
     let fretX = 0;
 
@@ -116,7 +117,15 @@ function SVGFretboard(spec) {
             gInlays,
             gStrings,
             gFretted,
+            gWillFret
         )
+
+
+    self.swapGroups = function() {
+        let tmp = gFretted;
+        gFretted = gWillFret;
+        gWillFret = tmp;
+    }
 
     self.testCircle = function() {
         gFretted.append(DOM.circle()
@@ -233,11 +242,16 @@ https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
         });
     }
 
-    self.plotFrets = (frets, opts) => frets
-        .forEach(fret => self.plotFret(fret, opts))
+    self.plotFrets = (frets, opts, fretGroup) => frets
+        .forEach(fret => self.plotFret(fret, opts, fretGroup))
 
 
-    self.plotFret = function(fret, opts) {
+    self.plotFret = function(fret, opts, fretGroup) {
+
+        if (!fretGroup) {
+            fretGroup = gFretted
+        }
+
         var x = fretStarts[fret.fret] + fretWidths[fret.fret] / 2;
         ///var radius = utils.map(fret.fret, 0, fps, 1.5, 0.75);
 
@@ -278,12 +292,21 @@ https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
 
         opts.class = 'fretted ' + (opts.class || '');
 
-        gFretted.append(DOM.ellipse()
+        fretGroup.append(DOM.ellipse()
             .attr(opts));
     };
-    self.clearFretted = function() {
-        gFretted.empty();
+    self.clearFretted = function(fretGroup) {
+        if (!fretGroup) {
+            fretGroup = gFretted
+        }
+        fretGroup.empty();
         return self;
+    }
+    self.getFretGroups = function() {
+        return {
+            gFretted,
+            gWillFret
+        }
     }
 
 
