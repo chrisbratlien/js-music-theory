@@ -209,7 +209,7 @@ https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
                     })
                     .css({
                         //stroke: 'rgb(234,243,0)',
-                        stroke: 'grey',
+                        ///stroke: 'grey',
                         strokeWidth: remap(1,6,1,2.5,string),
                     })
             )

@@ -1,3 +1,11 @@
+:root {
+  --fretboard-hue: 30deg;
+  --fretboard-bg-hsl: hsl( var(--fretboard-hue), 40%, 40%);
+  --fretboard-bg: var(--fretboard-bg-hsl);
+    
+  /*--fretboard-bg: blanchedalmond;*/
+  --fretboard-bg-lighter:  color-mix(in srgb, var(--fretboard-bg) 80%, white);
+}
 .svg-wrap {
     min-width: 50%;
     margin: 0 auto;
@@ -5,10 +13,14 @@
   }
 
   .svg-board .bg {
-    fill: blanchedalmond;
+    fill: var(--fretboard-bg);
     height: 100%;
     width: 100%;
-}
+  }
+  .svg-board .strings line {
+    stroke: var(--fretboard-bg-lighter);
+    
+  }
   .svg-wrap g.base-baord {
     width: 100%;
   }
@@ -16,6 +28,7 @@
   .svg-wrap .fretted {
     /* fill: cornsilk; **/
   }
+
 
 
 
