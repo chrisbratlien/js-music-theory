@@ -1,0 +1,16 @@
+.song-list {
+    padding: 0;
+    list-style-type: none;
+}
+.song-list li {
+    cursor: pointer;
+    padding: 3px;
+  }
+.song-list li:hover {
+    background-color: #ddd;
+}
+
+.song-list .selected {
+    background: #409;
+    color: white;
+}

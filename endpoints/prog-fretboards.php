@@ -15,270 +15,8 @@ add_action('wp_head', function () {
     @import 'css/vindow.css';
     @import 'css/svg-fretboard.css';
     @import 'css/prog-transport.css';
+    @import 'css/song-list.css';
 
-  </style>
-  <style type="text/css">
-    body {
-      font-size: 10px;
-    }
-
-
-    label {
-      margin: 0;
-    }
-
-    .clear-both {
-      clear: both;
-    }
-
-    .color-grey {
-      color: #888;
-    }
-
-    .color-white {
-      color: white;
-    }
-
-    .color-black {
-      color: black;
-    }
-
-
-
-    .stringset-name {
-      color: #888;
-    }
-
-
-    .inner {
-      font-size: 10px;
-      margin-left: 2%;
-      /*
-      width: 50%;
-      float: left;
-      */
-    }
-
-
-    .inner table {
-      float: left;
-    }
-
-    .inner .controls {
-      float: left;
-    }
-
-    .inner .spacer {
-      clear: both;
-    }
-
-    .bsd-control {
-      margin-top: 1rem;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    /* consider refactoring this name */
-    .invisible {
-      visibility: hidden;
-    }
-
-    table {
-      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-      border-right: 1px solid rgba(0, 0, 0, 0.1);
-
-    }
-
-    table td {
-      border-radius: 1rem;
-      border-top: 1px solid rgba(0, 0, 0, 0.1);
-      border-left: 1px solid rgba(0, 0, 0, 0.1);
-
-      height: 1.5em;
-      min-width: 23px;
-      padding: 0.2em;
-      text-align: center;
-
-
-      -webkit-user-select: none;
-      /* Chrome/Safari/Opera */
-      -khtml-user-select: none;
-      /* Konqueror */
-      -moz-user-select: none;
-      /* Firefox */
-      -ms-user-select: none;
-      /* Internet Explorer/Edge */
-      text-align: center;
-      user-select: none;
-      width: 23px;
-
-    }
-
-    .fretboard-table {
-      margin-bottom: 1.75em;
-    }
-
-    .cell {
-      cursor: pointer;
-    }
-
-    table td {
-      cursor: pointer;
-    }
-
-    .hide-text td {
-      color: transparent;
-    }
-
-
-
-    @media print {
-      .noprint {
-        display: none;
-      }
-
-      body {
-        font-size: 7pt;
-      }
-
-      .inner {
-        font-size: 7pt;
-      }
-
-      .stage {
-        color: #777;
-        color: rgba(0, 0, 0, 0.5);
-      }
-
-      .inner {
-        page-break-inside: avoid;
-      }
-
-
-      .featured {
-        color: red !important;
-        background: red !important;
-      }
-
-
-    }
-
-
-    .controls {
-      margin-left: 0.4rem;
-    }
-
-    .controls .fa-close {
-      cursor: pointer;
-    }
-
-
-
-    .extra .was-once-featured {
-      background: #ccc;
-      color: white;
-    }
-
-    .predict .was-once-featured {
-      /*
-    background: #ccc;
-    color: white;
-    **/
-    }
-
-
-
-    .extra .featured {
-      background: yellow;
-      color: black;
-    }
-
-
-
-    .featured {
-      color: black !important;
-      background: yellow !important;
-    }
-
-
-    /**
-  .control.play-all { background: green; height: 50px; max-height: 50px; line-height: 50px; } 
-  .control.play-all:active { background: #0f0; }
-  **/
-
-
-
-    .venue-footer {
-      height: 400px;
-    }
-
-
-    .song-list {
-      padding: 0;
-      list-style-type: none;
-    }
-
-    .song-list li {
-      cursor: pointer;
-      font-size: 1.2rem;
-      padding: 3px;
-    }
-
-    .song-list .selected {
-      background: #409;
-      color: white;
-    }
-
-
-
-.chord-name {
-  font-size: 2rem;
-}
-
-
-    .tiny td {
-      min-width: 15px;
-      /* font-size: 1rem; */
-      height: 15px;
-      width: 15px;
-      height: 10px;
-      min-height: 10px;
-      font-size: 10px;
-      line-height: 10px;
-    }
-
-    .tiny .spacer {
-      display: none;
-    }
-
-
-
-
-    .tiny .chord-name {
-      font-size: 10px;
-      margin: 0;
-    }
-
-    .tiny .inner .controls {
-      display: none;
-    }
-
-    .tiny .fretboard-table {
-      margin-bottom: 2px;
-    }
-
-
-    .fret {
-      letter-spacing: -0.2rem;
-    }
-
-
-
-    div.dg.ac {
-      top: 50px;
-    }
   </style>
 
 <?php
@@ -492,7 +230,7 @@ add_action('wp_footer', function () {
     import Procrastinator from "./js/Procrastinator.js";
     import PubSub from "./js/PubSub.js";
     import ProgTransport from "./js/ProgTransport.js";
-
+    import Dropdown from "./js/Dropdown.js"
 
     window.lerp = lerp;
     window.invlerp = invlerp;
@@ -582,6 +320,8 @@ add_action('wp_footer', function () {
         midi: false,
         channel: 1,
         volume: 0.7,
+        bank: 1,
+        patch: 1,
         pan: 64
       },
       chord: {
@@ -589,6 +329,8 @@ add_action('wp_footer', function () {
         midi: false,
         channel: 2,
         volume: 0.7,
+        bank: 1,
+        patch: 1,
         pan: 64
       },
       hihat: {
@@ -781,7 +523,11 @@ add_action('wp_footer', function () {
           progression: progInput.val()
         };
         BSD.progressions.push(spec);
+        BSD.songlist.addSong(spec);
+        BSD.songlist.sort();
+        BSD.songlist.refresh();
         campfire.publish('save-progressions');
+
       }
     });
 
@@ -961,29 +707,94 @@ add_action('wp_footer', function () {
     }
 
     function patchSelectorUL(opts) {
-      let ul = DOM.ul();
+
+      let manifold = PubSub();
+      manifold.on('click',({ label, opts, bankOpts, patch }) => {
+        //console.log("we got a megaOption!!",megaOption);
+        let p = +patch.number - 1;
+        console.log('opts', opts, 'bankOpts', bankOpts, 'patch', patch, 'p', p);
+        bankSelect(opts.channel, bankOpts.msb, bankOpts.lsb, p);
+        if (!router.outPort) {
+          return false;
+        }
+        router.outPort.send([
+          MIDI_CONST.PROGRAM_CHANGE | (opts.channel - 1),
+          p
+        ]);
+      });
+
       Object.keys(jvtool.banks).map((bankName, i) => {
+        let megaOptions = [];
         let bankOpts = jvtool.banks[bankName];
         bankOpts.patches.forEach(patch => {
-          let li = DOM.li(`${bankName} :: ${patch.name}`);
-          li.on('click', function() {
-            let p = +patch.number - 1;
-            console.log('opts', opts, 'bankOpts', bankOpts, 'patch', patch, 'p', p);
-            bankSelect(opts.channel, bankOpts.msb, bankOpts.lsb, p);
-            if (!router.outPort) {
-              return false;
-            }
-            router.outPort.send([
-              MIDI_CONST.PROGRAM_CHANGE | (opts.channel - 1),
-              p
-            ]);
-          });
-          ul.append(li);
-        });
-      });
-      opts.wrap.append(ul);
+          let megaOption = {
+            label: `${bankName} :: ${patch.number} ${patch.name}`,
+            opts,
+            bankOpts,
+            patch
+          }
+          megaOptions.push(megaOption)
+        })
+        let dd = Dropdown({ 
+          options: megaOptions,
+          label: bankName
+        })
+        opts.wrap.append(dd.ui());
+        dd.relay('click',manifold)
+      })
+
+
     }
 
+    function hookupPanControl(guiFolder, voiceOptions) {
+      guiFolder.add(voiceOptions, 'pan')
+        .min(1)
+        .max(128)
+        .onChange(function(e) {
+          saveOptions();
+          if (!router.outPort) {
+            return false;
+          }
+          router.outPort.send([
+            MIDI_CONST.CONTROL_CHANGE | (voiceOptions.channel - 1),
+            MIDI_CONST.CC_PAN,
+            voiceOptions.pan - 1
+          ]);
+        });
+    }
+
+    function hookupPatchControl(guiFolder, voiceOptions) {
+      guiFolder.add(voiceOptions, 'patch')
+        .min(1)
+        .max(128)
+        .step(1)
+        .onChange(function(v) {
+          saveOptions();
+          if (!router.outPort) {
+            return false;
+          }
+          router.outPort.send([
+            MIDI_CONST.PROGRAM_CHANGE | (voiceOptions.channel - 1),
+            voiceOptions.patch - 1
+          ]);
+        });
+    }
+
+
+    function hookupChannel(guiFolder, voiceOptions) {
+      guiFolder.add(voiceOptions, 'channel')
+        .min(1)
+        .max(16)
+        .step(1)
+        .onChange(saveOptions);
+    }
+
+    function hookupVolume(guiFolder, voiceOptions) {
+      guiFolder.add(voiceOptions, 'volume')
+        .min(0)
+        .max(1)
+        .onChange(saveOptions);
+    }
 
     function hookupJV(parentFolder, opts) {
 
@@ -1298,7 +1109,7 @@ add_action('wp_footer', function () {
 
     function loadDatGUI() {
       //https://stackoverflow.com/questions/18366229/is-it-possible-to-create-a-button-using-dat-gui
-      const gui = new dat.GUI();
+      const gui = new dat.GUI({ width: 400 });
       gui.remember(BSD.options);
 
 
@@ -1328,55 +1139,12 @@ add_action('wp_footer', function () {
         .onChange(saveOptions);
       improvFolder.add(BSD.options.improv, 'midi')
         .onChange(saveOptions);
-      improvFolder.add(BSD.options.improv, 'channel')
-        .min(1)
-        .max(16)
-        .step(1)
-        .onChange(saveOptions);
-      improvFolder.add(BSD.options.improv, 'volume')
-        .min(0)
-        .max(1)
-        .onChange(saveOptions);
-      improvFolder.add(BSD.options.improv, 'pan')
-        .min(0)
-        .max(127)
-        .onChange(function(e) {
-          saveOptions();
-          if (!router.outPort) {
-            return false;
-          }
-          router.outPort.send([
-            MIDI_CONST.CONTROL_CHANGE | (BSD.options.improv.channel - 1),
-            MIDI_CONST.CC_PAN,
-            e
-          ]);
-        });
 
-
-
+      hookupChannel(improvFolder, BSD.options.improv);
+      hookupVolume(improvFolder, BSD.options.improv);
       hookupJV(improvFolder, BSD.options.improv);
-
-
-      improvFolder.add(BSD.options.improv, 'patch')
-        .min(1)
-        .max(128)
-        .step(1)
-        .onChange(function(v) {
-          saveOptions();
-          //bank first
-          ///bankSelect(BSD.options.improv.channel, BSD.options.improv.bank);
-          //set patch (within the bank set previously)
-          if (!router.outPort) {
-            return false;
-          }
-          router.outPort.send([
-            MIDI_CONST.PROGRAM_CHANGE | (BSD.options.improv.channel - 1),
-            BSD.options.improv.patch - 1
-          ]);
-        });
-
-
-
+      hookupPatchControl(improvFolder, BSD.options.improv);
+      hookupPanControl(improvFolder, BSD.options.improv);
 
       improvFolder.add(BSD.options.improv, 'insideChord')
         .onChange(saveOptions);
@@ -1387,30 +1155,11 @@ add_action('wp_footer', function () {
         .onChange(saveOptions);
       bassFolder.add(BSD.options.bass, 'midi')
         .onChange(saveOptions);
-      bassFolder.add(BSD.options.bass, 'channel')
-        .min(1)
-        .max(16)
-        .step(1)
-        .onChange(saveOptions);
-      bassFolder.add(BSD.options.bass, 'volume')
-        .min(0)
-        .max(1)
-        .onChange(saveOptions);
-      bassFolder.add(BSD.options.bass, 'pan')
-        .min(0)
-        .max(127)
-        .onChange(function(e) {
-          saveOptions();
-          if (!router.outPort) {
-            return false;
-          }
-          router.outPort.send([
-            MIDI_CONST.CONTROL_CHANGE | (BSD.options.bass.channel - 1),
-            MIDI_CONST.CC_PAN,
-            e
-          ]);
-        });
-
+      
+      hookupChannel(bassFolder, BSD.options.bass);
+      hookupVolume(bassFolder, BSD.options.bass);
+      hookupPanControl(bassFolder, BSD.options.bass);
+      hookupPatchControl(bassFolder, BSD.options.bass);
       hookupJV(bassFolder, BSD.options.bass);
 
 
@@ -1418,31 +1167,11 @@ add_action('wp_footer', function () {
 
       chordFolder.add(BSD.options.chord, 'enabled').onChange(saveOptions);
       chordFolder.add(BSD.options.chord, 'midi').onChange(saveOptions);
-      chordFolder.add(BSD.options.chord, 'channel')
-        .min(1)
-        .max(16)
-        .step(1)
-        .onChange(saveOptions);
-      chordFolder.add(BSD.options.chord, 'volume')
-        .min(0)
-        .max(1)
-        .onChange(saveOptions);
-      chordFolder.add(BSD.options.chord, 'pan')
-        .min(0)
-        .max(127)
-        .onChange(function(e) {
-          saveOptions();
-          if (!router.outPort) {
-            return false;
-          }
-          router.outPort.send([
-            MIDI_CONST.CONTROL_CHANGE | (BSD.options.chord.channel - 1),
-            MIDI_CONST.CC_PAN,
-            e
-          ]);
-        });
 
-
+      hookupChannel(chordFolder, BSD.options.chord);
+      hookupVolume(chordFolder, BSD.options.chord);
+      hookupPanControl(chordFolder, BSD.options.chord);
+      hookupPatchControl(chordFolder, BSD.options.chord);
       hookupJV(chordFolder, BSD.options.chord);
 
 
@@ -1451,34 +1180,15 @@ add_action('wp_footer', function () {
       let hatFolder = gui.addFolder('hihat', 'High-hat');
       hatFolder.add(BSD.options.hihat, 'enabled').onChange(saveOptions);
       hatFolder.add(BSD.options.hihat, 'midi').onChange(saveOptions);
-      hatFolder.add(BSD.options.hihat, 'channel')
-        .min(1)
-        .max(16)
-        .step(1)
-        .onChange(saveOptions);
       hatFolder.add(BSD.options.hihat, 'noteNumber')
         .min(0)
         .max(127)
         .step(1)
         .onChange(saveOptions);
-      hatFolder.add(BSD.options.hihat, 'volume')
-        .min(0)
-        .max(1)
-        .onChange(saveOptions);
-      hatFolder.add(BSD.options.hihat, 'pan')
-        .min(0)
-        .max(127)
-        .onChange(function(e) {
-          saveOptions();
-          if (!router.outPort) {
-            return false;
-          }
-          router.outPort.send([
-            MIDI_CONST.CONTROL_CHANGE | (BSD.options.hihat.channel - 1),
-            MIDI_CONST.CC_PAN,
-            e
-          ]);
-        });
+      hookupChannel(hatFolder, BSD.options.hihat);
+      hookupVolume(hatFolder, BSD.options.hihat);
+      hookupPanControl(hatFolder, BSD.options.hihat);
+      hookupPatchControl(hatFolder, BSD.options.hihat);
 
     }
 

@@ -9,7 +9,10 @@ export function setBackgroundHue(elem, hueRads) {
 
 }
 
-
+export function makeArray(o) {
+  if (Array.isArray(o)) { return o; }
+  return [o];
+}
 
 export function ascendingSorter(selectorFunc) {
     var sortFunc = function(a, b) {

@@ -1,6 +1,8 @@
-body { font-family: Lucida Grande; }
+body { font-family: "Lucida Grande", system-ui, sans-serif }
 
-
+.emoji {
+  font-size: max(20px, 1em);
+}
 .cursor-pointer {
   cursor: pointer;
 }

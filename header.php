@@ -34,7 +34,7 @@
 
 <body <?php body_class(); ?>>
   <header class="navbar navbar-fixed-top navbar-inverse navbar-music-player noprint flex-row align-items-center space-between" id="top" role="banner">
-    <a class="pad8-lr" href="<?php home_url();  ?>">&#127968;</a>
+    <a class="pad8-lr emoji" href="<?php home_url();  ?>">&#127968;</a>
 
     <div class="nav-links flex-row align-items-center space-around">
     </div>
