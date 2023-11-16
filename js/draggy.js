@@ -1,4 +1,9 @@
-var Point = function(specX,specY) {
+
+//note: this project also has a module Point from Point.js with
+// an incompatible interface, so I am renaming this to DraggyPoint
+// as a stop-gap solution to this mismatch
+
+var DraggyPoint = function(specX,specY) {
   //private
   var x = specX || 0;
   var y = specY || 0;
@@ -9,17 +14,17 @@ var Point = function(specX,specY) {
   that.y = function() { return y; };
 
   that.minus = function(other) {
-    return Point(x - other.x(), y - other.y());
+    return DraggyPoint(x - other.x(), y - other.y());
   };
   that.plus = function(other) {
-    return Point(x + other.x(), y + other.y());
+    return DraggyPoint(x + other.x(), y + other.y());
   };
   
   that.toString = function() {
     return '(' + that.x() + ',' + that.y() + ')';
   };
   that.scaleBy = function(other) {
-    return Point( x * other.x(), y * other.y());
+    return DraggyPoint( x * other.x(), y * other.y());
   };
   return that;
 };
@@ -94,7 +99,7 @@ var Draggy = function(elem,spec) {
   //interface
   var that = {};
   elem.draggable = true; //assignment
-  var lastPoint = Point(0,0);
+  var lastPoint = DraggyPoint(0,0);
 
   var touched = Touchy(jQuery(elem),{
     ontouchstart: function(event) {
@@ -131,7 +136,7 @@ var Draggy = function(elem,spec) {
   that.whereAmI = function() {
     var left = parseInt(elem.style.left,10) || 0;
     var top = parseInt(elem.style.top,10) || 0;
-    return Point(left,top);
+    return DraggyPoint(left,top);
   };
   that.nowBeHere = function(newPoint) {
     var diff = newPoint.minus(lastPoint);
@@ -141,7 +146,7 @@ var Draggy = function(elem,spec) {
     //RETRIES make it more user-friendly and forgiving while still enforcing the contraints
     var retry = 9;
     while(!isPointSafe(possibleFuturePoint) && retry > 0) {
-      diff = diff.scaleBy(Point(0.5,0.5));  //half the distance
+      diff = diff.scaleBy(DraggyPoint(0.5,0.5));  //half the distance
       possibleFuturePoint = that.whereAmI().plus(diff);
       retry -= 1;
     }
@@ -185,7 +190,7 @@ var Draggy = function(elem,spec) {
   //mouse
   that.pointOfMouseEvent = function(event) {
   	if (event == null) { event = window.event; } //IE7
-	   return Point(event.clientX,event.clientY);
+	   return DraggyPoint(event.clientX,event.clientY);
   };
 
   //touch
@@ -195,7 +200,7 @@ var Draggy = function(elem,spec) {
       event = event.originalEvent; 
     }  	
   	var touch = event.targetTouches[0];
-  	return Point(touch.pageX,touch.pageY);
+  	return DraggyPoint(touch.pageX,touch.pageY);
   };
 
   //generic

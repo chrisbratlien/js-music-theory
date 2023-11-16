@@ -292,8 +292,31 @@ https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
 
         opts.class = 'fretted ' + (opts.class || '');
 
-        fretGroup.append(DOM.ellipse()
-            .attr(opts));
+        var ellipse = DOM.ellipse()
+            .attr(opts)
+
+        fretGroup.append(ellipse);
+
+        self.on('feature-fret',cursor => {
+            //console.log('cursor for FF',cursor);            
+            const hit = fret.string == cursor.string && fret.fret == cursor.fret;
+            hit
+                ?
+                ellipse.addClass("featured was-once-featured") :
+                ellipse.removeClass("featured");
+            // ellipse.attr({
+            //     ...opts,
+            //     fill: hit ? 'yellow' : opts.fill
+            // })
+            // .css({
+            //     ...opts,
+            //     fill: hit ? 'yellow' : opts.fill
+            // })
+
+
+
+        });
+
     };
     self.clearFretted = function(fretGroup) {
         if (!fretGroup) {
@@ -308,6 +331,16 @@ https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
             gWillFret
         }
     }
+
+
+    self.unfeatureFrets = function() {
+        let tmp;
+        tmp = svg.find(".featured");
+        tmp && tmp.removeClass("featured");
+    };
+    self.featureFret = function(cursor) {
+        self.publish("feature-fret", cursor);
+    };
 
 
 

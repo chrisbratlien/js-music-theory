@@ -283,7 +283,12 @@ add_action('wp_head', function () {
 
 <?php
 });
-
+add_action('dynamic-header-content',function(){
+  ?>
+    <button class="btn-auto-arrange">Auto Arrange</button>
+  <?php
+  });
+  
 get_header(); ?>
 
 
@@ -466,8 +471,9 @@ add_action('wp_footer', function () {
       MIDI_CONST,
       MIDI_MSG
     } from "./js/MIDIConstants.js";
-    import Vindow from "./js/Vindow.js";
+    import Vindow, {autoArrange, allVindows} from "./js/Vindow.js";
     import Draggable from "./js/Draggable.js";
+    import Point from "./js/Point.js"
 
     import {
       setBackgroundHue
@@ -2427,13 +2433,14 @@ add_action('wp_footer', function () {
       predictBoard && predictBoard.updateCursor(cursor);
       predictBoard && predictBoard.unfeatureFrets();
 
+      fred.clearFretted();
+
+
       if (BSD.options.improv.enabled) {
         cursor.board.featureFret(cursor);
         extraBoard.featureFret(cursor);
         predictBoard && predictBoard.featureFret(cursor);
       }
-
-      fred.clearFretted();
 
       let currOpts = {
         chord: cursor.chord,
@@ -2484,7 +2491,9 @@ add_action('wp_footer', function () {
         fred.plotFret(fret, plotOpts);
       });
 
-
+      if (BSD.options.improv.enabled) {
+        fred.featureFret(cursor)
+      }
       //fred.swapGroups();
 
     });
@@ -2971,6 +2980,7 @@ add_action('wp_footer', function () {
     datWrap.addClass('noprint');
     Draggable(document.querySelector('.dg.ac'));
 
+    
     let TAU = Math.PI * 2;
     let biggerIsSlower = 500000 // 1_000_000
     let magicHueRadians = (Date.now() / biggerIsSlower) % TAU;
@@ -2979,6 +2989,16 @@ add_action('wp_footer', function () {
     });
 
 
+    function myAutoArrange() {
+      var br = document.body.getBoundingClientRect();
+      var origin = Point(0,50); //x ignored for now.
+      var corner = Point(br.right,0);//y ignored for now.
+      autoArrange(allVindows, origin, corner);
+    }
+
+    var btnAutoArrange = DOM.from('.btn-auto-arrange');
+    btnAutoArrange.on('click',myAutoArrange);
+    //myAutoArrange();
 
 
 

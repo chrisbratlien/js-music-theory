@@ -485,10 +485,6 @@ add_action('wp_footer', function () {
     let vindows = [w, tabWindow, vMIDIInfo, vinfo,arranger];
 
 
-
-
-
-
     function myAutoArrange() {
       var br = document.body.getBoundingClientRect();
       var origin = Point(0,50); //x ignored for now.
