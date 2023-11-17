@@ -763,6 +763,25 @@ add_action('wp_footer', function () {
         });
     }
 
+    function setupMIDIEnabledVoicePatches() {
+      ['improv', 'bass','chord','hihat']
+        .filter(voiceName => BSD.options[voiceName].midi && BSD.options[voiceName].enabled)
+        .map(voiceName => {
+          console.log(voiceName, 'needs setup')
+          setMIDIChannelPatch(BSD.options[voiceName]);
+        })
+    }
+
+    function setMIDIChannelPatch({ channel, patch }) {
+      if (!router || !router.outPort) {
+        return false;
+      }
+      router.outPort.send([
+        MIDI_CONST.PROGRAM_CHANGE | (channel - 1),
+        patch - 1
+      ]);
+    }
+
     function hookupPatchControl(guiFolder, voiceOptions) {
       guiFolder.add(voiceOptions, 'patch')
         .min(1)
@@ -770,13 +789,7 @@ add_action('wp_footer', function () {
         .step(1)
         .onChange(function(v) {
           saveOptions();
-          if (!router.outPort) {
-            return false;
-          }
-          router.outPort.send([
-            MIDI_CONST.PROGRAM_CHANGE | (voiceOptions.channel - 1),
-            voiceOptions.patch - 1
-          ]);
+          setMIDIChannelPatch(voiceOptions)
         });
     }
 
@@ -1205,8 +1218,8 @@ add_action('wp_footer', function () {
     });
 
 
-    var activeStringsInput = jQuery('.active-strings');
-    activeStringsInput.blur(function() {
+    var activeStringsInput = DOM.from('.active-strings');
+    activeStringsInput.on('blur', function() {
       campfire.publish('gather-inputs-and-do-it');
     });
 
@@ -1219,6 +1232,8 @@ add_action('wp_footer', function () {
         campfire.publish('stop-it');
         return false;
       }
+
+      setupMIDIEnabledVoicePatches();
 
       BSD.options.progression = progInput.val(); //just the text
       storage.setItem('options', JSON.stringify(BSD.options));
@@ -1234,7 +1249,11 @@ add_action('wp_footer', function () {
 
 
     var extraBoard, predictBoard;
-    var headerHeight = jQuery('header').height();
+    var headerHeight = document
+      .querySelector('header')
+      .getBoundingClientRect()
+      .height
+      
     var delayMS = {
 
     };
