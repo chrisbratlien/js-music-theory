@@ -374,9 +374,8 @@ add_action('wp_footer', function () {
 
 
     let svgFB = SVGFretboard();
-    svgFB.plotFingerboardFrets();
-    svgFB.plotInlays();
-    svgFB.plotStrings();
+    svgFB.bootup();
+    
     let fbWin = Vindow({
       title: 'Fretboard'
     });

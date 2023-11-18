@@ -3,7 +3,7 @@ import PubSub from "./PubSub.js";
 import {remap} from "./Lerpy.js";
 import {makeChord, twelveBitMask} from "./js-music-theory.js";
 import {vlerp} from "./VectorLerpy.js";
-
+import {ascending, descending} from "./Utils.js";
 //FIXME/NOTE: vlerp is external from js/la.js
 
 const STRING_GAP = 14; //probably not percent?
@@ -95,6 +95,8 @@ function SVGFretboard(spec) {
     var gInlays = DOM.g().attr({ class: 'inlays' });
     let fretX = 0;
 
+    let ellipses = [];
+
     var svg = DOM.from(
         document.createElementNS("http://www.w3.org/2000/svg", "svg")
     );
@@ -159,7 +161,7 @@ function SVGFretboard(spec) {
                     let fretX = fretXCoeff * totW;
                     //console.log('fretX',fretX);
                     let rectOpts = {
-                        class: `string-${fret.string} fret-${fret.fret}`,
+                        class: `fret-${fret.fret}`,
                         fill: 'rgba(0,0,0,0.1)', //getRandomColor(),
                         x: fretStarts[xIdx] + '%',
                         y: (fret.string - 1) * fretHeights + '%',
@@ -251,9 +253,13 @@ https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
         if (!fretGroup) {
             fretGroup = gFretted
         }
+        let ellipseIdx = self.getEllipseIndex({string: fret.string, fret: fret.fret });
+        let ellipse = ellipses[ellipseIdx];
 
         var x = fretStarts[fret.fret] + fretWidths[fret.fret] / 2;
         ///var radius = utils.map(fret.fret, 0, fps, 1.5, 0.75);
+        //maxCircleRadiusPercent: 0.8,
+        //minCircleRadiusPercent: 0.5
 
         var maxCircleRadiusPercent = opts.maxCircleRadiusPercent || 1.25;
         var minCircleRadiusPercent = opts.minCircleRadiusPercent || 0.75;
@@ -276,7 +282,6 @@ https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
         var fill = fillFromInterval ? fillFromInterval : opts.fill;
         fill = fill ? fill : 'rgba(0,0,0,0.1)';
 
-
         opts = {
             //////class: 'fretted',
             cx: x + '%',
@@ -291,38 +296,19 @@ https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
         };
 
         opts.class = 'fretted ' + (opts.class || '');
+        ellipse.attr(opts)
+        /// this is done in bootupFrets now...///fretGroup.append(ellipse);
 
-        var ellipse = DOM.ellipse()
-            .attr(opts)
-
-        fretGroup.append(ellipse);
-
-        self.on('feature-fret',cursor => {
-            //console.log('cursor for FF',cursor);            
-            const hit = fret.string == cursor.string && fret.fret == cursor.fret;
-            hit
-                ?
-                ellipse.addClass("featured was-once-featured") :
-                ellipse.removeClass("featured");
-            // ellipse.attr({
-            //     ...opts,
-            //     fill: hit ? 'yellow' : opts.fill
-            // })
-            // .css({
-            //     ...opts,
-            //     fill: hit ? 'yellow' : opts.fill
-            // })
-
-
-
-        });
 
     };
     self.clearFretted = function(fretGroup) {
         if (!fretGroup) {
             fretGroup = gFretted
         }
-        fretGroup.empty();
+        ellipses.map(e => e.attr({
+            stroke: 'rgba(0,0,0,0)',
+            fill: 'rgba(0,0,0,0)',
+        }))
         return self;
     }
     self.getFretGroups = function() {
@@ -332,6 +318,93 @@ https://developer.mozilla.org/en-US/docs/Web/SVG/Element/line
         }
     }
 
+    let maxFret = 0;
+
+    self.getEllipseIndex = function({ string, fret }) {
+        if (!maxFret) {
+            maxFret = [...guitarData].sort(descending(o => o.fret))[0].fret;
+        }
+        return (string * maxFret) + fret;
+    }
+    self.getEllipse = function ({ string, fret }) {
+        let idx = self.getEllipseIndex({ string, fret })
+        return ellipses[idx];
+
+    }
+    self.bootupFrets = function() {
+        
+        const fretGroup = gFretted
+        
+
+        //populate initial ellipses
+        guitarData.forEach(fret => {
+            let ellipseIdx = self.getEllipseIndex({ string: fret.string, fret: fret.fret });
+    
+            var x = fretStarts[fret.fret] + fretWidths[fret.fret] / 2;
+            ///var radius = utils.map(fret.fret, 0, fps, 1.5, 0.75);
+            let maxCircleRadiusPercent = 0.8;
+            let minCircleRadiusPercent = 0.5;
+    
+            //var maxCircleRadiusPercent = opts.maxCircleRadiusPercent || 1.25;
+            //var minCircleRadiusPercent = opts.minCircleRadiusPercent || 0.75;
+    
+            var radius = remap(
+                0, fps, 
+                maxCircleRadiusPercent, 
+                minCircleRadiusPercent,
+                fret.fret, 
+                true);
+    
+            var ry = remap(
+                0,fps,
+                7, //% radius compared to height when frets are low
+                3, //% radius compared to height when frets are high
+                fret.fret
+            );
+    
+            var fillFromInterval = (fret.interval || fret.interval === 0) ? getIntervalFill(fret.interval) : false;
+            var fill = fillFromInterval;
+            fill = fill ? fill : 'rgba(0,0,0,0)';
+    
+    
+            let opts = {
+                //////class: 'fretted',
+                cx: x + '%',
+                cy: (fret.string - 1) * fretHeights + fretHeights / 2 + '%',
+                ///WASr: '1.5%',
+                //rx: 'auto',
+                ry: ry + '%',
+                //'stroke-width': 0.5,
+                //'stroke': 'black',
+                fill
+            };
+    
+            //opts.class = 'fretted ' + (opts.class || '');
+    
+            var ellipse = DOM.ellipse()
+                .attr(opts)
+    
+            fretGroup.append(ellipse);
+            ellipses[ellipseIdx] = ellipse;
+
+            self.on('feature-fret',cursor => {
+                //console.log('cursor for FF',cursor);            
+                const hit = fret.string == cursor.string && fret.fret == cursor.fret;
+                hit
+                    ?
+                    ellipse.addClass("featured was-once-featured") :
+                    ellipse.removeClass("featured");
+            });
+
+        });
+    }
+
+    self.bootup = function() {
+        self.plotFingerboardFrets();
+        self.plotInlays();
+        self.plotStrings();
+        self.bootupFrets();
+    }
 
     self.unfeatureFrets = function() {
         let tmp;

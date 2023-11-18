@@ -454,10 +454,8 @@ export function ConnectingGameVindow(props) {
 
     //content
     self.append(uiChord, svgFretboard.ui());
-    fred.plotFingerboardFrets();
-    fred.plotInlays();
-    fred.plotStrings();
-
+    
+    fred.bootup();
 
 
     self.update = function(newProps) {

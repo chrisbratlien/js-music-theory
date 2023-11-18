@@ -1698,9 +1698,7 @@ add_action('wp_footer', function () {
             .append(DOM.span(chord.fullAbbrev())),
           thisFred.ui()
         ]);
-        thisFred.plotFingerboardFrets();
-        thisFred.plotInlays();
-        thisFred.plotStrings();
+        thisFred.bootup();
         thisFred.plotHelper({
           chordOrScale: chord, 
           svgAlpha: BSD.svgAlpha,
@@ -2547,10 +2545,7 @@ add_action('wp_footer', function () {
       svgWrap.append(
         fred.ui()
       );
-      ///console.log(fred);
-      fred.plotFingerboardFrets();
-      fred.plotInlays();
-      fred.plotStrings();
+      fred.bootup();
     });
 
     jQuery('.color-palette-wrap').append(
