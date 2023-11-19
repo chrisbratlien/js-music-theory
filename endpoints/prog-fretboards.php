@@ -514,7 +514,7 @@ add_action('wp_footer', function () {
 
     });
 
-    var btnSaveProg = jQuery('.btn-save-prog');
+    var btnSaveProg = DOM.from('.btn-save-prog');
     btnSaveProg.on('click', function() {
       var title = prompt('Title');
       if (title) {
@@ -589,8 +589,6 @@ add_action('wp_footer', function () {
 
     BSD.boards = [];
     var colorHash = {};
-    ///var stage = jQuery('.stage');
-
 
     let mixer, bassist, keyboardist;
 
@@ -874,15 +872,15 @@ add_action('wp_footer', function () {
 
 
     BSD.beatsPerMeasure = 4;
-    var ddBeatsPerMeasure = jQuery('.beats-per-measure');
-    ddBeatsPerMeasure.change(function() {
+    var ddBeatsPerMeasure = DOM.from('.beats-per-measure');
+    ddBeatsPerMeasure.on('change', function() {
       BSD.beatsPerMeasure = parseInt(this.value, 10);
     });
     ddBeatsPerMeasure.find('option[value="' + BSD.beatsPerMeasure + '"]').attr('selected', true);
 
     BSD.noteResolution = 4;
-    var ddNoteResolution = jQuery('.note-resolution');
-    ddNoteResolution.change(function() {
+    var ddNoteResolution = DOM.from('.note-resolution');
+    ddNoteResolution.on('change', function() {
       BSD.noteResolution = parseInt(this.value, 10);
     });
     ddNoteResolution.find('option[value="' + BSD.noteResolution + '"]').attr('selected', true);
@@ -892,8 +890,8 @@ add_action('wp_footer', function () {
       BSD.options.stringSet = '654321';
       storage.setItem('options', JSON.stringify(BSD.options));
     }
-    var ddStringSet = jQuery('.stringset');
-    ddStringSet.change(function() {
+    var ddStringSet = DOM.from('.stringset');
+    ddStringSet.on('change', function() {
       ///////BSD.beatsPerMeasure = parseInt(this.value,10);
       BSD.options.stringSet = this.value;
       storage.setItem('options', JSON.stringify(BSD.options));
@@ -1038,9 +1036,12 @@ add_action('wp_footer', function () {
       }
 
     });
+    campfire.on('fret-hover', ({ fret }) => {
+      BSD.currentNote = Note(fret.noteValue);
+    })
 
 
-    jQuery(document).on('keydown', function(e) {
+    DOM.from(document).on('keydown', function(e) {
       var c = e.keyCode || e.which;
 
       /* rethink */
@@ -1050,7 +1051,7 @@ add_action('wp_footer', function () {
 
       if (BSD.currentNote && c == BSD.keycodes.f) {
 
-        if (BSD.options.midiOnly && router.outPort) {
+        if (BSD.options.improv.midi && router.outPort) {
           router.outPort.send([noteOnChanByte, noteNumber, 0x7f]);
           return setTimeout(function() {
             router.outPort.send([noteOffChanByte, noteNumber, 0x7f]);
@@ -1078,7 +1079,7 @@ add_action('wp_footer', function () {
 
     });
 
-    jQuery(document).on('keyup', function(e) {
+    DOM.from(document).on('keyup', function(e) {
       BSD.strum = false;
     });
 
@@ -1094,9 +1095,10 @@ add_action('wp_footer', function () {
 
     var btnToggleText = DOM.from('.btn-toggle-text');
     var hideText = false;
+    let html = DOM.from('html')
     btnToggleText.on('click', function() {
       hideText = !hideText;
-      hideText ? jQuery('html').addClass('hide-text') : jQuery('html').removeClass('hide-text');
+      hideText ? html.addClass('hide-text') : html.removeClass('hide-text');
     });
 
 
@@ -1455,7 +1457,6 @@ add_action('wp_footer', function () {
     transportVindow.renderOn(body);
 
 
-    ///var songCycleIndicator = jQuery('.song-cycle-indicator');
     function initLast() {
       meta = {};
       avgFret = false;
@@ -1578,11 +1579,9 @@ add_action('wp_footer', function () {
 
     var guru = BSD.Widgets.TonalityGuru({});
 
-    var svgWrap = jQuery('.svg-wrap');
+    var svgWrap = DOM.from('.svg-wrap');
 
-
-
-    var venue = jQuery('.venue');
+    var venue = DOM.from('.venue');
 
     campfire.on('do-it', function(prog) {
       BSD.pause = false;
@@ -1664,7 +1663,7 @@ add_action('wp_footer', function () {
       });
 
 
-      jQuery('.stringset-name').html(BSD.options.stringSet);
+      DOM.from('.stringset-name').html(BSD.options.stringSet);
 
       var activeStrings = BSD.options.stringSet.split('');
       BSD.activeStrings = activeStrings; //FIXME, this won't work in the long run
@@ -1688,6 +1687,7 @@ add_action('wp_footer', function () {
 
         var thisFred = SVGFretboard()
         .on('wake-up', () => console.log('WOKE!!'))
+        .relay('fret-hover', campfire);
 
         var svgStage = DOM.div().addClass("stage svg-stage margin4 flex-row");
         venueColumn.append(svgStage);
@@ -2069,7 +2069,7 @@ add_action('wp_footer', function () {
 
 
     campfire.on('play-chord', function(o) {
-      jQuery('.extra .chord-name').html(o.chord.fullAbbrev());
+      DOM.from('.extra .chord-name').html(o.chord.fullAbbrev());
     });
 
 
@@ -2169,64 +2169,10 @@ add_action('wp_footer', function () {
         predictBoard && predictBoard.featureFret(cursor);
       }
 
-      let currOpts = {
-        chord: cursor.chord,
-        fretRange: [0, 24],
+      fred.plotChordChange({
+        cursor,
+        fretRange: BSD.options.fretRange,
         strings: BSD.options.stringSet.split('').map(o => +o)
-      };
-
-      //send a scout ahead to find a chord with a different root.
-      // FIXME: it should check the quality too. but this is WIP/POC
-      let scout = cursor;
-      while (scout.chord.rootNote.chromaticValue() == cursor.chord.rootNote.chromaticValue()) {
-        scout = scout.next;
-      }
-
-
-      
-
-      let nextOpts = {
-        ...currOpts,
-        chord: scout.chord
-      };
-
-      getFrets(currOpts).forEach(fret => {
-        let idx = fret.chromaticValue - currOpts.chord.spec.rootNote.chromaticValue();        
-        let fill = getIntervalFill(idx);
-        let plotOpts = {
-          ...BSD.options.defaultSVGCircleAttrs,
-          fill
-        }
-        //opts = Object.assign({}, BSD.options.defaultSVGCircleAttrs, opts);
-        fred.plotFret(fret, plotOpts);
-      });
-
-      ///let currentCVSet = new Set(cursor.chord.chromaticNoteValues());
-      let nextChordUniqueChromaticValues = nextOpts.chord
-        .chromaticNoteValues()
-        .difference(cursor.chord.chromaticNoteValues());
-
-
-      // console.log({
-      //   currentCVSet,
-      //   nextChordUniqueChromaticValues,
-      //   cccv: cursor.chord.chromaticNoteValues(),
-      //   nccv: nextOpts.chord.chromaticNoteValues() 
-      // })
-
-      getFrets(nextOpts)
-      .filter(fret => nextChordUniqueChromaticValues.contains(fret.chromaticValue))
-      .forEach(fret => {
-        let idx = fret.chromaticValue - nextOpts.chord.spec.rootNote.chromaticValue();        
-        let fill = 'rgba(0,0,0,0.2)'
-        let stroke = 'rgba(0,0,0,0.1)'
-        let plotOpts = {
-          ...BSD.options.defaultSVGCircleAttrs,
-          fill,
-          stroke
-        }
-        //opts = Object.assign({}, BSD.options.defaultSVGCircleAttrs, opts);
-        fred.plotFret(fret, plotOpts);
       });
 
       if (BSD.options.improv.enabled) {
@@ -2299,32 +2245,6 @@ add_action('wp_footer', function () {
       }
     });
 
-    // campfire.on('tick', function(cursor) {
-    //   if (cursor.chordNoteIdx == 0) {
-    //     BSD.boards.forEach(function(board) {
-    //       board.getWrap(function(wrap) {
-    //         BSD.options.showCurrentChordFretboardOnly ? wrap.addClass('hidden') : wrap.removeClass('hidden');
-    //       });
-    //     });
-    //     cursor.board.getWrap(function(wrap) { //just in case they were hidden...
-    //       wrap.removeClass('hidden');
-    //     });
-    //     if (BSD.options.scrollToBoard) {
-    //       cursor.board.getWrap(function(wrap) {
-            
-    //         var chordEl = wrap.raw.querySelector('.chord-name');
-            
-    //         var headerOffset = 65;
-    //         var elementPosition = chordEl.getBoundingClientRect().top;
-    //         var offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-             
-    //         chordEl.scrollIntoView({ behavior: 'smooth' })
-    //         window.scrollTo(0,offsetPosition);
-
-    //       });
-    //     }
-    //   }
-    // });
 
     //improv
     campfire.on('tick', function(cursor) {
@@ -2436,7 +2356,7 @@ add_action('wp_footer', function () {
     });
 
 
-    var btnLoopStart = jQuery('.btn-loop-start');
+    var btnLoopStart = DOM.from('.btn-loop-start');
     btnLoopStart.on('click', function() {
 
       if (BSD.loopEnd !== 0 && !BSD.loopEnd) {
@@ -2455,7 +2375,7 @@ add_action('wp_footer', function () {
       BSD.loop[BSD.loop.length - 1].next = BSD.loop[0];
       tick(BSD.loop[0]);
     });
-    var btnLoopEnd = jQuery('.btn-loop-end');
+    var btnLoopEnd = DOM.from('.btn-loop-end');
     btnLoopEnd.on('click', function() {
       if (BSD.loopStart !== 0 && !BSD.loopStart) {
         BSD.loopStart = 0;
@@ -2552,6 +2472,7 @@ add_action('wp_footer', function () {
     campfire.on('guitar-data-loaded', function() {
       fred = SVGFretboard()
         .on('wake-up', () => console.log('WOKE!!'))
+        .relay('fret-hover',campfire);
 
       svgWrap.append(
         fred.ui()
@@ -2559,7 +2480,7 @@ add_action('wp_footer', function () {
       fred.bootup();
     });
 
-    jQuery('.color-palette-wrap').append(
+    DOM.from('.color-palette-wrap').append(
       ColorPalette('woo')
       .on('color-chosen', color => {
         BSD.chosenColor = color;
@@ -2582,10 +2503,10 @@ add_action('wp_footer', function () {
       },
       5500);
 
-    var fretPlotterInput = jQuery('.fret-plotter-input');
-    var btnClear = jQuery('.btn-clear');
+    var fretPlotterInput = DOM.from('.fret-plotter-input');
+    var btnClear = DOM.from('.btn-clear');
 
-    jQuery('.btn-chord').on('click', function() {
+    DOM.from('.btn-chord').on('click', function() {
       var str = fretPlotterInput.val();
       let chordNames = str.split(/\ +|\+|,/g)
         .filter(o => o)
@@ -2602,7 +2523,7 @@ add_action('wp_footer', function () {
         );
       })
     });
-    jQuery('.btn-scale').on('click', function() {
+    DOM.from('.btn-scale').on('click', function() {
       var scale = makeScale(fretPlotterInput.val());
       fred.plotHelper({
         chordOrScale: scale,
@@ -2617,12 +2538,12 @@ add_action('wp_footer', function () {
     });
 
     BSD.svgAlpha = 0.7
-    let svgAlphaInput = jQuery('.svg-alpha');
+    let svgAlphaInput = DOM.from('.svg-alpha');
     svgAlphaInput.on('change', e => {
       BSD.svgAlpha = +e.target.value;
     });
 
-    var btnColor = jQuery('.btn-color');
+    var btnColor = DOM.from('.btn-color');
     btnColor.on('click', () => {
       let rc = lightbox('Choose Color', function(wrap) {
         BSD.chosenColors = []
@@ -2678,7 +2599,7 @@ add_action('wp_footer', function () {
     let midiOutMonitor = MIDIOutMonitor({
       port: router.outPort
     });
-    jQuery('.monitor-wrap').append(midiOutMonitor.ui())
+    DOM.from('.monitor-wrap').append(midiOutMonitor.ui())
 
 
     pianoRoll.on('note-hover', function(noteNumber) {
@@ -2707,13 +2628,20 @@ add_action('wp_footer', function () {
     let [toolbar, pane] = pianoRoll.ui();
     w.appendToToolbar(toolbar);
     w.append(pane);
-    w.renderOn(jQuery('.piano-roll-wrap'));
+    w.renderOn(DOM.from('.piano-roll-wrap'));
 
 
 
-    let datWrap = jQuery('.dg.ac');
-    datWrap.addClass('noprint');
-    Draggable(document.querySelector('.dg.ac'));
+    let datWrap = DOM.from('.dg.ac');
+    datWrap.addClass('noprint')
+      //fix some hard-wired inline styles
+      .css({
+        position: 'absolute',
+        float: 'inherit',
+        right: 'inherit'
+      })
+
+    Draggable(datWrap.raw);
 
     
     let TAU = Math.PI * 2;
