@@ -15,10 +15,12 @@ Array.prototype.reject = function(test) {
 	
 }
 
-Array.prototype.contains = function (x) { //does the array contain x?
-	var result = this.detect(function (n) { return n == x; });
-	return (result !== false);
-};
+Array.prototype.contains = Array.prototype.includes;
+
+// Array.prototype.contains = function (x) { //does the array contain x?
+// 	var result = this.find(function (n) { return n == x; });
+// 	return result !== undefined;
+// };
 
 Array.prototype.inject = function (acc, fn) {
 	var result = acc;
@@ -56,46 +58,14 @@ Array.prototype.average = function() {
 };
 
 
-/* IE doesn't support Array.indexOf, so here, hold my hand while we cross the street */
-if (!Array.indexOf) {
-Array.prototype.indexOf = function (obj) {
-for (var i = 0; i < this.length; i++) {
-if (this[i] == obj) {
-return i;
+Array.prototype.difference = function(other) {
+	let setB = new Set([...other]);
+	return this.filter(o => !setB.has(o));
 }
+Array.prototype.intersection = function(other) {
+	let setB = new Set([...other]);
+	return this.filter(o => setB.has(o));
 }
-return -1;
-}
-}
-
-Array.prototype.eachPCN = function(callback) { //gives your callback a view of previous, current, and next
-
-var length = this.length;
-var c,p,n = false;
-switch(length) {
-case 0:
-console.log('err-OR! does not compute. ');
-break;
-case 1:
-c = 0; n = 0; p = 0;
-break;
-case 2: 
-c = 0; n = 1; p = 1;
-break;
-default:
-c = 0; n = 1; p = length - 1;
-break;
-}    
-
-for(var i = 0; i < length; i += 1) {
-callback({ prev: this[p], current: this[c], next: this[n], p: p, c: c, n: n, length: length });
-c += 1; c %= length;
-n += 1; n %= length;
-p += 1; p %= length;
-}
-};
-
-
 
 Array.prototype.unique = function()
 {

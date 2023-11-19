@@ -63,7 +63,7 @@ export function getIntervalFill(idx) {
 }
 
 
-function getFrets(spec) {
+export function getFrets(spec) {
     return guitarData
     .filter(fret => {
         let chord = typeof spec.chord == 'string' ? makeChord(spec.chord) : spec.chord;

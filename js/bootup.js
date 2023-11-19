@@ -132,16 +132,6 @@ let fretsForChordNameAndStringSet = (chordName, stringset) => BSD.guitarData
         .includes(fret.noteValue % 12)
     );
 
-let getFrets = (spec) => BSD.guitarData
-    .filter(fret => {
-        let chord = typeof spec.chord == 'string' ? makeChord(spec.chord) : spec.chord;
-        return spec.strings.includes(fret.string) &&
-            fret.fret >= Math.min(...spec.fretRange) &&
-            fret.fret <= Math.max(...spec.fretRange) &&
-            chord
-            .abstractNoteValues()
-            .includes(fret.noteValue % 12)
-    });
 
 
 

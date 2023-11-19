@@ -218,7 +218,7 @@ add_action('wp_footer', function () {
     } from "./js/Utils.js";
 
     import SongList from "./js/SongList.js";
-    import SVGFretboard, {getFretsByChromaticHash, getIntervalFill} from "./js/SVGFretboard.js";
+    import SVGFretboard, {getFretsByChromaticHash, getFrets, getIntervalFill} from "./js/SVGFretboard.js";
 
     import Fretboard, {
       makeFretboardOn
@@ -2201,10 +2201,21 @@ add_action('wp_footer', function () {
         fred.plotFret(fret, plotOpts);
       });
 
-      let currentCVSet = new Set(cursor.chord.chromaticNoteValues());
+      ///let currentCVSet = new Set(cursor.chord.chromaticNoteValues());
+      let nextChordUniqueChromaticValues = nextOpts.chord
+        .chromaticNoteValues()
+        .difference(cursor.chord.chromaticNoteValues());
+
+
+      // console.log({
+      //   currentCVSet,
+      //   nextChordUniqueChromaticValues,
+      //   cccv: cursor.chord.chromaticNoteValues(),
+      //   nccv: nextOpts.chord.chromaticNoteValues() 
+      // })
 
       getFrets(nextOpts)
-      .filter(fret => !currentCVSet.has(fret.chromaticValue))
+      .filter(fret => nextChordUniqueChromaticValues.contains(fret.chromaticValue))
       .forEach(fret => {
         let idx = fret.chromaticValue - nextOpts.chord.spec.rootNote.chromaticValue();        
         let fill = 'rgba(0,0,0,0.2)'
