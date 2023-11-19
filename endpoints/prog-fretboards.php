@@ -1250,7 +1250,6 @@ add_action('wp_footer', function () {
     });
 
 
-    var extraBoard, predictBoard;
     var headerHeight = document
       .querySelector('header')
       .getBoundingClientRect()
@@ -1586,14 +1585,6 @@ add_action('wp_footer', function () {
     campfire.on('do-it', function(prog) {
       BSD.pause = false;
       initLast();
-      if (extraBoard) {
-        extraBoard.close();
-        extraBoard = null;
-      }
-      if (predictBoard) {
-        predictBoard.close();
-        predictBoard = null;
-      }
 
 
       BSD.boards.forEach(function(board) {
@@ -1657,10 +1648,10 @@ add_action('wp_footer', function () {
       venue.empty();
 
       venue.append(stage);
-      extraBoard = makeFretboardOn(stage, {
-        colorHash,
-        activeStrings: '654321'.split('')
-      });
+      // extraBoard = makeFretboardOn(stage, {
+      //   colorHash,
+      //   activeStrings: '654321'.split('')
+      // });
 
 
       DOM.from('.stringset-name').html(BSD.options.stringSet);
@@ -1669,6 +1660,7 @@ add_action('wp_footer', function () {
       BSD.activeStrings = activeStrings; //FIXME, this won't work in the long run
       prog.forEach(function(progItem, progItemIdx) {
 
+        let cursor = progItem;
         var chord = progItem.chord;
         if (progItemIdx % 8 == 0) {
           venueColumn = DOM.div()
@@ -1678,12 +1670,12 @@ add_action('wp_footer', function () {
         var tableStage = DOM.div()
           .addClass('stage table-stage hidden noprint stringset-' + BSD.options.stringSet);
         venueColumn.append(tableStage);
-        var board = makeFretboardOn(tableStage, {
-          chord,
-          colorHash,
-          activeStrings: activeStrings
-        });
-        BSD.boards.push(board);
+        // var board = makeFretboardOn(tableStage, {
+        //   chord,
+        //   colorHash,
+        //   activeStrings: activeStrings
+        // });
+        //BSD.boards.push(board);
 
         var thisFred = SVGFretboard()
         .on('wake-up', () => console.log('WOKE!!'))
@@ -1699,19 +1691,11 @@ add_action('wp_footer', function () {
           thisFred.ui()
         ]);
         thisFred.bootup();
-        thisFred.plotHelper({
-          chordOrScale: chord, 
-          svgAlpha: BSD.svgAlpha,
-          stringSet: BSD.options.stringSet,
-          fretRange: BSD.options.fretRange, 
-          opts: {
-            maxCircleRadiusPercent: 0.8,
-            minCircleRadiusPercent: 0.5
-          }
+        thisFred.plotChordChange({
+          cursor,
+          fretRange: BSD.options.fretRange,
+          strings: BSD.options.stringSet.split('').map(o => +o)
         });
-        //thisFred.plotFrets(chord, BSD.defaultSVGCircleAttrs);
-
-
 
       });
 
@@ -2156,19 +2140,7 @@ add_action('wp_footer', function () {
         let x = 123;
       }
 
-
-      predictBoard && predictBoard.updateCursor(cursor);
-      predictBoard && predictBoard.unfeatureFrets();
-
       fred.clearFretted();
-
-
-      if (BSD.options.improv.enabled) {
-        cursor.board.featureFret(cursor);
-        extraBoard.featureFret(cursor);
-        predictBoard && predictBoard.featureFret(cursor);
-      }
-
       fred.plotChordChange({
         cursor,
         fretRange: BSD.options.fretRange,
