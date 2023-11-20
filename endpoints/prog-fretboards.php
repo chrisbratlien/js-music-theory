@@ -2458,6 +2458,7 @@ add_action('wp_footer', function () {
         BSD.chosenColor = color;
         console.log('chosen!!', color);
       })
+      .relay('color-chosen',campfire)
       .redraw()
       .ui()
     );

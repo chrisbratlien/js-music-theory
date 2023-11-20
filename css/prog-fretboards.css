@@ -215,12 +215,13 @@ font-size: 2rem;
 }
 
 
-
-
-.tiny .chord-name {
-  font-size: 10px;
-  margin: 0;
+.chord-name {
+  font-size: 40px;
+  bottom: 0;
+  color: rgba(1,1,1,0.3);
+  left: 10%;
 }
+
 
 .tiny .inner .controls {
   display: none;

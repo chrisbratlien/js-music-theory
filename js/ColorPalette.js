@@ -3,7 +3,7 @@ import DOM from "./DOM.js";
 import ColorPicker from "./ColorPicker.js";
 const ColorPalette = function(spec) {
 
-    let self = BSD.PubSub();
+    let self = PubSub();
 
     var pickers, selectedColors, morePalettes;
     var savedColors = {};
