@@ -123,9 +123,11 @@ get_header(); ?>
   <br />
 </div>
 
-
-<div class="svg-wrap">
+<div class="flex flex-row">
+  <div class="current-chord chord-name one-tenth-width"></div>
+  <div class="svg-wrap"></div>
 </div>
+
 <div class="svg-controls noprint">
   <div class="btn-group svg-buttons">
     <button class="btn btn-sm btn-primary btn-chord">chord</button>
@@ -235,7 +237,7 @@ add_action('wp_footer', function () {
     window.lerp = lerp;
     window.invlerp = invlerp;
     window.remap = remap;
-
+    window.makeChord = makeChord;
     let router;
 
 
@@ -1235,7 +1237,6 @@ add_action('wp_footer', function () {
         return false;
       }
 
-      setupMIDIEnabledVoicePatches();
 
       BSD.options.progression = progInput.val(); //just the text
       storage.setItem('options', JSON.stringify(BSD.options));
@@ -1583,6 +1584,8 @@ add_action('wp_footer', function () {
     var venue = DOM.from('.venue');
 
     campfire.on('do-it', function(prog) {
+      setupMIDIEnabledVoicePatches();
+
       BSD.pause = false;
       initLast();
 
@@ -2126,6 +2129,7 @@ add_action('wp_footer', function () {
         BSD.currentCycleIdx = cursor.cycleIdx;
         campfire.publish('song-form-position', cursor);
       }
+      DOM.from('.current-chord').html(cursor.chord.fullAbbrev());
     });
 
 
@@ -2589,6 +2593,12 @@ add_action('wp_footer', function () {
     pianoRoll.on('is-playing', function(isPlaying) {
       //isPlaying shows the new going-forward wish
       isPlaying ? freak.play() : freak.stop();
+    });
+    pianoRoll.on('new-loop-object',function(obj){
+      console.log('new loop object',obj);
+      let opts = freak.update(obj);
+      pianoRoll.update(opts);
+      ///tablature.update(opts);
     });
 
 
