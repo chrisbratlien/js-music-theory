@@ -8,6 +8,7 @@ palette.html
 data/*
 !data/guitar.json
 !data/mandolin.json
+!data/mt32-percussion-names.json
 local.php
 .htaccess
 node_modules

@@ -90,3 +90,12 @@ export function getTimestmap() {
 
     //https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from#sequence_generator_range
 export  const range = (start, stop, step) => Array.from({ length: (stop - start) / step + 1}, (_, i) => start + (i * step));
+
+
+export const throwOnFetchError = function(resp) {
+  if (!resp.ok) {
+    console.log({resp})
+    throw new Error("fetch error");
+  }
+  return resp;
+}

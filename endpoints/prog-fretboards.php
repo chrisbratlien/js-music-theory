@@ -350,6 +350,15 @@ add_action('wp_footer', function () {
         volume: 0.7,
         pan: 64,
         insideChord: true
+      },
+      pianoroll: {
+        enabled: true,
+        midi: false,
+        channel: 10,
+        bank: 1,
+        patch: 1,
+        volume: 0.7,
+        pan: 64
       }
     };
     BSD.options = {
@@ -923,17 +932,12 @@ add_action('wp_footer', function () {
       BSD.audioPlayer.stopNote(payload.note);
     });
 
-    //LEAD / IMPROV
-    campfire.on('play-note', function(payload) {
-      if (!BSD.options.improv.enabled) {
-        return false;
-      }
-
-      if (router.outPort && BSD.options.improv.midi) {
-        let noteOnChannel = MIDI_CONST.NOTE_ON + (BSD.options.improv.channel - 1);
-        let noteOffChannel = MIDI_CONST.NOTE_OFF + (BSD.options.improv.channel - 1);
-        let noteNum = payload.note.value();
-        let vel = BSD.options.improv.volume * BSD.volume; 
+    function lowerLevelPlayNote({note, duration, velocity, voiceOpts}) {
+      if (router.outPort && voiceOpts.midi) {
+        let noteOnChannel = MIDI_CONST.NOTE_ON + (voiceOpts.channel - 1);
+        let noteOffChannel = MIDI_CONST.NOTE_OFF + (voiceOpts.channel - 1);
+        let noteNum = note.value();
+        let vel = voiceOpts.volume * BSD.volume; 
         vel = Math.floor(127 * vel);////[0..1] -> [0..127]
 
         router.outPort.send([noteOnChannel, noteNum, vel]);
@@ -942,10 +946,23 @@ add_action('wp_footer', function () {
         }, BSD.durations.note);
       }
       // okay, currently no MIDI output, we'll use our WebAudio API synth
-      BSD.audioPlayer.playNote(payload.note, payload.duration, payload.velocity);
+      BSD.audioPlayer.playNote(note, duration, velocity);
+    }
+
+    //LEAD / IMPROV
+    campfire.on('play-note', function({note, duration, velocity, voiceOpts }) {
+      if (!voiceOpts) {
+        voiceOpts = BSD.options.improv
+      }
+      if (!voiceOpts.enabled) {
+        return false;
+      }
+      lowerLevelPlayNote({ note, duration, velocity, voiceOpts});
     });
 
 
+
+    
     //CHORD
     campfire.on('play-notes', function(notes) {
 
@@ -1196,11 +1213,14 @@ add_action('wp_footer', function () {
       hookupPanControl(hatFolder, BSD.options.hihat);
       hookupPatchControl(hatFolder, BSD.options.hihat);
 
+      let prFolder = gui.addFolder('pianoroll', 'Piano Roll');
+      prFolder.add(BSD.options.pianoroll, 'enabled').onChange(saveOptions);
+      prFolder.add(BSD.options.pianoroll, 'midi').onChange(saveOptions);
+      hookupChannel(prFolder, BSD.options.pianoroll);
+      hookupVolume(prFolder, BSD.options.pianoroll);
+      hookupPanControl(prFolder, BSD.options.pianoroll);
+      hookupPatchControl(prFolder, BSD.options.pianoroll);
     }
-
-
-
-
 
     var btnStart = DOM.from('.btn-start');
     btnStart.on('click', function() {
@@ -2529,9 +2549,12 @@ add_action('wp_footer', function () {
     });
     window.freak = freak;
     freak.on('note-on', function(event) {
+      
+      
       campfire.publish('play-note', {
         note: Note(event.noteNumber),
-        duration: BSD.durations.note
+        duration: BSD.durations.note,
+        voiceOpts: BSD.options.pianoroll
       });
     });
 
@@ -2561,7 +2584,8 @@ add_action('wp_footer', function () {
     pianoRoll.on('note-preview', function(noteNumber) {
       campfire.publish('play-note', {
         note: Note(noteNumber),
-        duration: BSD.durations.note
+        duration: BSD.durations.note,
+        voiceOpts: BSD.options.pianoroll
       });
 
 

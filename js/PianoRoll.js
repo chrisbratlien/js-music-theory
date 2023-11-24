@@ -3,7 +3,7 @@ import DOM from "./DOM.js";
 import DragAndDropFile from "./DragAndDropFile.js";
 import { lerp, invlerp, remap } from "./scalar.js";
 import JSMT, { makeScale } from "./js-music-theory.js";
-import { getTimestmap, pad } from "./Utils.js";
+import { getTimestmap, pad, throwOnFetchError } from "./Utils.js";
 
 window.getTimestamp = getTimestmap;
 window.pad = pad;
@@ -28,13 +28,23 @@ function makeTextFile(text, type) {
   return textFile;
 }
 
+async function loadMT32PercussionMap() {
+  var result = await fetch('/data/mt32-percussion-names.json')
+    .then(throwOnFetchError)
+    .then(resp => resp.json());
+  //console.log('result??',result)
+  return result;
+}
+
+const mt32map = await loadMT32PercussionMap();
+
 
 function PianoRoll(props) {
   let self = PubSub({});
   let pane = DOM.div().addClass("piano-roll");
   const minTempo = 10;
-  let lowNote = 36;//C
-  let howManyNotes = 60;//48;
+  let lowNote = 35;//B (MT-32 percussion begins here) //C
+  let howManyNotes = 61;//48;
 
   let noteRange = [...Array(howManyNotes).keys()].map((o) => lowNote + o);
   //so that the table rows can render in order from high to low
@@ -203,6 +213,24 @@ function PianoRoll(props) {
     })
   }
 
+  let thContentCurrent = 0;
+
+  function getTHContentVariation(noteNumber) {
+    let variations = {
+      0: noteNames[noteNumber % 12],
+      1: noteNumber,
+      2: mt32map[noteNumber] || "NA"
+    };
+    let idx = thContentCurrent % 3;
+    return variations[idx];    
+  }
+  function rotateTHContent() {
+    thContentCurrent += 1;
+    thContentCurrent %= 3;
+    self.emit('rotate-th');
+  }
+
+
 
   self.refresh = function() {
     let row;
@@ -217,9 +245,21 @@ function PianoRoll(props) {
           if (!noteFitsTonality(noteNumber)) { return false; }
 
 
+          let thContentVariations = [
+            noteNames[noteNumber % 12],
+            noteNumber,
+            mt32map[noteNumber]
+          ]
+          let th = DOM.th(getTHContentVariation(noteNumber))
+            .addClass('cursor-pointer')
+            .on('click',rotateTHContent);
+          
+          self.on('rotate-th',() => {
+              th.html(getTHContentVariation(noteNumber));
+          });
 
           row = DOM.tr().append(
-            DOM.th(noteNames[noteNumber % 12]),
+            th,
             ...eventRange.map((tickIdx) => {
               let state = false;
 

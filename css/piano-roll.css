@@ -13,8 +13,7 @@
 }
 
 .piano-roll table th {
-    max-width: 23px;
-    width: 23px;
+    padding-right: 3px;
 }
 
 .piano-roll table td {
