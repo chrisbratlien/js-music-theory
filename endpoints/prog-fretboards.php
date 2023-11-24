@@ -186,8 +186,6 @@ add_action('wp_footer', function () {
   <script src="<?php home_url();  ?>/lib/la.js"></script>
   <script src="<?php home_url();  ?>/lib/async.min.js"></script>
   <script src="<?php home_url();  ?>/js/draggy.js"></script>
-  <script src="<?php home_url();  ?>/js/sticky-note.js"></script>
-  <script src="<?php home_url();  ?>/js/bsd.widgets.colorpicker.js"></script>
   <script src="<?php home_url();  ?>/js/bsd.widgets.simpleplayer.js"></script>
   <script src="<?php home_url();  ?>/js/bsd.widgets.tonalityguru.js"></script>
 
@@ -589,7 +587,6 @@ add_action('wp_footer', function () {
 
 
 
-    BSD.boards = [];
     var colorHash = {};
 
     let mixer, bassist, keyboardist;
@@ -913,14 +910,6 @@ add_action('wp_footer', function () {
     }
     campfire.publish('render-fret-range-control');
 
-
-
-
-    campfire.on('fret-range-updated', function(o) {
-      BSD.boards.forEach(function(board) {
-        board.publish('visible-fret-range', o);
-      });
-    });
 
 
     campfire.on('set-master-volume', function(o) {
@@ -1590,11 +1579,6 @@ add_action('wp_footer', function () {
       initLast();
 
 
-      BSD.boards.forEach(function(board) {
-        board.close();
-      });
-      BSD.boards = [];
-
       clearTimeout(BSD.timeout);
       var pa = '#FF0000-#E6DF52-#FFDD17-#4699D4-#4699D4-#000000-#000000-#000000-#bbbbbb-#67AFAD-#8C64AB-#8C64AB'.split(/-/);
 
@@ -1651,10 +1635,6 @@ add_action('wp_footer', function () {
       venue.empty();
 
       venue.append(stage);
-      // extraBoard = makeFretboardOn(stage, {
-      //   colorHash,
-      //   activeStrings: '654321'.split('')
-      // });
 
 
       DOM.from('.stringset-name').html(BSD.options.stringSet);
@@ -1673,12 +1653,6 @@ add_action('wp_footer', function () {
         var tableStage = DOM.div()
           .addClass('stage table-stage hidden noprint stringset-' + BSD.options.stringSet);
         venueColumn.append(tableStage);
-        // var board = makeFretboardOn(tableStage, {
-        //   chord,
-        //   colorHash,
-        //   activeStrings: activeStrings
-        // });
-        //BSD.boards.push(board);
 
         var thisFred = SVGFretboard()
         .on('wake-up', () => console.log('WOKE!!'))
@@ -1968,7 +1942,6 @@ add_action('wp_footer', function () {
 
             result.direction = direction;
             result.chordIdx = chordIdx;
-            result.board = BSD.boards[chordIdx];
             result.chord = myChord;
             result.chordNoteIdx = chordNoteIdx;
             result.cycleIdx = cycleIdx;
@@ -2042,6 +2015,7 @@ add_action('wp_footer', function () {
 
       campfire.publish('reset-song-form-ui')
 
+      console.log()
       //initial tick
       tick(BSD.sequence[0]);
     });
@@ -2134,11 +2108,8 @@ add_action('wp_footer', function () {
 
 
 
-
+    //update SVGFretboard on tick
     campfire.on('tick', function(cursor) {
-      BSD.boards.forEach(function(board) {
-        board.unfeatureFrets();
-      });
 
       if (cursor.chordIdx > 0) {
         let x = 123;
@@ -2299,8 +2270,8 @@ add_action('wp_footer', function () {
 
     });
 
-    campfire.on('tick', function(cursor) {
       //hihat
+      campfire.on('tick', function(cursor) {
       if (!BSD.options.hihat.enabled) {
         return false;
       }
@@ -2327,9 +2298,12 @@ add_action('wp_footer', function () {
       last.next = BSD.sequence[0];
     });
 
+    //TODO: see if this can be reconciled/combined with BSD.currentBarIdx
     campfire.on('tick', function(cursor) {
       BSD.barIdx = cursor.barIdx;
     });
+
+  
 
 
     var btnLoopStart = DOM.from('.btn-loop-start');
@@ -2564,6 +2538,8 @@ add_action('wp_footer', function () {
 
     campfire.on('tempo-change', freak.tempoChange)
     freak.tempoChange(BSD.options.tempo);
+
+    campfire.on('tick',(cursor) => freak.tick(cursor.idx));
 
 
 

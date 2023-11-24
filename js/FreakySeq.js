@@ -49,6 +49,63 @@ export default function FreakySeq(props) {
   let currentLoop = 0;
   let saveProgressMS = 0;
   let progressMS = 0;
+  let whenStartedMS = false;
+
+  function tick(tickIdx) {
+    tickIdx = tickIdx % opts.TPLOOP; //stay within range.
+    self.emit('tick',tickIdx);
+    ////console.log("tickIdx", tickIdx);
+    //NOW it's time...
+
+    let toTriggerNow = props.events
+      //.filter((event) => event.noteOnMillis < progressMS)
+      .filter((event) => event.tickIdx == tickIdx)
+      .filter((event) => event.noteOnLoopNum <= currentLoop);
+    
+    ///console.log('tickIdx', tickIdx, 'toTrigger', toTrigger, 'currentLoop', currentLoop);
+    toTriggerNow
+      .forEach((event) => {
+        event.noteOnLoopNum = currentLoop;
+        ////console.log("note onnnn",event);
+        self.emit('note-on', event);
+      });
+    (!opts.noteOffDisabled) && props.events
+      //.filter((event) => event.noteOffMillis < progressMS)
+      .filter((event) => event.tickIdx < tickIdx || event.tickIdx == opts.TPLOOP - 1 && tickIdx == 0)
+      .filter((event) => event.noteOffLoopNum < currentLoop)
+      .forEach((event) => {
+        event.noteOffLoopNum = currentLoop;
+        self.emit('note-off', event);
+      });
+  }
+
+  function frameTick(nowMS) {
+    if (!playing) {
+      return console.log("stopped");
+    }
+
+    nowMS = Math.floor(nowMS);
+    if (!whenStartedMS) {
+      whenStartedMS = nowMS;
+    }
+    progressMS = nowMS - whenStartedMS;
+    progressMS %= loopMS;
+
+    if (progressMS < saveProgressMS) {
+      currentLoop += 1;
+    }
+    saveProgressMS = progressMS;
+
+    tickIdx = Math.floor(progressMS / opts.MSPT);
+
+    //it may not be time to do anything yet.
+    if (tickIdx !== saveTickIdx) {
+      saveTickIdx = tickIdx;
+      tick(tickIdx);
+    }
+    requestAnimationFrame(frameTick);
+  }
+
 
   function play() {
     if (playing) {
@@ -56,71 +113,16 @@ export default function FreakySeq(props) {
     }
     playing = true;
     currentLoop = 0;
-    let whenStartedMS = false;
+    whenStartedMS = false;
   
     props.events.map(event => {
       event.noteOnLoopNum = currentLoop;
       event.noteOffLoopNum = currentLoop;
     })
-
     //console.log("loopMS", loopMS);
-
-    function frameTick(nowMS) {
-      if (!playing) {
-        return console.log("stopped");
-      }
-
-      nowMS = Math.floor(nowMS);
-      if (!whenStartedMS) {
-        whenStartedMS = nowMS;
-      }
-      progressMS = nowMS - whenStartedMS;
-      progressMS %= loopMS;
-
-      if (progressMS < saveProgressMS) {
-        currentLoop += 1;
-      }
-      saveProgressMS = progressMS;
-
-      tickIdx = Math.floor(progressMS / opts.MSPT);
-
-
-      if (tickIdx === saveTickIdx) {
-        return requestAnimationFrame(frameTick); //it's not time to do anything yet. exit early.
-      }
-      self.emit('tick',tickIdx);
-      ////console.log("tickIdx", tickIdx);
-      //NOW it's time...
-      saveTickIdx = tickIdx;
-
-      let toTriggerNow = props.events
-        //.filter((event) => event.noteOnMillis < progressMS)
-        .filter((event) => event.tickIdx == tickIdx)
-        .filter((event) => event.noteOnLoopNum <= currentLoop);
-      
-      ///console.log('tickIdx', tickIdx, 'toTrigger', toTrigger, 'currentLoop', currentLoop);
-      toTriggerNow
-        .forEach((event) => {
-          event.noteOnLoopNum = currentLoop;
-          ////console.log("note onnnn",event);
-          self.emit('note-on', event);
-        });
-
-
-      (!opts.noteOffDisabled) && props.events
-        //.filter((event) => event.noteOffMillis < progressMS)
-        .filter((event) => event.tickIdx < tickIdx || event.tickIdx == opts.TPLOOP - 1 && tickIdx == 0)
-        .filter((event) => event.noteOffLoopNum < currentLoop)
-        .forEach((event) => {
-          event.noteOffLoopNum = currentLoop;
-          self.emit('note-off', event);
-        });
-
-      requestAnimationFrame(frameTick);
-    }
-
     requestAnimationFrame(frameTick);
   }
+
   function stop() {
     playing = false;
   }
@@ -135,6 +137,7 @@ export default function FreakySeq(props) {
     play,
     stop,
     tempoChange,
+    tick,
     update
   };
 }
