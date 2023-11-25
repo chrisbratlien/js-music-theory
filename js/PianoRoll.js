@@ -83,12 +83,13 @@ function PianoRoll(props) {
 
   let playing = false;
   let btnSave;
-  let btnPlayStop, iconPlayStop, inTempo, inTonality;
+  let btnPlayStop, iconPlayStop, inTempo, inBars, inTonality;
 
 
   function handleNewLoopUpload(jsonString) {
     var obj = JSON.parse(jsonString);
-    self.emit('new-loop-object', obj);
+    //self.emit('new-loop-object', obj);
+    self.update(obj);
   }
 
   let dragFile = DragAndDropFile({
@@ -175,6 +176,15 @@ function PianoRoll(props) {
         .attr('min', minTempo)
         .val(props.tempo || 120)
         .on('change', (e) => self.emit('tempo-change', +e.target.value)),
+      inBars = DOM.input()
+        .addClass('bars')
+        .attr({
+          type: 'number',
+          min: 1,
+          placeholder: 'Bars'
+        })
+        .val(props.bars)
+        .on('change', (e) => self.setTotalBars(+e.target.value)),
       inTonality = DOM.input()
         .addClass('tempo')
         .attr('type', 'text')
@@ -333,8 +343,19 @@ function PianoRoll(props) {
     props = opts;
     init();
     self.refresh();
+    self.emit('new-loop-object',props);
   }
 
+  self.setTotalBars = function(bars) {
+
+    let newProps = {
+      ...props,
+      BARS: bars
+    }
+    newProps.TPBAR = newProps.PPQ * newProps.QPBAR;
+    newProps.TPLOOP = newProps.TPBAR * newProps.BARS;    
+    self.update(newProps);
+  }
 
   self.ui = function() {
     return [toolbar, pane];

@@ -2597,7 +2597,7 @@ add_action('wp_footer', function () {
     pianoRoll.on('new-loop-object',function(obj){
       console.log('new loop object',obj);
       let opts = freak.update(obj);
-      pianoRoll.update(opts);
+      //pianoRoll.update(opts);
       ///tablature.update(opts);
     });
 

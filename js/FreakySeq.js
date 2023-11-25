@@ -3,9 +3,9 @@ import PubSub  from "./PubSub.js";
 export default function FreakySeq(props) {
 
   let opts = {
-    BARS: 2, //total bars in this sequence
+    BARS: 4, //total bars in this sequence
     QPBAR: 4, //quarter notes per bar
-    PPQ: 4,//sixteenths// ticks per quarter note or PPQN (pulse per quarter note)
+    PPQ: 2,//sixteenths// ticks per quarter note or PPQN (pulse per quarter note)
     BPM: 120,
     ...props
   };
