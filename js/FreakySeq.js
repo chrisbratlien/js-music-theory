@@ -46,10 +46,12 @@ export default function FreakySeq(props) {
     return (beatsPerBar * barsPerLoop * millisPerMinute) / bpm;
   }
 
-  let currentLoop = 0;
   let saveProgressMS = 0;
   let progressMS = 0;
   let whenStartedMS = false;
+
+  let lastTickIdx = 0;
+
 
   function tick(tickIdx) {
     tickIdx = tickIdx % opts.TPLOOP; //stay within range.
@@ -59,22 +61,20 @@ export default function FreakySeq(props) {
 
     let toTriggerNow = props.events
       //.filter((event) => event.noteOnMillis < progressMS)
-      .filter((event) => event.tickIdx == tickIdx)
-      .filter((event) => event.noteOnLoopNum <= currentLoop);
+      .filter((event) => event.tickIdx > lastTickIdx && event.tickIdx <= tickIdx)
     
     ///console.log('tickIdx', tickIdx, 'toTrigger', toTrigger, 'currentLoop', currentLoop);
     toTriggerNow
       .forEach((event) => {
-        event.noteOnLoopNum = currentLoop;
-        ////console.log("note onnnn",event);
         self.emit('note-on', event);
       });
+
+    lastTickIdx = tickIdx;
+
     (!opts.noteOffDisabled) && props.events
       //.filter((event) => event.noteOffMillis < progressMS)
-      .filter((event) => event.tickIdx < tickIdx || event.tickIdx == opts.TPLOOP - 1 && tickIdx == 0)
-      .filter((event) => event.noteOffLoopNum < currentLoop)
+      .filter((event) => event.tickIdx < lastTickIdx)
       .forEach((event) => {
-        event.noteOffLoopNum = currentLoop;
         self.emit('note-off', event);
       });
   }
@@ -91,9 +91,6 @@ export default function FreakySeq(props) {
     progressMS = nowMS - whenStartedMS;
     progressMS %= loopMS;
 
-    if (progressMS < saveProgressMS) {
-      currentLoop += 1;
-    }
     saveProgressMS = progressMS;
 
     tickIdx = Math.floor(progressMS / opts.MSPT);
@@ -112,13 +109,8 @@ export default function FreakySeq(props) {
       return console.log("already playing");
     }
     playing = true;
-    currentLoop = 0;
     whenStartedMS = false;
   
-    props.events.map(event => {
-      event.noteOnLoopNum = currentLoop;
-      event.noteOffLoopNum = currentLoop;
-    })
     //console.log("loopMS", loopMS);
     requestAnimationFrame(frameTick);
   }
@@ -131,7 +123,6 @@ export default function FreakySeq(props) {
   return {
     ...self,
     props, //temporary for debugging..
-    currentLoop,
     millisPerLoop,
     opts,
     play,

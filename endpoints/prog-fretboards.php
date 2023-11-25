@@ -770,10 +770,10 @@ add_action('wp_footer', function () {
     }
 
     function setupMIDIEnabledVoicePatches() {
-      ['improv', 'bass','chord','hihat']
-        .filter(voiceName => BSD.options[voiceName].midi && BSD.options[voiceName].enabled)
+      ['improv', 'bass','chord','hihat','pianoroll']
+        //just do them all//.filter(voiceName => BSD.options[voiceName].midi && BSD.options[voiceName].enabled)
         .map(voiceName => {
-          console.log(voiceName, 'needs setup')
+          //console.log(voiceName, 'needs setup')
           setMIDIChannelPatch(BSD.options[voiceName]);
         })
     }
