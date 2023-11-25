@@ -1592,6 +1592,7 @@ add_action('wp_footer', function () {
 
     var venue = DOM.from('.venue');
 
+
     campfire.on('do-it', function(prog) {
       setupMIDIEnabledVoicePatches();
 
@@ -1768,22 +1769,22 @@ add_action('wp_footer', function () {
           }
 
 
-          var totQuarterNoteBeats = BSD.beatsPerMeasure; //for this chord.
+          var QPC = BSD.beatsPerMeasure; //for this chord.
           if (progItem.halfBar) {
             if (BSD.beatsPerMeasure == 3) {
               if (barChordIdx == 0) {
-                totQuarterNoteBeats = 2;
+                QPC = 2;
               } else {
-                totQuarterNoteBeats = 1;
+                QPC = 1;
               }
             } else {
-              totQuarterNoteBeats = 2;
+              QPC = 2;
             }
           }
 
-          var totNoteEvents = Math.ceil(totQuarterNoteBeats * BSD.beatsPerMeasure / BSD.noteResolution);
+          var numNoteEvents = QPC * (BSD.noteResolution/4); 
           var eventRange = [];
-          for (var i = 0; i < totNoteEvents; i += 1) {
+          for (var i = 0; i < numNoteEvents; i += 1) {
             eventRange.push(i);
           }
 
@@ -1957,8 +1958,8 @@ add_action('wp_footer', function () {
 
             result = JSON.parse(JSON.stringify(result));
             result.barIdx = barIdx;
-            result.totQuarterNoteBeats = totQuarterNoteBeats;
-            result.totNoteEvents = totNoteEvents;
+            result.QPC = QPC;
+            result.numNoteEvents = numNoteEvents;
 
             result.direction = direction;
             result.chordIdx = chordIdx;
@@ -2085,7 +2086,21 @@ add_action('wp_footer', function () {
     var shiftThenScale = periodicA;
     var scaleThenShift = periodicB;
 
+    function checkPosition(cursor, QPC, noteResolution, chordNoteIdx) {
+      var result = true;
 
+      if (QPC) {
+        result = result && cursor.QPC === QPC; 
+      }
+      if (noteResolution) {
+        result = result && BSD.noteResolution == noteResolution;
+      }
+      if (chordNoteIdx || chordNoteIdx == 0) {
+        result = result && cursor.chordNoteIdx === chordNoteIdx
+      }
+
+      return result;
+    }
 
 
     campfire.on('test-periodic', function(o) {
@@ -2127,7 +2142,9 @@ add_action('wp_footer', function () {
     });
 
 
-
+    campfire.on('tick',function(cursor){
+      console.log('tick','cni',cursor.chordNoteIdx);
+    })
     //update SVGFretboard on tick
     campfire.on('tick', function(cursor) {
 
@@ -2188,7 +2205,12 @@ add_action('wp_footer', function () {
         }
 
       }
-      if (cursor.totQuarterNoteBeats == 4 && BSD.noteResolution == 4 && cursor.chordNoteIdx == 2) { //3rd beat in [0,1,2,3]
+
+
+      if (
+        checkPosition(cursor, 4, 4, 2) ||
+        checkPosition(cursor, 4, 8, 4) 
+      ) { //3rd quarter note beat in [0,1,2,3] or [0,1,2,3,4,5,6,7]
 
         let pedal5 = cursor.chord.myFifth().plus(-12);
         let pedal5Value = pedal5.value();
@@ -2240,7 +2262,8 @@ add_action('wp_footer', function () {
       var nextChord = node.chord;
 
       //LAST QUARTER NOTE OF MEASURE
-      if (BSD.noteResolution == 4 && cursor.chordNoteIdx + 1 == cursor.totQuarterNoteBeats) {
+      //if (BSD.noteResolution == 4 && cursor.chordNoteIdx + 1 == cursor.QPC) {
+      if (checkPosition(cursor, null, 4, cursor.QPC-1)) {
         setTimeout(function() {
           campfire.publish('play-chord', {
             chord: nextChord,
@@ -2258,8 +2281,9 @@ add_action('wp_footer', function () {
         }, delayMS.even4DelayMS + swung81);
       }
 
-      if (cursor.totQuarterNoteBeats == 4) {
-        if (BSD.noteResolution == 1 && cursor.chordNoteIdx === 0) {
+      if (cursor.QPC == 4) {
+
+        if (checkPosition(cursor, 1, 4, 0)) {
           setTimeout(function() {
             campfire.publish('play-chord', {
               chord: nextChord,
@@ -2267,7 +2291,7 @@ add_action('wp_footer', function () {
             });
           }, delayMS.even1 - delayMS.swung82);
         }
-        if (BSD.noteResolution == 8 && cursor.chordNoteIdx == 6) {
+        if (checkPosition(cursor, null, 8, 6)) {
           //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
           setTimeout(function() {
             campfire.publish('play-chord', {
@@ -2277,7 +2301,7 @@ add_action('wp_footer', function () {
           }, delayMS.swung81);
         }
 
-        if (BSD.noteResolution == 16 && cursor.chordNoteIdx == 12) {
+        if (checkPosition(cursor, null, 16, 12)) {
           //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
           setTimeout(function() {
             campfire.publish('play-chord', {
@@ -2295,10 +2319,17 @@ add_action('wp_footer', function () {
       if (!BSD.options.hihat.enabled) {
         return false;
       }
-      if (BSD.noteResolution == 4 && cursor.chordNoteIdx == 1) {
+
+      if (checkPosition(cursor, null, 8, 2)) {
         hihat();
       }
-      if (BSD.noteResolution == 4 && cursor.chordNoteIdx + 1 == cursor.totQuarterNoteBeats) {
+      if (checkPosition(cursor, null, 4, 1)) {
+        hihat();
+      }
+      if (checkPosition(cursor, null, 4, 3)) {
+        hihat();
+      }
+      if (checkPosition(cursor, null, 8, 6)) {
         hihat();
       }
     });

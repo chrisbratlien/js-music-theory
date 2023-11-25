@@ -183,7 +183,7 @@ function PianoRoll(props) {
           min: 1,
           placeholder: 'Bars'
         })
-        .val(props.bars)
+        .val(props.BARS)
         .on('change', (e) => self.setTotalBars(+e.target.value)),
       inTonality = DOM.input()
         .addClass('tempo')
@@ -243,6 +243,7 @@ function PianoRoll(props) {
 
 
   self.refresh = function() {
+    inBars.val(props.BARS);
     let row;
 
     tablePlaceholder
