@@ -16,5 +16,8 @@ export default function SimpleSeq(props) {
   self.update = function (newProps) {
     props = newProps;
   }
+  self.addEvent = function({when, event}) {
+    props.events.push([event, when]);
+  };
   return self;
 }

@@ -10,4 +10,16 @@ export const MIDI_CONST = {
   };
 export const MIDI_MSG = MIDI_CONST;
 
+
+export const TICK_RESOLUTION = Object.freeze({
+  QUARTER: 96,
+  QUARTER_3: 64,
+  EIGHTH: 48,
+  EIGHTH_3: 32,
+  SIXTEENTH: 24,
+  SIXTEENTH_3: 16
+});
+
+
+
 export default MIDI_CONST;

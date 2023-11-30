@@ -55,14 +55,18 @@ get_header(); ?>
     <option value="4">4</option>
   </select>
 
-  <label>Note Resolution</label>
-  <select class="note-resolution">
-    <option value="1">1</option>
-    <option value="2">2</option>
-    <option value="4">4</option>
-    <option value="8">8</option>
-    <option value="16">16</option>
+  <label>Tick Resolution</label>
+  <select class="tick-resolution">
+    <option value="96">1/4 note</option>
+    <option value="64">1/4 (3) note</option>
+    <option value="48">1/8 note</option>
+    <option value="32">1/8 (3) note</option>
+    <option value="24">1/16 note</option>
+    <option value="16">1/16 (3) note</option>
   </select>
+
+
+
 
 
   <div class="form-inline form-progression">
@@ -207,7 +211,8 @@ add_action('wp_footer', function () {
     import ColorPalette from "./js/ColorPalette.js";
     import {
       MIDI_CONST,
-      MIDI_MSG
+      MIDI_MSG,
+      TICK_RESOLUTION
     } from "./js/MIDIConstants.js";
     import Vindow, {autoArrange, allVindows} from "./js/Vindow.js";
     import Draggable from "./js/Draggable.js";
@@ -315,6 +320,7 @@ add_action('wp_footer', function () {
       showCurrentChordFretboardOnly: true,
       scrollToBoard: false,
       tempo: 120,
+      tickResolution: TICK_RESOLUTION.QUARTER, 
       bass: {
         enabled: true,
         midi: false,
@@ -886,12 +892,17 @@ add_action('wp_footer', function () {
     });
     ddBeatsPerMeasure.find('option[value="' + BSD.beatsPerMeasure + '"]').attr('selected', true);
 
-    BSD.noteResolution = 4;
-    var ddNoteResolution = DOM.from('.note-resolution');
-    ddNoteResolution.on('change', function() {
-      BSD.noteResolution = parseInt(this.value, 10);
+
+    var ddTickResolution = DOM.from('.tick-resolution');
+    ddTickResolution.on('change', function() {
+      BSD.options.tickResolution = parseInt(this.value, 10);
     });
-    ddNoteResolution.find('option[value="' + BSD.noteResolution + '"]').attr('selected', true);
+
+    BSD.options.tickResolution = TICK_RESOLUTION.QUARTER;
+    ddTickResolution.find('option[value="' + BSD.options.tickResolution + '"]').attr('selected', true);
+
+
+
 
 
     if (!BSD.options.stringSet) {
@@ -1420,10 +1431,12 @@ add_action('wp_footer', function () {
       delayMS.midSwung82 = delayMS.swung82;
       campfire.publish('tick', cursor); //that a tick happened, 
 
+
+      delayMS.next = (BSD.options.tickResolution / 96) * delayMS.even4;
+
       clearTimeout(BSD.timeout);
-      delayMS.next = delayMS['even' + BSD.noteResolution];
       if (!delayMS.next) {
-        console.log('invalid delayMS.next for resolution' + BSD.noteResolution);
+        throw new Error(`invalid delayMS.next for tick resolution ${BSD.options.tickResolution}`);
       }
       cursor = cursor.next;
       BSD.timeout = setTimeout(function() {
@@ -1436,7 +1449,6 @@ add_action('wp_footer', function () {
 
 
 
-    BSD.noteResolution = 4;
 
     var direction = (Math.random() > 0.5) ? 'up' : 'down'; //initial direction.
     var nextDirection = {
@@ -1594,6 +1606,10 @@ add_action('wp_footer', function () {
 
 
     campfire.on('do-it', function(prog) {
+      BSD.prog = prog;
+      //BSD.totalBars = Math.max(...prog.map(pi => pi.barIndex));
+      BSD.totalBars = Math.max(...BSD.prog.map(pi => pi.barIndex)) + 1;
+
       setupMIDIEnabledVoicePatches();
 
       BSD.pause = false;
@@ -1624,18 +1640,6 @@ add_action('wp_footer', function () {
       });
       last.next = prog[0];
 
-
-      prog.forEach(function(o) {
-        let cursor = o;
-        let tries = 9;
-        while (tries > 0 && cursor.chord.abstractlyEqualTo(cursor.next.chord)) {
-          cursor = cursor.next;
-          tries -= 1;
-        }
-        o.nextChordChange = cursor.next.chord;
-      });
-
-      console.log('PROG W CHANGES?', prog);
 
 
 
@@ -1710,7 +1714,7 @@ add_action('wp_footer', function () {
 
 
 
-
+      let accum96 = 0; //total running count of 96 ticks per quarter note
 
 
       cycleRange.forEach(function(cycleIdx) {
@@ -1722,7 +1726,6 @@ add_action('wp_footer', function () {
 
           rejections = [];
           outsideRejections = [];
-          ///var barIdx = Math.floor(i / BSD.noteResolution);
           var barIdx = progItem.barIndex;
           //var chordIdx = barIdx % chords.length;
           var chordIdx = progItemIdx;
@@ -1782,11 +1785,15 @@ add_action('wp_footer', function () {
             }
           }
 
-          var numNoteEvents = QPC * (BSD.noteResolution/4); 
+          let ticksPerQuarterNote = 96 / BSD.options.tickResolution;
+          var numNoteEvents = QPC * ticksPerQuarterNote; 
+
           var eventRange = [];
           for (var i = 0; i < numNoteEvents; i += 1) {
             eventRange.push(i);
           }
+
+          let tick96 = 0;
 
           eventRange.forEach(function(o, chordNoteIdx) {
             if (errors) {
@@ -1883,7 +1890,7 @@ add_action('wp_footer', function () {
 
             var retries = 0;
             while (retries < 110 && candidates.length == 0) {
-              console.log('pre-proto uh oh retry#', retries);
+              //console.log('pre-proto uh oh retry#', retries);
 
               var last;
               if (BSD.sequence.length > 0) {
@@ -1960,6 +1967,16 @@ add_action('wp_footer', function () {
             result.barIdx = barIdx;
             result.QPC = QPC;
             result.numNoteEvents = numNoteEvents;
+            result.tick96 = tick96;
+            //accum after setting...
+            tick96 += BSD.options.tickResolution;
+            tick96 %= 96;
+
+            result.accum96 = accum96;
+
+            result.beatAndTick = getBeatAndTick(result);
+            //accum after setting...
+            accum96 += BSD.options.tickResolution;
 
             result.direction = direction;
             result.chordIdx = chordIdx;
@@ -1970,9 +1987,7 @@ add_action('wp_footer', function () {
             result.idealFret = idealFret;
             result.avgFret = avgFret;
             ///result.idx = i;
-            result.nextChordChange = progItem.nextChordChange;
             result.progItem = progItem;
-
 
             console.log('result', result);
 
@@ -2036,9 +2051,9 @@ add_action('wp_footer', function () {
 
       campfire.publish('reset-song-form-ui')
 
-      console.log()
+      let first = BSD.sequence[0];
       //initial tick
-      tick(BSD.sequence[0]);
+      tick(first);
     });
 
 
@@ -2086,22 +2101,25 @@ add_action('wp_footer', function () {
     var shiftThenScale = periodicA;
     var scaleThenShift = periodicB;
 
-    function checkPosition(cursor, QPC, noteResolution, chordNoteIdx) {
-      var result = true;
 
-      if (QPC) {
-        result = result && cursor.QPC === QPC; 
-      }
-      if (noteResolution) {
-        result = result && BSD.noteResolution == noteResolution;
-      }
-      if (chordNoteIdx || chordNoteIdx == 0) {
-        result = result && cursor.chordNoteIdx === chordNoteIdx
-      }
+    function getBeatAndTick(cursor) {
+      //let beat = Math.floor(cursor.accum96 / 96);
+      //let beat0 = Math.floor(cursor.accum96 / BSD.options.progCycles / 96);
+      let beat0 = Math.floor(cursor.accum96 / 96) % (BSD.beatsPerMeasure * BSD.totalBars)
+      //NOTE: without Math.floor, this could be 0.5 on eighthnote tick resolution 
 
-      return result;
+
+      let beat0InBar = beat0 % BSD.beatsPerMeasure;
+
+      let beat = beat0InBar + 1;
+
+      let tickFrac = cursor.tick96 / 100;
+
+      let beatAndTickFrac = beat + tickFrac;
+      //console.log({beat0, beat, beat0InBar, tickFrac, beatAndTickFrac});
+      return beatAndTickFrac;
     }
-
+    window.getBeatAndTick = getBeatAndTick;
 
     campfire.on('test-periodic', function(o) {
       for (var i = 0; i < o.total; i += 1) {
@@ -2142,9 +2160,9 @@ add_action('wp_footer', function () {
     });
 
 
-    campfire.on('tick',function(cursor){
-      console.log('tick','cni',cursor.chordNoteIdx);
-    })
+    // campfire.on('tick',function(cursor){
+    //   //console.log('tick','cni',cursor.chordNoteIdx);
+    // })
     //update SVGFretboard on tick
     campfire.on('tick', function(cursor) {
 
@@ -2166,12 +2184,15 @@ add_action('wp_footer', function () {
 
     });
 
+
+
+
     //BASS
     campfire.on('tick', function(cursor) {
       if (!BSD.options.bass.enabled) {
         return false;
       }
-      if (cursor.chordNoteIdx == 0) {
+      if (cursor.beatAndTick === 1) {
         var beatOneNote = [
             cursor.chord.rootNote,
             cursor.chord.myThird(),
@@ -2206,11 +2227,7 @@ add_action('wp_footer', function () {
 
       }
 
-
-      if (
-        checkPosition(cursor, 4, 4, 2) ||
-        checkPosition(cursor, 4, 8, 4) 
-      ) { //3rd quarter note beat in [0,1,2,3] or [0,1,2,3,4,5,6,7]
+      if (cursor.beatAndTick === 3) { 
 
         let pedal5 = cursor.chord.myFifth().plus(-12);
         let pedal5Value = pedal5.value();
@@ -2261,9 +2278,8 @@ add_action('wp_footer', function () {
 
       var nextChord = node.chord;
 
-      //LAST QUARTER NOTE OF MEASURE
-      //if (BSD.noteResolution == 4 && cursor.chordNoteIdx + 1 == cursor.QPC) {
-      if (checkPosition(cursor, null, 4, cursor.QPC-1)) {
+      if (cursor.beatAndTick === 2 ||
+        cursor.beatAndTick === 4) {
         setTimeout(function() {
           campfire.publish('play-chord', {
             chord: nextChord,
@@ -2271,47 +2287,6 @@ add_action('wp_footer', function () {
           });
         }, delayMS.swung81);
       }
-
-      if (BSD.noteResolution == 2 && cursor.chordNoteIdx == 1) {
-        setTimeout(function() {
-          campfire.publish('play-chord', {
-            chord: nextChord,
-            duration: BSD.durations.chord
-          });
-        }, delayMS.even4DelayMS + swung81);
-      }
-
-      if (cursor.QPC == 4) {
-
-        if (checkPosition(cursor, 1, 4, 0)) {
-          setTimeout(function() {
-            campfire.publish('play-chord', {
-              chord: nextChord,
-              duration: BSD.durations.chord
-            });
-          }, delayMS.even1 - delayMS.swung82);
-        }
-        if (checkPosition(cursor, null, 8, 6)) {
-          //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
-          setTimeout(function() {
-            campfire.publish('play-chord', {
-              chord: nextChord,
-              duration: BSD.durations.chord
-            });
-          }, delayMS.swung81);
-        }
-
-        if (checkPosition(cursor, null, 16, 12)) {
-          //queue up next chord just before its note will sound. 2/3 to give a swung "and of 4" feel.
-          setTimeout(function() {
-            campfire.publish('play-chord', {
-              chord: nextChord,
-              duration: BSD.durations.chord
-            });
-          }, delayMS.swung81);
-        }
-      }
-
     });
 
       //hihat
@@ -2320,18 +2295,10 @@ add_action('wp_footer', function () {
         return false;
       }
 
-      if (checkPosition(cursor, null, 8, 2)) {
+      if (cursor.beatAndTick == 2 || cursor.beatAndTick == 4) {
         hihat();
       }
-      if (checkPosition(cursor, null, 4, 1)) {
-        hihat();
-      }
-      if (checkPosition(cursor, null, 4, 3)) {
-        hihat();
-      }
-      if (checkPosition(cursor, null, 8, 6)) {
-        hihat();
-      }
+
     });
 
     campfire.on('opened-midi-out-port', function(port) {})
