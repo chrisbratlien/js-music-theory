@@ -219,7 +219,7 @@ add_action('wp_footer', function () {
     import Point from "./js/Point.js"
 
     import {
-      setBackgroundHue
+      setBackgroundHue, probablyTrue
     } from "./js/Utils.js";
 
     import SongList from "./js/SongList.js";
@@ -236,6 +236,8 @@ add_action('wp_footer', function () {
     import PubSub from "./js/PubSub.js";
     import ProgTransport from "./js/ProgTransport.js";
     import Dropdown from "./js/Dropdown.js"
+
+
 
     window.lerp = lerp;
     window.invlerp = invlerp;
@@ -2275,8 +2277,10 @@ add_action('wp_footer', function () {
 
       var nextChord = node.chord;
 
-      if (cursor.beatAndTick === 2 ||
-        cursor.beatAndTick === 4) {
+      let sometimesOnBeat2OfFullBarChord = probablyTrue(0.2);
+      let sometimesOnBeat2 = cursor.beatAndTick == 2 && (cursor.progItem.halfBar || sometimesOnBeat2OfFullBarChord);
+
+      if (sometimesOnBeat2 || cursor.beatAndTick === 4) {
         setTimeout(function() {
           campfire.publish('play-chord', {
             chord: nextChord,

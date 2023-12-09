@@ -99,3 +99,8 @@ export const throwOnFetchError = function(resp) {
   }
   return resp;
 }
+
+export function probablyTrue(prob) {
+  var res = Math.random();
+  return (res < prob); 
+}
