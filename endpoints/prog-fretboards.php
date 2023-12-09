@@ -290,10 +290,7 @@ add_action('wp_footer', function () {
           console.log('bend?', e.data);
           return router.outPort.send(e.data);
         }
-
-
       }
-
     });
 
     //toss this variable over the module/non-module fence for now until further refactoring is done.
@@ -1148,7 +1145,7 @@ add_action('wp_footer', function () {
 
 
       let mainFolder = gui.addFolder('main', 'Main');
-      mainFolder.add(router, 'allNotesOff');
+      router && mainFolder.add(router, 'allNotesOff');
       mainFolder.add(BSD.options, 'tempo')
         .min(50)
         .max(250)
@@ -2570,10 +2567,12 @@ add_action('wp_footer', function () {
     })
     pianoRoll.relay('tempo-change', campfire);
 
-    let midiOutMonitor = MIDIOutMonitor({
-      port: router.outPort
-    });
-    DOM.from('.monitor-wrap').append(midiOutMonitor.ui())
+    if (router) {
+      let midiOutMonitor = MIDIOutMonitor({
+        port: router.outPort
+      });
+      DOM.from('.monitor-wrap').append(midiOutMonitor.ui())
+    }
 
 
     pianoRoll.on('note-hover', function(noteNumber) {
@@ -2645,22 +2644,24 @@ add_action('wp_footer', function () {
     //myAutoArrange();
 
 
-
-
-    let midiInfo = MIDIInfo({
-      router,
-      channel: BSD.options.improv.channel,
-      patch: BSD.options.improv.patch
-    });
-    var vMIDIInfo = Vindow({
-      title: 'MIDI Info',
-      className: 'noprint'
-    });
-    let [miToolbar, miPane] = midiInfo.ui();
-    vMIDIInfo.appendToToolbar(miToolbar),
+    if (router) {
+      let midiInfo = MIDIInfo({
+        router,
+        channel: BSD.options.improv.channel,
+        patch: BSD.options.improv.patch
+      });
+      var vMIDIInfo = Vindow({
+        title: 'MIDI Info',
+        className: 'noprint'
+      });
+      let [miToolbar, miPane] = midiInfo.ui();
+      vMIDIInfo.appendToToolbar(miToolbar),
       vMIDIInfo.append(miPane);
-    vMIDIInfo.renderOn(body);
-  </script>
+      vMIDIInfo.renderOn(body);
+    }
+
+
+</script>
 
 <?php
 });
