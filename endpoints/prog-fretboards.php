@@ -190,7 +190,6 @@ add_action('wp_footer', function () {
   <script src="<?php home_url();  ?>/lib/la.js"></script>
   <script src="<?php home_url();  ?>/lib/async.min.js"></script>
   <script src="<?php home_url();  ?>/js/draggy.js"></script>
-  <script src="<?php home_url();  ?>/js/bsd.widgets.simpleplayer.js"></script>
   <script src="<?php home_url();  ?>/js/bsd.widgets.tonalityguru.js"></script>
 
   <script src="<?php home_url();  ?>/js/patchList.js"></script>
@@ -236,6 +235,8 @@ add_action('wp_footer', function () {
     import PubSub from "./js/PubSub.js";
     import ProgTransport from "./js/ProgTransport.js";
     import Dropdown from "./js/Dropdown.js"
+    import SimplePlayer from "./js/SimplePlayer.js";
+    import WyomingTunedPlayer from "./js/WyomingTunedPlayer.js";
 
 
 
@@ -603,11 +604,11 @@ add_action('wp_footer', function () {
 
     var colorHash = {};
 
-    let mixer, bassist, keyboardist;
+    let mixer, bassist;
 
 
     mixer = BSDMixer(context);
-    BSD.audioPlayer = BSD.Widgets.SimplePlayer({
+    BSD.audioPlayer = WyomingTunedPlayer({
       context: context,
       destination: mixer.common,
       polyphonyCount: 48, //polyphonyCount,
@@ -616,16 +617,7 @@ add_action('wp_footer', function () {
     });
 
 
-    bassist = BSD.Widgets.SimplePlayer({
-      context: context,
-      destination: mixer.common,
-      polyphonyCount: 48, //polyphonyCount,
-      itemTitles: BSD.itemTitles, //['fundamental','octave','dominant','dominant+fourth(octave2)'],
-      range: [28, 100]
-    });
-
-
-    keyboardist = BSD.Widgets.SimplePlayer({
+    bassist = WyomingTunedPlayer({
       context: context,
       destination: mixer.common,
       polyphonyCount: 48, //polyphonyCount,
@@ -716,6 +708,9 @@ add_action('wp_footer', function () {
     let empty = {
       name: false
     }
+
+
+
 
     function patchSelectorUL(opts) {
 
@@ -934,7 +929,6 @@ add_action('wp_footer', function () {
     campfire.on('set-master-volume', function(o) {
       BSD.audioPlayer.publish('set-master-volume', o);
       bassist.publish('set-master-volume', o);
-      keyboardist.publish('set-master-volume', o);
     });
 
 

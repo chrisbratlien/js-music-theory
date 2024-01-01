@@ -104,3 +104,7 @@ export function probablyTrue(prob) {
   var res = Math.random();
   return (res < prob); 
 }
+
+export const randomInRange = function(min, max) {
+  return Math.random() * (max - min) + min;
+};
