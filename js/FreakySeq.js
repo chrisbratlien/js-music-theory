@@ -61,7 +61,7 @@ export default function FreakySeq(props) {
 
     let toTriggerNow = props.events
       //.filter((event) => event.noteOnMillis < progressMS)
-      .filter((event) => event.tickIdx > lastTickIdx && event.tickIdx <= tickIdx)
+      .filter((event) => event.tickIdx === tickIdx ||  event.tickIdx > lastTickIdx && event.tickIdx <= tickIdx)
     
     ///console.log('tickIdx', tickIdx, 'toTrigger', toTrigger, 'currentLoop', currentLoop);
     toTriggerNow

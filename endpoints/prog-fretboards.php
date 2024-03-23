@@ -16,7 +16,7 @@ add_action('wp_head', function () {
     @import 'css/svg-fretboard.css';
     @import 'css/prog-transport.css';
     @import 'css/song-list.css';
-
+    @import 'css/key-signatures.css';
   </style>
 
 <?php
@@ -129,6 +129,7 @@ get_header(); ?>
 
 <div class="flex flex-row">
   <div class="current-chord chord-name one-tenth-width"></div>
+  <div class="key-signature"></div>
   <div class="svg-wrap"></div>
 </div>
 
@@ -2149,7 +2150,43 @@ add_action('wp_footer', function () {
         BSD.currentCycleIdx = cursor.cycleIdx;
         campfire.publish('song-form-position', cursor);
       }
-      DOM.from('.current-chord').html(cursor.chord.fullAbbrev());
+
+
+
+      let abbrev = cursor.chord.fullAbbrev()
+      DOM.from('.current-chord').html(abbrev);
+
+
+      let keysig = abbrev
+        .replace(/b/,'flat')
+        .replace(/#/,'sharp')
+        .replace('m','minor')
+        .replace('Major','major')
+        .replace('M','major');
+
+        if (!keysig.match("m")) {
+          keysig = keysig + 'major';
+        }
+        console.log('keysig',keysig)
+      DOM.from(".key-signature").attr({
+        class: `key-signature ${keysig}`
+      });
+      /*
+      let keysig = abbrev
+        .replace(/b/,'flat')
+        .replace(/#/,'sharp')
+        .replace('m','minor')
+        .replace('Major','major')
+        .replace('M','major');
+
+        if (!keysig.match("m")) {
+          keysig = keysig + 'major';
+        }
+        console.log('keysig',keysig)
+
+       */
+
+
     });
 
 

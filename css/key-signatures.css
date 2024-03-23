@@ -1,0 +1,100 @@
+/**
+
+Resources:
+
+Images on wikimedia
+https://commons.wikimedia.org/w/index.php?search=key+signature&title=Special:MediaSearch&go=Go&type=image&filemime=svg&haslicense=unrestricted
+
+CSS SVG scaling and background examples.
+https://developer.mozilla.org/en-US/docs/Web/CSS/Scaling_of_SVG_backgrounds
+**/
+
+.key-signature {
+  width: 80px;
+  height: auto;
+  background-size: cover;
+}
+
+.Amajor,
+.Fsharpminor {
+  background-image: url("../images/key-signatures/A-major_f-sharp-minor.svg");
+}
+
+
+/* missing A# major */
+
+.Bflatmajor,
+.Gminor {
+  background-image: url("../images/key-signatures/B-flat-major_g-minor.svg");
+}
+
+.Bmajor,
+.Gsharpminor {
+  background-image: url("../images/key-signatures/B-major_g-sharp-minor.svg");
+}
+
+.Cflatmajor,
+.Aflatminor {
+  background-image: url("../images/key-signatures/C-flat-major_a-flat-minor.svg");
+}
+
+.Cmajor,
+.Aminor {
+  background-image: url("../images/key-signatures/C-major_a-minor.svg");
+}
+
+.Csharpmajor,
+.Asharpminor {
+  background-image: url("../images/key-signatures/C-sharp-major_a-sharp-minor.svg");
+}
+
+.Dflatmajor,
+.Bflatminor {
+  background-image: url("../images/key-signatures/D-flat-major_b-flat-minor.svg");
+}
+
+
+.Dmajor,
+.Bminor {
+  background-image: url("../images/key-signatures/D-major_b-minor.svg");
+}
+
+.Eflatmajor,
+.Cminor {
+  background-image: url("../images/key-signatures/E-flat-major_c-minor.svg");
+}
+
+.Emajor,
+.Csharpminor {
+  background-image: url("../images/key-signatures/E-major_c-sharp-minor.svg");
+}
+
+.Fmajor,
+.Dminor {
+  background-image: url("../images/key-signatures/F-major_d-minor.svg");
+}
+
+.Fsharpmajor,
+.Dsharpminor
+{
+  background-image: url("../images/key-signatures/F-sharp-major_d-sharp-minor.svg");
+}
+
+.Gflatmajor,
+.Eflatminor {
+    background-image: url("../images/key-signatures/G-flat-major_e-flat-minor.svg");
+  }
+
+
+
+.Gmajor,
+.Eminor {
+  background-image: url("../images/key-signatures/G-major_e-minor.svg");
+}
+
+.Aflatmajor,
+.Fminor {
+  background-image: url("../images/key-signatures/A-flat-major_f-minor.svg");
+}
+    
+
